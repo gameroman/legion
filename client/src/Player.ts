@@ -8,21 +8,22 @@ export class Player extends Phaser.GameObjects.Container {
     arena: Phaser.Scene;
     gridX: number;
     gridY: number;
+    num: number;
     distance: number;
 
     constructor(scene: Phaser.Scene, gridX: number, gridY: number, x: number, y: number, num: number, texture: string, isPlayer: boolean) {
         super(scene, x, y);
-        this.setDepth(3);
+        this.arena = this.scene.scene.get('Arena');
+
         this.isPlayer = isPlayer;
         this.gridX = gridX;
         this.gridY = gridY;
-        this.arena = this.scene.scene.get('Arena');
-        this.distance = 2;
+        this.distance = 4;
+        this.num = num;
 
         // Create the sprite using the given key and add it to the container
         this.sprite = scene.add.sprite(0, 0, texture);
         this.add(this.sprite);
-
 
         // Create a text object to display the player's name and score, and add it to the container
         if (isPlayer) {
@@ -47,6 +48,7 @@ export class Player extends Phaser.GameObjects.Container {
 
         // Add the container to the scene
         scene.add.existing(this);
+        this.setDepth(3);
 
         this.sprite.play(`${texture}_anim`);
     }
@@ -55,5 +57,16 @@ export class Player extends Phaser.GameObjects.Container {
         this.selectionOval.setVisible(!this.selectionOval.visible);
         // @ts-ignore
         this.arena.highlightCells(this.gridX, this.gridY, this.distance);
+    }
+
+    canMoveTo(x: number, y: number) {
+        // Check if (x, y) is within a circle of radius `this.distance` from (this.gridX, this.gridY)
+        return Math.pow(x - this.gridX, 2) + Math.pow(y - this.gridY, 2) <= Math.pow(this.distance, 2);
+
+    }
+
+    updatePos(x, y) {
+        this.gridX = x;
+        this.gridY = y;
     }
 }

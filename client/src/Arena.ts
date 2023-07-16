@@ -9,6 +9,7 @@ export class Arena extends Phaser.Scene
     gridCorners;
     gridMap: Map<string, Player> = new Map<string, Player>();
     playersMap: Map<number, Player> = new Map<number, Player>();
+    opponentsMap: Map<number, Player> = new Map<number, Player>();
     selectedPlayer: Player | null = null;
     highlight: Phaser.GameObjects.Graphics;
     tileSize = 60;
@@ -94,15 +95,19 @@ export class Arena extends Phaser.Scene
         // });
     }
 
-    // orderRecruitTroops() {
-    //     const data = {
-    //         tile: {
-    //             x: this.selectedTile.x,
-    //             y: this.selectedTile.y,
-    //         }
-    //     };
-    //     this.send('recruitTroops', data);
-    // }
+    sendMove(x, y) {
+        const data = {
+            tile: { x, y},
+            num: this.selectedPlayer.num,
+        };
+        // this.send('move', data);
+        const serverData = {
+            isPlayer: true,
+            tile: { x, y},
+            num: this.selectedPlayer.num,
+        };
+        this.processMove(serverData);
+    }
 
     send(channel, data) {
         if (this.socket) {
@@ -194,8 +199,7 @@ export class Arena extends Phaser.Scene
 
             // Ensure the pointer is within the grid
             if (gridX >= 0 && gridX < this.gridWidth && gridY >= 0 && gridY < this.gridHeight) {
-                console.log(`Clicked tile at grid coordinates (${gridX}, ${gridY})`);
-                this.handlePlayerSelect(this.gridMap[this.serializeCoords(gridX, gridY)]);
+                this.handleTileClick(gridX, gridY);
             }
         }, this);
 
@@ -224,11 +228,58 @@ export class Arena extends Phaser.Scene
         this.handlePlayerSelect(this.playersMap[number]);
     }
 
+    isFree(gridX, gridY) {
+        return !this.gridMap[this.serializeCoords(gridX, gridY)];
+    }
+
+    handleTileClick(gridX, gridY) {
+        console.log(`Clicked tile at grid coordinates (${gridX}, ${gridY})`);
+        const player = this.gridMap[this.serializeCoords(gridX, gridY)];
+        if (this.selectedPlayer && !player) {
+            this.handleMove(gridX, gridY);
+        } else {
+            this.handlePlayerSelect(player);
+        }
+    }
+
+    handleMove(gridX, gridY) {
+        if (!this.selectedPlayer.canMoveTo(gridX, gridY)) return;
+        if (!this.isFree(gridX, gridY)) return;
+        this.sendMove(gridX, gridY);
+        this.deselectPlayer();
+    }
+
+    deselectPlayer() {
+        if (this.selectedPlayer) {
+            this.selectedPlayer.toggleSelect();
+            this.selectedPlayer = null;
+            this.clearHighlight();
+        }
+    }
+
     handlePlayerSelect(player: Player) {
         if (!player || !player.isPlayer) return;
         if (this.selectedPlayer) this.selectedPlayer.toggleSelect();
         this.selectedPlayer = player;
         this.selectedPlayer.toggleSelect();
+    }
+
+    processMove({isPlayer, tile, num}) {
+        const player = isPlayer ? this.playersMap[num] : this.opponentsMap[num];
+        const {x, y} = this.gridToPixelCoords(tile.x, tile.y);
+
+        this.gridMap[this.serializeCoords(player.x, player.y)] = null;
+        this.gridMap[this.serializeCoords(tile.x, tile.y)] = player;
+        player.updatePos(tile.x, tile.y);
+
+        this.tweens.add({
+            targets: player,
+            props: {
+                x: x,
+                y: y,
+            },
+            duration: 66,
+        });
     }
 
     createAnims() {
@@ -244,16 +295,24 @@ export class Arena extends Phaser.Scene
         }, this);
     }
 
+    gridToPixelCoords(gridX, gridY) {
+        return {
+            x: gridX * this.tileSize + this.gridCorners.startX + 30,
+            y: gridY * this.tileSize + this.gridCorners.startY - 10,
+        };
+    }
+
     placeCharacters(data, isPlayer) {
         data.forEach((character, i) => {
-            const x = character.x * 60 + this.gridCorners.startX + 30;
-            const y = character.y * 60 + this.gridCorners.startY - 10;
+            const {x, y} = this.gridToPixelCoords(character.x, character.y);
 
             const player = new Player(this, character.x, character.y, x, y, i + 1, character.frame, isPlayer);
             this.gridMap[this.serializeCoords(character.x, character.y)] = player;
 
             if (isPlayer) {
                 this.playersMap[i + 1] = player;
+            } else {
+                this.opponentsMap[i + 1] = player;
             }
         }, this);
     }
@@ -265,15 +324,15 @@ export class Arena extends Phaser.Scene
     highlightCells(gridX, gridY, radius) {
         // Create a new Graphics object to highlight the cells
         if (!this.highlight) this.highlight = this.add.graphics();
-        this.highlight.clear();
+        this.clearHighlight();
         this.highlight.fillStyle(0xffd700, 0.7); // Use golden color
     
         // Iterate over each cell in the grid
         for (let y = -radius; y <= radius; y++) {
             for (let x = -radius; x <= radius; x++) {
-                if (this.isSkip(gridX + x, gridY + y)) continue;
                 // Check if the cell is within the circle
                 if (x * x + y * y <= radius * radius) {
+                    if (this.isSkip(gridX + x, gridY + y)) continue;
                     // Calculate the screen position of the cell
                     let posX = this.gridCorners.startX + (gridX + x) * this.tileSize;
                     let posY = this.gridCorners.startY + (gridY + y) * this.tileSize;
@@ -284,8 +343,11 @@ export class Arena extends Phaser.Scene
             }
         }
     }
-    
 
+    clearHighlight() {
+        if (this.highlight) this.highlight.clear();
+    }
+    
     create ()
     {
         this.drawGrid();
