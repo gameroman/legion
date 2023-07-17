@@ -10,6 +10,7 @@ export class Player extends Phaser.GameObjects.Container {
     gridY: number;
     num: number;
     distance: number;
+    baseSquare: Phaser.GameObjects.Graphics;
 
     constructor(scene: Phaser.Scene, gridX: number, gridY: number, x: number, y: number, num: number, texture: string, isPlayer: boolean) {
         super(scene, x, y);
@@ -18,12 +19,17 @@ export class Player extends Phaser.GameObjects.Container {
         this.isPlayer = isPlayer;
         this.gridX = gridX;
         this.gridY = gridY;
-        this.distance = 4;
+        this.distance = 2;
         this.num = num;
+
+        this.baseSquare = scene.add.graphics();
+        this.add(this.baseSquare);
 
         // Create the sprite using the given key and add it to the container
         this.sprite = scene.add.sprite(0, 0, texture);
         this.add(this.sprite);
+
+        // Create a Graphics object for the base square
 
         // Create a text object to display the player's name and score, and add it to the container
         if (isPlayer) {
@@ -37,14 +43,18 @@ export class Player extends Phaser.GameObjects.Container {
             this.selectionOval.setVisible(false);
             this.add(this.selectionOval);
 
+            this.baseSquare.lineStyle(4, 0x0000ff); // blue color
+
             this.moveTo(this.numKey, 2);
             this.moveTo(this.sprite, 1);
 
         } else {
             this.sprite.flipX = true;
+            this.baseSquare.lineStyle(4, 0xff0000); // red color
         }
 
         this.add(new HealthBar(scene, 0, -40));
+        this.baseSquare.strokeRect(-30, 10, 60, 60); // adjust position and size as needed
 
         // Add the container to the scene
         scene.add.existing(this);

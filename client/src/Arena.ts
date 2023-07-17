@@ -116,6 +116,7 @@ export class Arena extends Phaser.Scene
     }
 
     isSkip(x, y) {
+        if (x < 0 || y < 0 || x >= this.gridWidth || y >= this.gridHeight) return true;
         const v = 3;
         const skip = y < this.gridHeight/2 ? Math.max(0, v - y - 1) : Math.max(0, y - (this.gridHeight - v));
         // Skip drawing the corners to create an oval shape
@@ -169,6 +170,7 @@ export class Arena extends Phaser.Scene
              // Calculate the grid coordinates of the pointer
              let gridX = Math.floor(pointerX / this.tileSize);
              let gridY = Math.floor(pointerY / this.tileSize);
+            //  console.log(gridX, gridY);
  
              // Ensure the pointer is within the grid
              if (gridX >= 0 && gridX < this.gridWidth && gridY >= 0 && gridY < this.gridHeight) {
