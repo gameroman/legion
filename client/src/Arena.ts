@@ -231,7 +231,8 @@ export class Arena extends Phaser.Scene
     }
 
     isFree(gridX, gridY) {
-        return !this.gridMap[this.serializeCoords(gridX, gridY)];
+        const isFree = !this.gridMap[this.serializeCoords(gridX, gridY)];
+        return isFree;
     }
 
     handleTileClick(gridX, gridY) {
@@ -270,7 +271,7 @@ export class Arena extends Phaser.Scene
         const player = isPlayer ? this.playersMap[num] : this.opponentsMap[num];
         const {x, y} = this.gridToPixelCoords(tile.x, tile.y);
 
-        this.gridMap[this.serializeCoords(player.x, player.y)] = null;
+        this.gridMap[this.serializeCoords(player.gridX, player.gridY)] = null;
         this.gridMap[this.serializeCoords(tile.x, tile.y)] = player;
         player.updatePos(tile.x, tile.y);
 
@@ -334,7 +335,7 @@ export class Arena extends Phaser.Scene
             for (let x = -radius; x <= radius; x++) {
                 // Check if the cell is within the circle
                 if (x * x + y * y <= radius * radius) {
-                    if (this.isSkip(gridX + x, gridY + y)) continue;
+                    if (this.isSkip(gridX + x, gridY + y) || !this.isFree(gridX + x, gridY + y)) continue;
                     // Calculate the screen position of the cell
                     let posX = this.gridCorners.startX + (gridX + x) * this.tileSize;
                     let posY = this.gridCorners.startY + (gridY + y) * this.tileSize;

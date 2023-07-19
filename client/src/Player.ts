@@ -6,6 +6,7 @@ export class Player extends Phaser.GameObjects.Container {
     selectionOval: Phaser.GameObjects.Graphics;
     isPlayer: boolean = false;
     arena: Phaser.Scene;
+    hud: Phaser.Scene;
     gridX: number;
     gridY: number;
     num: number;
@@ -15,14 +16,15 @@ export class Player extends Phaser.GameObjects.Container {
     constructor(scene: Phaser.Scene, gridX: number, gridY: number, x: number, y: number, num: number, texture: string, isPlayer: boolean) {
         super(scene, x, y);
         this.arena = this.scene.scene.get('Arena');
+        this.hud = this.scene.scene.get('HUD');
 
         this.isPlayer = isPlayer;
         this.gridX = gridX;
         this.gridY = gridY;
-        this.distance = 2;
+        this.distance = 4;
         this.num = num;
 
-        this.baseSquare = scene.add.graphics();
+        this.baseSquare = scene.add.graphics().setAlpha(0.6);
         this.add(this.baseSquare);
 
         // Create the sprite using the given key and add it to the container
@@ -45,8 +47,8 @@ export class Player extends Phaser.GameObjects.Container {
 
             this.baseSquare.lineStyle(4, 0x0000ff); // blue color
 
-            this.moveTo(this.numKey, 2);
-            this.moveTo(this.sprite, 1);
+            this.moveTo(this.numKey, 3);
+            this.moveTo(this.sprite, 2);
 
         } else {
             this.sprite.flipX = true;
@@ -61,6 +63,11 @@ export class Player extends Phaser.GameObjects.Container {
         this.setDepth(3);
 
         this.sprite.play(`${texture}_anim`);
+        this.sprite.setInteractive(new Phaser.Geom.Rectangle(35, 40, 70, 100), Phaser.Geom.Rectangle.Contains);
+
+
+        this.sprite.on('pointerover', this.onPointerOver, this);
+        this.sprite.on('pointerout', this.onPointerOut, this);
     }
 
     toggleSelect() {
@@ -78,5 +85,24 @@ export class Player extends Phaser.GameObjects.Container {
     updatePos(x, y) {
         this.gridX = x;
         this.gridY = y;
+    }
+
+    onPointerOver() {
+        // @ts-ignore
+        if(!this.isPlayer && this.arena.selectedPlayer?.isNextTo(this.gridX, this.gridY)) {
+            // @ts-ignore
+            this.hud.toggleSwordCursor(true);
+        }
+    }
+
+    onPointerOut() {
+        if(!this.isPlayer) {
+            // @ts-ignore
+            this.hud.toggleSwordCursor(false);
+        }
+    }
+
+    isNextTo(x: number, y: number) {
+        return (Math.abs(x - this.gridX) <= 1 && Math.abs(y - this.gridY) <= 1);
     }
 }
