@@ -1,10 +1,12 @@
 import { HealthBar } from "./HealthBar";
 
 export class Player extends Phaser.GameObjects.Container {
+    scene: Phaser.Scene;
     sprite: Phaser.GameObjects.Sprite;
     numKey: Phaser.GameObjects.Text;
     selectionOval: Phaser.GameObjects.Graphics;
     isPlayer: boolean = false;
+    texture: string;
     arena: Phaser.Scene;
     hud: Phaser.Scene;
     gridX: number;
@@ -15,9 +17,11 @@ export class Player extends Phaser.GameObjects.Container {
 
     constructor(scene: Phaser.Scene, gridX: number, gridY: number, x: number, y: number, num: number, texture: string, isPlayer: boolean) {
         super(scene, x, y);
+        this.scene = scene;
         this.arena = this.scene.scene.get('Arena');
         this.hud = this.scene.scene.get('HUD');
 
+        this.texture = texture;
         this.isPlayer = isPlayer;
         this.gridX = gridX;
         this.gridY = gridY;
@@ -62,12 +66,17 @@ export class Player extends Phaser.GameObjects.Container {
         scene.add.existing(this);
         this.setDepth(3);
 
-        this.sprite.play(`${texture}_anim`);
+        this.playAnim('idle');
         this.sprite.setInteractive(new Phaser.Geom.Rectangle(35, 40, 70, 100), Phaser.Geom.Rectangle.Contains);
 
 
         this.sprite.on('pointerover', this.onPointerOver, this);
         this.sprite.on('pointerout', this.onPointerOut, this);
+    }
+
+    playAnim(key: string) {
+        // if (key) key = `_${key}`;
+        this.sprite.play(`${this.texture}_anim_${key}`);
     }
 
     toggleSelect() {
@@ -104,5 +113,31 @@ export class Player extends Phaser.GameObjects.Container {
 
     isNextTo(x: number, y: number) {
         return (Math.abs(x - this.gridX) <= 1 && Math.abs(y - this.gridY) <= 1);
+    }
+
+    walkTo(gridX: number, gridY: number, x: number, y: number) {
+        const oldGridX = this.gridX;
+        this.updatePos(gridX, gridY);
+
+        this.playAnim('walk');
+        this.scene.tweens.add({
+            targets: this,
+            props: {
+                x: x,
+                y: y,
+            },
+            duration: 300,
+            onComplete: () => {
+                this.playAnim('idle');
+            },
+        });
+
+        if(this.isPlayer) {
+            if(gridX > oldGridX && !this.sprite.flipX) this.sprite.flipX = true;
+            if(gridX < oldGridX && this.sprite.flipX) this.sprite.flipX = false;
+        } else {
+            if(gridX < oldGridX && !this.sprite.flipX) this.sprite.flipX = true;
+            if(gridX > oldGridX && this.sprite.flipX) this.sprite.flipX = false;
+        }
     }
 }

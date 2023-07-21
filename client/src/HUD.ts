@@ -32,9 +32,8 @@ export class HUD extends Phaser.Scene
 
     toggleSwordCursor(flag: boolean) {
         if (flag) {
-            console.log('....');
             this.customCursor.setTexture('swords');
-        } else {
+        } else if(!flag && this.customCursor.texture.key == 'swords'){
             this.customCursor.setTexture('cursor');
         }
     }

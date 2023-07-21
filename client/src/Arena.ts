@@ -273,16 +273,8 @@ export class Arena extends Phaser.Scene
 
         this.gridMap[this.serializeCoords(player.gridX, player.gridY)] = null;
         this.gridMap[this.serializeCoords(tile.x, tile.y)] = player;
-        player.updatePos(tile.x, tile.y);
 
-        this.tweens.add({
-            targets: player,
-            props: {
-                x: x,
-                y: y,
-            },
-            duration: 66,
-        });
+        player.walkTo(tile.x, tile.y, x, y);
     }
 
     createAnims() {
@@ -290,8 +282,15 @@ export class Arena extends Phaser.Scene
         // Loop over assets
         assets.forEach((asset) => {
             this.anims.create({
-                key: `${asset}_anim`, // The name of the animation
-                frames: this.anims.generateFrameNumbers(asset, { frames: [0, 1, 2] }), 
+                key: `${asset}_anim_idle`, // The name of the animation
+                frames: this.anims.generateFrameNumbers(asset, { frames: [9, 10, 11] }), 
+                frameRate: 5, // Number of frames per second
+                repeat: -1 // Loop indefinitely
+            });
+
+            this.anims.create({
+                key: `${asset}_anim_walk`, // The name of the animation
+                frames: this.anims.generateFrameNumbers(asset, { frames: [6, 7, 8] }), 
                 frameRate: 5, // Number of frames per second
                 repeat: -1 // Loop indefinitely
             });
