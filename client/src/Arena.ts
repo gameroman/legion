@@ -75,11 +75,7 @@ export class Arena extends Phaser.Scene
             target: player.num,
         };
         // this.send('attack', data);
-        const serverData = {
-            isPlayer: true,
-            target: player.num,
-            num: this.selectedPlayer.num,
-        };
+        const serverData = this.server.processAttack(data);
         this.processAttack(serverData);
     }
 
@@ -259,12 +255,14 @@ export class Arena extends Phaser.Scene
         player.walkTo(tile.x, tile.y, x, y);
     }
 
-    processAttack({isPlayer, target, num}) {
+    processAttack({isPlayer, target, num, damage, hp}) {
         const player = this.getPlayer(isPlayer, num);
         const targetPlayer = this.getPlayer(!isPlayer, target);
         player.attack(targetPlayer);
+        targetPlayer.setHP(hp);
+        targetPlayer.displayDamage(damage);
     }
-
+    
     createAnims() {
         const assets = ['warrior_1', 'warrior_2', 'warrior_3', 'warrior_4', 'mage_1', 'mage_2']
         // Loop over assets
@@ -314,7 +312,7 @@ export class Arena extends Phaser.Scene
         data.forEach((character, i) => {
             const {x, y} = this.gridToPixelCoords(character.x, character.y);
 
-            const player = new Player(this, character.x, character.y, x, y, i + 1, character.frame, isPlayer);
+            const player = new Player(this, character.x, character.y, x, y, i + 1, character.frame, isPlayer, character.hp);
             player.setDistance(character.distance);
             this.gridMap[this.serializeCoords(character.x, character.y)] = player;
 

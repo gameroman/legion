@@ -2,12 +2,16 @@ class ServerPlayer {
     frame;
     x;
     y;
+    hp;
+    maxHP;
     distance;
 
     constructor(frame, x, y) {
         this.frame = frame;
         this.x = x;
         this.y = y;
+        this.maxHP = 100;
+        this.hp = this.maxHP;
         this.distance = 4;
     }
 
@@ -17,6 +21,7 @@ class ServerPlayer {
             'x': this.x,
             'y': this.y,
             'distance': includePersonal ? this.distance : 0,
+            'hp': this.maxHP,
         }
     }
 
@@ -25,9 +30,24 @@ class ServerPlayer {
         return Math.pow(x - this.x, 2) + Math.pow(y - this.y, 2) <= Math.pow(this.distance, 2);
     }
 
+    isNextTo(x: number, y: number) {
+        return (Math.abs(x - this.x) <= 1 && Math.abs(y - this.y) <= 1);
+    }
+
     updatePos(x, y) {
         this.x = x;
         this.y = y;
+    }
+
+    dealDamage(damage) {
+        this.hp -= damage;
+        if (this.hp < 0) {
+            this.hp = 0;
+        }
+    }
+
+    getHP() {
+        return this.hp;
     }
 }
 
@@ -79,6 +99,21 @@ export class Server
             isPlayer: true,
             tile,
             num
+        };
+    }
+
+    processAttack({num, target}) {
+        const player = this.players[num - 1];
+        const opponent = this.opponents[target - 1];
+        if (!player.isNextTo(opponent.x, opponent.y)) return;
+        const damage = 10;
+        opponent.dealDamage(damage);
+        return {
+            isPlayer: true,
+            target,
+            num,
+            damage,
+            hp: opponent.getHP()
         };
     }
 }

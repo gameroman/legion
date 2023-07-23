@@ -14,8 +14,11 @@ export class Player extends Phaser.GameObjects.Container {
     num: number;
     distance: number;
     baseSquare: Phaser.GameObjects.Graphics;
+    maxHP: number;
+    hp: number;
+    healthBar: HealthBar;
 
-    constructor(scene: Phaser.Scene, gridX: number, gridY: number, x: number, y: number, num: number, texture: string, isPlayer: boolean) {
+    constructor(scene: Phaser.Scene, gridX: number, gridY: number, x: number, y: number, num: number, texture: string, isPlayer: boolean, hp: number) {
         super(scene, x, y);
         this.scene = scene;
         this.arena = this.scene.scene.get('Arena');
@@ -26,6 +29,8 @@ export class Player extends Phaser.GameObjects.Container {
         this.gridX = gridX;
         this.gridY = gridY;
         this.distance = 2;
+        this.maxHP = hp;
+        this.hp = hp;
         this.num = num;
 
         this.baseSquare = scene.add.graphics().setAlpha(0.6);
@@ -59,7 +64,8 @@ export class Player extends Phaser.GameObjects.Container {
             this.baseSquare.lineStyle(4, 0xff0000); // red color
         }
 
-        this.add(new HealthBar(scene, 0, -40));
+        this.healthBar = new HealthBar(scene, 0, -40);
+        this.add(this.healthBar);
         this.baseSquare.strokeRect(-30, 10, 60, 60); // adjust position and size as needed
 
         // Add the container to the scene
@@ -160,6 +166,11 @@ export class Player extends Phaser.GameObjects.Container {
         }
     }
 
+    setHP(hp) {
+        this.hp = hp;
+        this.healthBar.setHpValue(hp / this.maxHP);
+    }
+
     attack(player: Player) {
         // @ts-ignore
         this.arena.deselectPlayer();
@@ -178,6 +189,25 @@ export class Player extends Phaser.GameObjects.Container {
             yoyo: true,
             onComplete: () => {
                 this.alpha = 1;
+            }
+        });
+    }
+
+    displayDamage(damage) {
+        // Create the damage text
+        let damageText = this.scene.add.text(0,( -this.sprite.height / 2) + 15, `-${String(damage)}`, { fontSize: '24px', color: '#fff', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5);
+        this.add(damageText);
+    
+        // Create a tween to animate the damage text
+        this.scene.tweens.add({
+            targets: damageText,
+            y: '-=30',  // move up
+            alpha: 0,   // fade out
+            duration: 2000,  // 1 second
+            ease: 'Power2',  // smooth easing
+            onComplete: () => {
+                // remove the text when the tween is complete
+                damageText.destroy();
             }
         });
     }
