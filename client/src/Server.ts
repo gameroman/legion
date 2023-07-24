@@ -14,7 +14,7 @@ class ServerPlayer {
         this.y = y;
         this.maxHP = 100;
         this.hp = this.maxHP;
-        this.distance = 4;
+        this.distance = 3;
         this.atk = 10;
         this.def = 10;
 //         Every level up, a character gains:

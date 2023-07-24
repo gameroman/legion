@@ -197,7 +197,7 @@ export class Arena extends Phaser.Scene
         } else {
             return;
         }
-        this.handlePlayerSelect(this.playersMap[number]);
+        this.playersMap[number]?.onClick();
     }
 
     isFree(gridX, gridY) {
@@ -210,8 +210,8 @@ export class Arena extends Phaser.Scene
         const player = this.gridMap[this.serializeCoords(gridX, gridY)];
         if (this.selectedPlayer && !player) {
             this.handleMove(gridX, gridY);
-        } else {
-            this.handlePlayerSelect(player);
+        } else if (player){ 
+            player.onClick();
         }
     }
 
@@ -230,8 +230,7 @@ export class Arena extends Phaser.Scene
         }
     }
 
-    handlePlayerSelect(player: Player) {
-        if (!player || !player.isPlayer) return;
+    selectPlayer(player: Player) {
         if (this.selectedPlayer === player) {
             this.deselectPlayer();
             return;
@@ -341,6 +340,45 @@ export class Arena extends Phaser.Scene
         return `${x},${y}`;
     }
 
+    specialRound(num) {
+        if (num >= 0) {
+            return Math.round(num);
+        } else {
+            return -Math.round(-num);
+        }
+    }
+    
+
+    lineOfSight(startX, startY, endX, endY) {
+        // Get the distance between the start and end points
+        let distance = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
+    
+        // Calculate the number of steps to check, based on the distance
+        let steps = Math.ceil(distance);
+    
+        console.log(`Line of sight from (${startX}, ${startY}) to (${endX}, ${endY})`);
+        for (let i = 1; i < steps; i++) {
+            // Calculate the current position along the line
+            const xInc = this.specialRound(i / steps * (endX - startX));
+            const yInc = this.specialRound(i / steps * (endY - startY));
+            console.log(`Adding ${xInc}, ${yInc}`);
+            let currentX = Math.round(startX + xInc);
+            let currentY = Math.round(startY + yInc);
+            if (currentX == startX && currentY == startY) continue;
+            console.log(`Checking position (${currentX}, ${currentY})`);
+
+            // Check if this position is occupied
+            if (!this.isFree(currentX, currentY)) {
+                console.log(`Line of sight blocked at (${currentX}, ${currentY})`);
+                // If the position is occupied, return false
+                return false;
+            }
+        }
+    
+        // If no occupied positions were found, return true
+        return true;
+    }
+
     highlightCells(gridX, gridY, radius) {
         // Create a new Graphics object to highlight the cells
         if (!this.highlight) this.highlight = this.add.graphics();
@@ -352,7 +390,11 @@ export class Arena extends Phaser.Scene
             for (let x = -radius; x <= radius; x++) {
                 // Check if the cell is within the circle
                 if (x * x + y * y <= radius * radius) {
-                    if (this.isSkip(gridX + x, gridY + y) || !this.isFree(gridX + x, gridY + y)) continue;
+                    if (
+                        this.isSkip(gridX + x, gridY + y)
+                        || !this.isFree(gridX + x, gridY + y)
+                        || !this.lineOfSight(gridX, gridY, gridX + x, gridY + y)
+                    ) continue;
                     // Calculate the screen position of the cell
                     let posX = this.gridCorners.startX + (gridX + x) * this.tileSize;
                     let posY = this.gridCorners.startY + (gridY + y) * this.tileSize;
@@ -373,6 +415,9 @@ export class Arena extends Phaser.Scene
         this.drawGrid();
         this.createAnims();
         this.connectToServer();
+
+        console.log(this.lineOfSight(3, 3, 2, 4))
+        console.log(this.lineOfSight(3, 3, 4, 4))
     }
 
     createHUD() {

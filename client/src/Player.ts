@@ -26,8 +26,6 @@ export class Player extends Phaser.GameObjects.Container {
 
         this.texture = texture;
         this.isPlayer = isPlayer;
-        this.gridX = gridX;
-        this.gridY = gridY;
         this.distance = 2;
         this.maxHP = hp;
         this.hp = hp;
@@ -70,7 +68,7 @@ export class Player extends Phaser.GameObjects.Container {
 
         // Add the container to the scene
         scene.add.existing(this);
-        this.setDepth(3);
+        this.updatePos(gridX, gridY);
 
         this.playAnim('idle');
         this.sprite.setInteractive(new Phaser.Geom.Rectangle(35, 40, 70, 100), Phaser.Geom.Rectangle.Contains);
@@ -78,7 +76,6 @@ export class Player extends Phaser.GameObjects.Container {
 
         this.sprite.on('pointerover', this.onPointerOver, this);
         this.sprite.on('pointerout', this.onPointerOut, this);
-        this.sprite.on('pointerup', this.onPointerUp, this);
     }
 
     isAlive() {
@@ -111,6 +108,7 @@ export class Player extends Phaser.GameObjects.Container {
     updatePos(x, y) {
         this.gridX = x;
         this.gridY = y;
+        this.setDepth(3 + this.gridY/10);
     }
 
     onPointerOver() {
@@ -128,8 +126,11 @@ export class Player extends Phaser.GameObjects.Container {
         }
     }
 
-    onPointerUp() {
-        if(this.isTarget()) {
+    onClick() {
+        if (this.isPlayer) {
+            // @ts-ignore
+            this.arena.selectPlayer(this);
+        } else if(this.isTarget()) {
             // @ts-ignore
             this.arena.sendAttack(this);
             // @ts-ignore
