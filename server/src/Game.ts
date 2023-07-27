@@ -2,10 +2,9 @@ import { Socket, Server } from 'socket.io';
 import { uuid } from 'uuidv4';
 
 import { ServerPlayer } from './ServerPlayer';
-import { AIServerPlayer } from './AIServerPlayer';
 import { Team } from './Team';
 
-export class Game
+export abstract class Game
 {
     id: string = uuid();
     teams: Map<number, Team> = new Map<number, Team>();
@@ -13,35 +12,51 @@ export class Game
     io: Server;
     sockets: Socket[] = [];
     tickTimer: NodeJS.Timeout | null = null;
+    socketMap = new Map<Socket, Team>();
 
     constructor(io: Server, sockets: Socket[]) {
         this.io = io;
         this.sockets = sockets;
 
-        this.teams.set(1, new Team(1, this));
-        this.teams.set(2, new Team(2, this));
-        this.teams.get(1)?.addMember(new ServerPlayer('warrior_1', 5, 4));
-        this.teams.get(1)?.addMember(new ServerPlayer('mage_1', 18, 2));
-        this.teams.get(1)?.addMember(new ServerPlayer('warrior_2', 18, 6));
-        this.teams.get(2)?.addMember(new AIServerPlayer('warrior_3', 3, 4));
-        this.teams.get(2)?.addMember(new AIServerPlayer('mage_2', 1, 2));
-        this.teams.get(2)?.addMember(new AIServerPlayer('warrior_4', 1, 6));
-
-        // Iterate over teams
-        this.teams.forEach(team => {
-            team.getMembers().forEach(player => {
-                this.gridMap.set(`${player.x},${player.y}`, player);
-            }, this);
-        }, this);
-
         this.sockets.forEach(socket => {
             socket.join(this.id);
         }, this);
 
+        this.teams.set(1, new Team(1, this));
+        this.teams.set(2, new Team(2, this));
+        this.socketMap.set(sockets[0], this.teams.get(1)!);
+        
+        this.populateTeams();
+        this.populateGrid();
+        this.sendGameStart();
+    }
+
+    abstract populateTeams(): void;
+
+    isFree(gridX: number, gridY: number) {
+        const isFree = !this.gridMap.get(`${gridX},${gridY}`);
+        return isFree;
+    }
+
+    freeCell(gridX: number, gridY: number) {
+        this.gridMap.delete(`${gridX},${gridY}`);
+    }
+
+    occupyCell(gridX: number, gridY: number, player: ServerPlayer) {
+        this.gridMap.set(`${gridX},${gridY}`, player);
+    }
+
+    populateGrid() {
+        // Iterate over teams
+        this.teams.forEach(team => {
+            team.getMembers().forEach(player => {
+                this.occupyCell(player.x, player.y, player);
+            }, this);
+        }, this);
+    }
+
+    sendGameStart() {
         this.broadcast('gameStart', this.getPlacementData());
-
-        this.tickTimer = setInterval(this.AItick.bind(this), 500);
-
     }
 
     broadcast(event: string, data: any) {
@@ -58,11 +73,6 @@ export class Game
             }
         }
         return data;
-    }
-
-    isFree(gridX: number, gridY: number) {
-        const isFree = !this.gridMap.get(`${gridX},${gridY}`);
-        return isFree;
     }
 
     calculateDamage(attacker: ServerPlayer, defender: ServerPlayer) {
@@ -91,13 +101,44 @@ export class Game
         return this.teams.get(team)?.getMembers()!;
     }
 
-    processMove({tile, num}: {tile: Tile, num: number}) {
-        if (!this.isFree(tile.x, tile.y)) return;
-        const player = this.getTeam(1)[num - 1];
+    getOtherTeam(id: number): Team {
+        return this.teams.get(id === 1 ? 2 : 1)!;
+    }
+
+    processAction(action: string, data: any, socket: Socket | null = null) {
+        let team;
+        if (socket) {
+            team = this.socketMap.get(socket);
+        } else {
+            team = this.teams.get(2);
+        }
+
+        switch (action) {
+            case 'move':
+                this.processMove(data, team!);
+                break;
+            case 'attack':
+                this.processAttack(data, team!);
+                break;
+        }
+    }
+
+    processMove({tile, num}: {tile: Tile, num: number}, team: Team) {
+        console.log(`Team ${team.id} player ${num} moving to ${tile.x},${tile.y}`);
+        if (!this.isFree(tile.x, tile.y)) {
+            console.log('Tile is not free');
+            return;
+        }
+        const player = team.getMembers()[num - 1];
         if (!player.canAct || !player.isAlive() || !player.canMoveTo(tile.x, tile.y)) return;
+        
+        this.freeCell(player.x, player.y);
         player.updatePos(tile.x, tile.y);
+        this.occupyCell(player.x, player.y, player);
+
         const cooldown = player.cooldowns.move;
         player.setCooldown(cooldown);
+        
         this.broadcast('move', {
             isPlayer: true,
             tile,
@@ -106,9 +147,10 @@ export class Game
         });
     }
 
-    processAttack({num, target}: {num: number, target: number}) {
-        const player = this.getTeam(1)[num - 1];
-        const opponent = this.getTeam(2)[num - 1];
+    processAttack({num, target}: {num: number, target: number}, team: Team) {
+        const player = team.getMembers()[num - 1];
+        const opponentTeam = this.getOtherTeam(team.id);
+        const opponent = opponentTeam.getMembers()[num - 1];
         if (!player.canAct || !player.isNextTo(opponent.x, opponent.y) || !player.isAlive() || !opponent.isAlive()) return;
         const damage = this.calculateDamage(player, opponent);
         opponent.dealDamage(damage);

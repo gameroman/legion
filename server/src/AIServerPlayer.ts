@@ -18,8 +18,7 @@ export class AIServerPlayer extends ServerPlayer {
     constructor(frame: string, x: number, y: number) {
         super(frame, x, y);
 
-        // Pick a random number between 1 and 3
-        const random = Math.floor(Math.random() * 3) + 1;
+        const random = Math.floor(Math.random() * 4) + 1;
         switch (random) {
             case 1:
                 this.AItype = AIType.Opportunist;
@@ -30,10 +29,14 @@ export class AIServerPlayer extends ServerPlayer {
             case 3:
                 this.AItype = AIType.Equalizer;
                 break;
+            case 4:
+                this.AItype = AIType.Defender;
+                break;
             default:
                 this.AItype = AIType.Opportunist;
                 break;
         }
+        this.AItype = AIType.Opportunist; // TODO: remove
 
         // TODO: add factor determining how often the AI re-evaluates its taget
     }
@@ -79,11 +82,11 @@ export class AIServerPlayer extends ServerPlayer {
 
     opportunist() {
         const targets = this.team?.game.listAdjacentEnemies(this);
-        const target = this.getOptimalTarget(targets!, lowestHpComparator);
-        if (target) {
-            this.attack(target);
+        if (targets) {
+            const target = this.getOptimalTarget(targets!, lowestHpComparator);
+            // this.attack(target);
         } else {
-            this.moveTowardsClosestEnemy();
+            // this.moveTowardsClosestEnemy();
         }
     }
 

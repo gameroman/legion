@@ -3,6 +3,7 @@ import { Socket, Server } from 'socket.io';
 import { createServer } from 'http';
 
 import { Game } from './Game';
+import { AIGame } from './AIGame';
 
 const PORT = process.env.PORT || 3123;
 
@@ -37,7 +38,7 @@ const socketMap = new Map<Socket, Game>();
 io.on('connection', (socket: any) => {
     console.log('A user connected');
 
-    const game = new Game(io, [socket]);
+    const game = new AIGame(io, [socket]);
     socketMap.set(socket, game);
 
     socket.on('disconnect', () => {
@@ -46,12 +47,12 @@ io.on('connection', (socket: any) => {
 
     socket.on('move', (data: any) => {
       const game = socketMap.get(socket);
-      game?.processMove(data);
+      game?.processAction('move', data, socket);
     });
 
     socket.on('attack', (data: any) => {
       const game = socketMap.get(socket);
-      game?.processAttack(data);
+      game?.processAction('attack', data, socket);
     });
 });
 

@@ -25,8 +25,8 @@ export class ServerPlayer {
         this.atk = 10;
         this.def = 10;
         this.cooldowns = {
-            'move': 5000,
-            'attack': 5000
+            'move': 500,
+            'attack': 500
         };
         this.cooldown = 500;
         this.setCooldown(this.cooldown);
