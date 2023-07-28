@@ -1,5 +1,6 @@
 import { Team } from './Team';
 
+export type ActionType = 'move' | 'attack';
 export class ServerPlayer {
     num;
     frame;
@@ -12,7 +13,7 @@ export class ServerPlayer {
     atk;
     def;
     cooldowns;
-    cooldown;
+    cooldown: number = 0;
     cooldownTimer: NodeJS.Timeout | null = null;
     canAct = false;
 
@@ -27,11 +28,11 @@ export class ServerPlayer {
         this.atk = 10;
         this.def = 10;
         this.cooldowns = {
-            'move': 500,
-            'attack': 500
+            'move': 5000,
+            'attack': 5000
         };
-        this.cooldown = 500;
-        this.setCooldown(this.cooldown);
+        this.setCooldown(this.cooldowns.move);
+
 //         Every level up, a character gains:
 //         Attack: +2 and +10% of current attack
 //         Defense: +3 and +8% of current defense
@@ -84,15 +85,20 @@ export class ServerPlayer {
     getHP() {
         return this.hp;
     } 
+
+    getCooldown(action: ActionType): number {
+        return this.cooldowns[action];
+    }
     
     setCooldown(duration: number) {
         this.canAct = false;
+        this.cooldown = duration;
         if (this.cooldownTimer) {
             clearTimeout(this.cooldownTimer);
         }
         this.cooldownTimer = setTimeout(() => {
             this.canAct = true;
-        });
+        }, duration);
     }
 
     setTeam(team: Team) {

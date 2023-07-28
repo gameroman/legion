@@ -1,4 +1,4 @@
-import { ServerPlayer } from './ServerPlayer';
+import { ServerPlayer, ActionType } from './ServerPlayer';
 
 type Comparator<T> = (a: T, b: T) => number;
 
@@ -15,6 +15,8 @@ enum AIType {
 export class AIServerPlayer extends ServerPlayer {
     AItype: AIType;
     target: ServerPlayer | null = null;
+    retargetRate: number = 0;
+    retargetCount: number = 0;
 
     constructor(num: number, frame: string, x: number, y: number) {
         super(num, frame, x, y);
@@ -37,31 +39,20 @@ export class AIServerPlayer extends ServerPlayer {
                 this.AItype = AIType.Opportunist;
                 break;
         }
+
+        // Assign a random value between 1 and 10 to retargetCount
+        this.retargetRate = 3; // Math.floor(Math.random() * 10) + 1;
+        this.retargetCount = this.retargetRate;
+
         this.AItype = AIType.Opportunist; // TODO: remove
 
-        // TODO: add factor determining how often the AI re-evaluates its taget
+        const cooldown = this.getCooldown('move');
+        this.setCooldown(cooldown);
     }
 
-    determineTarget() {
-        if(this.target && this.target.isAlive()) return;
-
-        switch (this.AItype) {
-            case AIType.Opportunist:
-                this.opportunistTarget();
-                break;
-            // case AIType.Hunter:
-            //     this.hunter();
-            //     break;
-            // case AIType.Equalizer:
-            //     this.equalizer();
-            //     break;
-            // case AIType.Defender:
-            //     this.defender();
-            //     break;
-            default:
-                this.opportunistTarget();
-                break;
-        }
+    getCooldown(action: ActionType) {
+        // Return a random number between 1 and 1.3 times the cooldown
+        return Math.floor(this.cooldowns[action] * (1 + Math.random() * 0.3));
     }
 
     takeAction() {
@@ -75,13 +66,30 @@ export class AIServerPlayer extends ServerPlayer {
         this.determineTarget();
         if(!this.target) return;
 
+        if (this.isNextTo(this.target!.x, this.target!.y)) {
+            this.attack(this.target!);
+        } else {
+            this.moveTowards(this.target!.x, this.target!.y);
+        }
+
+        this.retargetCount--;
+        if (this.retargetCount <= 0) {
+            this.target = null;
+            this.retargetCount = this.retargetRate;
+        }
+    }
+
+    determineTarget() {
+        if(this.target && this.target.isAlive()) return;
+        // console.log('Determining target');
+
         switch (this.AItype) {
             case AIType.Opportunist:
-                this.opportunistAttack();
+                this.opportunistTarget();
                 break;
-            // case AIType.Hunter:
-            //     this.hunter();
-            //     break;
+            case AIType.Hunter:
+                this.hunterTarget();
+                break;
             // case AIType.Equalizer:
             //     this.equalizer();
             //     break;
@@ -89,7 +97,7 @@ export class AIServerPlayer extends ServerPlayer {
             //     this.defender();
             //     break;
             default:
-                this.opportunistAttack();
+                this.opportunistTarget();
                 break;
         }
     }
@@ -110,15 +118,31 @@ export class AIServerPlayer extends ServerPlayer {
             targets = this.team?.game.listAllEnemies(this);
         }
         this.target = this.getOptimalTarget(targets!, lowestHpComparator);
+        // console.log(`opportunist target: ${this.target!.num} at (${this.target!.x}, ${this.target!.y})`);
     }
 
-    opportunistAttack() {
-        if (this.isNextTo(this.target!.x, this.target!.y)) {
-            this.attack(this.target!);
-        } else {
-            this.moveTowards(this.target!.x, this.target!.y);
+    hunterTarget() {
+        const targets = this.team?.game.listAllEnemies(this);
+        const target = this.getOptimalTarget(targets!, lowestHpComparator);
+        if (target) {
+            this.attack(target);
         }
     }
+
+    // equalizer() {
+    //     const targets = this.team?.game.listAllEnemies(this);
+    //     const target = this.getOptimalTarget(targets!, highestHpComparator);
+    //     if (target) {
+    //         this.attack(target);
+    //     }
+    // }
+
+    // defender() {
+    //     const target = this.getClosestEnemyToLowestHPAlly();
+    //     if (target) {
+    //         this.attack(target);
+    //     }
+    // }
 
     attack(target: ServerPlayer) {
         const data = {
@@ -153,27 +177,4 @@ export class AIServerPlayer extends ServerPlayer {
         }
         this.team?.game.processMove(data, this.team);
     }
-
-    // hunter() {
-    //     const targets = this.team?.game.listAllEnemies(this);
-    //     const target = this.getOptimalTarget(targets!, lowestHpComparator);
-    //     if (target) {
-    //         this.attack(target);
-    //     }
-    // }
-
-    // equalizer() {
-    //     const targets = this.team?.game.listAllEnemies(this);
-    //     const target = this.getOptimalTarget(targets!, highestHpComparator);
-    //     if (target) {
-    //         this.attack(target);
-    //     }
-    // }
-
-    // defender() {
-    //     const target = this.getClosestEnemyToLowestHPAlly();
-    //     if (target) {
-    //         this.attack(target);
-    //     }
-    // }
 }

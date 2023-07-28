@@ -139,7 +139,7 @@ export abstract class Game
         player.updatePos(tile.x, tile.y);
         this.occupyCell(player.x, player.y, player);
 
-        const cooldown = player.cooldowns.move;
+        const cooldown = player.getCooldown('move');
         player.setCooldown(cooldown);
         
         this.broadcast('move', {
@@ -157,14 +157,14 @@ export abstract class Game
     processAttack({num, target}: {num: number, target: number}, team: Team) {
         const player = team.getMembers()[num - 1];
         const opponentTeam = this.getOtherTeam(team.id);
-        const opponent = opponentTeam.getMembers()[num - 1];
+        const opponent = opponentTeam.getMembers()[target - 1];
         
         if (!player.canAct || !player.isNextTo(opponent.x, opponent.y) || !player.isAlive() || !opponent.isAlive()) return;
         
         const damage = this.calculateDamage(player, opponent);
         opponent.dealDamage(damage);
         
-        const cooldown = player.cooldowns.attack;
+        const cooldown = player.getCooldown('attack');
         player.setCooldown(cooldown);
 
         this.broadcast('attack', {
@@ -192,7 +192,7 @@ export abstract class Game
         const oppositeTeamId = player.team!.id === 1 ? 2 : 1;
         const oppositeTeam = this.teams.get(oppositeTeamId)!;
         oppositeTeam.getMembers().forEach(enemy => {
-            if (player.isNextTo(enemy.x, enemy.y)) {
+            if (player.isNextTo(enemy.x, enemy.y) && enemy.isAlive()) {
                 adjacentEnemies.push(enemy);
             }
         });
@@ -202,7 +202,8 @@ export abstract class Game
     listAllEnemies(player: ServerPlayer): ServerPlayer[] {
         const oppositeTeamId = player.team!.id === 1 ? 2 : 1;
         const oppositeTeam = this.teams.get(oppositeTeamId)!;
-        return  oppositeTeam.getMembers();
+        // Filter for alive enemies
+        return oppositeTeam.getMembers().filter(enemy => enemy.isAlive());
     }
 
     specialRound(num: number) {
