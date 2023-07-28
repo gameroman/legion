@@ -19,6 +19,7 @@ export class Player extends Phaser.GameObjects.Container {
     healthBar: HealthBar;
     cooldown: CircularProgress;
     cooldownTween: Phaser.Tweens.Tween;
+    hurtTween: Phaser.Tweens.Tween;
     canAct: boolean = false;
 
     constructor(scene: Phaser.Scene, gridX: number, gridY: number, x: number, y: number, num: number, texture: string, isPlayer: boolean, hp: number) {
@@ -111,7 +112,7 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     displayMovementRange() {
-        if (!this.canAct) return;
+        if (!this.canAct || !this.isAlive()) return;
         // @ts-ignore
         this.arena.highlightCells(this.gridX, this.gridY, this.distance);
     }
@@ -180,13 +181,7 @@ export class Player extends Phaser.GameObjects.Container {
             },
         });
 
-        if(this.isPlayer) {
-            if(gridX > oldGridX && !this.sprite.flipX) this.sprite.flipX = true;
-            if(gridX < oldGridX && this.sprite.flipX) this.sprite.flipX = false;
-        } else {
-            if(gridX < oldGridX && !this.sprite.flipX) this.sprite.flipX = true;
-            if(gridX > oldGridX && this.sprite.flipX) this.sprite.flipX = false;
-        }
+        if (oldGridX != this.gridX) this.sprite.flipX = this.gridX > oldGridX;
     }
 
     setHP(hp) {
@@ -206,16 +201,17 @@ export class Player extends Phaser.GameObjects.Container {
 
     }
 
-    attack(player: Player) {
+    attack(target: Player) {
         // @ts-ignore
         this.arena.deselectPlayer();
         this.playAnim('attack', true);
+        this.sprite.flipX = target.gridX > this.gridX;
     }
 
     hurt() {
-        
+        if (this.hurtTween?.isPlaying()) this.hurtTween.complete();
         // Blink
-        this.scene.tweens.add({
+        this.hurtTween = this.scene.tweens.add({
             targets: this,
             alpha: 0,
             duration: 100,

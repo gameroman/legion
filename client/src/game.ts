@@ -9,7 +9,7 @@ const config = {
         mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    backgroundColor: '#2d2d2d',
+    backgroundColor: '#000',
     parent: 'scene',
     pixelArt: true,
     plugins: {

@@ -1,16 +1,35 @@
 
 import { io } from 'socket.io-client';
 import { Player } from './Player';
-import { Server } from './Server';
+
+class Team {
+    id: number;
+    members: Player[] = [];
+
+    constructor(number: number) {
+        this.id = number;
+    }   
+
+    addMember(player: Player) {
+        this.members.push(player);
+    }
+
+    getMember(num: number) {
+        return this.members[num - 1];
+    }
+
+    getMembers(): Player[] {
+        return this.members;
+    }
+}
 export class Arena extends Phaser.Scene
 {
     socket;
     HUD;
-    localPlayer;
+    playerTeamId;
     gridCorners;
     gridMap: Map<string, Player> = new Map<string, Player>();
-    playersMap: Map<number, Player> = new Map<number, Player>();
-    opponentsMap: Map<number, Player> = new Map<number, Player>();
+    playersMap: Map<number, Team> = new Map<number, Team>();
     selectedPlayer: Player | null = null;
     highlight: Phaser.GameObjects.Graphics;
     tileSize = 60;
@@ -39,25 +58,29 @@ export class Arena extends Phaser.Scene
 
 
     connectToServer() {
-        // this.socket = io('http://localhost:3123');
+        this.socket = io('http://localhost:3123');
 
-        // this.socket.on('connect', () => {
-        //     console.log('Connected to the server');
-        // });
+        this.socket.on('connect', () => {
+            console.log('Connected to the server');
+        });
         
-        // this.socket.on('disconnect', () => {
-        //     console.log('Disconnected from the server');
-        // }); 
+        this.socket.on('disconnect', () => {
+            console.log('Disconnected from the server');
+        }); 
 
-        // this.socket.on('init', this.initializeGame.bind(this));
-        this.server = new Server();
-        
-        this.initializeGame(this.server.getPlacementData());
+        this.socket.on('gameStart', this.initializeGame.bind(this));
 
-        // this.socket.on('addCity', (data) => {
-        //     // console.log('addCity data received from the server');
-        //     this.addCity(data.tile, data.player);
-        // });
+        this.socket.on('move', (data) => {
+            this.processMove(data);
+        });
+
+        this.socket.on('attack', (data) => {
+            this.processAttack(data);
+        });
+
+        this.socket.on('cooldown', (data) => {
+            this.processCooldown(data);
+        });
     }
 
     sendMove(x, y) {
@@ -65,9 +88,7 @@ export class Arena extends Phaser.Scene
             tile: { x, y},
             num: this.selectedPlayer.num,
         };
-        // this.send('move', data);
-        const serverData = this.server.processMove(data);
-        this.processMove(serverData);
+        this.send('move', data);
     }
 
     sendAttack(player: Player) {
@@ -76,9 +97,7 @@ export class Arena extends Phaser.Scene
             num: this.selectedPlayer.num,
             target: player.num,
         };
-        // this.send('attack', data);
-        const serverData = this.server.processAttack(data);
-        this.processAttack(serverData);
+        this.send('attack', data);
     }
 
     send(channel, data) {
@@ -199,7 +218,7 @@ export class Arena extends Phaser.Scene
         } else {
             return;
         }
-        this.playersMap[number]?.onClick();
+        this.playersMap.get(this.playerTeamId).getMember(number)?.onClick();
     }
 
     isFree(gridX, gridY) {
@@ -242,27 +261,35 @@ export class Arena extends Phaser.Scene
         this.selectedPlayer.toggleSelect();
     }
 
-    getPlayer(isPlayer, num) {
-        return isPlayer ? this.playersMap[num] : this.opponentsMap[num];
+    getPlayer(team: number, num: number): Player {
+        return this.playersMap.get(team).getMember(num);
     }
 
-    processMove({isPlayer, tile, num, cooldown}) {
-        const player = this.getPlayer(isPlayer, num);
+    getOtherTeam(id: number): number {
+        return id === 1 ? 2 : 1;
+    }
+
+    processMove({team, tile, num}) {
+        const player = this.getPlayer(team, num);
         const {x, y} = this.gridToPixelCoords(tile.x, tile.y);
 
         this.gridMap[this.serializeCoords(player.gridX, player.gridY)] = null;
         this.gridMap[this.serializeCoords(tile.x, tile.y)] = player;
 
         player.walkTo(tile.x, tile.y, x, y);
-        player.setCooldown(cooldown);
     }
 
-    processAttack({isPlayer, target, num, damage, hp, cooldown}) {
-        const player = this.getPlayer(isPlayer, num);
-        const targetPlayer = this.getPlayer(!isPlayer, target);
+    processAttack({team, target, num, damage, hp}) {
+        const player = this.getPlayer(team, num);
+        const otherTeam = this.getOtherTeam(team);
+        const targetPlayer = this.getPlayer(otherTeam, target);
         player.attack(targetPlayer);
         targetPlayer.setHP(hp);
         targetPlayer.displayDamage(damage);
+    }
+
+    processCooldown({num, cooldown}) {
+        const player = this.getPlayer(this.playerTeamId, num);
         player.setCooldown(cooldown);
     }
 
@@ -324,20 +351,20 @@ export class Arena extends Phaser.Scene
         };
     }
 
-    placeCharacters(data, isPlayer) {
+    placeCharacters(data, isPlayer, teamId) {
         data.forEach((character, i) => {
             const {x, y} = this.gridToPixelCoords(character.x, character.y);
 
             const player = new Player(this, character.x, character.y, x, y, i + 1, character.frame, isPlayer, character.hp);
-            player.setDistance(character.distance);
-            if (isPlayer) player.setCooldown(character.cooldown);
+            
+            if (isPlayer) {
+                player.setDistance(character.distance);
+                player.setCooldown(character.cooldown);
+            }
+
             this.gridMap[this.serializeCoords(character.x, character.y)] = player;
 
-            if (isPlayer) {
-                this.playersMap[i + 1] = player;
-            } else {
-                this.opponentsMap[i + 1] = player;
-            }
+            this.playersMap.get(teamId)?.addMember(player);
         }, this);
     }
 
@@ -353,7 +380,6 @@ export class Arena extends Phaser.Scene
         }
     }
     
-
     lineOfSight(startX, startY, endX, endY) {
         // Get the distance between the start and end points
         let distance = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
@@ -382,6 +408,12 @@ export class Arena extends Phaser.Scene
         return true;
     }
 
+    isValidCell(fromX, fromY, toX, toY) {
+        return !this.isSkip(toX, toY)
+        && this.isFree(toX, toY)
+        && this.lineOfSight(fromX, fromY, toX, toY)
+    }
+
     highlightCells(gridX, gridY, radius) {
         // Create a new Graphics object to highlight the cells
         if (!this.highlight) this.highlight = this.add.graphics();
@@ -393,11 +425,7 @@ export class Arena extends Phaser.Scene
             for (let x = -radius; x <= radius; x++) {
                 // Check if the cell is within the circle
                 if (x * x + y * y <= radius * radius) {
-                    if (
-                        this.isSkip(gridX + x, gridY + y)
-                        || !this.isFree(gridX + x, gridY + y)
-                        || !this.lineOfSight(gridX, gridY, gridX + x, gridY + y)
-                    ) continue;
+                    if(!this.isValidCell(gridX, gridY, gridX + x, gridY + y)) continue;
                     // Calculate the screen position of the cell
                     let posX = this.gridCorners.startX + (gridX + x) * this.tileSize;
                     let posY = this.gridCorners.startY + (gridY + y) * this.tileSize;
@@ -436,11 +464,19 @@ export class Arena extends Phaser.Scene
 
     initializeGame(data) {
         this.createHUD(); 
-        this.placeCharacters(data.player.team, true);
-        this.placeCharacters(data.opponent.team, false);
+        this.playerTeamId = data.player.teamId;
+
+        if(this.playerTeamId === undefined) {
+            console.error('Player team id is undefined');
+        }
+
+        this.playersMap.set(1, new Team(1));
+        this.playersMap.set(2, new Team(2));
+
+        this.placeCharacters(data.player.team, true, data.player.teamId);
+        this.placeCharacters(data.opponent.team, false, data.opponent.teamId);
     }
 
-  
     update (time, delta)
     {
     }
