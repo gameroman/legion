@@ -22,14 +22,14 @@ export class ServerPlayer {
         this.frame = frame;
         this.x = x;
         this.y = y;
-        this.maxHP = 100;
+        this.maxHP = 10;
         this.hp = this.maxHP;
         this.distance = 3;
         this.atk = 10;
         this.def = 10;
         this.cooldowns = {
-            'move': 5000,
-            'attack': 5000
+            'move': 500,
+            'attack': 500
         };
         this.setCooldown(this.cooldowns.move);
 
