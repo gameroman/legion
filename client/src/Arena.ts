@@ -292,7 +292,8 @@ export class Arena extends Phaser.Scene
 
         // Count how many team members are alive
         const aliveMembers = this.playersMap.get(this.playerTeamId).getMembers().filter(member => member.isAlive());
-        this.app.setAliveCount(aliveMembers);
+        this.app.setAliveCount(aliveMembers.length);
+        console.log('####', aliveMembers.length)
     }
 
     processCooldown({num, cooldown}) {

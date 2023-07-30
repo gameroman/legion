@@ -6,6 +6,7 @@ class App extends Component {
   state = { aliveCount: 0 }
 
   setAliveCount = (count) => {
+    console.log('setAliveCount', count);
     this.setState({ aliveCount: count });
   }
 

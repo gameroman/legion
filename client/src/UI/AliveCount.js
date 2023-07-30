@@ -3,7 +3,8 @@ import { h, Component } from 'preact';
 
 class AliveCount extends Component {
   render() {
-    return <div className="alive-count">{this.props.count}</div>;
+    console.log('render');
+    return <div className="alive-count">Alive: {this.props.count}</div>;
   }
 }
 
