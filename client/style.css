@@ -1,0 +1,121 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
+canvas {
+    display: block;
+    margin: 0 auto;
+}
+
+#root, #scene {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#root {
+  z-index: 1;  /* This ensures that the AliveCount component will be displayed above the Phaser game */
+  /* background-color: red; */
+}
+
+.box {
+    position: relative; /* Needed to position the pseudo-element */
+    border-bottom-left-radius: 15px;  /* Bottom left corner rounded */
+    border-bottom-right-radius: 15px; /* Bottom right corner rounded */
+    background: linear-gradient(rgba(10, 10, 10, 0.7), rgba(20, 20, 20, 0.7)); /* Dark grey, almost black background with slight transparency */
+    border: none; /* Remove default borders */
+    padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden; /* To make sure the pseudo-element does not overflow the box */
+    color: white;
+    margin-top: 10px;
+    margin-left: 10px;
+    width: 800px;
+}
+
+.box::before {
+    content: ""; /* Pseudo-elements require a content property, even if it's an empty string */
+    position: absolute; /* To position it at the top */
+    left: 0;
+    top: 0;
+    height: 3px; /* The thickness of your border */
+    width: 100%; /* To cover the full width of the box */
+    background: linear-gradient(to right, rgb(255, 191, 0), orange 90%); /* Adjusted gradient colors and positions */
+}
+
+@font-face {
+  font-family: 'Vinque';
+  src: url('assets/vinque.otf');
+}
+
+.player-main {
+    display: flex;
+    align-items: start;
+    gap: 10px; /* adjust as needed */
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto; 
+}
+
+.player-name {
+    margin-bottom: 10px;
+    margin-left: 3px;
+}
+
+.player-portrait {
+    position: relative;
+    border: 3px solid #D4AF37;
+    width: 50px;
+    height: 77px;
+    margin-top: 2px;
+}
+
+.hp, .mp, .cooldown {
+    display: flex;
+    align-items: center;
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: 2px;
+    padding-left: 5px;
+    /* width: fit-content; */
+    font-weight: bold;
+}
+
+.cooldown {
+    background-color: #AD8606;
+}
+
+.hp {
+    background-color: #028406;
+}
+
+.mp {
+    background-color: #0645AD;
+}
+  
+.hp-label, .mp-label, .cooldown-label {
+    border-right: 1px solid black;
+    padding-right: 10px;
+    margin-right: 10px;
+}
+  
+.hp-amount, .mp-amount, .cooldown-amount {
+    padding-right: 10px;
+    margin-right: 10px;
+    font-style: italic;
+}
+
+.cooldown-amount {
+    border-right: 1px solid black;
+}
+
+.cooldown-state {
+    /* padding-right: 10px; */
+    margin-right: 10px;
+}
