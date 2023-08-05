@@ -1,7 +1,7 @@
 
 import { io } from 'socket.io-client';
 import { Player } from './Player';
-
+import { App, events } from './UI/App';
 class Team {
     id: number;
     members: Player[] = [];
@@ -288,9 +288,7 @@ export class Arena extends Phaser.Scene
         targetPlayer.setHP(hp);
         targetPlayer.displayDamage(damage);
 
-        // Count how many team members are alive
-        const aliveMembers = this.playersMap.get(this.playerTeamId).getMembers().filter(member => member.isAlive());
-        // this.app.setAliveCount(aliveMembers);
+        // events.emit('updateAliveCount', aliveMembers.length);
     }
 
     processCooldown({num, cooldown}) {
