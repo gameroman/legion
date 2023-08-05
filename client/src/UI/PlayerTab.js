@@ -55,25 +55,32 @@ class PlayerTab extends Component {
     const HPBackground = this.getHPBackground(player);
     const MPBackground = this.getMPBackground(player);
     const isCooldownActive = player.cooldown > 0;
-    const cooldownClass = isCooldownActive ? "cooldown" : "cooldown cooldown-complete";
-    
+    const cooldownClass = isCooldownActive ? "cooldown-state" : "cooldown-state cooldown-complete";
+    const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+
     return <div className="player-tab box">
         <div className="player-info">
-          <span className="player-num">#{player.number} </span> 
-          <span>{player.name}</span>
-          <span className="player-level">Lvl 1</span>
-          <span className="player-xp">XP 0/100</span>
-          <span className="player-class">Warrior</span>
-          {/* <span className="player-status"></span> */}
+          <div className='badge'>
+            <span className="badge-label">#{player.number} </span> 
+            <span>{player.name}</span>
+          </div>
+          <div className='badge'>
+            <span className="badge-label">Lvl </span> 
+            <span>1</span>
+          </div>
+          <div className='badge'>
+            <span className="badge-label">XP </span> 
+            <span>0 / 100</span>
+          </div>  
         </div>
         <div className="player-main">
           <div className="player-content">
             <div style={portraitStyle} className="player-portrait" />
             <div className="player-stats">
-                <div className={cooldownClass}>
+                <div className="cooldown">
                   <span className="cooldown-label">⏱ Cooldown</span>
                   <span className="cooldown-amount" >{this.formatTime(player.cooldown)} </span>
-                  <span className="cooldown-state" >{isCooldownActive ? `⏳` : `✅`}</span>
+                  <span className={cooldownClass} >{isCooldownActive ? `⏳` : `✅`}</span>
                   </div>
                 <div className="hp" style={{background: HPBackground}}>  
                   <span className="hp-label">❤️ HP</span>
@@ -88,19 +95,25 @@ class PlayerTab extends Component {
           </div>
         </div>
         <div className="player-skills">
-            <h4>Skills</h4>
-            {player.skills.map(skill => 
-                <div className="skill">
-                    {skill.name}: {skill.cooldown} seconds cooldown
-                </div>
+            <h4>🔥 Skills </h4>
+            {player.skills.map((skill, i) => {
+                const startPosition = keyboardLayout.indexOf('Q');
+                const keyBinding = keyboardLayout.charAt(startPosition + i);
+                return (<div className="skill">
+                  <span className="key-binding">{keyBinding}</span>
+                </div>)
+              }
             )}
         </div>
         <div className="player-items">
-            <h4>Items</h4>
-            {player.items.map(item => 
-                <div className="item">
-                    {item.name}: {item.quantity}
-                </div>
+            <h4>🧪 Items</h4>
+            {player.items.map((item, i) => {
+                const startPosition = keyboardLayout.indexOf('Z');
+                const keyBinding = keyboardLayout.charAt(startPosition + i);
+                return (<div className="item">
+                  <span className="key-binding">{keyBinding}</span>
+                </div>)
+            }
             )}
         </div>
     </div>;
