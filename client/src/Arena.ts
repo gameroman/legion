@@ -44,6 +44,8 @@ export class Arena extends Phaser.Scene
 
     preload ()
     {
+        this.app = new App();
+        
         this.load.image('bg',  '/assets/aarena_bg.png');
         // this.load.svg('pop', 'assets/pop.svg',  { width: 24, height: 24 } );
         const frameConfig = { frameWidth: 144, frameHeight: 144};

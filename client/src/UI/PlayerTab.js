@@ -48,7 +48,7 @@ class PlayerTab extends Component {
 
   render({player}) {
     const portraitStyle = {
-      backgroundImage: `url(${player.portrait})`,
+      backgroundImage: `url(assets/sprites/${player.portrait})`,
       backgroundPosition: '-45px -45px', // adjust these values to your needs
       backgroundRepeat: 'no-repeat',
     };
@@ -99,8 +99,9 @@ class PlayerTab extends Component {
             {player.skills.map((skill, i) => {
                 const startPosition = keyboardLayout.indexOf('Q');
                 const keyBinding = keyboardLayout.charAt(startPosition + i);
-                return (<div className="skill">
+                return (<div className={isCooldownActive ? 'skill skill-off' : 'skill'} style={{ backgroundImage: `url(assets/skills/${skill.frame})` }} >
                   <span className="key-binding">{keyBinding}</span>
+                  <div className="info-box box">{skill.name}</div>
                 </div>)
               }
             )}
@@ -110,8 +111,10 @@ class PlayerTab extends Component {
             {player.items.map((item, i) => {
                 const startPosition = keyboardLayout.indexOf('Z');
                 const keyBinding = keyboardLayout.charAt(startPosition + i);
-                return (<div className="item">
+                return (<div className={isCooldownActive ? 'item item-off' : 'item'} style={{ backgroundImage: `url(assets/items/${item.frame})` }} >
+                  <span className="item-qty">x{item.quantity}</span>
                   <span className="key-binding">{keyBinding}</span>
+                  <div className="info-box box">{item.name}</div>
                 </div>)
             }
             )}

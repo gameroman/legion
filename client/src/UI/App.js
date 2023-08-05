@@ -23,25 +23,21 @@ class App extends Component {
     return <PlayerTab player={{
       name: 'Player 1',
       number: 1,
-      portrait: 'assets/sprites/1_1.png',
+      portrait: '1_1.png',
       hp: 600,
       maxHp: 1000,
       mp: 12,
       maxMp: 100,
       cooldown: 2,
       skills: [
-        { name: 'Skill 1', cooldown: 10 },
-        { name: 'Skill 2', cooldown: 10 },
-        { name: 'Skill 3', cooldown: 10 },
-        { name: 'Skill 4', cooldown: 10 },
-        { name: 'Skill 5', cooldown: 10 },
+        { name: 'Ice ball', frame: '01.png' },
+        { name: 'Fire ball', frame: '10.png' },
+        { name: 'Maelstrom', frame: '21.png' },
+        { name: 'Zombie', frame: '47.png' },
       ],
       items: [
-        { name: 'Item 1', quantity: 10 },
-        { name: 'Item 2', quantity: 10 },
-        { name: 'Item 3', quantity: 10 },
-        { name: 'Item 4', quantity: 10 },
-        { name: 'Item 5', quantity: 10 },
+        { name: 'Potion', quantity: 2, frame: 'potion.png' },
+        { name: 'Ether', quantity: 1, frame: 'ether.png' },
       ]
     }} />;
   }

@@ -22,7 +22,6 @@ canvas {
 }
 
 .box {
-    position: relative; /* Needed to position the pseudo-element */
     border-bottom-left-radius: 15px;  /* Bottom left corner rounded */
     border-bottom-right-radius: 15px; /* Bottom right corner rounded */
     background: linear-gradient(rgba(10, 10, 10, 0.7), rgba(20, 20, 20, 0.7)); /* Dark grey, almost black background with slight transparency */
@@ -31,6 +30,10 @@ canvas {
     box-sizing: border-box;
     overflow: hidden; /* To make sure the pseudo-element does not overflow the box */
     color: white;
+}
+
+.player-tab {
+    position: relative; /* Needed to position the pseudo-element */
     margin-top: 10px;
     margin-left: 10px;
     /* width: 800px; */
@@ -178,12 +181,47 @@ canvas {
     width: 36px;
     height: 36px;
     margin-right: 3px;
+    background-size: contain;
+}
+
+.skill-off, .item-off {
+    filter: grayscale(1);
 }
 
 .key-binding {
     position: absolute;
     bottom: -1px;
-    right: 2px;
+    right: 0px;
     color: white;   /* Or any color that matches your design */
     font-size: 10px; /* Adjust as needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Black background with 50% opacity */
+    border-radius: 10px; 
 }
+
+.item-qty {
+    position: absolute;
+    bottom: -1px;
+    left: 2px;
+    font-size: 14px; /* Adjust as needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Black background with 50% opacity */
+    border-radius: 10px; 
+    color: white; 
+}
+
+.info-box {
+    position: absolute;
+    bottom: 100%; /* Positioned above the parent element */
+    left: 0;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.75); /* Semi-transparent black */
+    color: white; /* White text */
+    border-radius: 5px;
+    visibility: hidden; /* Hidden by default */
+    opacity: 0;
+    transition: visibility 0s, opacity 0.2s linear; /* Fade in/out */
+  }
+  
+  .skill:hover .info-box, .item:hover .info-box {
+    visibility: visible; /* Visible when parent is hovered over */
+    opacity: 1;
+  }
