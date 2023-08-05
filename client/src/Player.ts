@@ -73,7 +73,7 @@ export class Player extends Phaser.GameObjects.Container {
         this.add(this.healthBar);
 
         this.baseSquare.strokeRect(-30, 10, 60, 60); // adjust position and size as needed
-
+        this.baseSquare.setDepth(this.depth - 2);  
         // Add the container to the scene
         scene.add.existing(this);
         this.updatePos(gridX, gridY);

@@ -99,9 +99,19 @@ class PlayerTab extends Component {
             {player.skills.map((skill, i) => {
                 const startPosition = keyboardLayout.indexOf('Q');
                 const keyBinding = keyboardLayout.charAt(startPosition + i);
-                return (<div className={isCooldownActive ? 'skill skill-off' : 'skill'} style={{ backgroundImage: `url(assets/skills/${skill.frame})` }} >
+                return (<div className="skill">
+                  <div 
+                      className={isCooldownActive ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}
+                      style={{backgroundImage: `url(assets/skills/${skill.frame})`, }} />
                   <span className="key-binding">{keyBinding}</span>
-                  <div className="info-box box">{skill.name}</div>
+                  <div className="info-box box">
+                    <div className="info-box-title">{skill.name}</div>
+                    <div className="info-box-desc">{skill.description}</div>
+                    <div className="mp mini-mp">  
+                      <span className="mp-label">MP</span>
+                      <span className="mp-amount">5</span>
+                    </div>
+                  </div>
                 </div>)
               }
             )}
@@ -111,11 +121,19 @@ class PlayerTab extends Component {
             {player.items.map((item, i) => {
                 const startPosition = keyboardLayout.indexOf('Z');
                 const keyBinding = keyboardLayout.charAt(startPosition + i);
-                return (<div className={isCooldownActive ? 'item item-off' : 'item'} style={{ backgroundImage: `url(assets/items/${item.frame})` }} >
-                  <span className="item-qty">x{item.quantity}</span>
-                  <span className="key-binding">{keyBinding}</span>
-                  <div className="info-box box">{item.name}</div>
-                </div>)
+                return (
+                  <div className="item">
+                    <div 
+                      className={isCooldownActive ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}
+                      style={{backgroundImage: `url(assets/items/${item.frame})`, }} />
+                    <span className="item-qty">x{item.quantity}</span>
+                    <span className="key-binding">{keyBinding}</span>
+                    <div className="info-box box">
+                      <div className="info-box-title">{item.name}</div>
+                      <div className="info-box-desc">{item.description}</div>
+                    </div>
+                  </div>
+                )
             }
             )}
         </div>

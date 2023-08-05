@@ -30,14 +30,14 @@ class App extends Component {
       maxMp: 100,
       cooldown: 2,
       skills: [
-        { name: 'Ice ball', frame: '01.png' },
-        { name: 'Fire ball', frame: '10.png' },
-        { name: 'Maelstrom', frame: '21.png' },
-        { name: 'Zombie', frame: '47.png' },
+        { name: 'Ice ball', frame: '01.png', description: 'Lorem ipsum dolor sit amet conecuetur dolores sit erat'},
+        { name: 'Fire ball', frame: '10.png', description: 'Lorem ipsum dolor sit amet conecuetur dolores sit erat' },
+        { name: 'Maelstrom', frame: '21.png', description: 'Lorem ipsum dolor sit amet conecuetur dolores sit erat' },
+        { name: 'Zombie', frame: '47.png', description: 'Lorem ipsum dolor sit amet conecuetur dolores sit erat' },
       ],
       items: [
-        { name: 'Potion', quantity: 2, frame: 'potion.png' },
-        { name: 'Ether', quantity: 1, frame: 'ether.png' },
+        { name: 'Potion', quantity: 2, frame: 'potion.png', description: 'Lorem ipsum dolor sit amet conecuetur dolores sit erat' },
+        { name: 'Ether', quantity: 1, frame: 'ether.png', description: 'Lorem ipsum dolor sit amet conecuetur dolores sit erat' },
       ]
     }} />;
   }
