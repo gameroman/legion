@@ -19,7 +19,7 @@ class PlayerTab extends Component {
 
   formatTime(seconds) {
     const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
+    const remainingSeconds = Math.round(seconds % 60);
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
@@ -41,6 +41,7 @@ class PlayerTab extends Component {
     this.setState(prevState => {
       if (prevState.player.cooldown > 0) {
         prevState.player.cooldown--;
+        prevState.player.cooldown = Math.max(0, prevState.player.cooldown);
       }
       return prevState;
     });
@@ -57,6 +58,7 @@ class PlayerTab extends Component {
     const isCooldownActive = player.cooldown > 0;
     const cooldownClass = isCooldownActive ? "cooldown-state" : "cooldown-state cooldown-complete";
     const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+    const isDead = player.hp <= 0;
 
     return <div className="player-tab box">
         <div className="player-info">
@@ -101,13 +103,13 @@ class PlayerTab extends Component {
                 const keyBinding = keyboardLayout.charAt(startPosition + i);
                 return (<div className="skill">
                   <div 
-                      className={isCooldownActive ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}
+                      className={isCooldownActive || isDead ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}
                       style={{backgroundImage: `url(assets/skills/${skill.frame})`, }} />
                   <span className="key-binding">{keyBinding}</span>
                   <div className="info-box box">
                     <div className="info-box-title">{skill.name}</div>
                     <div className="info-box-desc">{skill.description}</div>
-                    <div className="mp mini-mp">  
+                    <div className="mp mini">  
                       <span className="mp-label">MP</span>
                       <span className="mp-amount">5</span>
                     </div>
@@ -124,13 +126,31 @@ class PlayerTab extends Component {
                 return (
                   <div className="item">
                     <div 
-                      className={isCooldownActive ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}
+                      className={isCooldownActive || isDead ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}
                       style={{backgroundImage: `url(assets/items/${item.frame})`, }} />
                     <span className="item-qty">x{item.quantity}</span>
                     <span className="key-binding">{keyBinding}</span>
                     <div className="info-box box">
                       <div className="info-box-title">{item.name}</div>
                       <div className="info-box-desc">{item.description}</div>
+                      {
+                        item.effects.map((effect) => {
+                          let className = '';
+                          let stat = '';
+                          switch (effect.stat) {
+                            case 'HP':
+                              stat = 'HP';
+                              className = 'hp';
+                              break;
+                          }
+                          return (
+                            <div className="hp mini">  
+                            <span className="mp-label">{stat}</span>
+                            <span className="mp-amount">+{effect.value}</span>
+                          </div>
+                          );
+                        })
+                      }
                     </div>
                   </div>
                 )

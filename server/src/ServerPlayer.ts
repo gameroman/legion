@@ -1,4 +1,5 @@
 import { Team } from './Team';
+import { Item, NetworkItem } from './Item';
 
 export type ActionType = 'move' | 'attack';
 export class ServerPlayer {
@@ -16,6 +17,7 @@ export class ServerPlayer {
     cooldown: number = 0;
     cooldownTimer: NodeJS.Timeout | null = null;
     canAct = false;
+    inventory: Map<Item, number> = new Map<Item, number>();
 
     constructor(num: number, frame: string, x: number, y: number) {
         this.num = num;
@@ -53,8 +55,19 @@ export class ServerPlayer {
         if (includePersonal) {
             data['distance'] = this.distance;
             data['cooldown'] = this.cooldown;
+            data['inventory'] = this.getNetworkInventory();
         }
         return data;
+    }
+
+    getNetworkInventory(): NetworkInventory[] {
+        // Map every item to its network data
+        return [...this.inventory.entries()].map(([item, quantity]) => {
+            return {
+                'item': item.getNetworkData(),
+                'quantity': quantity
+            }
+        });
     }
 
     canMoveTo(x: number, y: number) {
@@ -108,6 +121,11 @@ export class ServerPlayer {
     setTeam(team: Team) {
         this.team = team;
     }
+
+    addItem(item: Item, quantity: number) {
+        const currentQuantity = this.inventory.get(item) || 0;
+        this.inventory.set(item, currentQuantity + quantity);
+    }
 }
 
 interface playerNetworkData {
@@ -117,4 +135,10 @@ interface playerNetworkData {
     hp: number;
     distance?: number;
     cooldown?: number;
+    inventory?: NetworkInventory[];
+}
+
+interface NetworkInventory {
+    item: NetworkItem;
+    quantity: number;
 }

@@ -273,7 +273,6 @@ export class Arena extends Phaser.Scene
 
     selectPlayer(player: Player) {
         if (this.selectedPlayer === player) {
-            console.log('Already selected');
             this.deselectPlayer();
             return;
         }
@@ -384,6 +383,8 @@ export class Arena extends Phaser.Scene
 
     placeCharacters(data, isPlayer, teamId) {
         data.forEach((character, i) => {
+            // if (isPlayer) console.log(character);
+
             const {x, y} = this.gridToPixelCoords(character.x, character.y);
 
             const player = new Player(this, character.x, character.y, x, y, i + 1, character.frame, isPlayer, character.hp);
@@ -391,6 +392,7 @@ export class Arena extends Phaser.Scene
             if (isPlayer) {
                 player.setDistance(character.distance);
                 player.setCooldown(character.cooldown);
+                player.setInventory(character.inventory);
             }
 
             this.gridMap[this.serializeCoords(character.x, character.y)] = player;

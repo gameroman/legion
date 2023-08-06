@@ -1,5 +1,22 @@
 import { HealthBar } from "./HealthBar";
 import { CircularProgress } from "./CircularProgress";
+
+interface NetworkInventory {
+    item: Item;
+    quantity: number;
+}
+interface Item {
+    name: string;
+    description: string;
+    frame: string;
+    effects: ItemEffect[];
+}
+
+interface ItemEffect {
+    stat: string;
+    value: number;
+}
+
 export class Player extends Phaser.GameObjects.Container {
     scene: Phaser.Scene;
     sprite: Phaser.GameObjects.Sprite;
@@ -22,6 +39,7 @@ export class Player extends Phaser.GameObjects.Container {
     cooldownDuration: number;
     hurtTween: Phaser.Tweens.Tween;
     canAct: boolean = false;
+    inventory: Map<Item, number> = new Map<Item, number>();
 
     constructor(scene: Phaser.Scene, gridX: number, gridY: number, x: number, y: number, num: number, texture: string, isPlayer: boolean, hp: number) {
         super(scene, x, y);
@@ -43,9 +61,7 @@ export class Player extends Phaser.GameObjects.Container {
         this.sprite = scene.add.sprite(0, 0, texture);
         this.add(this.sprite);
 
-        // Create a Graphics object for the base square
-
-        // Create a text object to display the player's name and score, and add it to the container
+        // TODO: refactor as subclass
         if (isPlayer) {
             this.numKey = scene.add.text(30, 70, num.toString(), { fontSize: '16px', color: '#fff', stroke: '#000', strokeThickness: 3 }).setOrigin(1,1);
             this.add(this.numKey);
@@ -91,6 +107,17 @@ export class Player extends Phaser.GameObjects.Container {
         const textureFile = this.arena.assetsMap[this.texture];
         // Extract the filename from the path
         const textureFilename = textureFile.split('/').pop();
+
+        const items = Array.from(this.inventory.entries()).map(([item, quantity]) => {
+            return {
+                name: item.name,
+                description: item.description,
+                frame: item.frame,
+                effects: item.effects,
+                quantity: quantity
+            }
+        });        
+
         return {
             name: 'Player 1',
             number: this.num,
@@ -106,10 +133,7 @@ export class Player extends Phaser.GameObjects.Container {
               { name: 'Maelstrom', frame: '21.png', description: 'Lorem ipsum dolor sit amet conecuetur dolores sit erat' },
               { name: 'Zombie', frame: '47.png', description: 'Lorem ipsum dolor sit amet conecuetur dolores sit erat' },
             ],
-            items: [
-              { name: 'Potion', quantity: 2, frame: 'potion.png', description: 'Lorem ipsum dolor sit amet conecuetur dolores sit erat' },
-              { name: 'Ether', quantity: 1, frame: 'ether.png', description: 'Lorem ipsum dolor sit amet conecuetur dolores sit erat' },
-            ]
+            items
           }
     }
 
@@ -304,5 +328,16 @@ export class Player extends Phaser.GameObjects.Container {
                 if (this.isSelected()) this.displayMovementRange();
             }
         });
+    }
+
+    setInventory(inventory: NetworkInventory[]) {
+        inventory.forEach(data => {
+            this.addItem(data.item, data.quantity);
+        });
+    }
+
+    addItem(item: Item, quantity: number) {
+        const currentQuantity = this.inventory.get(item) || 0;
+        this.inventory.set(item, currentQuantity + quantity);
     }
 }
