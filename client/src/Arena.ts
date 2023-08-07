@@ -218,17 +218,25 @@ export class Arena extends Phaser.Scene
 
     handleKeyDown(event) {
         // Check if the pressed key is a number
-        let number;
-        if (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NINE) {
-            // Convert the key code to a number
-            number = event.keyCode - Phaser.Input.Keyboard.KeyCodes.ZERO;
-        } else if (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NUMPAD_NINE) {
-            // Convert the key code to a number (for numpad keys)
-            number = event.keyCode - Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO;
+        const isNumberKey = (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NINE) || (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NUMPAD_NINE);
+        if (isNumberKey) {
+            let number;
+            if (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NINE) {
+                // Convert the key code to a number
+                number = event.keyCode - Phaser.Input.Keyboard.KeyCodes.ZERO;
+            } else if (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NUMPAD_NINE) {
+                // Convert the key code to a number (for numpad keys)
+                number = event.keyCode - Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO;
+            } 
+            this.playersMap.get(this.playerTeamId).getMember(number)?.onClick();
         } else {
-            return;
+            const isLetterKey = (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.A && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.Z);
+            if (isLetterKey) {
+                // Get the letter corresponding to the keyCode
+                const letter = String.fromCharCode(event.keyCode);
+                this.selectedPlayer?.onLetterKey(letter);
+            }
         }
-        this.playersMap.get(this.playerTeamId).getMember(number)?.onClick();
     }
 
     isFree(gridX, gridY) {
@@ -508,6 +516,10 @@ export class Arena extends Phaser.Scene
 
         this.placeCharacters(data.player.team, true, data.player.teamId);
         this.placeCharacters(data.opponent.team, false, data.opponent.teamId);
+
+        events.on('itemClick', (i) => {
+            console.log('itemClick', i);
+        });
     }
 
     update (time, delta)

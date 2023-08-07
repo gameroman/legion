@@ -6,6 +6,7 @@ interface NetworkInventory {
     quantity: number;
 }
 interface Item {
+    id: number;
     name: string;
     description: string;
     frame: string;
@@ -110,6 +111,7 @@ export class Player extends Phaser.GameObjects.Container {
 
         const items = Array.from(this.inventory.entries()).map(([item, quantity]) => {
             return {
+                id: item.id,
                 name: item.name,
                 description: item.description,
                 frame: item.frame,
@@ -205,6 +207,10 @@ export class Player extends Phaser.GameObjects.Container {
             // @ts-ignore
             this.hud.toggleSwordCursor(false);
         }
+    }
+
+    onLetterKey(keyCode) {
+        console.log('onLetterKey', keyCode);
     }
 
     isTarget() {

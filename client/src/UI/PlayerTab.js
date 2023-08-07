@@ -7,6 +7,7 @@ class PlayerTab extends Component {
     this.state = {
       player: this.props.player,
     };
+    this.events = this.props.eventEmitter;
   }
 
   componentDidMount() {
@@ -45,6 +46,10 @@ class PlayerTab extends Component {
       }
       return prevState;
     });
+  }
+
+  itemClick(index) {
+    this.events.emit('itemClick', index);
   }
 
   render({player}) {
@@ -124,7 +129,7 @@ class PlayerTab extends Component {
                 const startPosition = keyboardLayout.indexOf('Z');
                 const keyBinding = keyboardLayout.charAt(startPosition + i);
                 return (
-                  <div className="item">
+                  <div className="item" onClick={() => this.itemClick(item.id)}>
                     <div 
                       className={isCooldownActive || isDead ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}
                       style={{backgroundImage: `url(assets/items/${item.frame})`, }} />

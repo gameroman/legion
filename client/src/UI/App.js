@@ -29,7 +29,7 @@ class App extends Component {
 
   render() {
     const { playerVisible, player } = this.state;
-    return playerVisible && player ? <PlayerTab player={player} /> : null;
+    return playerVisible && player ? <PlayerTab player={player} eventEmitter={events}/> : null;
   }
 }
 
