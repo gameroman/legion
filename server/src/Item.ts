@@ -1,16 +1,21 @@
 import { ServerPlayer } from "./ServerPlayer";
+import { EffectModifiers } from "./Spell";
 
 export enum Stat {
-    HP
+    HP,
+    SPATK,
+    SPDEF
 }
 
 export interface Effect {
     stat: Stat;
     value: number;
+    modifiers?: EffectModifiers;
 }
 
 export enum Target {
-    SELF
+    SELF,
+    AOE
 }
 
 export interface NetworkItem {
@@ -21,6 +26,7 @@ export interface NetworkItem {
     effects: NetworkItemEffect[];
     target: string;
     cooldown: number;
+    // animation: string;
 }
 
 interface NetworkItemEffect {
@@ -36,9 +42,10 @@ export class Item {
     effects: Effect[];
     target: Target;
     cooldown: number;
+    animation: string;
 
     constructor(
-        id: number, name: string, description: string, frame: string, 
+        id: number, name: string, description: string, frame: string, animation: string,
         cooldown: number, target: Target, effects: Effect[]
     ) {
         this.id = id;
@@ -48,6 +55,7 @@ export class Item {
         this.target = target;
         this.effects = effects;
         this.cooldown = cooldown;
+        this.animation = animation;
     }
 
     getNetworkData(): NetworkItem {
@@ -64,7 +72,8 @@ export class Item {
             'description': this.description,
             'effects': effects,
             'target': Target[this.target],
-            'cooldown': this.cooldown
+            'cooldown': this.cooldown,
+            // 'animation': this.animation
         }
     }
 

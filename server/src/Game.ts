@@ -209,6 +209,7 @@ export abstract class Game
         this.broadcast('useitem', {
             team: team.id,
             num,
+            animation: item.animation,
         });
 
         if (hp != _hp) {

@@ -5,7 +5,7 @@ export class HealthBar extends Phaser.GameObjects.Container {
   private readonly hpBar: RoundRectangle;
   private hpValue: number;
 
-  constructor(scene: Phaser.Scene, x: number, y: number) {
+  constructor(scene: Phaser.Scene, x: number, y: number, color: number) {
     super(scene, x, y);
 
     const width = 50;
@@ -24,7 +24,7 @@ export class HealthBar extends Phaser.GameObjects.Container {
     this.hpBar = new RoundRectangle(scene, {
       x: this.barBackground.getTopLeft().x,
       y: this.barBackground.getTopLeft().y,
-      color: 0x00ff08,
+      color: color,
       strokeColor: 0x000000,
       strokeWidth: 1,
       radius: radius,

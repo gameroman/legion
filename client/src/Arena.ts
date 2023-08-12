@@ -62,6 +62,7 @@ export class Arena extends Phaser.Scene
         for (let key in this.assetsMap) {
             this.load.spritesheet(key, this.assetsMap[key], frameConfig);
         }
+        this.load.spritesheet('potion_heal', 'assets/animations/potion_heal.png', { frameWidth: 48, frameHeight: 64});
         // this.load.audio('click', 'assets/click_2.wav');
         this.load.text('grayScaleShader', 'assets/grayscale.glsl');
     }
@@ -376,9 +377,9 @@ export class Arena extends Phaser.Scene
         player.setHP(hp);
     }
 
-    processUseItem({team, num}) {
+    processUseItem({team, num, animation}) {
         const player = this.getPlayer(team, num);
-        player.useItemAnimation();
+        player.useItemAnimation(animation);
     }
 
     createAnims() {
@@ -436,6 +437,12 @@ export class Arena extends Phaser.Scene
                 frameRate: 10, // Number of frames per second
             });
         }, this);
+
+        this.anims.create({
+            key: `potion_heal`, // The name of the animation
+            frames: this.anims.generateFrameNumbers('potion_heal'), 
+            frameRate: 10, // Number of frames per second
+        });
     }
 
     gridToPixelCoords(gridX, gridY) {
@@ -451,7 +458,11 @@ export class Arena extends Phaser.Scene
 
             const {x, y} = this.gridToPixelCoords(character.x, character.y);
 
-            const player = new Player(this, character.x, character.y, x, y, i + 1, character.frame, isPlayer, character.hp);
+            const player = new Player(
+                this, character.x, character.y, x, y,
+                i + 1, character.frame, isPlayer,
+                character.hp, character.mp
+                );
             
             if (isPlayer) {
                 player.setDistance(character.distance);

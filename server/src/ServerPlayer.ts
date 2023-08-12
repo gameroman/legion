@@ -10,9 +10,13 @@ export class ServerPlayer {
     team: Team | null = null;
     hp;
     maxHP;
+    mp;
+    maxMP;
     distance;
     atk;
     def;
+    spatk;
+    spdef;
     cooldowns;
     cooldown: number = 0;
     cooldownTimer: NodeJS.Timeout | null = null;
@@ -26,9 +30,14 @@ export class ServerPlayer {
         this.y = y;
         this.maxHP = 100;
         this.hp = this.maxHP;
+        this.maxMP = 20;
+        this.mp = this.maxMP;
         this.distance = 3;
-        this.atk = 10;
-        this.def = 10;
+        // Random number between 8 and 12
+        this.atk = Math.floor(Math.random() * 5) + 8;
+        this.def = Math.floor(Math.random() * 5) + 8;
+        this.spatk = Math.floor(Math.random() * 5) + 8;
+        this.spdef = Math.floor(Math.random() * 5) + 8;
         this.cooldowns = {
             'move': 2000,
             'attack': 4000
@@ -53,6 +62,7 @@ export class ServerPlayer {
             'hp': this.maxHP,
         }
         if (includePersonal) {
+            data['mp'] = this.maxMP;
             data['distance'] = this.distance;
             data['cooldown'] = this.cooldown;
             data['inventory'] = this.getNetworkInventory();
@@ -161,6 +171,7 @@ interface playerNetworkData {
     x: number;
     y: number;
     hp: number;
+    mp?: number;
     distance?: number;
     cooldown?: number;
     inventory?: NetworkInventory[];

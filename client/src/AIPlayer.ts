@@ -6,8 +6,8 @@ export class AIPlayer extends Player {
         gridX: number, gridY: number,
         x: number, y: number, 
         num: number, texture: string, isPlayer: boolean,
-        hp: number
+        hp: number, mp: number
     ) {
-            super(scene, gridX, gridY, x, y, num, texture, isPlayer, hp);
+            super(scene, gridX, gridY, x, y, num, texture, isPlayer, hp, mp);
     }
 }

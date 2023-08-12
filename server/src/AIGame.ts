@@ -30,6 +30,8 @@ export class AIGame extends Game {
                 // Set quantity to random between 0 and 2
                 const qty = Math.floor(Math.random() * 3);
                 if (qty) player.addItem(potion, qty);
+
+                
             }, this);
         }, this);
     }

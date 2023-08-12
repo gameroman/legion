@@ -36,15 +36,22 @@ export class Player extends Phaser.GameObjects.Container {
     baseSquare: Phaser.GameObjects.Graphics;
     maxHP: number;
     hp: number;
+    mp: number;
     healthBar: HealthBar;
+    MPBar: HealthBar;
     cooldown: CircularProgress;
     cooldownTween: Phaser.Tweens.Tween;
     cooldownDuration: number;
     hurtTween: Phaser.Tweens.Tween;
     canAct: boolean = false;
     inventory: Map<Item, number> = new Map<Item, number>();
+    animationSprite: Phaser.GameObjects.Sprite;
 
-    constructor(scene: Phaser.Scene, gridX: number, gridY: number, x: number, y: number, num: number, texture: string, isPlayer: boolean, hp: number) {
+    constructor(
+        scene: Phaser.Scene, gridX: number, gridY: number, x: number, y: number,
+        num: number, texture: string, isPlayer: boolean,
+        hp: number, mp: number
+        ) {
         super(scene, x, y);
         this.scene = scene;
         this.arena = this.scene.scene.get('Arena');
@@ -81,6 +88,10 @@ export class Player extends Phaser.GameObjects.Container {
             this.cooldown = new CircularProgress(scene, -8, 28, 10, 0x87CEFA).setVisible(false);
             this.add(this.cooldown);
 
+            this.MPBar = new HealthBar(scene, 0, -40, 0x0099ff);
+            this.add(this.MPBar);
+            this.mp = mp;
+
             this.moveTo(this.numKey, 3);
             this.moveTo(this.sprite, 2);
 
@@ -89,11 +100,15 @@ export class Player extends Phaser.GameObjects.Container {
             this.baseSquare.lineStyle(4, 0xff0000); // red color
         }
 
-        this.healthBar = new HealthBar(scene, 0, -40);
+        this.healthBar = new HealthBar(scene, 0, -50, 0x00ff08);
         this.add(this.healthBar);
 
         this.baseSquare.strokeRect(-30, 10, 60, 60); // adjust position and size as needed
         this.baseSquare.setDepth(this.depth - 2);  
+
+        this.animationSprite = scene.add.sprite(0, 0, '').setScale(2).setVisible(false);
+        this.add(this.animationSprite);
+
         // Add the container to the scene
         scene.add.existing(this);
         this.updatePos(gridX, gridY);
@@ -241,8 +256,9 @@ export class Player extends Phaser.GameObjects.Container {
         }
     }
 
-    useItemAnimation() {
+    useItemAnimation(animation) {
         this.playAnim('item', true);
+        this.animationSprite.setVisible(true).play(animation);
     }
 
     useSkill(index) {
