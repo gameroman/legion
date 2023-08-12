@@ -48,8 +48,8 @@ class PlayerTab extends Component {
     });
   }
 
-  itemClick(index) {
-    this.events.emit('itemClick', index);
+  itemClick(letter) {
+    this.events.emit('itemClick', letter);
   }
 
   render({player}) {
@@ -129,33 +129,36 @@ class PlayerTab extends Component {
                 const startPosition = keyboardLayout.indexOf('Z');
                 const keyBinding = keyboardLayout.charAt(startPosition + i);
                 return (
-                  <div className="item" onClick={() => this.itemClick(item.id)}>
+                  <div className="item" onClick={() => this.itemClick(keyBinding)}>
                     <div 
                       className={isCooldownActive || isDead ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}
-                      style={{backgroundImage: `url(assets/items/${item.frame})`, }} />
-                    <span className="item-qty">x{item.quantity}</span>
+                      style={{backgroundImage: item.quantity !== 0 ? `url(assets/items/${item.frame})` : 'none'}}
+                      />
+                    {item.quantity !== 0 && <span className="item-qty">x{item.quantity}</span>}
                     <span className="key-binding">{keyBinding}</span>
                     <div className="info-box box">
                       <div className="info-box-title">{item.name}</div>
                       <div className="info-box-desc">{item.description}</div>
                       {
                         item.effects.map((effect) => {
-                          let className = '';
-                          let stat = '';
-                          switch (effect.stat) {
-                            case 'HP':
-                              stat = 'HP';
-                              className = 'hp';
-                              break;
-                          }
                           return (
                             <div className="hp mini">  
-                            <span className="mp-label">{stat}</span>
+                            <span className="mp-label">{effect.stat}</span>
                             <span className="mp-amount">+{effect.value}</span>
                           </div>
                           );
                         })
                       }
+                      <div class="info-box-extra">
+                        <div className='badge'>
+                          <span className="badge-label">⏳ </span> 
+                          <span>{item.cooldown}s</span>
+                        </div>
+                        <div className='badge'>
+                          <span className="badge-label">🎯 </span> 
+                          <span>{item.target}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )

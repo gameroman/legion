@@ -30,8 +30,8 @@ export class ServerPlayer {
         this.atk = 10;
         this.def = 10;
         this.cooldowns = {
-            'move': 500,
-            'attack': 500
+            'move': 2000,
+            'attack': 4000
         };
         this.setCooldown(this.cooldowns.move);
 
@@ -99,6 +99,13 @@ export class ServerPlayer {
         }
     }
 
+    heal(amount: number) {
+        this.hp += amount;
+        if (this.hp > this.maxHP) {
+            this.hp = this.maxHP;
+        }
+    }
+
     getHP() {
         return this.hp;
     } 
@@ -125,6 +132,27 @@ export class ServerPlayer {
     addItem(item: Item, quantity: number) {
         const currentQuantity = this.inventory.get(item) || 0;
         this.inventory.set(item, currentQuantity + quantity);
+    }
+
+    removeItem(item: Item, quantity: number) {
+        const currentQuantity = this.inventory.get(item) || 0;
+        if (currentQuantity < quantity) {
+            throw new Error(`Cannot remove ${quantity} ${item.name} from player ${this.num} because they only have ${currentQuantity}`);
+        }
+        this.inventory.set(item, currentQuantity - quantity);
+        return this.inventory.get(item);
+    }
+
+    getItemQuantity(item: Item): number {
+        return this.inventory.get(item) || 0;
+    }
+
+    getItemAtIndex(index: number): Item | null {
+        const items = [...this.inventory.keys()];
+        if (index < 0 || index >= items.length) {
+            return null;
+        }
+        return items[index];
     }
 }
 

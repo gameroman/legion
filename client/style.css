@@ -99,7 +99,7 @@ canvas {
 }
 
 .badge {
-    display: flex;
+    display: inline-block;
     align-items: center;
     border: 2px solid black;
     border-radius: 5px;
@@ -240,6 +240,11 @@ canvas {
 .info-box-desc {
     margin-top: 3px;
     font-weight: normal;
+    font-size: 12px;
+}
+
+.info-box-extra {
+    display: flex;
 }
 
 .mini {

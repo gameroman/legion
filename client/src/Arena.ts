@@ -91,6 +91,18 @@ export class Arena extends Phaser.Scene
         this.socket.on('cooldown', (data) => {
             this.processCooldown(data);
         });
+
+        this.socket.on('itemnb', (data) => {
+            this.processItemNb(data);
+        });
+
+        this.socket.on('hpchange', (data) => {
+            this.processHPChange(data);
+        });
+
+        this.socket.on('useitem', (data) => {
+            this.processUseItem(data);
+        });
     }
 
     sendMove(x, y) {
@@ -108,6 +120,15 @@ export class Arena extends Phaser.Scene
             target: player.num,
         };
         this.send('attack', data);
+    }
+
+    sendUseItem(player: Player, index: number) {
+        if (!this.selectedPlayer.canAct) return;
+        const data = {
+            num: this.selectedPlayer.num,
+            index
+        };
+        this.send('useitem', data);
     }
 
     send(channel, data) {
@@ -258,21 +279,34 @@ export class Arena extends Phaser.Scene
         if (!this.selectedPlayer.canMoveTo(gridX, gridY)) return;
         if (!this.isFree(gridX, gridY)) return;
         this.sendMove(gridX, gridY);
-        this.deselectPlayer();
+        this.clearHighlight();
+        // this.deselectPlayer();
+    }
+
+    refreshBox() {
+        if (this.selectedPlayer) {
+            events.emit('showPlayerBox', this.selectedPlayer.getProps());
+        }
     }
 
     emitEvent(event, data?) {
         switch (event) {
             case 'hpChange':
                 if (this.selectedPlayer && data.num === this.selectedPlayer.num) {
-                    events.emit('showPlayerBox', this.selectedPlayer.getProps());
+                    this.refreshBox();
                 }
                 break;
             case 'selectPlayer':
-                if (this.selectedPlayer) events.emit('showPlayerBox', this.selectedPlayer.getProps());
+                this.refreshBox();
                 break;
             case 'deselectPlayer':
                 events.emit('hidePlayerBox');
+                break;
+            case 'inventoryChange':
+                this.refreshBox();
+                break;
+            case 'cooldownEnded':
+                this.refreshBox();
                 break;
             default:
                 break;
@@ -331,6 +365,22 @@ export class Arena extends Phaser.Scene
         player.setCooldown(cooldown);
     }
 
+    processItemNb({num, index, newQuantity}) {
+        const player = this.getPlayer(this.playerTeamId, num);
+        player.updateItemNb(index, newQuantity);
+        this.emitEvent('inventoryChange', {num});
+    }
+
+    processHPChange({team, num, hp}) {
+        const player = this.getPlayer(team, num);
+        player.setHP(hp);
+    }
+
+    processUseItem({team, num}) {
+        const player = this.getPlayer(team, num);
+        player.useItemAnimation();
+    }
+
     createAnims() {
         const assets = ['warrior_1', 'warrior_2', 'warrior_3', 'warrior_4', 'mage_1', 'mage_2']
         // Loop over assets
@@ -366,6 +416,12 @@ export class Arena extends Phaser.Scene
                 key: `${asset}_anim_dodge`, // The name of the animation
                 frames: this.anims.generateFrameNumbers(asset, { frames: [45, 46, 47] }), 
                 frameRate: 10, // Number of frames per second
+            });
+
+            this.anims.create({
+                key: `${asset}_anim_item`, // The name of the animation
+                frames: this.anims.generateFrameNumbers(asset, { frames: [48, 49, 50] }), 
+                frameRate: 5, // Number of frames per second
             });
 
             this.anims.create({
@@ -517,8 +573,8 @@ export class Arena extends Phaser.Scene
         this.placeCharacters(data.player.team, true, data.player.teamId);
         this.placeCharacters(data.opponent.team, false, data.opponent.teamId);
 
-        events.on('itemClick', (i) => {
-            console.log('itemClick', i);
+        events.on('itemClick', (letter) => {
+            this.selectedPlayer?.onLetterKey(letter);
         });
     }
 

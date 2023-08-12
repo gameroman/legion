@@ -127,6 +127,9 @@ export abstract class Game
             case 'attack':
                 this.processAttack(data, team!);
                 break;
+            case 'useitem':
+                this.processUseItem(data, team!);
+                break;
         }
     }
 
@@ -159,7 +162,12 @@ export abstract class Game
         const opponentTeam = this.getOtherTeam(team.id);
         const opponent = opponentTeam.getMembers()[target - 1];
         
-        if (!player.canAct || !player.isNextTo(opponent.x, opponent.y) || !player.isAlive() || !opponent.isAlive()) return;
+        if (
+            !player.canAct || 
+            !player.isNextTo(opponent.x, opponent.y) || 
+            !player.isAlive() || 
+            !opponent.isAlive()
+        ) return;
         
         const damage = this.calculateDamage(player, opponent);
         opponent.dealDamage(damage);
@@ -178,6 +186,48 @@ export abstract class Game
         team.socket?.emit('cooldown', {
             num,
             cooldown,
+        });
+    }
+
+    processUseItem({num, index}: {num: number, index: number}, team: Team) {
+        const player = team.getMembers()[num - 1];
+        if (!player.canAct || !player.isAlive()) return;
+
+        const item = player.getItemAtIndex(index);
+        if (!item) return;
+        if (!player.getItemQuantity(item)) return;
+        
+        const cooldown = item?.cooldown * 1000;
+        player.setCooldown(cooldown);
+
+        const newQuantity = player.removeItem(item, 1);
+        const _hp = player.getHP();
+        item.applyEffect(player);
+        const hp = player.getHP();
+
+        // Add delay
+        this.broadcast('useitem', {
+            team: team.id,
+            num,
+        });
+
+        if (hp != _hp) {
+            this.broadcast('hpchange', {
+                team: team.id,
+                num,
+                hp,
+            });
+        }
+
+        team.socket?.emit('cooldown', {
+            num,
+            cooldown,
+        });
+
+        team.socket?.emit('itemnb', {
+            num,
+            index,
+            newQuantity,
         });
     }
 

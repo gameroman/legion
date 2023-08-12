@@ -11,6 +11,8 @@ interface Item {
     description: string;
     frame: string;
     effects: ItemEffect[];
+    target: string;
+    cooldown: number;
 }
 
 interface ItemEffect {
@@ -111,13 +113,9 @@ export class Player extends Phaser.GameObjects.Container {
 
         const items = Array.from(this.inventory.entries()).map(([item, quantity]) => {
             return {
-                id: item.id,
-                name: item.name,
-                description: item.description,
-                frame: item.frame,
-                effects: item.effects,
+                ...item,
                 quantity: quantity
-            }
+            }    
         });        
 
         return {
@@ -210,7 +208,45 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     onLetterKey(keyCode) {
-        console.log('onLetterKey', keyCode);
+        console.log(`Pressed ${keyCode}`);
+        const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+        const itemsIndex = keyboardLayout.indexOf('Z');
+        const index = keyboardLayout.indexOf(keyCode);
+        if (index <= itemsIndex) {
+            this.useItem(index - itemsIndex);
+        }
+        else {
+            this.useSkill(index);
+        }
+    }
+
+    getItemAtSlot(index) {
+        const entry = Array.from(this.inventory.entries())[index]
+        if (entry) return entry[0];
+        return null;
+    }
+
+    useItem(index) {
+        // console.log(`Using item at slot ${index}`);
+        const item = this.getItemAtSlot(index);
+        if (!item) {
+            console.error(`No item at slot ${index}`);
+            return;
+        }
+        if (item) {
+            if (item.target == 'SELF') {
+                // @ts-ignore
+                this.arena.sendUseItem(this, index);
+            }
+        }
+    }
+
+    useItemAnimation() {
+        this.playAnim('item', true);
+    }
+
+    useSkill(index) {
+    
     }
 
     isTarget() {
@@ -332,12 +368,15 @@ export class Player extends Phaser.GameObjects.Container {
                 this.cooldownDuration = 0;
                 // this.playAnim('idle');
                 if (this.isSelected()) this.displayMovementRange();
+                // @ts-ignore
+                this.arena.emitEvent('cooldownEnded', {num: this.num})
             }
         });
     }
 
     setInventory(inventory: NetworkInventory[]) {
         inventory.forEach(data => {
+            console.log(data.item);
             this.addItem(data.item, data.quantity);
         });
     }
@@ -345,5 +384,10 @@ export class Player extends Phaser.GameObjects.Container {
     addItem(item: Item, quantity: number) {
         const currentQuantity = this.inventory.get(item) || 0;
         this.inventory.set(item, currentQuantity + quantity);
+    }
+
+    updateItemNb(index: number, quantity: number) {
+        const item = this.getItemAtSlot(index);
+        this.inventory.set(item, quantity);
     }
 }
