@@ -76,6 +76,7 @@ export class Player extends Phaser.GameObjects.Container {
     animationSprite: Phaser.GameObjects.Sprite;
     pendingSkill: number | null = null;
     casting: boolean = false;
+    selected: boolean = false;
 
     constructor(
         scene: Phaser.Scene, gridX: number, gridY: number, x: number, y: number,
@@ -138,6 +139,7 @@ export class Player extends Phaser.GameObjects.Container {
         this.baseSquare.setDepth(this.depth - 2);  
 
         this.animationSprite = scene.add.sprite(0, 20, '').setScale(2).setVisible(false);
+        this.animationSprite.on('animationcomplete', () => this.animationSprite.setVisible(false), this);
         this.add(this.animationSprite);
 
         // Add the container to the scene
@@ -199,14 +201,40 @@ export class Player extends Phaser.GameObjects.Container {
         }
     }
 
+    checkHeartbeat() {
+        if (this.getHPpct() < 0.3 && this.isAlive()) {
+            // @ts-ignore
+            this.arena.playSound('heart', 1, true);
+        } else {
+            // @ts-ignore
+            this.arena.stopSound('heart');
+        }
+    }
+
     toggleSelect() {
-        this.selectionOval.setVisible(!this.selectionOval.visible);
-        // @ts-ignore
+        if (this.isSelected()) {
+            this.deselect();
+        } else {
+            this.select();
+        }
+    }
+
+    select() {
+        this.selectionOval.setVisible(true);
         this.displayMovementRange();
+        this.selected = true;
+
+        this.checkHeartbeat();
+    }
+
+    deselect() {
+        this.selectionOval.setVisible(false);
+        this.hideMovementRange();
+        this.selected = false;
     }
 
     isSelected() {
-        return this.selectionOval.visible;
+        return this.selected;
     }
 
     displayMovementRange() {
@@ -241,13 +269,16 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     onPointerOut() {
-        if(!this.isPlayer) {
+        // @ts-ignore
+        if(!this.isPlayer && this.arena.selectedPlayer?.pendingSkill == null) {
             // @ts-ignore
-            this.hud.toggleCursor(false);
+            this.hud.toggleCursor(false, 'scroll');
         }
     }
 
     onClick() {
+        // @ts-ignore
+        this.arena.playSound('click');
         if (this.isPlayer) { // If clicking on a player of your team
             // @ts-ignore
             this.arena.selectPlayer(this);
@@ -261,6 +292,8 @@ export class Player extends Phaser.GameObjects.Container {
 
     onLetterKey(keyCode) {
         console.log(`Pressed ${keyCode}`);
+        // @ts-ignore
+        this.arena.playSound('click');
         const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
         const itemsIndex = keyboardLayout.indexOf('Z');
         const index = keyboardLayout.indexOf(keyCode);
@@ -284,6 +317,11 @@ export class Player extends Phaser.GameObjects.Container {
             console.error(`No item at slot ${index}`);
             return;
         }
+        if (!this.canAct()) {
+            // @ts-ignore
+            this.arena.playSound('nope', 0.2);
+            return;
+        }
         if (item) {
             if (item.target == 'SELF') {
                 // @ts-ignore
@@ -294,7 +332,7 @@ export class Player extends Phaser.GameObjects.Container {
 
     useItemAnimation(animation: string, name: string) {
         this.playAnim('item', true);
-        this.animationSprite.setVisible(true).play(animation);
+        this.playSuperimposedAnim(animation);
         this.displayOverheadText(name, 4000, '#fff');
     }
 
@@ -317,7 +355,6 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     useSkill(index) {
-        if (!this.canAct()) return;
         const spell = this.spells[index];
         if (!spell) {
             console.error(`No skill at slot ${index}`);
@@ -328,7 +365,12 @@ export class Player extends Phaser.GameObjects.Container {
             return;
         }
 
-        if (spell.cost > this.mp) return;
+        if (!this.canAct() || spell.cost > this.mp) {
+            console.log('nope');
+            // @ts-ignore
+            this.arena.playSound('nope', 0.2);
+            return;
+        }
 
         if (spell.target == 'AOE') {
             this.pendingSkill = index;
@@ -374,6 +416,8 @@ export class Player extends Phaser.GameObjects.Container {
             this.hurt();   
         }
 
+        if(this.isSelected()) this.checkHeartbeat();
+
         if (this.hp <= 0) {
             this.die();
         } else {
@@ -384,6 +428,10 @@ export class Player extends Phaser.GameObjects.Container {
             // @ts-ignore
             this.arena.emitEvent('hpChange', {num: this.num})
         }
+    }
+
+    getHPpct() {
+        return this.hp / this.maxHP;
     }
 
     setMP(mp) {
@@ -448,6 +496,22 @@ export class Player extends Phaser.GameObjects.Container {
 
     displayDamage(damage) {
         this.displayOverheadText(damage, 2000, '#fff');
+    }
+
+    displaySlash(attacker) {
+        this.playSuperimposedAnim('slash');
+        this.animationSprite.flipX = attacker.gridX > this.gridX;
+    }
+
+    playSuperimposedAnim(name) {
+        // @ts-ignore
+        if (this.arena.animationScales[name]) {
+            // @ts-ignore
+            this.animationSprite.setScale(this.arena.animationScales[name]);
+        } else {
+            this.animationSprite.setScale(2);
+        }
+        this.animationSprite.setVisible(true).play(name);
     }
 
     // Function to toggle grayscale shader for a given sprite

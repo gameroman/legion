@@ -56,7 +56,6 @@ export class AIServerPlayer extends ServerPlayer {
     }
 
     takeAction() {
-        return;
         if (!this.canAct()) return;
 
         // Opportunist: attacks if adjacent, otherwise moves towards closest enemy

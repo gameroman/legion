@@ -99,6 +99,8 @@ export class Arena extends Phaser.Scene
     gridWidth = 20;
     gridHeight = 9;
     server;
+    animationScales;
+    SFX;
 
     assetsMap = {
         'warrior_1': 'assets/sprites/1_1.png',
@@ -119,6 +121,7 @@ export class Arena extends Phaser.Scene
         
         this.load.image('bg',  '/assets/aarena_bg.png');
         this.load.image('killzone',  '/assets/killzone.png');
+        this.load.image('spark',  '/assets/spark.png');
         // this.load.svg('pop', 'assets/pop.svg',  { width: 24, height: 24 } );
         const frameConfig = { frameWidth: 144, frameHeight: 144};
         // Iterate over assetsMap and load spritesheets
@@ -128,8 +131,14 @@ export class Arena extends Phaser.Scene
         this.load.spritesheet('potion_heal', 'assets/animations/potion_heal.png', { frameWidth: 48, frameHeight: 64});
         this.load.spritesheet('explosion', 'assets/animations/explosion.png', { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('cast', 'assets/animations/cast.png', { frameWidth: 48, frameHeight: 64});
-        // this.load.audio('click', 'assets/click_2.wav');
-        this.load.text('grayScaleShader', 'assets/grayscale.glsl');
+        this.load.spritesheet('slash', 'assets/animations/slash.png', { frameWidth: 96, frameHeight: 96});
+        // this.load.text('grayScaleShader', 'assets/grayscale.glsl');
+
+        this.load.audio('click', 'assets/sfx/click_2.wav');
+        this.load.audio('slash', 'assets/sfx/swish_2.wav');
+        this.load.audio('steps', 'assets/sfx/steps.wav');
+        this.load.audio('nope', 'assets/sfx/nope.wav');
+        this.load.audio('heart', 'assets/sfx/heart.wav');
     }
 
     connectToServer() {
@@ -351,6 +360,8 @@ export class Arena extends Phaser.Scene
                 // Get the letter corresponding to the keyCode
                 const letter = String.fromCharCode(event.keyCode);
                 this.selectedPlayer?.onLetterKey(letter);
+                // Play sound
+                this.sound.play('click');
             }
         }
     }
@@ -375,6 +386,7 @@ export class Arena extends Phaser.Scene
     handleMove(gridX, gridY) {
         if (!this.selectedPlayer.canMoveTo(gridX, gridY)) return;
         if (!this.isFree(gridX, gridY)) return;
+        this.playSound('click');
         this.sendMove(gridX, gridY);
         this.clearHighlight();
     }
@@ -418,14 +430,13 @@ export class Arena extends Phaser.Scene
     selectPlayer(player: Player) {
         if (this.selectedPlayer) this.deselectPlayer();
         this.selectedPlayer = player;
-        this.selectedPlayer.toggleSelect();
+        this.selectedPlayer.select();
         this.emitEvent('selectPlayer', {num: this.selectedPlayer.num})
     }
 
     deselectPlayer() {
-        console.log('deselecting player');
         if (this.selectedPlayer) {
-            this.selectedPlayer.toggleSelect();
+            this.selectedPlayer.deselect();
             this.selectedPlayer.cancelSkill();
             this.selectedPlayer = null;
             this.clearHighlight();
@@ -449,15 +460,18 @@ export class Arena extends Phaser.Scene
         this.gridMap[this.serializeCoords(tile.x, tile.y)] = player;
 
         player.walkTo(tile.x, tile.y, x, y);
+        this.playSoundMultipleTimes('steps', 2);
     }
 
     processAttack({team, target, num, damage, hp}) {
         const player = this.getPlayer(team, num);
         const otherTeam = this.getOtherTeam(team);
         const targetPlayer = this.getPlayer(otherTeam, target);
+        this.playSound('slash');
         player.attack(targetPlayer);
         targetPlayer.setHP(hp);
         targetPlayer.displayDamage(damage);
+        targetPlayer.displaySlash(player);
     }
 
     processCooldown({num, cooldown}) {
@@ -493,11 +507,42 @@ export class Arena extends Phaser.Scene
         if (flag) this.displaySpellArea(location, delay);
     }
 
-    processLocalAnimation({x, y, animation}) {
+    processLocalAnimation({x, y, animation, shake}) {
         // Convert x and y in grid coords to pixels
         const {x: pixelX, y: pixelY} = this.gridToPixelCoords(x, y);
         this.localAnimationSprite.setPosition(pixelX, pixelY).setVisible(true).setDepth(3 + y/10).play(animation);
+        if (shake) this.cameras.main.shake(250, 0.01); // More intense shake
     }
+
+    createSounds() {
+        this.SFX = {};
+        const sounds = ['click', 'slash', 'steps', 'nope', 'heart']
+        sounds.forEach((sound) => {
+            this.SFX[sound] = this.sound.add(sound);
+        })
+    }
+
+    playSound(name, volume = 1, loop = false) {
+        this.SFX[name].play({volume, loop});
+    }
+
+    stopSound(name) {
+        this.SFX[name].stop();
+    }
+
+    playSoundMultipleTimes(key, times) {
+        if(times <= 0) return;
+    
+        const sound = this.SFX[key];
+    
+        sound.once('complete', () => {
+            // sound.destroy(); // Destroy the sound instance once done playing
+            this.playSoundMultipleTimes(key, times - 1); // Play the sound again
+        });
+    
+        sound.play();
+    }
+    
 
     createAnims() {
         const assets = ['warrior_1', 'warrior_2', 'warrior_3', 'warrior_4', 'mage_1', 'mage_2']
@@ -579,6 +624,16 @@ export class Arena extends Phaser.Scene
             frameRate: 15, // Number of frames per second
             repeat: -1
         });
+
+        this.anims.create({
+            key: `slash`, // The name of the animation
+            frames: this.anims.generateFrameNumbers('slash', { frames: [99, 100, 101, 102] }), 
+            frameRate: 15, // Number of frames per second
+        });
+
+        this.animationScales = {
+            'slash': 1,
+        }
     }
 
     gridToPixelCoords(gridX, gridY) {
@@ -691,6 +746,7 @@ export class Arena extends Phaser.Scene
     {
         this.drawGrid();
         this.createAnims();
+        this.createSounds();
         this.connectToServer();
 
         let grayScaleShader = this.cache.text.get('grayScaleShader');

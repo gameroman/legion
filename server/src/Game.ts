@@ -289,6 +289,7 @@ export abstract class Game
                 x,
                 y,
                 animation: spell.animation,
+                shake: spell.shake,
             });
 
             team.socket?.emit('cooldown', {
