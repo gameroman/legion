@@ -10,6 +10,7 @@ export class ServerPlayer {
     y;
     team: Team | null = null;
     _hp: number = 0;
+    _mp: number = 0;
     hp;
     maxHP;
     mp;
@@ -146,10 +147,24 @@ export class ServerPlayer {
         return this._hp !== this.hp;
     }
 
+    MPHasChanged() {
+        return this._mp !== this.mp;
+    }
+
     consumeMP(amount: number) {
+        this._mp = this.mp;
         this.mp -= amount;
         if (this.mp < 0) {
             this.mp = 0;
+        }
+        return this.mp;
+    }
+
+    restoreMP(amount: number) {
+        this._mp = this.mp;
+        this.mp += amount;
+        if (this.mp > this.maxMP) {
+            this.mp = this.maxMP;
         }
         return this.mp;
     }

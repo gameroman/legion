@@ -23,6 +23,7 @@ export class AIGame extends Game {
         this.teams.get(2)?.addMember(new AIServerPlayer(3, 'warrior_4', 1, 6));
 
         const potion = items[0];
+        const ether = items[1];
         const fireball = spells[0];
 
         // Iterate over teams
@@ -30,8 +31,11 @@ export class AIGame extends Game {
             // Iterate over members
             team.getMembers().forEach(player => {
                 // Set quantity to random between 0 and 2
-                const qty = Math.floor(Math.random() * 3);
+                let qty = Math.floor(Math.random() * 3);
                 if (qty) player.addItem(potion, qty);
+
+                qty = Math.floor(Math.random() * 3);
+                if (qty) player.addItem(ether, qty);
 
                 player.addSpell(fireball);
             }, this);

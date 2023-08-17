@@ -3,6 +3,7 @@ import { EffectModifiers } from "./Spell";
 
 export enum Stat {
     HP,
+    MP,
     ATK,
     DEF,
     SPATK,
@@ -84,6 +85,9 @@ export class Item {
             switch (effect.stat) {
                 case Stat.HP:
                     target.heal(effect.value);
+                    break;
+                case Stat.MP:
+                    target.restoreMP(effect.value);
                     break;
             }
         });

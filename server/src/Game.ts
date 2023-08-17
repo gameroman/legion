@@ -226,11 +226,11 @@ export abstract class Game
         });
 
         if (player.HPHasChanged()) {
-            this.broadcast('hpchange', {
-                team: team.id,
-                num,
-                hp,
-            });
+            this.broadcastHPchange(team, num, hp);
+        }
+
+        if (player.MPHasChanged()) {
+            this.emitMPchange(team, num, player.getMP());
         }
 
         team.socket?.emit('cooldown', {
@@ -269,10 +269,7 @@ export abstract class Game
             delay: spell.castTime,
         });
 
-        team.socket?.emit('mpchange', {
-            num,
-            mp,
-        });
+        this.emitMPchange(team, num, mp);
 
         // Display danger zone
 
@@ -284,12 +281,7 @@ export abstract class Game
 
             targets.forEach(target => {
                 if (target.HPHasChanged()) {
-                    this.broadcast('hpchange', {
-                        team: target.team!.id,
-                        num: target.num,
-                        hp: target.getHP(),
-                        damage: target.getHPDelta(),
-                    });
+                    this.broadcastHPchange(target.team!, target.num, target.getHP(), target.getHPDelta());
                 }
             });            
             
@@ -309,6 +301,22 @@ export abstract class Game
                 num
             });
         }, spell.castTime * 1000);
+    }
+
+    broadcastHPchange(team: Team, num: number, hp: number, damage?: number) {
+        this.broadcast('hpchange', {
+            team: team.id,
+            num,
+            hp,
+            damage
+        });
+    }
+
+    emitMPchange(team: Team, num: number, mp: number) {
+        team.socket?.emit('mpchange', {
+            num,
+            mp,
+        });
     }
 
     listAdjacentEnemies(player: ServerPlayer): ServerPlayer[] {
