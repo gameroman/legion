@@ -2,26 +2,7 @@
 import { io } from 'socket.io-client';
 import { Player } from './Player';
 import { App, events } from './UI/App';
-class Team {
-    id: number;
-    members: Player[] = [];
-
-    constructor(number: number) {
-        this.id = number;
-    }   
-
-    addMember(player: Player) {
-        this.members.push(player);
-    }
-
-    getMember(num: number) {
-        return this.members[num - 1];
-    }
-
-    getMembers(): Player[] {
-        return this.members;
-    }
-}
+import { Team } from './Team';
 
 class CellsHighlight extends Phaser.GameObjects.Graphics {
     size: number;
@@ -82,6 +63,70 @@ class CellsHighlight extends Phaser.GameObjects.Graphics {
         this.lastY = gridY;
     }
 }
+
+class SoundManager {
+    scene: Phaser.Scene;
+    currentSound;
+    intensity = 0;
+    scheduledIntensity = null;
+
+    constructor(scene) {
+        this.scene = scene;
+        this.currentSound = null;
+    }
+
+    playBeginning() {
+        this.currentSound = this.scene.sound.add('bgm_start');
+        this.currentSound.once('complete', () => this.playLoop(1), this);
+        this.currentSound.play();
+    }
+
+    playLoop(intensity = 1) {
+        // If trying to switch to the same intensity, do nothing.
+        if (this.intensity == intensity) return;
+        console.log(`Requiring intensity ${intensity}`);
+
+        // If there's a sound already playing, schedule the next one
+        if (this.currentSound && this.currentSound.isPlaying) {
+            this.scheduledIntensity = intensity; // mark the desired intensity
+            this.currentSound.once('complete', this.switchLoop, this); // schedule the switch
+        } else {
+            // No sound is currently playing, so just play the desired intensity
+            this.switchToIntensity(intensity);
+        }
+    }
+
+    switchLoop() {
+        if (this.scheduledIntensity !== null) {
+            this.switchToIntensity(this.scheduledIntensity);
+            this.scheduledIntensity = null; // reset the scheduled intensity
+        } else {
+            this.currentSound.play(); // If nothing is scheduled, replay the loop
+        }
+    }
+
+    switchToIntensity(intensity) {
+        this.intensity = intensity;
+        if (this.currentSound && this.currentSound.isPlaying) {
+            this.currentSound.stop();
+        }
+        this.currentSound = this.scene.sound.add(`bgm_loop_${intensity}`);
+        this.currentSound.setLoop(true);
+        this.currentSound.once('complete', this.switchLoop, this); // This ensures that we're always ready to switch or loop after completion
+        this.currentSound.play();
+    }
+
+    playEnd() {
+        if (this.currentSound && this.currentSound.isPlaying) {
+            this.currentSound.once('complete', () => {
+                this.currentSound = this.scene.sound.add('bgm_end');
+                this.currentSound.play();
+            });
+        }
+    }
+}
+
+
 export class Arena extends Phaser.Scene
 {
     app;
@@ -101,6 +146,7 @@ export class Arena extends Phaser.Scene
     server;
     animationScales;
     SFX;
+    soundManager: SoundManager;
 
     assetsMap = {
         'warrior_1': 'assets/sprites/1_1.png',
@@ -139,6 +185,15 @@ export class Arena extends Phaser.Scene
         this.load.audio('steps', 'assets/sfx/steps.wav');
         this.load.audio('nope', 'assets/sfx/nope.wav');
         this.load.audio('heart', 'assets/sfx/heart.wav');
+        this.load.audio('cooldown', 'assets/sfx/cooldown.wav');
+        this.load.audio('fireball', 'assets/sfx/fireball.wav');
+        this.load.audio('healing', 'assets/sfx/healing.wav');
+        this.load.audio('cast', 'assets/sfx/curse.ogg');
+
+        const bgm_pieces = ['bgm_start', 'bgm_loop_1', 'bgm_loop_2'];
+        for (let i = 0; i < bgm_pieces.length; i++) {
+            this.load.audio(bgm_pieces[i], `assets/music/${bgm_pieces[i]}.wav`);
+        }
     }
 
     connectToServer() {
@@ -374,7 +429,7 @@ export class Arena extends Phaser.Scene
     handleTileClick(gridX, gridY) {
         console.log(`Clicked tile at grid coordinates (${gridX}, ${gridY})`);
         const player = this.gridMap[this.serializeCoords(gridX, gridY)];
-        if (this.selectedPlayer?.pendingSkill !== null) {
+        if (this.selectedPlayer?.pendingSkill != null) {
             this.sendSkill(gridX, gridY);
         } else if (this.selectedPlayer && !player) {
             this.handleMove(gridX, gridY);
@@ -496,9 +551,10 @@ export class Arena extends Phaser.Scene
         player.setMP(mp);
     }
 
-    processUseItem({team, num, animation, name}) {
+    processUseItem({team, num, animation, name, sfx}) {
         const player = this.getPlayer(team, num);
         player.useItemAnimation(animation, name);
+        this.playSound(sfx);
     }
 
     processCast(flag, {team, num, name, location, delay}) {
@@ -507,23 +563,25 @@ export class Arena extends Phaser.Scene
         if (flag) this.displaySpellArea(location, delay);
     }
 
-    processLocalAnimation({x, y, animation, shake}) {
+    processLocalAnimation({x, y, animation, shake, sfx}) {
         // Convert x and y in grid coords to pixels
         const {x: pixelX, y: pixelY} = this.gridToPixelCoords(x, y);
         this.localAnimationSprite.setPosition(pixelX, pixelY).setVisible(true).setDepth(3 + y/10).play(animation);
+        this.playSound(sfx);
         if (shake) this.cameras.main.shake(250, 0.01); // More intense shake
     }
 
     createSounds() {
         this.SFX = {};
-        const sounds = ['click', 'slash', 'steps', 'nope', 'heart']
+        const sounds = ['click', 'slash', 'steps', 'nope', 'heart', 'cooldown', 'fireball','healing', 'cast']
         sounds.forEach((sound) => {
             this.SFX[sound] = this.sound.add(sound);
         })
     }
 
     playSound(name, volume = 1, loop = false) {
-        this.SFX[name].play({volume, loop});
+        // this.SFX[name].play({volume, loop});
+        this.SFX[name].play({delay: 0});
     }
 
     stopSound(name) {
@@ -590,7 +648,7 @@ export class Arena extends Phaser.Scene
             this.anims.create({
                 key: `${asset}_anim_hurt`, // The name of the animation
                 frames: this.anims.generateFrameNumbers(asset, { frames: [42, 43, 44] }), 
-                frameRate: 10, // Number of frames per second
+                frameRate: 5, // Number of frames per second
             });
 
             this.anims.create({
@@ -643,14 +701,14 @@ export class Arena extends Phaser.Scene
         };
     }
 
-    placeCharacters(data, isPlayer, teamId) {
+    placeCharacters(data, isPlayer, team: Team) {
         data.forEach((character, i) => {
             if (isPlayer) console.log(character);
 
             const {x, y} = this.gridToPixelCoords(character.x, character.y);
 
             const player = new Player(
-                this, character.x, character.y, x, y,
+                this, team, character.x, character.y, x, y,
                 i + 1, character.frame, isPlayer,
                 character.hp, character.mp
                 );
@@ -664,7 +722,7 @@ export class Arena extends Phaser.Scene
 
             this.gridMap[this.serializeCoords(character.x, character.y)] = player;
 
-            this.playersMap.get(teamId)?.addMember(player);
+            team.addMember(player);
         }, this);
     }
 
@@ -762,6 +820,10 @@ export class Arena extends Phaser.Scene
         this.localAnimationSprite.on('animationcomplete', () => this.localAnimationSprite.setVisible(false), this);
 
         this.input.mouse.disableContextMenu();
+
+        this.soundManager = new SoundManager(this);
+        // this.soundManager.playBeginning();
+
     }
 
     createHUD() {
@@ -798,11 +860,11 @@ export class Arena extends Phaser.Scene
             console.error('Player team id is undefined');
         }
 
-        this.playersMap.set(1, new Team(1));
-        this.playersMap.set(2, new Team(2));
+        this.playersMap.set(data.player.teamId, new Team(this, data.player.teamId));
+        this.playersMap.set(data.opponent.teamId, new Team(this, data.opponent.teamId));
 
-        this.placeCharacters(data.player.team, true, data.player.teamId);
-        this.placeCharacters(data.opponent.team, false, data.opponent.teamId);
+        this.placeCharacters(data.player.team, true, this.playersMap.get(data.player.teamId));
+        this.placeCharacters(data.opponent.team, false, this.playersMap.get(data.opponent.teamId));
 
         events.on('itemClick', (letter) => {
             this.selectedPlayer?.onLetterKey(letter);

@@ -38,7 +38,7 @@ export class ServerPlayer {
         this.mp = this.maxMP;
         this.distance = 3;
         // Random number between 8 and 12
-        this.atk = Math.floor(Math.random() * 5) + 8;
+        this.atk = Math.floor(Math.random() * 5) + 8 + 20;
         this.def = Math.floor(Math.random() * 5) + 8;
         this.spatk = Math.floor(Math.random() * 5) + 8;
         this.spdef = Math.floor(Math.random() * 5) + 8;

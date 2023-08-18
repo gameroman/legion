@@ -84,8 +84,9 @@ export class Spell {
     cooldown;
     castTime;
     shake;
-
-    constructor(id: number, name: string, description: string, frame: string, animation: string,
+    sfx;
+    
+    constructor(id: number, name: string, description: string, frame: string, sfx: string, animation: string,
         cooldown: number, castTime: number, cost: number, target: Target, size: number, effects: Effect[],
         shake: boolean = false) {
         this.id = id;
@@ -100,6 +101,7 @@ export class Spell {
         this.size = size;
         this.cooldown = cooldown;
         this.shake = shake;
+        this.sfx = sfx;
     }
 
     getNetworkData(): NetworkSpell {

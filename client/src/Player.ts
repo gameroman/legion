@@ -1,5 +1,6 @@
 import { HealthBar } from "./HealthBar";
 import { CircularProgress } from "./CircularProgress";
+import { Team } from './Team';
 
 interface NetworkInventory {
     item: Item;
@@ -77,9 +78,11 @@ export class Player extends Phaser.GameObjects.Container {
     pendingSkill: number | null = null;
     casting: boolean = false;
     selected: boolean = false;
+    HURT_THRESHOLD: number = 0.5;
+    team: Team;
 
     constructor(
-        scene: Phaser.Scene, gridX: number, gridY: number, x: number, y: number,
+        scene: Phaser.Scene, team: Team, gridX: number, gridY: number, x: number, y: number,
         num: number, texture: string, isPlayer: boolean,
         hp: number, mp: number
         ) {
@@ -88,6 +91,7 @@ export class Player extends Phaser.GameObjects.Container {
         this.arena = this.scene.scene.get('Arena');
         this.hud = this.scene.scene.get('HUD');
 
+        this.team = team;
         this.texture = texture;
         this.isPlayer = isPlayer;
         this.distance = 2;
@@ -196,13 +200,13 @@ export class Player extends Phaser.GameObjects.Container {
     playAnim(key: string, revertToIdle = false) {
         this.sprite.play(`${this.texture}_anim_${key}`);
         if (revertToIdle) {
-            const idleAnim = this.hp / this.maxHP < 0.5 ? 'idle_hurt' : 'idle';
+            const idleAnim = this.hp / this.maxHP < this.HURT_THRESHOLD ? 'idle_hurt' : 'idle';
             this.sprite.once('animationcomplete', () => this.playAnim(idleAnim), this);
         }
     }
 
     checkHeartbeat() {
-        if (this.getHPpct() < 0.3 && this.isAlive()) {
+        if (this.getHPpct() < this.HURT_THRESHOLD  && this.isAlive()) {
             // @ts-ignore
             this.arena.playSound('heart', 1, true);
         } else {
@@ -341,9 +345,13 @@ export class Player extends Phaser.GameObjects.Container {
             this.playAnim('cast', false);
             this.animationSprite.setVisible(true).play('cast');
             this.displayOverheadText(name, 4000, '#fff');
+            // @ts-ignore
+            this.arena.playSound('cast', 1, true);
         } else {
             this.playAnim('idle');
             this.animationSprite.setVisible(false);
+            // @ts-ignore
+            this.arena.stopSound('cast');
         }
         this.casting = flag;
     }
@@ -427,6 +435,7 @@ export class Player extends Phaser.GameObjects.Container {
         if(this.hp != _hp) {
             // @ts-ignore
             this.arena.emitEvent('hpChange', {num: this.num})
+            this.team.updateHP();
         }
     }
 
@@ -547,6 +556,8 @@ export class Player extends Phaser.GameObjects.Container {
                 if (this.isSelected()) this.displayMovementRange();
                 // @ts-ignore
                 this.arena.emitEvent('cooldownEnded', {num: this.num})
+                // @ts-ignore
+                if (this.selected) this.arena.playSound('cooldown');
             }
         });
     }

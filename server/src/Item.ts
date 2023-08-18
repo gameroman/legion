@@ -46,9 +46,10 @@ export class Item {
     target: Target;
     cooldown: number;
     animation: string;
+    sfx: string;
 
     constructor(
-        id: number, name: string, description: string, frame: string, animation: string,
+        id: number, name: string, description: string, frame: string, sfx: string, animation: string,
         cooldown: number, target: Target, effects: Effect[]
     ) {
         this.id = id;
@@ -59,6 +60,7 @@ export class Item {
         this.effects = effects;
         this.cooldown = cooldown;
         this.animation = animation;
+        this.sfx = sfx;
     }
 
     getNetworkData(): NetworkItem {
@@ -89,6 +91,17 @@ export class Item {
                 case Stat.MP:
                     target.restoreMP(effect.value);
                     break;
+            }
+        });
+    }
+
+    effectsAreApplicable(target: ServerPlayer) {
+        return this.effects.every(effect => {
+            switch (effect.stat) {
+                case Stat.HP:
+                    return target.hp + effect.value <= target.maxHP;
+                case Stat.MP:
+                    return target.mp + effect.value <= target.maxMP;
             }
         });
     }

@@ -22,20 +22,18 @@ export class AIGame extends Game {
         this.teams.get(2)?.addMember(new AIServerPlayer(2, 'mage_2', 1, 2));
         this.teams.get(2)?.addMember(new AIServerPlayer(3, 'warrior_4', 1, 6));
 
-        const potion = items[0];
-        const ether = items[1];
         const fireball = spells[0];
 
         // Iterate over teams
         this.teams.forEach(team => {
             // Iterate over members
             team.getMembers().forEach(player => {
-                // Set quantity to random between 0 and 2
-                let qty = Math.floor(Math.random() * 3);
-                if (qty) player.addItem(potion, qty);
-
-                qty = Math.floor(Math.random() * 3);
-                if (qty) player.addItem(ether, qty);
+                // Iterate from 0 to 5
+                for (let i = 0; i < 6; i++) {
+                    // Set quantity to random between 0 and 2
+                    let qty = Math.floor(Math.random() * 3);
+                    if (qty) player.addItem(items[i], qty);
+                }
 
                 player.addSpell(fireball);
             }, this);

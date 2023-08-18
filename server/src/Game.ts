@@ -223,6 +223,7 @@ export abstract class Game
             num,
             animation: item.animation,
             name: item.name,
+            sfx: item.sfx,
         });
 
         if (player.HPHasChanged()) {
@@ -290,6 +291,7 @@ export abstract class Game
                 y,
                 animation: spell.animation,
                 shake: spell.shake,
+                sfx: spell.sfx,
             });
 
             team.socket?.emit('cooldown', {

@@ -63,6 +63,8 @@ export class AIServerPlayer extends ServerPlayer {
         // Equalizer: targets the enemy with the highest HP
         // Defender: targets enemy closest to lowest HP ally
 
+        if (this.checkForItemUse()) return;
+
         this.determineTarget();
         if(!this.target) return;
 
@@ -77,6 +79,23 @@ export class AIServerPlayer extends ServerPlayer {
             this.target = null;
             this.retargetCount = this.retargetRate;
         }
+    }
+
+    checkForItemUse() {
+        // Iterate over the 5 item slots
+        for (let i = 0; i < 5; i++) {
+            const item = this.getItemAtIndex(i);
+            if (!item) continue;
+            if (item.effectsAreApplicable(this)) {
+                const data = {
+                    num: this.num,
+                    index: i,
+                };
+                this.team?.game.processUseItem(data, this.team);
+                return true;
+            }
+        }
+        return false;
     }
 
     determineTarget() {
