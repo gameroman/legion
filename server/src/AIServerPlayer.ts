@@ -1,4 +1,5 @@
 import { ServerPlayer, ActionType } from './ServerPlayer';
+import { Target } from "./Item";
 
 type Comparator<T> = (a: T, b: T) => number;
 
@@ -73,6 +74,7 @@ export class AIServerPlayer extends ServerPlayer {
         if (!this.canAct()) return;
 
         if (this.checkForItemUse()) return;
+        if (this.checkForAoE()) return;
 
         if (!this.target || !this.target.isAlive()) this.determineTarget();
         if(!this.target) {
@@ -104,6 +106,33 @@ export class AIServerPlayer extends ServerPlayer {
                     index: i,
                 };
                 this.team?.game.processUseItem(data, this.team);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    checkForAoE() {
+        for (let i = 0; i < this.spells.length; i++) {
+            const spell = this.spells[i];
+            // console.log(`AI ${this.num} checking spell ${spell.name}, cost = ${spell.cost}, mp = ${this.mp}`);
+            if (spell.cost > this.mp) {
+                // console.log(`AI ${this.num} spell ${spell.name} cost ${spell.cost} is too high`);
+                continue;
+            }
+            if (!(spell.target == Target.AOE)) {
+                // console.log(`AI ${this.num} spell ${spell.name} is not AOE`);
+                continue;
+            }
+            const tile = this.team?.game.scanGridForAoE(this, Math.floor(spell.size/2), 2);
+            if (tile) {
+                const data = {
+                    num: this.num,
+                    x: tile!.x,
+                    y: tile!.y,
+                    index: i,
+                };
+                this.team?.game.processSkill(data, this.team);
                 return true;
             }
         }

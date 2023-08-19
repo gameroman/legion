@@ -83,10 +83,12 @@ export class MusicManager {
 
     playEnd() {
         this.gameOver = true;
-        if (this.currentSound && this.currentSound.isPlaying) {
-            this.currentSound.once('complete', () => {
-                this.scene.sound.add('bgm_end').play();
-            });
-        } 
+        // if (this.currentSound && this.currentSound.isPlaying) {
+        //     this.currentSound.once('complete', () => {
+        //         this.scene.sound.add('bgm_end').play();
+        //     });
+        // } 
+        this.currentSound.stop();
+        this.scene.sound.add('bgm_end').play();
     }
 }

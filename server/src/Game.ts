@@ -16,6 +16,9 @@ export abstract class Game
     gameOver: boolean = false;
     cooldownCoef: number = 1;
 
+    gridWidth: number = 20;
+    gridHeight: number = 10;
+
     constructor(io: Server, sockets: Socket[]) {
         this.io = io;
         this.sockets = sockets;
@@ -410,13 +413,11 @@ export abstract class Game
     }
 
     isSkip(x: number, y: number) {
-        const gridWidth = 20;
-        const gridHeight = 9;
-        if (x < 0 || y < 0 || x >= gridWidth || y >= gridHeight) return true;
+        if (x < 0 || y < 0 || x >= this.gridWidth || y >= this.gridHeight) return true;
         const v = 3;
-        const skip = y < gridHeight/2 ? Math.max(0, v - y - 1) : Math.max(0, y - (gridHeight - v));
+        const skip = y < this.gridHeight/2 ? Math.max(0, v - y - 1) : Math.max(0, y - (this.gridHeight - v));
         // Skip drawing the corners to create an oval shape
-        return (x < skip || x >= gridWidth - skip);
+        return (x < skip || x >= this.gridWidth - skip);
     }
 
     isValidCell(fromX: number, fromY: number, toX: number, toY: number) {
@@ -440,6 +441,40 @@ export abstract class Game
             }
         }
         return tiles;
+    }
+
+    nbPlayersInArea(team: Team, gridX: number, gridY: number, radius: number) {
+        let nb = 0;
+        team.getMembers().forEach(player => {
+            if (player.isAlive() && player.isInArea(gridX, gridY, radius)) {
+                nb++;
+            }
+        });
+        return nb;
+    }
+
+    scanGridForAoE(player: ServerPlayer, radius: number, minScore: number = 0) {
+        let bestScore = -Infinity;
+        let bestTile = {x: 0, y: 0};
+        for(let x = 0; x < this.gridWidth; x++) {
+            for(let y = 0; y < this.gridHeight; y++) {
+                if (this.isSkip(x, y)) continue;
+                const otherTeam = this.getOtherTeam(player.team!.id);
+                const nbEnemies = this.nbPlayersInArea(otherTeam, x, y, radius);
+                const nbAllies = this.nbPlayersInArea(player.team!, x, y, radius);
+                const score = nbEnemies - nbAllies;
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestTile = {x, y};
+                }
+            }
+        }
+        if (bestScore >= minScore) {
+            return bestTile;
+        } else {
+            return null;
+        }
     }
 }
 
