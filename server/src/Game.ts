@@ -13,6 +13,8 @@ export abstract class Game
     sockets: Socket[] = [];
     tickTimer: NodeJS.Timeout | null = null;
     socketMap = new Map<Socket, Team>();
+    gameOver: boolean = false;
+    cooldownCoef: number = 1;
 
     constructor(io: Server, sockets: Socket[]) {
         this.io = io;
@@ -125,6 +127,8 @@ export abstract class Game
     }
 
     processAction(action: string, data: any, socket: Socket | null = null) {
+        if (this.gameOver) return;
+
         let team;
         if (socket) {
             team = this.socketMap.get(socket);
@@ -148,17 +152,38 @@ export abstract class Game
         }
     }
 
+    checkEndGame() {
+        const team1 = this.teams.get(1)!;
+        const team2 = this.teams.get(2)!;
+        if (team1.isDefeated() || team2.isDefeated()) {
+            this.broadcast('gameEnd', {
+                winner: team1.isDefeated() ? 2 : 1,
+            });
+            this.gameOver = true;
+        }
+    }
+
+    setCooldown(player: ServerPlayer, cooldown: number) {
+        player.setCooldown(cooldown * this.cooldownCoef);
+    }
+
     processMove({tile, num}: {tile: Tile, num: number}, team: Team) {
         const player = team.getMembers()[num - 1];
-        if (!this.isValidCell(player.x, player.y, tile.x, tile.y)) return;
-        if (!player.canAct() || !player.canMoveTo(tile.x, tile.y)) return;
+        if (!this.isValidCell(player.x, player.y, tile.x, tile.y)) {
+            console.log(`Invalid move from ${player.x},${player.y} to ${tile.x},${tile.y}!`);
+            return;
+        }
+        if (!player.canAct() || !player.canMoveTo(tile.x, tile.y)) {
+            console.log(`Player ${num} cannot move to ${tile.x},${tile.y}!`);
+            return;
+        }
         
         this.freeCell(player.x, player.y);
         player.updatePos(tile.x, tile.y);
         this.occupyCell(player.x, player.y, player);
 
         const cooldown = player.getCooldown('move');
-        player.setCooldown(cooldown);
+        this.setCooldown(player, cooldown);
         
         this.broadcast('move', {
             team: team.id,
@@ -185,9 +210,10 @@ export abstract class Game
         
         const damage = this.calculateDamage(player, opponent);
         opponent.takeDamage(damage);
+        player.increaseDamageDealt(damage);
         
         const cooldown = player.getCooldown('attack');
-        player.setCooldown(cooldown);
+        this.setCooldown(player, cooldown);
 
         this.broadcast('attack', {
             team: team.id,
@@ -212,7 +238,7 @@ export abstract class Game
         if (!player.getItemQuantity(item)) return;
         
         const cooldown = item?.cooldown * 1000;
-        player.setCooldown(cooldown);
+        this.setCooldown(player, cooldown);
 
         const newQuantity = player.removeItem(item, 1);
         item.applyEffect(player);
@@ -260,7 +286,7 @@ export abstract class Game
         const mp = player.consumeMP(spell.cost);
 
         const cooldown = spell?.cooldown * 1000;
-        player.setCooldown(cooldown);
+        this.setCooldown(player, cooldown);
 
         this.broadcast('cast', {
             team: team.id,
@@ -282,6 +308,7 @@ export abstract class Game
 
             targets.forEach(target => {
                 if (target.HPHasChanged()) {
+                    player.increaseDamageDealt(target.getHPDelta());
                     this.broadcastHPchange(target.team!, target.num, target.getHP(), target.getHPDelta());
                 }
             });            

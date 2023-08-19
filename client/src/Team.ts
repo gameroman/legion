@@ -6,10 +6,12 @@ export class Team {
     members: Player[] = [];
     totalHPMax: number = 0;
     totalHP: number = 0;
+    isPlayerTeam: boolean = false;
 
-    constructor(scene, number: number) {
+    constructor(scene, number: number, isPlayerTeam: boolean) {
         this.scene = scene;
         this.id = number;
+        this.isPlayerTeam = isPlayerTeam;
     }   
 
     addMember(player: Player) {
@@ -31,11 +33,9 @@ export class Team {
             this.totalHP += member.hp;
         });
 
-        const ratio = this.totalHP / this.totalHPMax;
-        console.log(ratio);
-        if (ratio < 0.5) {
+        if (this.isPlayerTeam) {
             // @ts-ignore
-            this.scene.soundManager.playLoop(2);
+            this.scene.updateMusicIntensity(this.totalHP / this.totalHPMax);
         }
     }
 }

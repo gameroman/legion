@@ -48,8 +48,16 @@ class PlayerTab extends Component {
     });
   }
 
-  itemClick(letter) {
+  actionClick(type, letter, index) {
     this.events.emit('itemClick', letter);
+
+    const stateField = type == 'item' ? 'clickedItem' : 'clickedSpell';
+    this.setState({ [stateField]: index });
+
+    // Remove the flash effect after the animation duration
+    setTimeout(() => {
+      this.setState({ [stateField]: -1 });
+    }, 1000);
   }
 
   render({player}) {
@@ -107,7 +115,9 @@ class PlayerTab extends Component {
             {player.spells.map((skill, i) => {
                 const startPosition = keyboardLayout.indexOf('Q');
                 const keyBinding = keyboardLayout.charAt(startPosition + i);
-                return (<div className="skill" onClick={() => this.itemClick(keyBinding)}>
+                return (<div 
+                  className={`skill ${i === this.state.clickedSpell ? 'flash-effect' : ''}`} 
+                  onClick={() => this.actionClick('skill', keyBinding, i)}>
                   <div 
                       className={!canAct ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}
                       style={{backgroundImage: `url(assets/skills/${skill.frame})`, }} />
@@ -138,7 +148,9 @@ class PlayerTab extends Component {
                 const startPosition = keyboardLayout.indexOf('Z');
                 const keyBinding = keyboardLayout.charAt(startPosition + i);
                 return (
-                  <div className="item" onClick={() => this.itemClick(keyBinding)}>
+                  <div 
+                    className={`item ${i === this.state.clickedItem ? 'flash-effect' : ''}`} 
+                    onClick={() => this.actionClick('item', keyBinding, i)}>
                     <div 
                       className={!canAct ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}
                       style={{backgroundImage: item.quantity !== 0 ? `url(assets/items/${item.frame})` : 'none'}}

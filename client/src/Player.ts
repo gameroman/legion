@@ -80,6 +80,7 @@ export class Player extends Phaser.GameObjects.Container {
     selected: boolean = false;
     HURT_THRESHOLD: number = 0.5;
     team: Team;
+    animationLock: boolean = false;
 
     constructor(
         scene: Phaser.Scene, team: Team, gridX: number, gridY: number, x: number, y: number,
@@ -197,12 +198,23 @@ export class Player extends Phaser.GameObjects.Container {
         this.distance = distance;
     }
 
+    handleAnimationComplete() {
+        let idleAnim = this.hp / this.maxHP < this.HURT_THRESHOLD ? 'idle_hurt' : 'idle';
+        if (this.hp <= 0) idleAnim = 'die';
+        this.playAnim(idleAnim)
+    }
+
     playAnim(key: string, revertToIdle = false) {
+        if (this.animationLock) return;
+        this.animationLock = true;
+
+        this.sprite.removeListener('animationcomplete', this.handleAnimationComplete);
+        this.sprite.anims.stop();
         this.sprite.play(`${this.texture}_anim_${key}`);
         if (revertToIdle) {
-            const idleAnim = this.hp / this.maxHP < this.HURT_THRESHOLD ? 'idle_hurt' : 'idle';
-            this.sprite.once('animationcomplete', () => this.playAnim(idleAnim), this);
+            this.sprite.once('animationcomplete', this.handleAnimationComplete, this);
         }
+        this.animationLock = false;
     }
 
     checkHeartbeat() {
@@ -295,7 +307,7 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     onLetterKey(keyCode) {
-        console.log(`Pressed ${keyCode}`);
+        // console.log(`Pressed ${keyCode}`);
         // @ts-ignore
         this.arena.playSound('click');
         const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
@@ -564,7 +576,7 @@ export class Player extends Phaser.GameObjects.Container {
 
     setInventory(inventory: NetworkInventory[]) {
         inventory.forEach(data => {
-            console.log(data.item);
+            // console.log(data.item);
             this.addItem(data.item, data.quantity);
         });
     }
@@ -581,5 +593,9 @@ export class Player extends Phaser.GameObjects.Container {
 
     setSpells(spells: NetworkSpell[]) {
         this.spells = spells;
+    }
+
+    victoryDance() {
+        this.playAnim('victory');
     }
 }

@@ -8,4 +8,6 @@ items[2] = new Item(2, "Hi-Potion", "Restores 250 HP", "hi-potion.png", "healing
 items[3] = new Item(3, "Hi-Ether", "Restores 50 MP", "hi-ether.png","healing", "potion_heal", 6, Target.SELF, [{stat: Stat.MP, value: 50}]);
 items[4] = new Item(4, "X-Potion", "Restores 1000 HP", "X-potion.png", "healing", "potion_heal", 8, Target.SELF, [{stat: Stat.HP, value: 1000}]);
 items[5] = new Item(5, "X-Ether", "Restores 200 MP", "X-ether.png", "healing", "potion_heal", 12, Target.SELF, [{stat: Stat.MP, value: 200}]);
+items[6] = new Item(6, "Elixir", "Restores 250 HP and 50 MP", "elixir.png", "healing", "potion_heal", 12, Target.SELF, [{stat: Stat.HP, value: 250}, {stat: Stat.MP, value: 50}]);
+items[7] = new Item(7, "X-Elixir", "Restores 1000 HP and 200 MP", "megalixir.png", "healing", "potion_heal", 22, Target.SELF, [{stat: Stat.HP, value: 1000}, {stat: Stat.MP, value: 200}]);
 

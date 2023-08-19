@@ -4,22 +4,41 @@ type Comparator<T> = (a: T, b: T) => number;
 
 const highestHpComparator: Comparator<ServerPlayer> = (a, b) => a.hp - b.hp;
 const lowestHpComparator: Comparator<ServerPlayer> = (a, b) => b.hp - a.hp;
+const highestDamageComparator: Comparator<ServerPlayer> = (a, b) => a.damageDealt - b.damageDealt;
 
 enum AIType {
     Opportunist,
     Hunter,
     Equalizer,
-    Defender
+    Defender,
+    Hero
 }
 
 export class AIServerPlayer extends ServerPlayer {
-    AItype: AIType;
+    AItype: AIType = AIType.Opportunist;
     target: ServerPlayer | null = null;
     retargetRate: number = 0;
     retargetCount: number = 0;
 
     constructor(num: number, frame: string, x: number, y: number) {
         super(num, frame, x, y);
+
+        this.setArchetype();
+
+        // Assign a random value between 1 and 10 to retargetCount
+        this.retargetRate = Math.floor(Math.random() * 10) + 1;
+        this.retargetCount = this.retargetRate;
+
+        const cooldown = this.getCooldown('move');
+        this.setCooldown(cooldown);
+    }
+
+    setArchetype() {
+        // Opportunist: attacks if adjacent, otherwise moves towards closest enemy
+        // Hunter: targets the enemy with the lowest HP
+        // Equalizer: targets the enemy with the highest HP
+        // Defender: targets enemy closest to lowest HP ally
+        // Hero: targets biggest damage dealer
 
         const random = Math.floor(Math.random() * 4) + 1;
         switch (random) {
@@ -35,19 +54,13 @@ export class AIServerPlayer extends ServerPlayer {
             case 4:
                 this.AItype = AIType.Defender;
                 break;
+            case 5:
+                this.AItype = AIType.Hero;
+                break;
             default:
                 this.AItype = AIType.Opportunist;
                 break;
         }
-
-        // Assign a random value between 1 and 10 to retargetCount
-        this.retargetRate = 3; // Math.floor(Math.random() * 10) + 1;
-        this.retargetCount = this.retargetRate;
-
-        this.AItype = AIType.Opportunist; // TODO: remove
-
-        const cooldown = this.getCooldown('move');
-        this.setCooldown(cooldown);
     }
 
     getCooldown(action: ActionType) {
@@ -56,17 +69,16 @@ export class AIServerPlayer extends ServerPlayer {
     }
 
     takeAction() {
+        // return;
         if (!this.canAct()) return;
-
-        // Opportunist: attacks if adjacent, otherwise moves towards closest enemy
-        // Hunter: targets the enemy with the lowest HP
-        // Equalizer: targets the enemy with the highest HP
-        // Defender: targets enemy closest to lowest HP ally
 
         if (this.checkForItemUse()) return;
 
-        this.determineTarget();
-        if(!this.target) return;
+        if (!this.target || !this.target.isAlive()) this.determineTarget();
+        if(!this.target) {
+            console.log(`AI ${this.num} has no target! ${this.target}`);    
+            return;
+        }
 
         if (this.isNextTo(this.target!.x, this.target!.y)) {
             this.attack(this.target!);
@@ -99,9 +111,8 @@ export class AIServerPlayer extends ServerPlayer {
     }
 
     determineTarget() {
-        if(this.target && this.target.isAlive()) return;
-        // console.log('Determining target');
-
+        this.setArchetype();
+        
         switch (this.AItype) {
             case AIType.Opportunist:
                 this.opportunistTarget();
@@ -115,6 +126,8 @@ export class AIServerPlayer extends ServerPlayer {
             case AIType.Defender:
                 this.defenderTarget();
                 break;
+            case AIType.Hero:
+                this.heroTarget();
             default:
                 this.opportunistTarget();
                 break;
@@ -169,6 +182,11 @@ export class AIServerPlayer extends ServerPlayer {
         const ally = this.getOptimalTarget(allies!, lowestHpComparator);
         const targets = this.team?.game.listAllEnemies(this);
         this.target = this.getClosestTarget(targets!, ally!);
+    }
+
+    heroTarget() {
+        const targets = this.team?.game.listAllEnemies(this);
+        this.target = this.getOptimalTarget(targets!, highestDamageComparator);
     }
 
     attack(target: ServerPlayer) {

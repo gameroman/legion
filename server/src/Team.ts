@@ -23,6 +23,17 @@ export class Team {
         return this.members;
     }
 
+    getMember(index: number): ServerPlayer {
+        return this.members[index];
+    }
+
+    isDefeated() {
+        for (let i = 0; i < this.members.length; i++) {
+            if (this.members[i].isAlive()) return false;
+        }
+        return true;
+    }
+
     setSocket(socket: Socket) {
         this.socket = socket;
     }

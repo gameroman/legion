@@ -26,6 +26,7 @@ export class ServerPlayer {
     inventory: Map<Item, number> = new Map<Item, number>();
     spells: Spell[] = [];
     isCasting: boolean = false;
+    damageDealt: number = 0;
 
     constructor(num: number, frame: string, x: number, y: number) {
         this.num = num;
@@ -38,7 +39,7 @@ export class ServerPlayer {
         this.mp = this.maxMP;
         this.distance = 3;
         // Random number between 8 and 12
-        this.atk = Math.floor(Math.random() * 5) + 8 + 20;
+        this.atk = Math.floor(Math.random() * 5) + 8 + 50;
         this.def = Math.floor(Math.random() * 5) + 8;
         this.spatk = Math.floor(Math.random() * 5) + 8;
         this.spdef = Math.floor(Math.random() * 5) + 8;
@@ -129,6 +130,8 @@ export class ServerPlayer {
         if (this.hp < 0) {
             this.hp = 0;
         }
+
+        this.team?.game.checkEndGame();
     }
 
     getHPDelta() {
@@ -238,6 +241,10 @@ export class ServerPlayer {
 
     addSpell(spell: Spell) {
         this.spells.push(spell);
+    }
+
+    increaseDamageDealt(amount: number) {
+        this.damageDealt += amount;
     }
 }
 

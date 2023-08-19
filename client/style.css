@@ -255,3 +255,16 @@ canvas {
 .player-items h4 {
     margin-right: 15px;
 }
+
+@keyframes flash {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+    /* 0% { filter: brightness(1); }
+    50% { filter: brightness(2); }
+    100% { filter: brightness(1); } */
+}
+
+.flash-effect {
+    animation: flash 0.2s ease infinite;
+}

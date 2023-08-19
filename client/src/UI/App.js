@@ -8,11 +8,14 @@ class App extends Component {
   state = { 
     visible: false,
     player: null,
+    clickedItem: -1,
+    clickedSpell: -1,
   }
 
   componentDidMount() {
     events.on('showPlayerBox', this.showPlayerBox);
     events.on('hidePlayerBox', this.hidePlayerBox);
+    events.on('keyPress', this.keyPress);
   }
 
   componentWillUnmount() {
@@ -25,6 +28,10 @@ class App extends Component {
 
   hidePlayerBox = () => {
     this.setState({ playerVisible: false, player: null });
+  }
+
+  keyPress = (key) => {
+    this.setState({ clickedSpell: 0 });
   }
 
   render() {
