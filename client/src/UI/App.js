@@ -18,6 +18,7 @@ class App extends Component {
     events.on('showPlayerBox', this.showPlayerBox);
     events.on('hidePlayerBox', this.hidePlayerBox);
     events.on('keyPress', this.keyPress);
+    events.on('updateOverview', this.updateOverview);
   }
 
   componentWillUnmount() {
@@ -44,8 +45,8 @@ class App extends Component {
     const { playerVisible, player, overview } = this.state;
     return (
       <div className="app-container">
-          {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
-          <Overview overview={overview} />
+        {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : <div style={{flexGrow: 1}} />}
+        <Overview overview={overview} />
       </div>
   );
   }

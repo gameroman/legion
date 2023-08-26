@@ -425,6 +425,9 @@ export class Arena extends Phaser.Scene
             case 'cooldownEnded':
                 this.refreshBox();
                 break;
+            case 'overviewChange':
+                events.emit('updateOverview', this.getOverview());
+                break;
             case 'letterKey':
                 if (this.selectedPlayer) {
                     events.emit('keyPress', data);
@@ -851,15 +854,23 @@ export class Arena extends Phaser.Scene
         this.placeCharacters(data.player.team, true, this.playersMap.get(data.player.teamId));
         this.placeCharacters(data.opponent.team, false, this.playersMap.get(data.opponent.teamId));
 
+        setTimeout(this.updateOverview.bind(this), 2000);
+
         events.on('itemClick', (letter) => {
             this.selectedPlayer?.onLetterKey(letter);
         });
     }
 
+    updateOverview() {
+        this.emitEvent('overviewChange');
+    }
+
     getOverview() {
-        return {
+        const overview = {
             teams: Array.from(this.playersMap.values()).map(team => team.getOverview()),
         }
+        console.log(overview);
+        return overview;
     }
 
     update (time, delta)

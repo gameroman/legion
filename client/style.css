@@ -17,9 +17,13 @@ canvas {
 }
 
 #root {
-  z-index: 1;  /* This ensures that the AliveCount component will be displayed above the Phaser game */
-  /* background-color: red; */
-}
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* height: auto; */
+    z-index: 1;
+  }
 
 .box {
     border-bottom-left-radius: 15px;  /* Bottom left corner rounded */
@@ -30,6 +34,8 @@ canvas {
     box-sizing: border-box;
     /* overflow: hidden;  */
     color: white;
+    width: auto;
+    /* flex: 1; */
 }
 
 .player-tab {
@@ -272,4 +278,71 @@ canvas {
 .app-container {
     display: flex;
     justify-content: space-between;  
+}
+
+.overview {
+    position: relative; /* Needed to position the pseudo-element */
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+.team {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+  
+  .member {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 10px;
+  }
+  
+  .member-portrait {
+    position: relative;
+    width: 50px;
+    height: 50px;
+  }
+
+  .member-name {
+    font-size: 12px;
+  }
+  
+  .member-index {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    color: white;   /* Or any color that matches your design */
+    font-size: 10px; /* Adjust as needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Black background with 50% opacity */
+    border-radius: 10px; 
+  }
+
+  .hp-bar {
+    width: 100%;
+    height: 10px; /* adjust as needed */
+    background-color: #ddd; /* color for the unfilled part */
+    border-radius: 5px; /* makes the bar rounded */
+    border: 1px solid black;
+  }
+  
+  .hp-fill {
+    height: 100%;
+    background-color: #32CD32; /* green color for the filled part */
+    border-radius: 5px; /* makes the bar rounded */
+  }
+
+  .mp-bar {
+  width: 100%;
+  height: 10px; /* adjust as needed */
+  background-color: #ddd; /* color for the unfilled part */
+  border-radius: 5px; /* makes the bar rounded */
+  border: 1px solid black;
+}
+
+.mp-fill {
+  height: 100%;
+  background-color: #0099ff;
+  border-radius: 5px; /* makes the bar rounded */
 }

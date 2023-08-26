@@ -117,7 +117,7 @@ class PlayerTab extends Component<Props, State> {
 
     const portraitStyle = {
         backgroundImage: `url(assets/sprites/${player.portrait})`,
-        backgroundPosition: '-45px -45px', // adjust these values to your needs
+        backgroundPosition: '-45px -45px', 
         backgroundRepeat: 'no-repeat',
       };
       const HPBackground = this.getHPBackground(player);

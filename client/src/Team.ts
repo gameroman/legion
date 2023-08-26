@@ -40,10 +40,13 @@ export class Team {
     }
 
     getOverview() {
-        const overview = [];
+        const members = [];
         this.members.forEach(member => {
-            overview.push({
-                texture: member.texture,
+            // @ts-ignore
+            const textureFile = this.scene.assetsMap[member.texture];
+            const textureFilename = textureFile.split('/').pop();
+            members.push({
+                texture: textureFilename,
                 name: member.name,
                 hp: member.hp,
                 maxHP: member.maxHP,
@@ -54,6 +57,6 @@ export class Team {
             });
         });
 
-        return overview;
+        return {members};
     }
 }
