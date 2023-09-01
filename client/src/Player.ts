@@ -534,6 +534,7 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     displayDamage(damage) {
+        const txt = damage > 0 ? `-${damage}` : `+${damage}`;
         this.displayOverheadText(Math.round(damage), 2000, '#fff');
     }
 

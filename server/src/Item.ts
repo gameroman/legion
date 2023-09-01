@@ -16,7 +16,7 @@ export interface Effect {
     stat: Stat;
     value: number;
     modifiers?: EffectModifiers;
-    ignoreKO?: boolean;
+    onKO?: boolean;
 }
 
 export enum Target {
@@ -100,16 +100,18 @@ export class Item {
         return [];
     }
 
-    applyEffect(target: ServerPlayer) {
-        this.effects.forEach(effect => {
-            switch (effect.stat) {
-                case Stat.HP:
-                    target.heal(effect.value);
-                    break;
-                case Stat.MP:
-                    target.restoreMP(effect.value);
-                    break;
-            }
+    applyEffect(targets: ServerPlayer[]) {
+        targets.forEach(target => {
+            this.effects.forEach(effect => {
+                switch (effect.stat) {
+                    case Stat.HP:
+                        target.heal(effect.value);
+                        break;
+                    case Stat.MP:
+                        target.restoreMP(effect.value);
+                        break;
+                }
+            });
         });
     }
 

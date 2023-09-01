@@ -252,7 +252,8 @@ export abstract class Game
 
         const newQuantity = player.removeItem(item, 1);
         const targets = item.getTargets(this, player, x, y);
-        item.applyEffect(player);
+        console.log(`Item ${item.name} found ${targets.length} targets`);
+        item.applyEffect(targets);
         const hp = player.getHP();
 
         this.broadcast('useitem', {
@@ -263,13 +264,14 @@ export abstract class Game
             sfx: item.sfx,
         });
 
-        if (player.HPHasChanged()) {
-            this.broadcastHPchange(team, num, hp);
-        }
-
-        if (player.MPHasChanged()) {
-            this.emitMPchange(team, num, player.getMP());
-        }
+        targets.forEach(target => {
+            if (target.HPHasChanged()) {
+                this.broadcastHPchange(target.team!, target.num, target.getHP(), target.getHPDelta());
+            }
+            if (target.MPHasChanged()) {
+                this.emitMPchange(target.team!, target.num, target.getMP());
+            }
+        });    
 
         team.socket?.emit('cooldown', {
             num,
