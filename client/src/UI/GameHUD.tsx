@@ -1,13 +1,22 @@
-// App.js
+// GameHUD.tsx
 import { h, Component, render } from 'preact';
 import PlayerTab from './PlayerTab';
 import Overview from './Overview';
 import { EventEmitter } from 'eventemitter3';
 
+interface State {
+  playerVisible: boolean;
+  player: any;
+  clickedItem: number;
+  clickedSpell: number;
+  overview: any;
+}
+
 const events = new EventEmitter();
-class GameHUD extends Component {
-  state = { 
-    visible: false,
+
+class GameHUD extends Component<{}, State> {
+  state: State = { 
+    playerVisible: false,
     player: null,
     clickedItem: -1,
     clickedSpell: -1,
@@ -22,10 +31,10 @@ class GameHUD extends Component {
   }
 
   componentWillUnmount() {
-    events.off('showPlayer', this.showPlayer);
+    events.off('showPlayer', this.showPlayerBox);
   }
 
-  showPlayerBox = (playerData) => {
+  showPlayerBox = (playerData: any) => {
     this.setState({ playerVisible: true, player: playerData });
   }
 
@@ -33,11 +42,11 @@ class GameHUD extends Component {
     this.setState({ playerVisible: false, player: null });
   }
 
-  updateOverview = (overview) => {
+  updateOverview = (overview: any) => {
     this.setState({ overview });
   }
 
-  keyPress = (key) => {
+  keyPress = (key: string) => {
     this.setState({ clickedSpell: 0 });
   }
 
@@ -45,7 +54,7 @@ class GameHUD extends Component {
     const { playerVisible, player, overview } = this.state;
     return (
       <div className="hud-container">
-        {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : <div style={{flexGrow: 1}} />}
+        {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : <div className="flex-grow" />}
         <Overview overview={overview} />
       </div>
     );

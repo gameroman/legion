@@ -281,6 +281,10 @@ canvas {
     justify-content: space-between;  
 }
 
+.flex-grow {
+    flex-grow: 1;
+}
+
 .overview {
     position: relative; /* Needed to position the pseudo-element */
     margin-top: 10px;
