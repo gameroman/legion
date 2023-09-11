@@ -52,6 +52,7 @@ class GameHUD extends Component<{}, State> {
 
   render() {
     const { playerVisible, player, overview } = this.state;
+    console.log('rendering game hud');
     return (
       <div>
         <div className="hud-container">

@@ -44,7 +44,7 @@ canvas {
     position: relative; /* Needed to position the pseudo-element */
     margin-top: 10px;
     margin-left: 10px;
-    /* width: 800px; */
+    z-index: 2;
 }
 
 .box::before {
@@ -291,6 +291,7 @@ canvas {
     position: relative; /* Needed to position the pseudo-element */
     margin-top: 10px;
     margin-right: 10px;
+    z-index: 2;
 }
 
 .team {
@@ -388,17 +389,63 @@ canvas {
     animation-iteration-count: 3;
 }
 
-.app {
+  .homePage {
     display: flex;
     height: 100vh;
   }
   
   .menu {
-    width: 10%;
-    background-color: #f0f0f0;
+    width: 100px;
+    background-color: #2D2D2D;
+    padding: 10px;
+    border-right: 2px solid black;
   }
   
   .content {
-    width: 90%;
-    /* background-color: #fff; */
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #2D2D2D;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url('assets/aarena_bg.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+  
+  .notificationBar {
+    height: 20px;
+    background-color: #373636;
+    border-bottom: 2px solid black;
+  }
+  
+  .mainContent {
+    flex: 1;
+  }
+
+  .gameLogo {
+    width: 95%;
+    height: auto;
+    padding: 5px;
+    background-color: black;
+    border-radius: 10px; /* Adjust this value to get the desired roundness */
+  }
+
+  .menuItems {
+    padding-top: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+  }
+  .menuItem {
+    cursor: pointer;
+    width: 100%;
+    height: auto;
+    padding-bottom: 10px;
+  }
+  .menuItem:hover {
+    filter: brightness(1.2);
+  }
+  .menuItem:active {
+    transform: scale(0.95);
   }

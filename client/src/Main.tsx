@@ -1,24 +1,8 @@
 // Main.tsx
 import { h, Component } from 'preact';
 import { Router, Route } from 'preact-router';
-import { GameHUD } from './game/HUD/GameHUD';
-import { startGame } from './game/game';
-
-class HomePage extends Component {
-  render() {
-    return <h1>Hello World</h1>;
-  }
-}
-
-class GamePage extends Component {
-  componentDidMount() {
-    startGame();
-  }
-
-  render() {
-    return <GameHUD />;
-  }
-}
+import HomePage from './HomePage';
+import GamePage from './GamePage';
 
 class Main extends Component {
   render() {
@@ -26,6 +10,9 @@ class Main extends Component {
       <Router>
         <Route path="/" component={HomePage} />
         <Route path="/game" component={GamePage} />
+        <Route path="/play" component={HomePage} />
+        <Route path="/team" component={HomePage} />
+        <Route path="/shop" component={HomePage} />
       </Router>
     );
   }
