@@ -102,7 +102,10 @@ export class Item {
 
     applyEffect(targets: ServerPlayer[]) {
         targets.forEach(target => {
+            console.log(this.effects);
             this.effects.forEach(effect => {
+                if (effect.onKO && target.isAlive()) return;
+                if (!effect.onKO && !target.isAlive()) return;
                 switch (effect.stat) {
                     case Stat.HP:
                         target.heal(effect.value);

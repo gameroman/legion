@@ -36,6 +36,7 @@ export class ServerPlayer {
         this.y = y;
         this.maxHP = 100;
         this.hp = this.maxHP;
+        this._hp = this.maxHP;
         this.maxMP = 20;
         this.mp = this.maxMP;
         this.distance = 3;
@@ -48,7 +49,8 @@ export class ServerPlayer {
             'move': 2000,
             'attack': 4000
         };
-        this.setCooldown(this.cooldowns.move + this.entranceTime * 1000);
+        this.setCooldown(0 + this.entranceTime * 1000);
+        // this.setCooldown(this.cooldowns.move + this.entranceTime * 1000);
 
 //         Every level up, a character gains:
 //         Attack: +2 and +10% of current attack

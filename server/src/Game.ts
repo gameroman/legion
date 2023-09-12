@@ -252,9 +252,8 @@ export abstract class Game
 
         const newQuantity = player.removeItem(item, 1);
         const targets = item.getTargets(this, player, x, y);
-        console.log(`Item ${item.name} found ${targets.length} targets`);
+        // console.log(`Item ${item.name} found ${targets.length} targets`);
         item.applyEffect(targets);
-        const hp = player.getHP();
 
         this.broadcast('useitem', {
             team: team.id,
