@@ -4,11 +4,27 @@ import { Router, Route, Link } from 'preact-router';
 import PlayPage from './PlayPage';
 import TeamPage from './TeamPage';
 import ShopPage from './ShopPage';
+import RankPage from './RankPage';
+
 
 class HomePage extends Component {
     state = {
         currentPage: 'play'
     };
+    componentDidMount() {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css';
+        link.id = 'font-awesome-css';
+        document.head.appendChild(link);
+    }
+
+    componentWillUnmount() {
+        const link = document.getElementById('font-awesome-css');
+        if (link) {
+            document.head.removeChild(link);
+        }
+    }
     handleRouteChange = (e) => {
         this.setState({ currentPage: e.url.substring(1) });
     };
@@ -28,20 +44,44 @@ class HomePage extends Component {
             <div className="menu">
             <img src="assets/legionlogo.png" className="gameLogo" />
             <div className="menuItems">
-                <Link href="/play"><img className="menuItem" src="assets/play.png" /></Link>
-                <Link href="/team"><img className="menuItem" src="assets/team.png" /></Link>
-                <Link href="/shop"><img className="menuItem" src="assets/shop.png" /></Link>
+                <Link href="/play">
+                    <div className="menuItemContainer">
+                        <img className="menuItem" src="assets/play.png" />
+                        <span className="menuItemText">PLAY</span>
+                    </div>
+                </Link>
+                <Link href="/team">
+                    <div className="menuItemContainer">
+                        <img className="menuItem" src="assets/team.png" />
+                        <span className="menuItemText">TEAM</span>
+                    </div>
+                </Link>
+                <Link href="/shop">
+                    <div className="menuItemContainer">
+                        <img className="menuItem" src="assets/shop.png" />
+                        <span className="menuItemText">SHOP</span>
+                    </div>
+                </Link>
+                <Link href="/rank">
+                    <div className="menuItemContainer">
+                        <img className="menuItem" src="assets/rank.png" />
+                        <span className="menuItemText">RANK</span>
+                    </div>
+                </Link>
             </div> 
             </div>
             <div className="content" style={bgImage}>
             <div className="notificationBar">
-                {/* Notifications go here */}
+                <div className="logoutButton">
+                    <i className="fas fa-sign-out-alt"></i>
+                </div>
             </div>
             <div className="mainContent">
                 <Router onChange={this.handleRouteChange}>
                 <Route default path="/play" component={PlayPage} />
                 <Route path="/team" component={TeamPage} />
                 <Route path="/shop" component={ShopPage} />
+                <Route path="/rank" component={RankPage} />
                 </Router>
             </div>
             </div>

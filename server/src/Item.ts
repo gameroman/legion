@@ -102,7 +102,7 @@ export class Item {
 
     applyEffect(targets: ServerPlayer[]) {
         targets.forEach(target => {
-            console.log(this.effects);
+            target.resetPreviousHP();
             this.effects.forEach(effect => {
                 if (effect.onKO && target.isAlive()) return;
                 if (!effect.onKO && !target.isAlive()) return;

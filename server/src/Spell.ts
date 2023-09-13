@@ -151,6 +151,7 @@ export class Spell {
     }
 
     applyEffect(caster: ServerPlayer, targets: ServerPlayer[]) {
+        targets.forEach(target => {target.resetPreviousHP();});
         this.effects.forEach(effect => {
             switch (effect.stat) {
                 case Stat.HP:

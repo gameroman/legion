@@ -460,6 +460,8 @@ export class Player extends Phaser.GameObjects.Container {
             this.die();
         } else {
             if (!this.casting) this.playAnim('hurt', true);
+            this.healthBar.setVisible(true);
+            this.MPBar?.setVisible(true);
         }
 
         if(this.hp != _hp) {

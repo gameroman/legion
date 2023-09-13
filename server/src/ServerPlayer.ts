@@ -149,6 +149,10 @@ export class ServerPlayer {
         return this._hp / this.maxHP;
     }
 
+    resetPreviousHP() {
+        this._hp = this.hp;
+    }
+
     heal(amount: number) {
         console.log(`Healing ${amount} HP`);
         this._hp = this.hp;

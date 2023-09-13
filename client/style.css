@@ -423,6 +423,8 @@ canvas {
   }
   
   .notificationBar {
+    display: flex;
+    justify-content: flex-end;
     height: 20px;
     background-color: #373636;
     border-bottom: 2px solid black;
@@ -453,12 +455,6 @@ canvas {
     width: 100%;
     height: auto;
     padding-bottom: 10px;
-  }
-  .menuItem:hover {
-    filter: brightness(1.2);
-  }
-  .menuItem:active {
-    transform: scale(0.95);
   }
 
 .page-header {
@@ -558,4 +554,46 @@ canvas {
 
 .shop-content {
     margin-left: 30px;
+}
+
+.menuItemContainer {
+    position: relative;
+}
+
+.menuItemText {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Kim', sans-serif;
+    color: white;
+    font-size: 30px;
+    text-shadow: -5px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+.menuItemContainer:hover {
+    filter: brightness(1.2);
+  }
+  .menuItemContainer:active {
+    transform: scale(0.95);
+  }
+
+  .logoutButton {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #B3B3B3;
+    color: #B3B3B3;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 10px;
+    background-color: transparent;
+    padding-right: 0;
+}
+
+.logoutButton:hover {
+    color: gray;
+}
+
+.logoutButton i {
+    margin-right: 5px;
 }
