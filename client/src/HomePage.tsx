@@ -6,10 +6,19 @@ import TeamPage from './TeamPage';
 import ShopPage from './ShopPage';
 import RankPage from './RankPage';
 
+interface State {
+    currentPage: string;
+    showNotifications: boolean;
+    unreadNotifications: number;
+    notifications: string[];
+}
 
-class HomePage extends Component {
-    state = {
-        currentPage: 'play'
+class HomePage extends Component<{}, State> {
+    state: State = {
+        currentPage: 'play',
+        showNotifications: false,
+        unreadNotifications: 3,
+        notifications: ['Notification 1', 'Notification 2', 'Notification 3']
     };
     componentDidMount() {
         const link = document.createElement('link');
@@ -25,9 +34,21 @@ class HomePage extends Component {
             document.head.removeChild(link);
         }
     }
+
     handleRouteChange = (e) => {
-        this.setState({ currentPage: e.url.substring(1) });
+        this.setState({ 
+            currentPage: e.url.substring(1),
+            showNotifications: false
+        });
     };
+
+    handleNotificationClick = () => {
+        this.setState(prevState => ({
+            showNotifications: !prevState.showNotifications,
+            unreadNotifications: 0
+        }));
+    };
+
     render() {
         const { currentPage } = this.state;
         const bgcolors = {
@@ -72,7 +93,23 @@ class HomePage extends Component {
             </div>
             <div className="content" style={bgImage}>
             <div className="notificationBar">
-                <div className="logoutButton">
+                <div className="notificationBarButton" onClick={this.handleNotificationClick}>
+                    <i className="fa-solid fa-bell">
+                        {this.state.unreadNotifications > 0 && (
+                            <span className="notificationBadge">{this.state.unreadNotifications}</span>
+                        )}
+                    </i>
+                    {this.state.showNotifications && (
+                        <div className="notificationList">
+                            {this.state.notifications.map((notification, index) => (
+                                <div key={index} className="notificationItem">
+                                    {notification}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <div className="notificationBarButton">
                     <i className="fas fa-sign-out-alt"></i>
                 </div>
             </div>

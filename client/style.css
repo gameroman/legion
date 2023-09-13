@@ -414,10 +414,6 @@ canvas {
     display: flex;
     flex-direction: column;
     background-color: #080c15;
-    /* background-image: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url('assets/aarena_bg.png'); */
-    /* background-size: cover;
-    background-repeat: no-repeat; */
-    /* background-image: url('assets/playpage.png'); */
     background-repeat: no-repeat;
     background-position: 150% -100%;
   }
@@ -425,7 +421,7 @@ canvas {
   .notificationBar {
     display: flex;
     justify-content: flex-end;
-    height: 20px;
+    height: 25px;
     background-color: #373636;
     border-bottom: 2px solid black;
   }
@@ -578,22 +574,58 @@ canvas {
     transform: scale(0.95);
   }
 
-  .logoutButton {
+  .notificationBarButton {
+    position: relative;
     display: inline-flex;
     align-items: center;
     border: 1px solid #B3B3B3;
     color: #B3B3B3;
     padding: 5px;
     cursor: pointer;
-    font-size: 10px;
+    font-size: 16px;
     background-color: transparent;
     padding-right: 0;
 }
 
-.logoutButton:hover {
-    color: gray;
+.notificationBarButton:hover {
+    /* color: gray; */
+    filter: brightness(1.2);
+    cursor: pointer;
 }
 
-.logoutButton i {
+.notificationBarButton i {
+    position: relative;
     margin-right: 5px;
+}
+
+.notificationBadge {
+    position: absolute;
+    bottom: -5px;
+    left: -8px;
+    padding: 2px 5px;
+    border-radius: 50%;
+    background-color: red;
+    color: white;
+    font-size: 8px;
+}
+
+.notificationList {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 200px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #B3B3B3;
+    background-color: white;
+    color: black;
+}
+
+.notificationItem {
+    padding: 10px;
+    border-bottom: 1px solid #B3B3B3;
+}
+
+.notificationItem:last-child {
+    border-bottom: none;
 }
