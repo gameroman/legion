@@ -3,12 +3,12 @@ import { h, Component } from 'preact';
 
 class RankPage extends Component {
   state = {
-    leaderboardData: [
-      { rank: 1, player: 'Player1', elo: 1500, wins: 10, losses: 2, crowdScore: '200K' },
-      { rank: 2, player: 'Player2', elo: 1400, wins: 8, losses: 3, crowdScore: '150K' },
+   leaderboardData: [
+      { rank: 1, player: 'Player1', elo: 1500, wins: 10, losses: 2,  winsRatio: Math.round((10/(10+2))*100) + '%', crowdScore: 5 },
+      { rank: 2, player: 'Player2', elo: 1400, wins: 8, losses: 3, winsRatio: Math.round((8/(8+3))*100) + '%',  crowdScore: 3 },
+      { rank: 3, player: 'Me', elo: 1300, wins: 7, losses: 3, winsRatio: Math.round((7/(7+3))*100) + '%',  crowdScore: 3 },
       // Add more dummy data here
     ],
-    columns: ['rank', 'player', 'elo', 'wins', 'losses', 'wins ratio', 'crowd score'],
     sortColumn: 'elo',
     sortAscending: false
   };
@@ -28,7 +28,14 @@ class RankPage extends Component {
     });
   };
 
+  camelCaseToNormal = (text) => {
+    let result = text.replace(/([A-Z])/g, ' $1').toLowerCase();
+    return result.charAt(0).toUpperCase() + result.slice(1);
+  };
+
   render() {
+    const columns = Object.keys(this.state.leaderboardData[0]);
+
     return (
       <div>
         <div className="page-header">
@@ -39,10 +46,10 @@ class RankPage extends Component {
         <table className="leaderboard-table">
             <thead>
               <tr>
-              {this.state.columns.map(column => (
+              {columns.map(column => (
                 <th onClick={() => this.handleSort(column)}>
                   <div>
-                    <span>{column.charAt(0).toUpperCase() + column.slice(1)}</span>
+                    <span>{this.camelCaseToNormal(column)}</span>
                     <span>
                       {this.state.sortColumn === column ? (this.state.sortAscending ? <i class="fa-solid fa-sort-up"></i> : <i class="fa-solid fa-sort-down"></i>) : <i class="fa-solid fa-sort" style={{visibility: 'hidden'}}></i>}
                     </span>
@@ -53,14 +60,14 @@ class RankPage extends Component {
             </thead>
             <tbody>
               {this.state.leaderboardData.map((data, index) => (
-                <tr key={index}>
+                <tr key={index} className={data.player === 'Me' ? 'highlighted-row' : ''}>
                   <td>#{data.rank}</td>
                   <td>{data.player}</td>
                   <td>{data.elo}</td>
                   <td>{data.wins}</td>
                   <td>{data.losses}</td>
-                  <td>{Math.round((data.wins/(data.wins+data.losses))*100)}%</td>
-                  <td>{data.crowdScore}</td>
+                  <td>{data.winsRatio}</td>
+                  <td>{Array.from({length: data.crowdScore}, (_, i) => <i class="fa-solid fa-star golden-star"></i>)}</td>
                 </tr>
               ))}
             </tbody>
