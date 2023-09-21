@@ -12,7 +12,7 @@ class Main extends Component {
         <Route path="/" component={LandingPage} />
         <Route path="/home" component={HomePage} />
         <Route path="/play" component={HomePage} />
-        <Route path="/team" component={HomePage} />
+        <Route path="/team/:id?" component={HomePage} />
         <Route path="/shop" component={HomePage} />
         <Route path="/rank" component={HomePage} />
         <Route path="/game" component={GamePage} />

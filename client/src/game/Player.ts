@@ -111,7 +111,7 @@ export class Player extends Phaser.GameObjects.Container {
 
         // TODO: refactor as subclass
         if (isPlayer) {
-            this.numKey = scene.add.text(30, 70, num.toString(), { fontSize: '16px', color: '#fff', stroke: '#000', strokeThickness: 3 }).setOrigin(1,1);
+            this.numKey = scene.add.text(30, 70, num.toString(), { fontFamily: 'Kim', fontSize: '12px', color: '#fff', stroke: '#000', strokeThickness: 3 }).setOrigin(1,1);
             this.add(this.numKey);
 
             // Create a Graphics object for the selection oval

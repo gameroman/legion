@@ -14,21 +14,16 @@ interface Member {
   totalCooldown: number;
 }
 
-interface Team {
+interface Props {
   members: Member[];
   score: number;
-}
-
-interface Props {
-  overview: {
-    teams: Team[];
-  };
+  position: string;
 }
 
 interface State {
   cooldowns: number[];
-  previousHPs: number[][];
-  blinking: boolean[][];
+  previousHPs: number[];
+  blinking: boolean[];
 }
 
 class Overview extends Component<Props, State> {
@@ -37,14 +32,14 @@ class Overview extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      cooldowns: props.overview 
-        ? props.overview.teams.flatMap(team => team.members.map(member => member.cooldown))
+      cooldowns: props.members 
+        ? props.members.map(member => member.cooldown)
         : [],
-      previousHPs: props.overview 
-        ? props.overview.teams.map(team => team.members.map(member => member.hp))
+      previousHPs: props.members 
+        ? props.members.map(member => member.hp)
         : [],
-      blinking: props.overview 
-        ? props.overview.teams.map(team => team.members.map(() => false))
+      blinking: props.members 
+        ? props.members.map(() => false)
         : []
     };
   }
@@ -54,30 +49,22 @@ class Overview extends Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (this.props.overview !== prevProps.overview && this.props.overview) {
-      const cooldowns = this.props.overview.teams.flatMap(team => team.members.map(member => member.cooldown));
+    if (this.props.members !== prevProps.members && this.props.members) {
+      const cooldowns = this.props.members.map(member => member.cooldown);
       const previousHPs = this.state.previousHPs;
       const blinking = this.state.blinking;
-      this.props.overview.teams.forEach((team, teamIndex) => {
-        if (!blinking[teamIndex]) {
-          blinking[teamIndex] = [];
+      this.props.members.forEach((member, memberIndex) => {
+        if (blinking[memberIndex] === undefined) {
+          blinking[memberIndex] = false;
         }
-        if (!previousHPs[teamIndex]) {
-          previousHPs[teamIndex] = [];
+        if (member.hp < previousHPs[memberIndex]) {
+          blinking[memberIndex] = true;
+          setTimeout(() => {
+            blinking[memberIndex] = false;
+            this.setState({ blinking });
+          }, 750); // blink for 500ms
         }
-        team.members.forEach((member, memberIndex) => {
-          if (blinking[teamIndex][memberIndex] === undefined) {
-            blinking[teamIndex][memberIndex] = false;
-          }
-          if (member.hp < previousHPs[teamIndex][memberIndex]) {
-            blinking[teamIndex][memberIndex] = true;
-            setTimeout(() => {
-              blinking[teamIndex][memberIndex] = false;
-              this.setState({ blinking });
-            }, 750); // blink for 500ms
-          }
-          previousHPs[teamIndex][memberIndex] = member.hp;
-        });
+        previousHPs[memberIndex] = member.hp;
       });
       this.setState({ cooldowns, previousHPs, blinking });
     }
@@ -93,51 +80,44 @@ class Overview extends Component<Props, State> {
     }));
   }
 
-  render({ overview }: Props, { cooldowns, blinking }: State) {
-    if (!overview || !blinking.length) {
+  render({ members, score, position }: Props, { cooldowns, blinking }: State) {
+    if (!members || !blinking.length) {
       return <div></div>; 
     }
     let cooldownIndex = 0;
     return (
-      <div className="overview box">
-        {overview.teams.map((team, teamIndex) => (
-          <div key={teamIndex} className="team">
-            {teamIndex === 0 && <div className="team-label">Your team - Score: {team.score}</div>}
-            <div className="team-members">
-              {team.members.map((member, memberIndex) => {
-                const portraitStyle = {
-                  backgroundImage: `url(assets/sprites/${member.texture})`,
-                  backgroundPosition: '-45px -45px',
-                  backgroundRepeat: 'no-repeat',
-                  filter: member.isAlive ? 'none' : 'grayscale(100%)'
-                };
-                const cooldown = cooldowns[cooldownIndex++];
-                return (
-                  <div key={memberIndex} className="member">
-                    <div style={portraitStyle} className={`member-portrait ${blinking[teamIndex][memberIndex] ? 'blink' : ''}`} >
-                    {member.isPlayer && <span className="member-index">{memberIndex + 1}</span>}
-                    </div>
-                    <div className="member-name">Player #{memberIndex + 1}</div>
-                    <div className="hp-bar">
-                      <div className="hp-fill" style={{width: `${(member.hp / member.maxHP) * 100}%`}}></div>
-                    </div>
-                    {member.isPlayer && (
-                      <div className="mp-bar">
-                        <div className="mp-fill" style={{width: `${(member.mp / member.maxMP) * 100}%`}}></div>
-                      </div>
-                    )}
-                    {member.isPlayer && (
-                    <div className="cooldown-bar">
-                      <div className="cooldown-fill" style={{width: `${(1 - (cooldown / member.totalCooldown)) * 100}%`}}></div>
-                    </div>
-                    )}
+      <div className="overview">
+          {members.map((member, memberIndex) => {
+            const portraitStyle = {
+              backgroundImage: `url(assets/sprites/${member.texture})`,
+              backgroundPosition: '-45px -45px',
+              backgroundRepeat: 'no-repeat',
+              filter: member.isAlive ? 'none' : 'grayscale(100%)',
+              transform: position === 'left' ? 'scaleX(-1)' : 'none'
+            };
+            const cooldown = cooldowns[cooldownIndex++];
+            return (
+              <div key={memberIndex} className={`box member ${position === 'left' ? 'member-left' : 'member-right'}`}>
+                <div style={portraitStyle} className={`member-portrait ${blinking[memberIndex] ? 'blink' : ''}`} >
+                {member.isPlayer && <span className="member-index">{memberIndex + 1}</span>}
+                </div>
+                <div className="member-name">Player #{memberIndex + 1}</div>
+                <div className="hp-bar">
+                  <div className="hp-fill" style={{width: `${(member.hp / member.maxHP) * 100}%`}}></div>
+                </div>
+                {member.isPlayer && (
+                  <div className="mp-bar">
+                    <div className="mp-fill" style={{width: `${(member.mp / member.maxMP) * 100}%`}}></div>
                   </div>
-                );
-              })}
-            </div>
-            {teamIndex === 1 && <div className="team-label opponent">Opponent's team - Score: {team.score}</div>}
-          </div>
-        ))}
+                )}
+                {member.isPlayer && (
+                <div className="cooldown-bar">
+                  <div className="cooldown-fill" style={{width: `${(1 - (cooldown / member.totalCooldown)) * 100}%`}}></div>
+                </div>
+                )}
+              </div>
+            );
+          })}
       </div>
     );
   }

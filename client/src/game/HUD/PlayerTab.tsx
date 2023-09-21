@@ -164,35 +164,39 @@ class PlayerTab extends Component<Props, State> {
               </div>
             </div>
           </div>
-          <div className="player-skills">
-            <h4>🔥 Spells </h4>
-            {player.spells.map((skill, i) => (
-              <ActionItem 
-                action={skill} 
-                index={i} 
-                clickedIndex={this.state.clickedSpell} 
-                canAct={canAct} 
-                keyboardLayout={keyboardLayout} 
-                actionType={ActionType.Skill} 
-                onActionClick={this.actionClick.bind(this)} 
-              />
-            ))}
-          </div>
+          {player.spells && player.spells.length > 0 && (
+            <div className="player-skills">
+              <h4>🔥 Spells </h4>
+              {player.spells.map((skill, i) => (
+                <ActionItem 
+                  action={skill} 
+                  index={i} 
+                  clickedIndex={this.state.clickedSpell} 
+                  canAct={canAct} 
+                  keyboardLayout={keyboardLayout} 
+                  actionType={ActionType.Skill} 
+                  onActionClick={this.actionClick.bind(this)} 
+                />
+              ))}
+            </div>
+          )}
 
-          <div className="player-items">
-            <h4>🧪 Items </h4>
-            {player.items.map((item, i) => (
-              <ActionItem 
-                action={item} 
-                index={i} 
-                clickedIndex={this.state.clickedItem} 
-                canAct={canAct} 
-                keyboardLayout={keyboardLayout} 
-                actionType={ActionType.Item}
-                onActionClick={this.actionClick.bind(this)} 
-              />
-            ))}
-          </div>
+          {player.items && player.items.length > 0 && (
+            <div className="player-items">
+              <h4>🧪 Items </h4>
+              {player.items.map((item, i) => (
+                <ActionItem 
+                  action={item} 
+                  index={i} 
+                  clickedIndex={this.state.clickedItem} 
+                  canAct={canAct} 
+                  keyboardLayout={keyboardLayout} 
+                  actionType={ActionType.Item}
+                  onActionClick={this.actionClick.bind(this)} 
+                />
+              ))}
+            </div>
+          )}
       </div>;
   }
 }

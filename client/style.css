@@ -46,6 +46,8 @@ canvas {
     margin-top: 10px;
     margin-left: 10px;
     z-index: 2;
+    max-width: 350px;
+    max-height: 270px;
 }
 
 .box::before {
@@ -73,6 +75,7 @@ canvas {
     flex-direction: column; /* This will stack the items vertically */
     align-items: start;
     gap: 10px; /* adjust as needed */
+    margin-bottom: 10px;
 }
 
 .player-content {
@@ -181,16 +184,13 @@ canvas {
     align-items: center;
     margin-left: 1px;
     font-weight: bold;
-    /* font-family: 'Vinque'; */
+    margin-bottom: -10px;
 }
 
 .player-skills h4, .player-items h4 {
     margin-right: 10px;
 }
 
-.player-items {
-    margin-top: -15px;
-}
 
 .skill, .item {
     position: relative;
@@ -277,9 +277,6 @@ canvas {
     0% { opacity: 1; }
     50% { opacity: 0.5; }
     100% { opacity: 1; }
-    /* 0% { filter: brightness(1); }
-    50% { filter: brightness(2); }
-    100% { filter: brightness(1); } */
 }
 
 .flash-effect {
@@ -287,8 +284,8 @@ canvas {
 }
 
 .hud-container {
-    display: flex;
-    justify-content: space-between;  
+  display: flex; 
+  justify-content: space-between;  
 }
 
 .flex-grow {
@@ -296,41 +293,64 @@ canvas {
 }
 
 .overview {
-    position: relative; /* Needed to position the pseudo-element */
+    position: relative;
     margin-top: 10px;
     margin-right: 10px;
     z-index: 2;
-}
-
-.team {
-    margin-bottom: 10px;
-}
-
-
-.team-members {
+    width: 100px;
     display: flex;
-    flex-direction: row;
-    justify-content: right;
-  }
-
-.team-label {
-    font-weight: bold;
-    margin-bottom: 10px;
-    font-size: 14px;
+    flex-direction: column;
+    justify-content: space-between;  
+    align-items: center;
 }
-  
-  .team-label.opponent {
-    text-align: right;
-    margin-top: 10px;
-  }
-  
+
+/* .member::before {
+  content: "";
+  position: absolute;
+  background-color: inherit;
+  z-index: -1;
+}
+
+.member-left::before {
+  top: -30px;
+  right: -60%;
+  bottom: 0;
+  left: -50%;
+  transform: rotate(45deg);
+  width: 170px;
+}
+
+.member-right::before {
+  top: -30px;
+  right: -50%;
+  bottom: 0;
+  left: -60%;
+  transform: rotate(-45deg);
+  width: 170px;
+} */
+
   .member {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 0 10px;
+    margin: 10px 0;
+    font-family: 'Kim', sans-serif;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+    color: white;
+/* 
+    border-top: 2px solid white;
+    border-bottom: 2px solid white; */
   }
-  
+
+  /* .member-left {
+    background: linear-gradient(to right, lightblue, transparent);
+  }
+
+  .member-right {
+    background: linear-gradient(to left, lightblue, transparent);
+  }
+   */
   .member-portrait {
     position: relative;
     width: 50px;
@@ -477,11 +497,10 @@ canvas {
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
-    background-color: gold; /* Warmer pastel color */
-    border-radius: 50px; /* Adjust to create an elliptical shape */
-    padding: 10px 20px; /* Adjust for size */
+    border-radius: 50px; 
+    padding: 10px 20px; 
     font-weight: bold;
-    box-shadow: 0 0 0 10px #070507, 0 0 0 12px #CD853F; /* Creates a 10px transparent gap and a 2px border */
+    border: 1px solid #CD853F;
     font-size: 30px;
     color: white;
     text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
@@ -614,12 +633,34 @@ canvas {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    background-color: #f9f9f9;
+    cursor: pointer;
     margin-bottom: 10px;
     margin-right: 20px;
     border: 2px solid #CD853F;
     align-items: flex-start;
+    color: white;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
   }
+
+  .character-card.warrior {
+    /* background: linear-gradient(to right, #FFC600, #FF8000); */
+    background: linear-gradient(to right, #B22222, #FF6347);
+
+}
+
+.character-card.thief {
+  /* background: linear-gradient(to right, #4B0082, #8A2BE2); */
+  background: linear-gradient(to right, #006400, #32CD32);
+
+}
+
+.character-card.white-mage {
+  background: linear-gradient(to right, #FFFFFF, #A9A9A9);
+}
+
+.character-card.black-mage {
+  background: linear-gradient(to right, #000000, #696969);
+}
 
   .character-info {
     display: flex;
@@ -634,7 +675,8 @@ canvas {
   
   .character-class {
     font-size: 0.9em;
-    color: #666;
+    font-family: Kim;
+    /* color: #666; */
   }
   
   .level-badge {
@@ -655,11 +697,11 @@ canvas {
     flex-direction: column;
     box-shadow: 0 0 0 5px #070507, 0 0 0 7px #CD853F; /* Creates a 10px transparent gap and a 2px border */
     text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
-
   }
 
+
   .level-badge .level-number {
-    font-size: 1.2em; /* adjust as needed */
+    font-size: 1.2em; 
   }
 
   .roster {
@@ -668,17 +710,17 @@ canvas {
     justify-content: center; 
   }
 
-  /* LandingPage.css */
 .landing-page {
   background: url('assets/aarena_bg.png') no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
-  height: 100vh;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  align-items: flex-start;
+  height: 100vh; 
 }
 
 .logo {
@@ -804,4 +846,117 @@ canvas {
 
 .button:active {
   transform: scale(0.95);
+}
+
+.character-full {
+  margin-top: 20px;
+  margin-left: 10px;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  background-color: #F9F6EE;
+  border-radius: 15px;
+  max-width: 800px;
+  min-height: 200px;
+}
+
+.character-header {
+  position: relative;
+  background: linear-gradient(to right, #874255, #edcfb7, transparent);
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  height: 50px;
+  padding: 5px;
+  padding-left: 15px;
+  overflow: hidden;
+}
+
+.character-header-name {
+  position: absolute;
+  font-family: Kim;
+  color: white;
+  font-size: 30px;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  top: 0;
+}
+
+.character-header-name-shadow {
+  position: absolute;
+  top: -30px;
+  left: 15px;
+  font-family: Kim;
+  color: white;
+  font-size: 80px;
+  opacity: 0.15;
+}
+
+.character-header-class {
+  position: absolute;
+  top: 35px;
+  left: 15px;
+  font-family: Kim;
+  color: white;
+  font-size: 15px;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  font-style: italic;
+}
+
+/* .character-header-class.warrior {
+  background: linear-gradient(to right, #B22222, #FF6347);
+
+}
+
+.character-header-class.thief {
+background: linear-gradient(to right, #006400, #32CD32);
+
+}
+
+.character-header-class.white-mage {
+background: linear-gradient(to right, #FFFFFF, #A9A9A9);
+}
+
+.character-header-class.black-mage {
+  background: linear-gradient(to right, #000000, #696969);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+} */
+
+.character-full-content {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  font-family: Kim;
+  color: white;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+.character-full-level {
+  font-size: 20px;
+}
+
+.level-area {
+  display: flex;
+  width: 50%;
+}
+
+.character-full .level-badge {
+  left: 10px;
+  top: 70px;
+}
+
+.xp-area {
+  margin-left: 60px;
+  flex-grow: 1;
+}
+
+.xp-bar-bg {
+  background-color: black;
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+.xp-bar {
+  height: 5px; 
+  background: linear-gradient(to right, darkblue, lightblue);
+  border-radius: 50px;
 }

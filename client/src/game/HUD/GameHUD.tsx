@@ -4,12 +4,18 @@ import PlayerTab from './PlayerTab';
 import Overview from './Overview';
 import { EventEmitter } from 'eventemitter3';
 
+interface Team {
+  members: any[];
+  score: number;
+}
+
 interface State {
   playerVisible: boolean;
   player: any;
   clickedItem: number;
   clickedSpell: number;
-  overview: any;
+  team1: Team;
+  team2: Team;
 }
 
 const events = new EventEmitter();
@@ -20,7 +26,8 @@ class GameHUD extends Component<{}, State> {
     player: null,
     clickedItem: -1,
     clickedSpell: -1,
-    overview: null,
+    team1: null,
+    team2: null,
   }
 
   componentDidMount() {
@@ -42,8 +49,9 @@ class GameHUD extends Component<{}, State> {
     this.setState({ playerVisible: false, player: null });
   }
 
-  updateOverview = (overview: any) => {
-    this.setState({ overview });
+  updateOverview = (team1: Team, team2: Team) => {
+    this.setState({ team1, team2 });
+    // console.log(`team1: `, team1);
   }
 
   keyPress = (key: string) => {
@@ -51,13 +59,13 @@ class GameHUD extends Component<{}, State> {
   }
 
   render() {
-    const { playerVisible, player, overview } = this.state;
-    console.log('rendering game hud');
+    const { playerVisible, player, team1, team2 } = this.state;
     return (
       <div>
         <div className="hud-container">
-          {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : <div className="flex-grow" />}
-          <Overview overview={overview} />
+            <Overview position="left" {...team2} />
+            {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
+            <Overview position="right" {...team1} />
         </div>
         <div id="scene"></div>
       </div>

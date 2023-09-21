@@ -364,7 +364,8 @@ export class Arena extends Phaser.Scene
     }
     
     refreshOverview() {
-        if (this.overviewReady) events.emit('updateOverview', this.getOverview());
+        const { team1, team2 } = this.getOverview();
+        if (this.overviewReady) events.emit('updateOverview', team1, team2);
     }
 
     emitEvent(event, data?) {
@@ -409,7 +410,11 @@ export class Arena extends Phaser.Scene
     }
 
     selectPlayer(player: Player) {
-        if (this.selectedPlayer) this.deselectPlayer();
+        if (this.selectedPlayer) {
+            const isSelf = player.num === this.selectedPlayer.num;
+            this.deselectPlayer();
+            if (isSelf) return;
+        }
         this.selectedPlayer = player;
         this.selectedPlayer.select();
         this.emitEvent('selectPlayer', {num: this.selectedPlayer.num})
@@ -844,10 +849,10 @@ export class Arena extends Phaser.Scene
     }
 
     getOverview() {
-        const overview = {
-            teams: Array.from(this.teamsMap.values()).map(team => team.getOverview()),
-        }
-        // console.log(overview);
+        const overview =  {
+            team1: this.teamsMap.get(1).getOverview(),
+            team2: this.teamsMap.get(2).getOverview(),
+        };
         return overview;
     }
 

@@ -36,8 +36,11 @@ class HomePage extends Component<{}, State> {
     }
 
     handleRouteChange = (e) => {
+        const pathParts = e.url.split('/');
+        const currentPage = pathParts[1]; // This will be 'team' if the URL is '/team/2'
+       
         this.setState({ 
-            currentPage: e.url.substring(1),
+            currentPage,
             showNotifications: false
         });
     };
@@ -58,7 +61,7 @@ class HomePage extends Component<{}, State> {
             rank: '#060607',
         }
         const bgImage = {
-            backgroundImage: `url(assets/${currentPage}bg.png)`,
+            backgroundImage: `url(/assets/${currentPage}bg.png)`,
             backgroundColor: bgcolors[currentPage]
         };
         return (
@@ -66,31 +69,31 @@ class HomePage extends Component<{}, State> {
             <div className="menu">
             <Link href="/">
                 <div className="menuItemContainer">
-                    <img src="assets/legionlogo.png" className="gameLogo" />
+                    <img src="/assets/legionlogo.png" className="gameLogo" />
                 </div>
             </Link>
             <div className="menuItems">
                 <Link href="/play">
                     <div className="menuItemContainer">
-                        <img className="menuItem" src="assets/play.png" />
+                        <img className="menuItem" src="/assets/play.png" />
                         <span className="menuItemText">PLAY</span>
                     </div>
                 </Link>
                 <Link href="/team">
                     <div className="menuItemContainer">
-                        <img className="menuItem" src="assets/team.png" />
+                        <img className="menuItem" src="/assets/team.png" />
                         <span className="menuItemText">TEAM</span>
                     </div>
                 </Link>
                 <Link href="/shop">
                     <div className="menuItemContainer">
-                        <img className="menuItem" src="assets/shop.png" />
+                        <img className="menuItem" src="/assets/shop.png" />
                         <span className="menuItemText">SHOP</span>
                     </div>
                 </Link>
                 <Link href="/rank">
                     <div className="menuItemContainer">
-                        <img className="menuItem" src="assets/rank.png" />
+                        <img className="menuItem" src="/assets/rank.png" />
                         <span className="menuItemText">RANK</span>
                     </div>
                 </Link>
@@ -121,7 +124,7 @@ class HomePage extends Component<{}, State> {
             <div className="mainContent">
                 <Router onChange={this.handleRouteChange}>
                 <Route default path="/play" component={PlayPage} />
-                <Route path="/team" component={TeamPage} />
+                <Route path="/team/:id?" component={TeamPage} />
                 <Route path="/shop" component={ShopPage} />
                 <Route path="/rank" component={RankPage} />
                 </Router>
