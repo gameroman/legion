@@ -125,7 +125,10 @@ canvas {
     padding-right: 6px;
     background-color: #4a4947;
     font-weight: bold;
-    max-width: 100px;
+    width: 100px;
+    font-family: 'Kim';
+    color: white;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }
 
 .badge-label {
@@ -136,8 +139,8 @@ canvas {
 }
 
 .cooldown {
-    background-color: #AD8606;
-    /* background-color: #ffc400; */
+  /* background-color: #AD8606; */
+  background-color: #ffc400;
 }
 
 .hp {
@@ -162,6 +165,10 @@ canvas {
 
 .spDef {
   background-color: #20B2AA;
+}
+
+.target {
+  background-color: #FAD7A0;
 }
 
   
@@ -980,7 +987,7 @@ background: linear-gradient(to right, #FFFFFF, #A9A9A9);
 
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
   margin-top: 20px;
 }
@@ -1000,6 +1007,8 @@ background: linear-gradient(to right, #FFFFFF, #A9A9A9);
 .shop-item-image {
   width: 36px;
   height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
@@ -1042,7 +1051,7 @@ background: linear-gradient(to right, #FFFFFF, #A9A9A9);
 
 .shop-item-card-content {
   padding: 10px;
-  min-height: 80px;
+  height: 150px;
   display: flex;
   flex-direction: row;
 }
@@ -1124,4 +1133,13 @@ background: linear-gradient(to right, #FFFFFF, #A9A9A9);
   display: flex;
   flex-direction: column;
   width: 100%;
+}
+
+.description-area {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 30px;
+  width: 50%;
 }

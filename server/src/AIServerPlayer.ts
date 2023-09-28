@@ -142,6 +142,8 @@ export class AIServerPlayer extends ServerPlayer {
     }
 
     checkForAoE() {
+        // Return if random number below 0.5
+        if (Math.random() < 0.6) return false;
         for (let i = 0; i < this.spells.length; i++) {
             const spell = this.spells[i];
             // console.log(`AI ${this.num} checking spell ${spell.name}, cost = ${spell.cost}, mp = ${this.mp}`);

@@ -9,27 +9,25 @@ class Description extends Component<DescProps> {
   render() {
     const { action } = this.props;
     return (
-      <div>  
+      <div className="description-area">  
         {
           action.effects && action.effects.map((effect) => {
             const value = effect.value == -1 ? 'FULL' : `+${effect.value}`;
             return (
-            <div className="hp mini">  
-              <span className="mp-label">{effect.stat}</span>
-              <span className="mp-amount">{value}</span>
+            <div className={`badge ${effect.stat}`}>  
+              <div className="badge-label">{effect.stat.toUpperCase()}</div>
+              <div>{value}</div>
             </div>
             );
           })
         }
-        <div className="info-box-extra">
-          <div className='badge'>
-            <span className="badge-label">⏳ </span> 
-            <span>{action.cooldown}s</span>
-          </div>
-          <div className='badge'>
-            <span className="badge-label">🎯 </span> 
-            <span>{action.target}</span>
-          </div>
+        <div className='badge cooldown' title='Cooldown'>
+          <span className="badge-label">⏳ </span> 
+          <span>{action.cooldown}s</span>
+        </div>
+        <div className='badge target' title='Target type'>
+          <span className="badge-label">🎯 </span> 
+          <span>{action.target.charAt(0).toUpperCase() + action.target.slice(1)}</span>
         </div>
       </div>
     );
