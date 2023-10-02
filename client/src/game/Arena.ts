@@ -82,6 +82,8 @@ export class Arena extends Phaser.Scene
         }
         this.load.audio(`bgm_end`, `assets/music/bgm_end.wav`);
 
+        this.load.atlas('groundTiles', 'assets/tiles.png', 'assets/tiles.json');
+
     }
 
     connectToServer() {
@@ -205,19 +207,31 @@ export class Arena extends Phaser.Scene
     }
 
     drawGrid() {
+        
+
         const totalWidth = this.tileSize * this.gridWidth;
         const totalHeight = this.tileSize * this.gridHeight;
 
-        // const gameWidth = Number(this.sys.game.config.width);
-        // const gameHeight = Number(this.sys.game.config.height);
         const gameWidth = this.scale.gameSize.width;
         const gameHeight = this.scale.gameSize.height;
 
         const startX = (gameWidth - totalWidth) / 2;
         const startY = (gameHeight - totalHeight) / 2 + 150;
 
-        // Create a graphics object
-        let graphics = this.add.graphics().setDepth(2).setAlpha(0.5);
+        const tileWeights = {
+            53: 15,
+            54: 2,
+            52: 2,
+            51: 2,
+            50: 1,
+            49: 1
+        };
+        const tiles = [];
+        for (const tile in tileWeights) {
+            for (let i = 0; i < tileWeights[tile]; i++) {
+                tiles.push(parseInt(tile));
+            }
+        }
 
         // Loop over each row
         for (let y = 0; y < this.gridHeight; y++) {
@@ -225,13 +239,26 @@ export class Arena extends Phaser.Scene
             for (let x = 0; x < this.gridWidth; x++) {
                 
                 if (this.isSkip(x, y)) continue;
-                // Set the fill style to transparent
-                graphics.fillStyle(0xffffff, 0);
-                graphics.fillRect(startX + x * this.tileSize, startY + y * this.tileSize, this.tileSize, this.tileSize);
                 
-                // Set the line style to white for the border
-                graphics.lineStyle(2, 0xffffff, 1);
-                graphics.strokeRect(startX + x * this.tileSize, startY + y * this.tileSize, this.tileSize, this.tileSize);
+                const tile = tiles[Math.floor(Math.random() * tiles.length)];
+                const tileSprite = this.add.image(startX + x * this.tileSize, startY + y * this.tileSize + this.scale.gameSize.height, 'groundTiles', `element_${tile}`)
+                    .setDisplaySize(this.tileSize, this.tileSize)
+                    .setDepth(1)
+                    .setOrigin(0); 
+                
+                // Add a random vertical and/or horizontal flip
+                const flipX = Math.random() < 0.5;
+                const flipY = Math.random() < 0.5;
+                tileSprite.setFlip(flipX, flipY);
+
+                // Tween the tile to its intended position
+                this.tweens.add({
+                    targets: tileSprite,
+                    y: startY + y * this.tileSize,
+                    duration: 1000, // duration of the tween in milliseconds
+                    ease: 'Power2', // easing function to make the movement smooth
+                    delay: Math.random() * 500 // random delay to make the tiles fall at different times
+                });
             }
         }
 
@@ -752,7 +779,7 @@ export class Arena extends Phaser.Scene
 
     highlightCells(gridX, gridY, radius) {
         // Create a new Graphics object to highlight the cells
-        if (!this.highlight) this.highlight = this.add.graphics();
+        if (!this.highlight) this.highlight = this.add.graphics().setDepth(1);
         this.clearHighlight();
         this.highlight.fillStyle(0xffd700, 0.7); // Use golden color
     
