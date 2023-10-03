@@ -224,7 +224,8 @@ export class Arena extends Phaser.Scene
             52: 2,
             51: 2,
             50: 1,
-            49: 1
+            49: 1,
+            48: 1,
         };
         const tiles = [];
         for (const tile in tileWeights) {
@@ -247,9 +248,9 @@ export class Arena extends Phaser.Scene
                     .setOrigin(0); 
                 
                 // Add a random vertical and/or horizontal flip
-                const flipX = Math.random() < 0.5;
-                const flipY = Math.random() < 0.5;
-                tileSprite.setFlip(flipX, flipY);
+                // const flipX = Math.random() < 0.5;
+                // const flipY = Math.random() < 0.5;
+                // tileSprite.setFlip(flipX, flipY);
 
                 // Tween the tile to its intended position
                 this.tweens.add({

@@ -281,7 +281,6 @@ canvas {
     visibility: hidden; 
     opacity: 0;
     transition: visibility 0s, opacity 0.2s linear; /* Fade in/out */
-    width: 200px;
     z-index: 1;
 }
   
@@ -945,26 +944,6 @@ canvas {
   font-style: italic;
 }
 
-/* .character-header-class.warrior {
-  background: linear-gradient(to right, #B22222, #FF6347);
-
-}
-
-.character-header-class.thief {
-background: linear-gradient(to right, #006400, #32CD32);
-
-}
-
-.character-header-class.white-mage {
-background: linear-gradient(to right, #FFFFFF, #A9A9A9);
-}
-
-.character-header-class.black-mage {
-  background: linear-gradient(to right, #000000, #696969);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-} */
 
 .character-full-content {
   display: flex;
@@ -1259,4 +1238,67 @@ background: linear-gradient(to right, #FFFFFF, #A9A9A9);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   font-family: Kim;
   color: #4a4947;
+}
+
+.inventory-full {
+  margin-top: 20px;
+  margin-left: 10px;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  background-color: #F9F6EE;
+  border-radius: 15px;
+  width: 60%;
+}
+
+.inventory-header {
+  position: relative;
+  background: linear-gradient(to right, #2f150e, #d8b085, transparent);
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  height: 50px;
+  padding: 5px;
+  padding-left: 15px;
+  overflow: hidden;
+}
+
+.inventory-header-name {
+  position: absolute;
+  font-family: Kim;
+  color: white;
+  font-size: 45px;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  top: 0;
+  padding-left: 100px;
+}
+
+.inventory-header-name-shadow {
+  position: absolute;
+  top: -30px;
+  left: 15px;
+  font-family: Kim;
+  color: white;
+  font-size: 80px;
+  opacity: 0.15;
+}
+
+.inventory-header-image {
+  position: relative;
+  left: -10px; /* Adjust this value to control how much the image spills over to the left */
+}
+
+.inventory-full-content {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  font-family: Kim;
+  color: white;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+.character-inventory-container {
+  display: flex;
+}
+
+.character-inventory-container > :first-child {
+  margin-right: 30px;
 }

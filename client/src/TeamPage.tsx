@@ -4,6 +4,7 @@ import { Router, Route } from 'preact-router';
 
 import Roster from './Roster';
 import Character from './Character';
+import Inventory from './Inventory';
 
 interface TeamPageProps {
   matches: {
@@ -21,9 +22,12 @@ class TeamPage extends Component<TeamPageProps> {
           </div>
           <div className="team-content">
             <Roster />
-            <Router>
-              <Route path="/team/:id" component={Character} />
-            </Router>
+            <div className="character-inventory-container">
+              <Router>
+                <Route path="/team/:id" component={Character} />
+              </Router>
+              <Inventory />
+            </div>
           </div>
         </div>
       );
