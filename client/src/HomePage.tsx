@@ -34,6 +34,7 @@ class HomePage extends Component<{}, State> {
         this.unregisterAuthObserver = firebase.auth().onAuthStateChanged(
             (user) => this.setState({ user })
         );
+   
     }
 
     componentWillUnmount() {
@@ -49,20 +50,28 @@ class HomePage extends Component<{}, State> {
     handleRouteChange = (e) => {
         const pathParts = e.url.split('/');
         const currentPage = pathParts[1]; // This will be 'team' if the URL is '/team/2'
-       
+        const showFirebaseUI = false;
+
         this.setState({ 
             currentPage,
+            showFirebaseUI,
         });
     };
 
     unregisterAuthObserver: () => void;
 
     logout = () => {
-        firebase.auth().signOut();
+        console.log('Logging out');
+        firebase.auth().signOut().then(() => {
+            this.setState({ user: null }); 
+        }).catch((error) => {
+            console.error('Error signing out: ', error);
+        });
     }
   
     initFirebaseUI = () => {
       const uiConfig = {
+        signInFlow: 'popup', 
         signInSuccessUrl: '/play',
         signInOptions: [
           firebase.auth.GoogleAuthProvider.PROVIDER_ID,
@@ -70,9 +79,17 @@ class HomePage extends Component<{}, State> {
         ],
       };
   
-      const ui = firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(firebase.auth());
-      ui.start('#firebaseui-auth-container', uiConfig);
-      this.setState({ showFirebaseUI: true });
+      try {
+        const ui = firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(firebase.auth());
+        ui.start('#firebaseui-auth-container', uiConfig);
+        this.setState({ showFirebaseUI: true });
+      } catch (error) {
+        console.error('Error initializing Firebase UI: ', error);
+      }
+    }
+
+    hideFirebaseUI = () => {
+        this.setState({ showFirebaseUI: false });
     }
 
     render() {
@@ -135,8 +152,16 @@ class HomePage extends Component<{}, State> {
                     </Router>
                 </div>
                 </div>
-                {/* {showFirebaseUI && <div id="firebaseui-auth-container"></div>} */}
-                <div id="firebaseui-auth-container"></div>
+
+                <div className={`dialog login-dialog ${!showFirebaseUI ? 'hidden' : ''}`}>
+                    <div className="shop-item-card-header" >
+                        <div className="shop-item-card-name">Sign up or sign in</div>
+                        <div className="shop-item-card-name-shadow">Sign up or sign in</div>
+                    </div>
+                    <div className="shop-item-card-content" id="firebaseui-auth-container">
+                        <i className="fa-solid fa-circle-xmark closebtn" onClick={this.hideFirebaseUI}></i>  
+                    </div>
+                </div>
             </div>
         );
     }

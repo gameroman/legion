@@ -41,8 +41,8 @@ class NotificationBar extends Component<Props, State> {
                     </a>
                 </div>
                 <div>
-                    {this.props.user === null && <button onClick={this.props.initFirebaseUI}>Log in</button>}
-                    {this.props.user !== null && <button onClick={this.props.logout}>Log out</button>}
+                    {this.props.user === null && <div className="notificationBarButton" onClick={this.props.initFirebaseUI}>Log in</div>}
+                    {this.props.user !== null && <div className="notificationBarButton" onClick={this.props.logout}>Log out</div>}
       
                     {/* <div className="notificationBarButton" onClick={this.handleNotificationClick}>
                         <i className="fa-solid fa-bell">

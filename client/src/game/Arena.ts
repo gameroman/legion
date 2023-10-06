@@ -63,6 +63,8 @@ export class Arena extends Phaser.Scene
         this.load.spritesheet('cast', 'assets/animations/cast.png', { frameWidth: 48, frameHeight: 64});
         this.load.spritesheet('slash', 'assets/animations/slash.png', { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('thunder', 'assets/animations/bolts.png', { frameWidth: 96, frameHeight: 96});
+        this.load.spritesheet('ice', 'assets/animations/ice.png', { frameWidth: 96, frameHeight: 96});
+
 
         this.load.audio('click', 'assets/sfx/click_2.wav');
         this.load.audio('slash', 'assets/sfx/swish_2.wav');
@@ -75,6 +77,7 @@ export class Arena extends Phaser.Scene
 
         this.load.audio('fireball', 'assets/sfx/fireball.wav');
         this.load.audio('thunder', 'assets/sfx/thunder.wav');
+        this.load.audio('ice', 'assets/sfx/ice.wav');
 
         this.load.audio(`bgm_start`, `assets/music/bgm_start.wav`);
         for (let i = 2; i <= 13; i++) {
@@ -226,6 +229,8 @@ export class Arena extends Phaser.Scene
             50: 1,
             49: 1,
             48: 1,
+            47: 1,
+            46: 1,
         };
         const tiles = [];
         for (const tile in tileWeights) {
@@ -554,7 +559,7 @@ export class Arena extends Phaser.Scene
 
     createSounds() {
         this.SFX = {};
-        const sounds = ['click', 'slash', 'steps', 'nope', 'heart', 'cooldown', 'fireball','healing', 'cast', 'thunder']
+        const sounds = ['click', 'slash', 'steps', 'nope', 'heart', 'cooldown', 'fireball','healing', 'cast', 'thunder', 'ice']
         sounds.forEach((sound) => {
             this.SFX[sound] = this.sound.add(sound);
         })
@@ -676,6 +681,12 @@ export class Arena extends Phaser.Scene
         this.anims.create({
             key: `thunder`, // The name of the animation
             frames: this.anims.generateFrameNumbers('thunder', { frames: [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47] }), 
+            frameRate: 15, // Number of frames per second
+        });
+
+        this.anims.create({
+            key: `ice`, // The name of the animation
+            frames: this.anims.generateFrameNumbers('ice', { frames: [54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 64, 66, 67] }), 
             frameRate: 15, // Number of frames per second
         });
 

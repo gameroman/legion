@@ -602,10 +602,9 @@ canvas {
     cursor: pointer;
     font-size: 14px;
     background-color: #080c15;
-    padding-right: 0;
     border-radius: 3px;
     margin-right: 5px;
-    /* box-shadow: 0 0 0 3px #070507, 0 0 0 4px #CD853F; */
+    font-weight: bold;
 }
 
 .notificationBarButton:hover {
@@ -841,6 +840,10 @@ canvas {
 
 .golden-star {
   color: gold;
+}
+
+.hidden {
+  display: none;
 }
 
 .leaderboard-table tr.highlighted-row {
@@ -1174,6 +1177,10 @@ canvas {
   color: #4a4947;
 }
 
+.login-dialog {
+  width: 300px;
+}
+
 
 .closebtn {
   cursor: pointer;
@@ -1225,21 +1232,6 @@ canvas {
 
 }
 
-#firebaseui-auth-container {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000;
-
-  border: 2px solid #ccc;
-  background-color: #F9F6EE;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  font-family: Kim;
-  color: #4a4947;
-}
-
 .inventory-full {
   margin-top: 20px;
   margin-left: 10px;
@@ -1287,12 +1279,14 @@ canvas {
 }
 
 .inventory-full-content {
-  display: flex;
-  justify-content: space-between;
   padding: 10px;
   font-family: Kim;
   color: white;
   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); /* Adjust the 100px value as needed */
+  grid-gap: 10px; /* Adjust as needed */
+
 }
 
 .character-inventory-container {
