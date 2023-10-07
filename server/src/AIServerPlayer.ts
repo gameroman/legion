@@ -1,5 +1,5 @@
 import { ServerPlayer, ActionType } from './ServerPlayer';
-import { Target } from "./Item";
+import { Target } from "@legion/shared";
 
 type Comparator<T> = (a: T, b: T) => number;
 

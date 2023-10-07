@@ -1,4 +1,5 @@
-import { Item, Stat, Target } from "./Item";
+import { Item } from "./Item";
+import { Stat, Target } from "@legion/shared";
 
 export const items:Item[] = [];
 

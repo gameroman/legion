@@ -1,6 +1,6 @@
 
 import { Spell, EffectModifier, EffectModifiers, EffectDirection } from "./Spell";
-import { Target, Stat } from "./Item";
+import { Stat, Target } from "@legion/shared";
 
 export const spells:Spell[] = [];
 

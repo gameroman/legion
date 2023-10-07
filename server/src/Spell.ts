@@ -1,6 +1,8 @@
 import { ServerPlayer } from "./ServerPlayer";
-import { Stat, Effect, Target } from "./Item";
+import { Effect } from "./Item";
 import { Game } from "./Game";
+import { Stat, Target } from "@legion/shared";
+
 
 export class EffectModifier {
     stat;

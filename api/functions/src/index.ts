@@ -13,5 +13,6 @@ export const leaderboardData = onRequest((request, response) => {
         { rank: 2, player: 'Player2', elo: 1400, wins: 8, losses: 3, winsRatio: Math.round((8/(8+3))*100) + '%',  crowdScore: 3 },
         { rank: 3, player: 'Me', elo: 1300, wins: 7, losses: 3, winsRatio: Math.round((7/(7+3))*100) + '%',  crowdScore: 3 },
         // Add more dummy data here
-      ]);
-  });
+    ]);
+});
+

@@ -86,12 +86,12 @@ class ShopPage extends Component<{}, State> {
                   <div className="qty-button" onClick={() => this.changeQuantity(-1)}>-</div>
                   <input className="shop-qty" type="text" value={quantity} />
                   <div className="qty-button" onClick={() => this.changeQuantity(1)}>+</div>
-                </div>
-                {selectedItem.name}
-                <div>Total: {quantity * selectedItem.price}</div>
-              <div className="button-container button small-button" onClick={this.purchaseItem}>
-                Buy
-              </div>
+            </div>
+            {selectedItem.name}
+            <div>Total: {quantity * selectedItem.price}</div>
+            <div className="" onClick={this.purchaseItem}>
+              Buy
+            </div>
             </div>
           </div>
         )}

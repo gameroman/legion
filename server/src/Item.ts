@@ -1,28 +1,13 @@
 import { ServerPlayer } from "./ServerPlayer";
 import { EffectModifiers } from "./Spell";
 import { Game } from "./Game";
-
-export enum Stat {
-    HP,
-    MP,
-    ATK,
-    DEF,
-    SPATK,
-    SPDEF,
-    NONE
-}
+import { Stat, Target } from "@legion/shared";
 
 export interface Effect {
     stat: Stat;
     value: number;
     modifiers?: EffectModifiers;
     onKO?: boolean;
-}
-
-export enum Target {
-    SELF,
-    AOE,
-    SINGLE
 }
 
 export interface NetworkItem {

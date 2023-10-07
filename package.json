@@ -1,0 +1,10 @@
+{
+    "name": "legion",
+    "private": true,
+    "workspaces": [
+      "shared",
+      "server",
+      "client",
+      "API"
+    ]
+  }

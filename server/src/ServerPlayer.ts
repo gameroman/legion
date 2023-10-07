@@ -1,5 +1,6 @@
 import { Team } from './Team';
-import { Item, NetworkItem, Stat } from './Item';
+import { Item, NetworkItem,} from './Item';
+import { Stat } from "@legion/shared";
 import { Spell, NetworkSpell } from './Spell';
 
 export type ActionType = 'move' | 'attack';

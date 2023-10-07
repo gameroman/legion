@@ -1,4 +1,5 @@
 {
+    "name": "legion-client",
     "main": "index.tsx",
     "scripts": {
         "start": "lite-server",
