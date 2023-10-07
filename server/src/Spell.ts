@@ -1,35 +1,6 @@
 import { ServerPlayer } from "./ServerPlayer";
-import { Effect } from "./Item";
 import { Game } from "./Game";
-import { Stat, Target } from "@legion/shared";
-
-
-export class EffectModifier {
-    stat;
-    value;
-    direction;
-
-    constructor(stat: Stat, value: number, direction: EffectDirection) {
-        this.stat = stat;
-        this.value = value;
-        this.direction = direction;
-    }
-}
-
-export class EffectModifiers {
-    casterModifier;
-    targetModifier;
-
-    constructor(casterModifier: EffectModifier, targetModifier: EffectModifier) {
-        this.casterModifier = casterModifier;
-        this.targetModifier = targetModifier;
-    }
-}
-
-export enum EffectDirection {
-    PLUS,
-    MINUS
-}
+import { Stat, Target, Effect, EffectModifiers, EffectModifier, EffectDirection } from "@legion/shared";
 
 export interface NetworkSpell {
     id: number;

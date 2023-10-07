@@ -3,8 +3,9 @@ import { Socket, Server } from 'socket.io';
 import { Game } from './Game';
 import { ServerPlayer } from './ServerPlayer';
 import { AIServerPlayer } from './AIServerPlayer';
-import { items } from './Items';
+import { items } from '@legion/shared/Items';
 import { spells } from './Spells';
+import { Item } from './Item';
 
 const TICK = 100;
 const AI_VS_AI = false;
@@ -40,7 +41,19 @@ export class AIGame extends Game {
                 for (let i = 0; i <= 1; i++) {
                     // Set quantity to random between 0 and 2
                     let qty = Math.floor(Math.random() * 2);
-                    if (qty) player.addItem(items[i], qty);
+                    const base = items[i];
+                    const item = new Item(
+                        base.id,
+                        base.name,
+                        base.description,
+                        base.frame,
+                        base.sfx,
+                        base.animation,
+                        base.cooldown,
+                        base.target,
+                        base.effects,
+                    );
+                    if (qty) player.addItem(item);
                 }
             }, this);
         }, this);

@@ -114,8 +114,8 @@ export class Arena extends Phaser.Scene
             this.processCooldown(data);
         });
 
-        this.socket.on('itemnb', (data) => {
-            this.processItemNb(data);
+        this.socket.on('inventory', (data) => {
+            this.processInventory(data);
         });
 
         this.socket.on('hpchange', (data) => {
@@ -189,7 +189,6 @@ export class Arena extends Phaser.Scene
             y,
             index
         };
-        console.log(`Sending useitem: ${JSON.stringify(data)}`);
         this.send('useitem', data);
         this.toggleItemMode(false);
         this.selectedPlayer.pendingItem = null;
@@ -499,9 +498,9 @@ export class Arena extends Phaser.Scene
         player.setCooldown(cooldown);
     }
 
-    processItemNb({num, index, newQuantity}) {
+    processInventory({num, inventory}) {
         const player = this.getPlayer(this.playerTeamId, num);
-        player.updateItemNb(index, newQuantity);
+        player.setInventory(inventory);
         this.emitEvent('inventoryChange', {num});
     }
 

@@ -245,12 +245,11 @@ export abstract class Game
 
         const item = player.getItemAtIndex(index);
         if (!item) return;
-        if (!player.getItemQuantity(item)) return;
         
         const cooldown = item?.cooldown * 1000;
         this.setCooldown(player, cooldown);
 
-        const newQuantity = player.removeItem(item, 1);
+        player.removeItem(item);
         const targets = item.getTargets(this, player, x, y);
         // console.log(`Item ${item.name} found ${targets.length} targets`);
         item.applyEffect(targets);
@@ -277,10 +276,9 @@ export abstract class Game
             cooldown,
         });
 
-        team.socket?.emit('itemnb', {
+        team.socket?.emit('inventory', {
             num,
-            index,
-            newQuantity,
+            inventory: player.getNetworkInventory(),
         });
     }
 

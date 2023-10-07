@@ -13,3 +13,37 @@ export enum Target {
     AOE,
     SINGLE
 }
+
+export enum EffectDirection {
+    PLUS,
+    MINUS,
+}
+
+export class EffectModifier {
+    stat;
+    value;
+    direction;
+
+    constructor(stat: Stat, value: number, direction: EffectDirection) {
+        this.stat = stat;
+        this.value = value;
+        this.direction = direction;
+    }
+}
+
+export class EffectModifiers {
+    casterModifier;
+    targetModifier;
+
+    constructor(casterModifier: EffectModifier, targetModifier: EffectModifier) {
+        this.casterModifier = casterModifier;
+        this.targetModifier = targetModifier;
+    }
+}
+
+export interface    Effect {
+    stat: Stat;
+    value: number;
+    modifiers?: EffectModifiers;
+    onKO?: boolean;
+}

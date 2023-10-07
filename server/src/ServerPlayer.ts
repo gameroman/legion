@@ -1,5 +1,5 @@
 import { Team } from './Team';
-import { Item, NetworkItem,} from './Item';
+import { Item } from './Item';
 import { Stat } from "@legion/shared";
 import { Spell, NetworkSpell } from './Spell';
 
@@ -24,7 +24,8 @@ export class ServerPlayer {
     cooldowns;
     cooldown: number = 0;
     cooldownTimer: NodeJS.Timeout | null = null;
-    inventory: Map<Item, number> = new Map<Item, number>();
+    inventoryCapacity: number = 3;
+    inventory: Item[] = [];
     spells: Spell[] = [];
     isCasting: boolean = false;
     damageDealt: number = 0;
@@ -80,14 +81,9 @@ export class ServerPlayer {
         return data;
     }
 
-    getNetworkInventory(): NetworkInventory[] {
-        // Map every item to its network data
-        return [...this.inventory.entries()].map(([item, quantity]) => {
-            return {
-                'item': item.getNetworkData(),
-                'quantity': quantity
-            }
-        });
+    getNetworkInventory(): number[] {
+        // Return the id's if the Items in this.inventory
+        return this.inventory.map(item => item.id);
     }
 
     getNetworkSpells() {
@@ -231,30 +227,26 @@ export class ServerPlayer {
         this.team = team;
     }
 
-    addItem(item: Item, quantity: number) {
-        const currentQuantity = this.inventory.get(item) || 0;
-        this.inventory.set(item, currentQuantity + quantity);
-    }
-
-    removeItem(item: Item, quantity: number) {
-        const currentQuantity = this.inventory.get(item) || 0;
-        if (currentQuantity < quantity) {
-            throw new Error(`Cannot remove ${quantity} ${item.name} from player ${this.num} because they only have ${currentQuantity}`);
+    addItem(item: Item) {
+        if (this.inventory.length >= this.inventoryCapacity) {
+            console.error(`Cannot add ${item.name} to player ${this.num}'s inventory because it is full`);
+            return;
         }
-        this.inventory.set(item, currentQuantity - quantity);
-        return this.inventory.get(item);
+        this.inventory.push(item);
     }
 
-    getItemQuantity(item: Item): number {
-        return this.inventory.get(item) || 0;
+    removeItem(item: Item) {
+        const index = this.inventory.indexOf(item);
+        if (index === -1) {
+            console.error(`Cannot remove ${item.name} from player ${this.num}'s inventory because it is not there`);
+            return;
+        }
+        this.inventory.splice(index, 1);
     }
 
     getItemAtIndex(index: number): Item | null {
-        const items = [...this.inventory.keys()];
-        if (index < 0 || index >= items.length) {
-            return null;
-        }
-        return items[index];
+        if (index < 0 || index >= this.inventory.length) return null;
+        return this.inventory[index];
     }
 
     addSpell(spell: Spell) {
@@ -276,11 +268,6 @@ interface playerNetworkData {
     mp?: number;
     distance?: number;
     cooldown?: number;
-    inventory?: NetworkInventory[];
+    inventory?: number[];
     spells?: NetworkSpell[];
-}
-
-interface NetworkInventory {
-    item: NetworkItem;
-    quantity: number;
 }

@@ -1,25 +1,10 @@
 import { HealthBar } from "./HealthBar";
 import { CircularProgress } from "./CircularProgress";
 import { Team } from './Team';
+import { BaseItem } from "@legion/shared/BaseItem";
+import { items } from '@legion/shared/Items';
+import { Target } from "@legion/shared";
 
-interface NetworkInventory {
-    item: Item;
-    quantity: number;
-}
-interface Item {
-    id: number;
-    name: string;
-    description: string;
-    frame: string;
-    effects: ItemEffect[];
-    target: string;
-    cooldown: number;
-}
-
-interface ItemEffect {
-    stat: string;
-    value: number;
-}
 
 export interface NetworkSpell {
     id: number;
@@ -73,7 +58,7 @@ export class Player extends Phaser.GameObjects.Container {
     cooldownDuration: number;
     totalCooldownDuration: number;
     hurtTween: Phaser.Tweens.Tween;
-    inventory: Map<Item, number> = new Map<Item, number>();
+    inventory: BaseItem[] = [];
     spells: NetworkSpell[] = [];
     animationSprite: Phaser.GameObjects.Sprite;
     pendingSkill: number | null = null;
@@ -168,14 +153,7 @@ export class Player extends Phaser.GameObjects.Container {
         const textureFile = this.arena.assetsMap[this.texture];
         // Extract the filename from the path
         const textureFilename = textureFile.split('/').pop();
-
-        const items = Array.from(this.inventory.entries()).map(([item, quantity]) => {
-            return {
-                ...item,
-                quantity: quantity
-            }    
-        });        
-
+  
         return {
             name: 'Player 1',
             number: this.num,
@@ -186,7 +164,7 @@ export class Player extends Phaser.GameObjects.Container {
             maxMp: this.maxMP,
             cooldown: this.cooldownDuration / 1000,
             spells: this.spells,
-            items,
+            items: this.inventory,
             casting: this.casting,
           }
     }
@@ -330,10 +308,9 @@ export class Player extends Phaser.GameObjects.Container {
         }
     }
 
-    getItemAtSlot(index) {
-        const entry = Array.from(this.inventory.entries())[index]
-        if (entry) return entry[0];
-        return null;
+    getItemAtSlot(index): BaseItem | null {
+        if (index >= this.inventory.length) return null;
+        return this.inventory[index];
     }
 
     useItem(index) {
@@ -350,10 +327,10 @@ export class Player extends Phaser.GameObjects.Container {
             return;
         }
         if (item) {
-            if (item.target == 'SELF') {
+            if (item.target == Target.SELF) {
                 // @ts-ignore
                 this.arena.sendUseItem(index, this.x, this.y);
-            } else if (item.target == 'SINGLE') {
+            } else if (item.target == Target.SINGLE) {
                 this.pendingItem = index;
                 // @ts-ignore
                 this.arena.toggleItemMode(true);
@@ -597,21 +574,15 @@ export class Player extends Phaser.GameObjects.Container {
         });
     }
 
-    setInventory(inventory: NetworkInventory[]) {
-        inventory.forEach(data => {
+    setInventory(inventory: number[]) {
+        inventory.forEach(itemId => {
             // console.log(data.item);
-            this.addItem(data.item, data.quantity);
+            this.addItem(itemId);
         });
     }
 
-    addItem(item: Item, quantity: number) {
-        const currentQuantity = this.inventory.get(item) || 0;
-        this.inventory.set(item, currentQuantity + quantity);
-    }
-
-    updateItemNb(index: number, quantity: number) {
-        const item = this.getItemAtSlot(index);
-        this.inventory.set(item, quantity);
+    addItem(item: number) {
+        this.inventory.push(items[item]);
     }
 
     setSpells(spells: NetworkSpell[]) {
