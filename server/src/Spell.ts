@@ -14,14 +14,6 @@ export class EffectModifier {
         this.value = value;
         this.direction = direction;
     }
-
-    modulateEffect(player: ServerPlayer, value: number) {
-        if (this.stat === Stat.NONE) return value;
-        const statValue = player.getStat(this.stat);
-        const sign = this.direction === EffectDirection.PLUS ? 1 : -1;
-        const random = (Math.random() - 0.5)/10;
-        return value * (1 + (statValue * this.value * sign)) * (1 + random);
-    }
 }
 
 export class EffectModifiers {
@@ -31,13 +23,6 @@ export class EffectModifiers {
     constructor(casterModifier: EffectModifier, targetModifier: EffectModifier) {
         this.casterModifier = casterModifier;
         this.targetModifier = targetModifier;
-    }
-
-    modulateEffect(caster: ServerPlayer, target: ServerPlayer, value: number) {
-        return this.casterModifier.modulateEffect(
-                caster,
-                this.targetModifier.modulateEffect(target, value)
-            );
     }
 }
 
@@ -164,12 +149,28 @@ export class Spell {
         });
     }
 
+    modulateEffectAll(modifiers: EffectModifiers, caster: ServerPlayer, target: ServerPlayer, value: number) {
+        return this.modulateEffect(
+            modifiers.casterModifier,
+            caster,
+           this.modulateEffect(modifiers.targetModifier, target, value)
+        );
+    }
+
+    modulateEffect(modifier: EffectModifier, player: ServerPlayer, value: number) {
+        if (modifier.stat === Stat.NONE) return value;
+        const statValue = player.getStat(modifier.stat);
+        const sign = modifier.direction === EffectDirection.PLUS ? 1 : -1;
+        const random = (Math.random() - 0.5)/10;
+        return value * (1 + (statValue * modifier.value * sign)) * (1 + random);
+    }
+
     dealDamage(caster: ServerPlayer, targets: ServerPlayer[], effect: Effect) {
         targets.forEach(target => {
             if (!target.isAlive()) return;
             let damage = effect.value * -1;
             // console.log(`Dealing ${damage} damage`);
-            if (effect.modifiers) damage = effect.modifiers.modulateEffect(caster, target, damage);
+            if (effect.modifiers) damage = this.modulateEffectAll(effect.modifiers, caster, target, damage);
             target.takeDamage(damage);
         });
     }
@@ -179,7 +180,7 @@ export class Spell {
             if (!target.isAlive()) return;
             let heal = effect.value;
             // console.log(`Healing ${heal} damage`);
-            if (effect.modifiers) heal = effect.modifiers.modulateEffect(caster, target, heal);
+            if (effect.modifiers) heal = this.modulateEffectAll(effect.modifiers, caster, target, heal);
             target.heal(heal);
         });
     }
