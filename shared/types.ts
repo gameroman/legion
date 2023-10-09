@@ -41,9 +41,27 @@ export class EffectModifiers {
     }
 }
 
-export interface    Effect {
+export interface Effect {
     stat: Stat;
     value: number;
     modifiers?: EffectModifiers;
     onKO?: boolean;
+}
+
+
+export interface SpellData {
+    id: number;
+    name: string;
+    description: string;
+    frame: string;
+    sfx: string;
+    animation: string;
+    cooldown: number;
+    castTime: number;
+    cost: number;
+    target: Target;
+    size: number;
+    effects: Effect[];
+    shake: boolean;
+    score: number;
 }

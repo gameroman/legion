@@ -1,25 +1,25 @@
 import { ServerPlayer } from "./ServerPlayer";
 import { Game } from "./Game";
-import { Stat, Target, Effect, EffectModifiers, EffectModifier, EffectDirection } from "@legion/shared";
+import { Stat, Target, Effect, EffectModifiers, EffectModifier, EffectDirection, SpellData } from "@legion/shared";
 import { BaseSpell } from "@legion/shared/BaseSpell";
 
 export function convertBaseToSpell(base: BaseSpell): Spell {
-    return new Spell(
-        base.id,
-        base.name,
-        base.description,
-        base.frame,
-        base.sfx,
-        base.animation,
-        base.cooldown,
-        base.castTime,
-        base.cost,
-        base.target,
-        base.size,
-        base.effects,
-        base.shake,
-        base.score,
-    );
+    return new Spell({
+        id: base.id,
+        name: base.name,
+        description: base.description,
+        frame: base.frame,
+        sfx: base.sfx,
+        animation: base.animation,
+        cooldown: base.cooldown,
+        castTime: base.castTime,
+        cost: base.cost,
+        target: base.target,
+        size: base.size,
+        effects: base.effects,
+        shake: base.shake,
+        score: base.score,
+    });
 }
 
 export class Spell extends BaseSpell {

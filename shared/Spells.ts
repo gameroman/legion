@@ -1,6 +1,6 @@
 
 import { BaseSpell } from "./BaseSpell";
-import { Stat, Target, EffectModifiers, EffectModifier, EffectDirection } from "./types";
+import { Stat, Target, Effect, EffectModifiers, EffectModifier, EffectDirection, SpellData } from "./types";
 
 export const spells:BaseSpell[] = [];
 
@@ -14,9 +14,70 @@ const SPBasedBoost = new EffectModifiers(
     new EffectModifier(Stat.NONE, 0, EffectDirection.PLUS)
 );
 
-// Cooldown, cast time, cost
-spells[0] = new BaseSpell(0, "Fire", "Throw a fireball", "fireball.png", "fireball", "explosion", 6, 1, 5, Target.AOE, 3, [{stat: Stat.HP, value: -30, modifiers: SPBasedBoostDeboost}], true, 100);
-spells[1] = new BaseSpell(1, "Heal", "Heals a target", "heal.png", "healing", "potion_heal", 4, 1, 5, Target.SINGLE, 1, [{stat: Stat.HP, value: 50, modifiers: SPBasedBoost}], false, 10);
-spells[2] = new BaseSpell(2, "Thunder", "Unleash a thunder bolt", "thunder.png", "thunder", "thunder", 4, 1, 4, Target.SINGLE, 1, [{stat: Stat.HP, value: -30, modifiers: SPBasedBoostDeboost}], false, 80);
-spells[3] = new BaseSpell(3, "Ice", "Generate a pillar of ice", "iceball.png", "ice", "ice", 4, 1, 4, Target.SINGLE, 1, [{stat: Stat.HP, value: -30, modifiers: SPBasedBoostDeboost}], false, 60);
+spells[0] = new BaseSpell({
+    id: 0,
+    name: "Fire",
+    description: "Throw a fireball",
+    frame: "fireball.png",
+    animation: "explosion",
+    size: 3,
+    sfx: "fireball",
+    shake: true,
+    cost: 5,
+    cooldown: 6,
+    castTime: 1,
+    target: Target.AOE,
+    effects: [{stat: Stat.HP, value: -30, modifiers: SPBasedBoostDeboost}],
+    score: 100,
+});
 
+spells[1] = new BaseSpell({
+    id: 1,
+    name: "Heal",
+    description: "Heals a target",
+    frame: "heal.png",
+    animation: "potion_heal",
+    size: 1,
+    sfx: "healing",
+    shake: false,
+    cost: 5,
+    cooldown: 4,
+    castTime: 1,
+    target: Target.SINGLE,
+    effects: [{stat: Stat.HP, value: 50, modifiers: SPBasedBoost}],
+    score: 10,
+});
+
+spells[2] = new BaseSpell({
+    id: 2,
+    name: "Thunder",
+    description: "Unleash a thunder bolt",
+    frame: "thunder.png",
+    animation: "thunder",
+    size: 1,
+    sfx: "thunder",
+    shake: false,
+    cost: 4,
+    cooldown: 4,
+    castTime: 1,
+    target: Target.SINGLE,
+    effects: [{stat: Stat.HP, value: -30, modifiers: SPBasedBoostDeboost}],
+    score: 80,
+});
+
+spells[3] = new BaseSpell({
+    id: 3,
+    name: "Ice",
+    description: "Generate a pillar of ice",
+    frame: "iceball.png",
+    animation: "ice",
+    size: 1,
+    sfx: "ice",
+    shake: false,
+    cost: 4,
+    cooldown: 4,
+    castTime: 1,
+    target: Target.SINGLE,
+    effects: [{stat: Stat.HP, value: -30, modifiers: SPBasedBoostDeboost}],
+    score: 60,
+});
