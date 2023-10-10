@@ -80,4 +80,5 @@ spells[3] = new BaseSpell({
     target: Target.SINGLE,
     effects: [{stat: Stat.HP, value: -30, modifiers: SPBasedBoostDeboost}],
     score: 60,
+    yoffset: 30,
 });

@@ -305,9 +305,8 @@ export abstract class Game
         this.broadcast('cast', {
             team: team.id,
             num,
-            name: spell.name,
-            location: {x, y, size: spell.size},
-            delay: spell.castTime,
+            id: spell.id,
+            location: {x, y},
         });
 
         this.emitMPchange(team, num, mp);

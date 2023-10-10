@@ -35,11 +35,7 @@ canvas {
     background: linear-gradient(rgba(10, 10, 10, 0.7), rgba(20, 20, 20, 0.7)); /* Dark grey, almost black background with slight transparency */
     border: none; /* Remove default borders */
     padding: 10px;
-    box-sizing: border-box;
-    /* overflow: hidden;  */
     color: white;
-    width: auto;
-    /* flex: 1; */
 }
 
 .player-tab {
@@ -48,7 +44,8 @@ canvas {
     margin-left: 10px;
     z-index: 2;
     max-width: 350px;
-    max-height: 270px;
+    align-self: start;
+    /* max-height: 270px; */
 }
 
 .box::before {
@@ -85,12 +82,11 @@ canvas {
 }
 
 .player-info {
-    display: flex;
-    align-items: center;
     margin-bottom: 5px;
     margin-left: 1px;
     font-weight: bold;
-    /* font-family: 'Vinque'; */
+    font-family: 'Kim';
+    font-size: 20px;
 }
 
 .player-class {
@@ -107,16 +103,6 @@ canvas {
     background-repeat: no-repeat;
 }
 
-.hp, .mp, .cooldown {
-    display: flex;
-    align-items: center;
-    border: 2px solid black;
-    border-radius: 5px;
-    padding: 2px;
-    padding-left: 5px;
-    /* width: fit-content; */
-    font-weight: bold;
-}
 
 .badge {
     border: 2px solid black;
@@ -148,6 +134,10 @@ canvas {
     background-color: #32CD32;
 }
 
+.dmg {
+    background-color: #FF0000;
+}
+
 .mp {
     background-color: #0099ff;
 }
@@ -172,6 +162,15 @@ canvas {
   background-color: #FAD7A0;
 }
 
+.hp, .mp, .cooldown, .dmg, .target {
+  display: flex;
+  align-items: center;
+  border: 2px solid black;
+  border-radius: 5px;
+  padding: 2px;
+  padding-left: 5px;
+  font-weight: bold;
+}
   
 .hp-label, .mp-label, .cooldown-label {
     border-right: 1px solid black;
@@ -299,10 +298,6 @@ canvas {
     font-size: 12px;
 }
 
-/* .info-box-extra {
-    display: flex;
-} */
-
 .mini {
     margin-top: 5px;
     display: inline-block;
@@ -321,7 +316,7 @@ canvas {
 .hud-container {
   display: flex; 
   justify-content: space-between;  
-}
+} 
 
 .flex-grow {
     flex-grow: 1;
@@ -1156,11 +1151,11 @@ canvas {
 
 .description-area {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  align-items: start;
+  grid-template-columns: repeat(2, auto);
   grid-template-rows: repeat(2, 1fr);
   gap: 10px;
   margin-top: 30px;
-  width: 50%;
 }
 
 .dialog {

@@ -106,18 +106,7 @@ class PlayerTab extends Component<Props, State> {
   
       return <div className="player-tab box">
           <div className="player-info">
-            <div className='badge'>
-              <span className="badge-label">#{player.number} </span> 
-              <span>{player.name}</span>
-            </div>
-            <div className='badge'>
-              <span className="badge-label">Lvl </span> 
-              <span>1</span>
-            </div>
-            <div className='badge'>
-              <span className="badge-label">XP </span> 
-              <span>0 / 100</span>
-            </div>  
+            #{player.number} {player.name}
           </div>
           <div className="player-main">
             <div className="player-content">
@@ -142,33 +131,35 @@ class PlayerTab extends Component<Props, State> {
           </div>
           {player.spells && player.spells.length > 0 && (
             <div className="player-skills">
-              <h4>🔥 Spells </h4>
-              {player.spells.map((skill, i) => (
-                <ActionItem 
-                  action={skill} 
-                  index={i} 
-                  clickedIndex={this.state.clickedSpell} 
-                  canAct={canAct} 
-                  actionType={ActionType.Skill} 
-                  onActionClick={this.actionClick.bind(this)} 
-                />
-              ))}
+              <div className="slots">
+                {player.spells.map((skill, i) => (
+                  <ActionItem 
+                    action={skill} 
+                    index={i} 
+                    clickedIndex={this.state.clickedSpell} 
+                    canAct={canAct} 
+                    actionType={ActionType.Skill} 
+                    onActionClick={this.actionClick.bind(this)} 
+                  />
+                ))}
+              </div>
             </div>
           )}
 
           {player.items && player.items.length > 0 && (
             <div className="player-items">
-              <h4>🧪 Items </h4>
-              {player.items.map((item, i) => (
-                <ActionItem 
-                  action={item} 
-                  index={i} 
-                  clickedIndex={this.state.clickedItem} 
-                  canAct={canAct} 
-                  actionType={ActionType.Item}
-                  onActionClick={this.actionClick.bind(this)} 
-                />
-              ))}
+              <div className="slots">
+                {player.items.map((item, i) => (
+                  <ActionItem 
+                    action={item} 
+                    index={i} 
+                    clickedIndex={this.state.clickedItem} 
+                    canAct={canAct} 
+                    actionType={ActionType.Item}
+                    onActionClick={this.actionClick.bind(this)} 
+                  />
+                ))}
+              </div>
             </div>
           )}
       </div>;

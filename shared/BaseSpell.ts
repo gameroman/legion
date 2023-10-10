@@ -15,6 +15,7 @@ export class BaseSpell {
     shake: boolean = false;
     sfx: string = '';
     score: number= 0;
+    yoffset: number = 0;
     
     constructor(props: SpellData) {
         Object.assign(this, props);

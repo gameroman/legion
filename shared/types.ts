@@ -64,4 +64,5 @@ export interface SpellData {
     effects: Effect[];
     shake: boolean;
     score: number;
+    yoffset?: number;
 }

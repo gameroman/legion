@@ -5,6 +5,7 @@ import { GameHUD, events } from './HUD/GameHUD';
 import { Team } from './Team';
 import { MusicManager } from './MusicManager';
 import { CellsHighlight } from './CellsHighlight';
+import { spells } from '@legion/shared/Spells';
 
 export class Arena extends Phaser.Scene
 {
@@ -252,9 +253,9 @@ export class Arena extends Phaser.Scene
                     .setOrigin(0); 
                 
                 // Add a random vertical and/or horizontal flip
-                // const flipX = Math.random() < 0.5;
-                // const flipY = Math.random() < 0.5;
-                // tileSprite.setFlip(flipX, flipY);
+                const flipX = Math.random() < 0.5;
+                const flipY = Math.random() < 0.5;
+                tileSprite.setFlip(flipX, flipY);
 
                 // Tween the tile to its intended position
                 this.tweens.add({
@@ -521,16 +522,21 @@ export class Arena extends Phaser.Scene
         this.playSound(sfx);
     }
 
-    processCast(flag, {team, num, name, location, delay}) {
+    processCast(flag, {team, num, id, location,}) {
+        console.log(`Processing cast: ${flag} ${team} ${num} ${id} ${location}`);
         const player = this.getPlayer(team, num);
-        player.castAnimation(flag, name);
-        if (flag) this.displaySpellArea(location, delay);
+        const spell = spells[id];
+        player.castAnimation(flag, spell?.name);
+        if (flag) this.displaySpellArea(location, spell.size, spell.castTime);
     }
 
     processLocalAnimation({x, y, animation, shake, sfx}) {
         // Convert x and y in grid coords to pixels
         const {x: pixelX, y: pixelY} = this.gridToPixelCoords(x, y);
-        this.localAnimationSprite.setPosition(pixelX, pixelY).setVisible(true).setDepth(3 + y/10).play(animation);
+        this.localAnimationSprite.setPosition(pixelX, pixelY)
+            .setVisible(true)
+            .setDepth(3 + y/10)
+            .play(animation);
         this.playSound(sfx);
         if (shake) this.cameras.main.shake(250, 0.01); // More intense shake
     }
@@ -847,11 +853,11 @@ export class Arena extends Phaser.Scene
         this.HUD = this.scene.get('HUD');
     }
 
-    displaySpellArea(location, delay) {
+    displaySpellArea(location, size, delay) {
         const {x, y} = this.gridToPixelCoords(location.x, location.y);
         const spellAreaImage = this.add.image(x + 2, y + 42, 'killzone')
             .setDepth(1)
-            .setDisplaySize(location.size * this.tileSize, location.size * this.tileSize)
+            .setDisplaySize(size * this.tileSize, size * this.tileSize)
             .setOrigin(0.5); // This will tint the sprite red
 
         const duration = 100;
