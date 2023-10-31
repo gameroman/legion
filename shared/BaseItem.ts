@@ -1,4 +1,4 @@
-import { Target, Effect } from "./types";
+import { Target, Effect, ItemData } from "./types";
 
 export class BaseItem {
     id: number;
@@ -11,19 +11,9 @@ export class BaseItem {
     animation: string;
     sfx: string;
     size: number = 1;
+    price: number = 0;
 
-    constructor(
-        id: number, name: string, description: string, frame: string, sfx: string, animation: string,
-        cooldown: number, target: Target, effects: Effect[]
-    ) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.frame = frame;
-        this.target = target;
-        this.effects = effects;
-        this.cooldown = cooldown;
-        this.animation = animation;
-        this.sfx = sfx;
+    constructor(props: ItemData) {
+        Object.assign(this, props);
     }
 }

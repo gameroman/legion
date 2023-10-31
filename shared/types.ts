@@ -66,3 +66,17 @@ export interface SpellData {
     score: number;
     yoffset?: number;
 }
+
+export interface ItemData {
+    id: number;
+    name: string;
+    description: string;
+    frame: string;
+    sfx: string;
+    animation: string;
+    cooldown: number;
+    target: Target;
+    size: number;
+    effects: Effect[];
+    price: number;
+}

@@ -1053,8 +1053,9 @@ canvas {
 .shop-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  gap: 10px;
   margin-top: 20px;
+  width: calc(100% - 30px);
 }
 
 .shop-item-card {
@@ -1121,27 +1122,27 @@ canvas {
   flex-direction: row;
 }
 
+.shop-item-card-content-info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 .shop-item-card-price {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
   background: url('assets/gold2.png') no-repeat left center;
   background-size: contain;
   color: white;
   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
-  /* background-color: rgba(105, 105, 105, 0.7);  */
   background-color: gold;
   border-radius: 25px; 
   padding: 5px 10px; 
   padding-left: 40px;
   font-family: Kim;
+  margin-left: 10px;
   border: 1px solid black;
 }
 
 .shop-item-card-owned {
-  position: absolute;
-  bottom: 10px;
-  right: 100px;
   background: url('assets/backpacks.png') no-repeat left center;
   background-size: contain;
   color: white;
@@ -1156,6 +1157,13 @@ canvas {
 
 .shop-item-details {
   padding-left: 10px;
+}
+
+.shop-item-card-capsules {
+  display: flex;
+  flex-direction: row;
+  margin-top: 10px;
+  justify-content: flex-end;
 }
 
 .socials {
@@ -1220,9 +1228,9 @@ canvas {
   display: grid;
   align-items: start;
   grid-template-columns: repeat(2, auto);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 10px;
-  margin-top: 30px;
+  grid-template-rows: repeat(2, auto);
+  gap: 5px;
+  margin-top: 5px;
 }
 
 .dialog {

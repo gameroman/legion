@@ -58,13 +58,17 @@ class ShopPage extends Component<{}, State> {
                     <div className="shop-item-card-name-shadow">{item.name}</div>
                   </div>
                   <div className="shop-item-card-content">
-                    <div style={{ backgroundImage: `url(${item.image})` }} className="shop-item-image"></div>
-                    <div className="shop-item-details">
-                      {item.description}
-                      <Description action={item} />
+                    <div style={{ backgroundImage: `url(/assets/items/${item.frame})` }} className="shop-item-image"></div>
+                    <div className="shop-item-card-content-info">
+                      <div className="shop-item-details">
+                        {item.description}
+                        <Description action={item} />
+                      </div>
+                      <div className="shop-item-card-capsules">
+                        <div className="shop-item-card-owned" title='Amount Owned'>23</div>
+                        <div className="shop-item-card-price" title='Price'>{item.price}</div>
+                      </div>
                     </div>
-                    <div className="shop-item-card-owned" title='Amount Owned'>23</div>
-                    <div className="shop-item-card-price" title='Price'>{item.price}</div>
                   </div>
                 </div>
               ))}

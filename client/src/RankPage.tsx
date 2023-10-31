@@ -8,7 +8,6 @@ class RankPage extends Component {
     sortColumn: 'elo',
     sortAscending: false
   };
-  // http://127.0.0.1:5001/legion-32c6d/us-central1/leaderboardData
 
   handleSort = (column) => {
     const isAscending = this.state.sortColumn === column ? !this.state.sortAscending : false;
@@ -31,7 +30,8 @@ class RankPage extends Component {
   };
 
   async componentDidMount() {
-    const response = await axios.get('http://127.0.0.1:5001/legion-32c6d/us-central1/leaderboardData');
+    const API_URL = 'http://127.0.0.1:5010/legion-32c6d/us-central1';
+    const response = await axios.get(`${API_URL}/leaderboardData`);
     if (response.data) this.setState({ leaderboardData: response.data });
   }
 
