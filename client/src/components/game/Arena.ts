@@ -8,6 +8,10 @@ import { CellsHighlight } from './CellsHighlight';
 import { spells } from '@legion/shared/Spells';
 import { lineOfSight, serializeCoords } from '@legion/shared/utils';
 
+type AssetsMap = {
+    [key: string]: string;
+};
+
 export class Arena extends Phaser.Scene
 {
     gamehud;
@@ -30,17 +34,17 @@ export class Arena extends Phaser.Scene
     overviewReady = false;
     musicManager: MusicManager;
 
-    assetsMap = {
-        'warrior_1': 'assets/sprites/1_1.png',
-        'warrior_2': 'assets/sprites/1_2.png',
-        'warrior_3': 'assets/sprites/1_3.png',
-        'warrior_4': 'assets/sprites/1_4.png',
-        'mage_1': 'assets/sprites/1_5.png',
-        'mage_2': 'assets/sprites/1_6.png',
-        'warrior_5': 'assets/sprites/2_1.png',
-        'warrior_6': 'assets/sprites/2_6.png',
-        'warrior_7': 'assets/sprites/2_2.png',
-        'warrior_8': 'assets/sprites/2_7.png',
+    assetsMap: AssetsMap = {
+        warrior_1: 'assets/sprites/1_1.png',
+        warrior_2: 'assets/sprites/1_2.png',
+        warrior_3: 'assets/sprites/1_3.png',
+        warrior_4: 'assets/sprites/1_4.png',
+        mage_1: 'assets/sprites/1_5.png',
+        mage_2: 'assets/sprites/1_6.png',
+        warrior_5: 'assets/sprites/2_1.png',
+        warrior_6: 'assets/sprites/2_6.png',
+        warrior_7: 'assets/sprites/2_2.png',
+        warrior_8: 'assets/sprites/2_7.png',
     };
 
     constructor() {
@@ -57,7 +61,7 @@ export class Arena extends Phaser.Scene
         // this.load.svg('pop', 'assets/pop.svg',  { width: 24, height: 24 } );
         const frameConfig = { frameWidth: 144, frameHeight: 144};
         // Iterate over assetsMap and load spritesheets
-        for (let key in this.assetsMap) {
+        for (const key in this.assetsMap) {
             this.load.spritesheet(key, this.assetsMap[key], frameConfig);
         }
         this.load.spritesheet('potion_heal', 'assets/animations/potion_heal.png', { frameWidth: 48, frameHeight: 64});
@@ -270,20 +274,20 @@ export class Arena extends Phaser.Scene
         }
 
         this.gridCorners = {
-            startX: startX,
-            startY: startY,
+            startX,
+            startY,
         };
 
         this.cellsHighlight = new CellsHighlight(this, this.gridWidth, this.gridHeight, this.tileSize, this.gridCorners).setDepth(1);
 
          // Add a pointer move handler to highlight the hovered tile
          this.input.on('pointermove', function (pointer) {
-             let pointerX = pointer.x - startX;
-             let pointerY = pointer.y - startY;
+             const pointerX = pointer.x - startX;
+             const pointerY = pointer.y - startY;
  
              // Calculate the grid coordinates of the pointer
-             let gridX = Math.floor(pointerX / this.tileSize);
-             let gridY = Math.floor(pointerY / this.tileSize);
+             const gridX = Math.floor(pointerX / this.tileSize);
+             const gridY = Math.floor(pointerY / this.tileSize);
  
              this.cellsHighlight.move(gridX, gridY);
          }, this);
@@ -295,12 +299,12 @@ export class Arena extends Phaser.Scene
                 return;
             }
 
-            let pointerX = pointer.x - startX;
-            let pointerY = pointer.y - startY;
+            const pointerX = pointer.x - startX;
+            const pointerY = pointer.y - startY;
 
             // Calculate the grid coordinates of the pointer
-            let gridX = Math.floor(pointerX / this.tileSize);
-            let gridY = Math.floor(pointerY / this.tileSize);
+            const gridX = Math.floor(pointerX / this.tileSize);
+            const gridY = Math.floor(pointerY / this.tileSize);
 
             if (this.isSkip(gridX, gridY)) return;
 
@@ -312,9 +316,9 @@ export class Arena extends Phaser.Scene
 
         const bg = this.add.image(0, -230, 'bg').setOrigin(0, 0);
 
-        let scaleX = gameWidth / bg.width;
-        let scaleY = gameHeight / bg.height;
-        let scale = Math.max(scaleX, scaleY);
+        const scaleX = gameWidth / bg.width;
+        const scaleY = gameHeight / bg.height;
+        const scale = Math.max(scaleX, scaleY);
         bg.setScale(scale).setAlpha(0.7);
 
         this.input.keyboard.on('keydown', this.handleKeyDown, this);
@@ -716,7 +720,7 @@ export class Arena extends Phaser.Scene
         });
 
         this.animationScales = {
-            'slash': 1,
+            slash: 1,
         }
     }
 
@@ -774,8 +778,8 @@ export class Arena extends Phaser.Scene
                 if (x * x + y * y <= radius * radius) {
                     if(!this.isValidCell(gridX, gridY, gridX + x, gridY + y)) continue;
                     // Calculate the screen position of the cell
-                    let posX = this.gridCorners.startX + (gridX + x) * this.tileSize;
-                    let posY = this.gridCorners.startY + (gridY + y) * this.tileSize;
+                    const posX = this.gridCorners.startX + (gridX + x) * this.tileSize;
+                    const posY = this.gridCorners.startY + (gridY + y) * this.tileSize;
     
                     // Draw a rectangle around the cell
                     this.highlight.fillRect(posX, posY, this.tileSize, this.tileSize);
@@ -796,7 +800,7 @@ export class Arena extends Phaser.Scene
         this.createSounds();
         this.connectToServer();
 
-        let grayScaleShader = this.cache.text.get('grayScaleShader');
+        const grayScaleShader = this.cache.text.get('grayScaleShader');
 
         // @ts-ignore
         const renderer: Phaser.Renderer.WebGL.WebGLRenderer = this.sys.game.renderer;

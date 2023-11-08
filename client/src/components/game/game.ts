@@ -10,7 +10,7 @@ const config = {
         autoCenter: Phaser.Scale.CENTER_BOTH,
     },
     backgroundColor: '#000',
-    parent: 'scene',
+    // parent: 'scene',
     pixelArt: true,
     plugins: {
         global:[
@@ -24,10 +24,8 @@ const config = {
     scene: [Arena, HUD],
 };
 
-// const game = new Phaser.Game(config);
-
 export function startGame() {
     const game = new Phaser.Game(config);
-  }
+}
 
 

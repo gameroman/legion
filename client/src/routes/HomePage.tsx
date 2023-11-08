@@ -1,15 +1,15 @@
 // HomePage.tsx
 import { h, Component } from 'preact';
 import { Router, Route, Link } from 'preact-router';
-import firebase from './firebaseConfig';
+import firebase from '../components/firebaseConfig';
 import * as firebaseui from 'firebaseui'
 import 'firebaseui/dist/firebaseui.css'
 
-import PlayPage from './PlayPage';
-import TeamPage from './TeamPage';
-import ShopPage from './ShopPage';
-import RankPage from './RankPage';
-import NotificationBar from './NotificationBar';
+import PlayPage from '../components/PlayPage';
+import TeamPage from '../components/TeamPage';
+import ShopPage from '../components/ShopPage';
+import RankPage from '../components/RankPage';
+import NotificationBar from '../components/NotificationBar';
 
 interface State {
     currentPage: string;

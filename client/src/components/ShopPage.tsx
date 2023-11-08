@@ -47,7 +47,7 @@ class ShopPage extends Component<{}, State> {
         <div className="shop-content">
             <div className="gold-container" title='Your gold'>
                 <img src="assets/gold2.png" className="gold-icon" /> {/* Replace with your gold icon */}
-                <span>2000</span>
+                <span>2001</span>
             </div>
 
             <div className="shop-grid">

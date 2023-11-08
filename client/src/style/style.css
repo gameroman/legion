@@ -49,19 +49,14 @@ canvas {
 }
 
 @font-face {
-    font-family: 'Vinque';
-    src: url('assets/vinque.otf');
-}
-
-@font-face {
     font-family: 'Kim';
-    src: url('assets/kim.otf');
+    src: url('../assets/kim.otf') format('opentype');
 }
 
 .player-main {
     display: flex;
     flex-direction: column; /* This will stack the items vertically */
-    align-items: start;
+    align-items: flex-start;
     gap: 10px; /* adjust as needed */
     margin-bottom: 10px;
 }
@@ -734,19 +729,6 @@ canvas {
     justify-content: center; 
   }
 
-.landing-page {
-  background: url('assets/aarena_bg.png') no-repeat center center fixed;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh; 
-}
-
 .logo {
   width: 50%; /* Adjust as needed */
   height: auto;
@@ -1128,7 +1110,7 @@ canvas {
 }
 
 .shop-item-card-price {
-  background: url('assets/gold2.png') no-repeat left center;
+  background: url('../assets/gold2.png') no-repeat left center;
   background-size: contain;
   color: white;
   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
@@ -1142,7 +1124,7 @@ canvas {
 }
 
 .shop-item-card-owned {
-  background: url('assets/backpacks.png') no-repeat left center;
+  background: url('../assets/backpacks.png') no-repeat left center;
   background-size: contain;
   color: white;
   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;

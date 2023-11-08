@@ -1,18 +1,22 @@
 {
-    "compilerOptions": {
-      "outDir": "./dist/",
-      "sourceMap": true,
-      "module": "es6",
-      "target": "es5",
-      "moduleResolution": "node",
-      "jsx": "react",
-      "jsxFactory": "h",
-      "jsxFragmentFactory": "Fragment",
-      "allowJs": true
-    },
-    "include": [
-      "./src/**/*.tsx",
-      "./src/**/*.ts"
-    ]
-  }
-  
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "Node",
+		"esModuleInterop": true,
+		"jsx": "react",
+		"jsxFactory": "h",
+		"jsxFragmentFactory": "Fragment",
+		"noEmit": true,
+		"allowJs": true,
+		"checkJs": true,
+		"skipLibCheck": true,
+		"baseUrl": "./",
+		"paths": {
+			"react": ["./node_modules/preact/compat"],
+			"react-dom": ["./node_modules/preact/compat"]
+		},
+		"sourceMap": true,
+	},
+	"include": ["src/**/*"]
+}

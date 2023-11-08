@@ -1,7 +1,8 @@
 import { Player } from './Player';
+import { Arena } from './Arena';
 
 export class Team {
-    scene: Phaser.Scene;
+    scene: Arena;
     id: number;
     members: Player[] = [];
     totalHPMax: number = 0;
@@ -47,7 +48,6 @@ export class Team {
     getOverview() {
         const members = [];
         this.members.forEach(member => {
-            // @ts-ignore
             const textureFile = this.scene.assetsMap[member.texture];
             const textureFilename = textureFile.split('/').pop();
             members.push({

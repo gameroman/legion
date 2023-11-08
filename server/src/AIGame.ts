@@ -44,19 +44,7 @@ export class AIGame extends Game {
                 for (let i = 0; i <= 1; i++) {
                     // Set quantity to random between 0 and 2
                     let qty = Math.floor(Math.random() * 2);
-                    const base = items[i];
-                    const item = new Item(
-                        base.id,
-                        base.name,
-                        base.description,
-                        base.frame,
-                        base.sfx,
-                        base.animation,
-                        base.cooldown,
-                        base.target,
-                        base.effects,
-                    );
-                    if (qty) player.addItem(item);
+                    if (qty) player.addItem(new Item(items[i]));
                 }
             }, this);
         }, this);

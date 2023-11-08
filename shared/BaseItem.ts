@@ -1,15 +1,15 @@
 import { Target, Effect, ItemData } from "./types";
 
 export class BaseItem {
-    id: number;
-    name: string;
-    description: string;
-    frame: string;
-    effects: Effect[];
-    target: Target;
-    cooldown: number;
-    animation: string;
-    sfx: string;
+    id: number = -1;
+    name: string = '';
+    description: string = '';
+    frame: string = '';
+    effects: Effect[] = [];
+    target: Target = Target.SINGLE;
+    cooldown: number = 0;
+    animation: string = '';
+    sfx: string = '';
     size: number = 1;
     price: number = 0;
 

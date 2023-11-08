@@ -16,7 +16,7 @@ const server = createServer(app);
 // Create a new socket.io instance
 const io = new Server(server, {
     cors: {
-      origin: "http://localhost:3000", // replace with the origin of your client
+      origin: "http://0.0.0.0:8080", // TODO: make env var
       methods: ["GET", "POST"],
       credentials: true
     }

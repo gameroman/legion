@@ -2,8 +2,8 @@
 import { h, Component, createContext } from 'preact';
 import { Router, Route } from 'preact-router';
 
-import HomePage from './HomePage';
-import GamePage from './GamePage';
+import HomePage from '../routes/HomePage';
+import GamePage from '../routes/GamePage';
 
 class Main extends Component {
   render() {

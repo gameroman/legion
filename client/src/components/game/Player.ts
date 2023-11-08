@@ -8,10 +8,10 @@ import { spells } from '@legion/shared/Spells';
 import { Target } from "@legion/shared";
 
 export class Player extends Phaser.GameObjects.Container {
-    scene: Phaser.Scene;
     sprite: Phaser.GameObjects.Sprite;
     numKey: Phaser.GameObjects.Text;
     selectionOval: Phaser.GameObjects.Graphics;
+    name = 'Player 1';
     isPlayer: boolean = false;
     texture: string;
     arena: Phaser.Scene;
@@ -129,7 +129,7 @@ export class Player extends Phaser.GameObjects.Container {
         const textureFilename = textureFile.split('/').pop();
   
         return {
-            name: 'Player 1',
+            name: this.name,
             number: this.num,
             portrait: textureFilename,
             hp: this.hp,
