@@ -30,8 +30,7 @@ class RankPage extends Component {
   };
 
   async componentDidMount() {
-    const API_URL = 'http://127.0.0.1:5010/legion-32c6d/us-central1';
-    const response = await axios.get(`${API_URL}/leaderboardData`);
+    const response = await axios.get(`${process.env.PREACT_APP_API_URL}/leaderboardData`);
     if (response.data) this.setState({ leaderboardData: response.data });
   }
 

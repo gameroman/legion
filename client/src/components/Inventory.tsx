@@ -49,9 +49,8 @@ class Inventory extends Component<InventoryProps, InventoryState> {
   async fetchInventoryData() {
     this.state.user.getIdToken(true).then((idToken) => {
       console.log(idToken);
-      const API_URL = 'http://127.0.0.1:5010/legion-32c6d/us-central1';
       // Make the API request, including the token in the Authorization header
-      fetch(`${API_URL}/inventoryData?playerId=0`, {
+      fetch(`${process.env.PREACT_APP_API_URL}/inventoryData?playerId=0`, {
         headers: {
           'Authorization': 'Bearer ' + idToken,
         },
