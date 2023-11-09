@@ -10,7 +10,7 @@ interface State {
   quantity: number;
 }
 
-class ShopPage extends Component<{}, State> {
+class ShopPage extends Component<object, State> {
   state: State = {
     items,
     isDialogOpen: false,
@@ -58,7 +58,7 @@ class ShopPage extends Component<{}, State> {
                     <div className="shop-item-card-name-shadow">{item.name}</div>
                   </div>
                   <div className="shop-item-card-content">
-                    <div style={{ backgroundImage: `url(/assets/items/${item.frame})` }} className="shop-item-image"></div>
+                    <div style={{ backgroundImage: `url(/assets/items/${item.frame})` }} className="shop-item-image" />
                     <div className="shop-item-card-content-info">
                       <div className="shop-item-details">
                         {item.description}
@@ -82,7 +82,7 @@ class ShopPage extends Component<{}, State> {
               <div className="shop-item-card-name-shadow">Buy</div>
             </div>
             <div className="shop-item-card-content">
-            <i className="fa-solid fa-circle-xmark closebtn" onClick={this.closeDialog}></i>
+            <i className="fa-solid fa-circle-xmark closebtn" onClick={this.closeDialog} />
             <div className="quantity-container">
                   <div className="qty-button" onClick={() => this.changeQuantity(-1)}>-</div>
                   <input className="shop-qty" type="text" value={quantity} />

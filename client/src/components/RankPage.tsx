@@ -25,12 +25,13 @@ class RankPage extends Component {
   };
 
   camelCaseToNormal = (text) => {
-    let result = text.replace(/([A-Z])/g, ' $1').toLowerCase();
+    const result = text.replace(/([A-Z])/g, ' $1').toLowerCase();
     return result.charAt(0).toUpperCase() + result.slice(1);
   };
 
   async componentDidMount() {
     const response = await axios.get(`${process.env.PREACT_APP_API_URL}/leaderboardData`);
+    // eslint-disable-next-line react/no-did-mount-set-state
     if (response.data) this.setState({ leaderboardData: response.data });
   }
 
@@ -48,11 +49,11 @@ class RankPage extends Component {
               <thead>
                 <tr>
                 {columns.map(column => (
-                  <th onClick={() => this.handleSort(column)}>
+                  <th key={column} onClick={() => this.handleSort(column)}>
                     <div>
                       <span>{this.camelCaseToNormal(column)}</span>
                       <span>
-                        {this.state.sortColumn === column ? (this.state.sortAscending ? <i class="fa-solid fa-sort-up"></i> : <i class="fa-solid fa-sort-down"></i>) : <i class="fa-solid fa-sort" style={{visibility: 'hidden'}}></i>}
+                        {this.state.sortColumn === column ? (this.state.sortAscending ? <i class="fa-solid fa-sort-up" /> : <i class="fa-solid fa-sort-down" />) : <i class="fa-solid fa-sort" style={{visibility: 'hidden'}} />}
                       </span>
                     </div>
                   </th>
@@ -68,7 +69,7 @@ class RankPage extends Component {
                     <td>{data.wins}</td>
                     <td>{data.losses}</td>
                     <td>{data.winsRatio}</td>
-                    <td>{Array.from({length: data.crowdScore}, (_, i) => <i class="fa-solid fa-star golden-star"></i>)}</td>
+                    <td>{Array.from({length: data.crowdScore}, (_, i) => <i key={i} class="fa-solid fa-star golden-star" />)}</td>
                   </tr>
                 ))}
               </tbody>

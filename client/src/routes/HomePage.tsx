@@ -17,7 +17,7 @@ interface State {
     showFirebaseUI: boolean;
 }
 
-class HomePage extends Component<{}, State> {
+class HomePage extends Component<object, State> {
     state: State = {
         currentPage: 'play',
         user: null,
@@ -159,7 +159,7 @@ class HomePage extends Component<{}, State> {
                         <div className="shop-item-card-name-shadow">Sign up or sign in</div>
                     </div>
                     <div className="shop-item-card-content" id="firebaseui-auth-container">
-                        <i className="fa-solid fa-circle-xmark closebtn" onClick={this.hideFirebaseUI}></i>  
+                        <i className="fa-solid fa-circle-xmark closebtn" onClick={this.hideFirebaseUI} />
                     </div>
                 </div>
             </div>

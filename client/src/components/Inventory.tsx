@@ -1,16 +1,11 @@
 
 // Inventory.tsx
 import { h, Component } from 'preact';
-import axios from 'axios';
 import firebase from './firebaseConfig';
 
 import { items } from '@legion/shared/Items';
 import ActionItem from './game/HUD/Action';
 import { ActionType } from './game/HUD/ActionTypes';
-
-interface InventoryProps {
-  // Define your props here
-}
 
 interface InventoryState {
     user: firebase.User | null;
@@ -18,10 +13,10 @@ interface InventoryState {
     inventory: number[];
   }
 
-class Inventory extends Component<InventoryProps, InventoryState> {
+class Inventory extends Component<object, InventoryState> {
   authSubscription: firebase.Unsubscribe | null = null;
   capacity = 50;
-  constructor(props: InventoryProps) {
+  constructor(props: object) {
       super(props);
       this.state = {
           user: null,
@@ -52,7 +47,7 @@ class Inventory extends Component<InventoryProps, InventoryState> {
       // Make the API request, including the token in the Authorization header
       fetch(`${process.env.PREACT_APP_API_URL}/inventoryData?playerId=0`, {
         headers: {
-          'Authorization': 'Bearer ' + idToken,
+          Authorization: `Bearer ${idToken}`,
         },
       })
       .then(response => response.json())

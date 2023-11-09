@@ -12,7 +12,7 @@ export class Player extends Phaser.GameObjects.Container {
     numKey: Phaser.GameObjects.Text;
     selectionOval: Phaser.GameObjects.Graphics;
     name = 'Player 1';
-    isPlayer: boolean = false;
+    isPlayer = false;
     texture: string;
     arena: Phaser.Scene;
     hud: Phaser.Scene;
@@ -37,11 +37,11 @@ export class Player extends Phaser.GameObjects.Container {
     animationSprite: Phaser.GameObjects.Sprite;
     pendingSkill: number | null = null;
     pendingItem: number | null = null;
-    casting: boolean = false;
-    selected: boolean = false;
-    HURT_THRESHOLD: number = 0.5;
+    casting = false;
+    selected = false;
+    HURT_THRESHOLD = 0.5;
     team: Team;
-    animationLock: boolean = false;
+    animationLock = false;
 
     constructor(
         scene: Phaser.Scene, team: Team, gridX: number, gridY: number, x: number, y: number,

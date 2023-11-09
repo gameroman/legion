@@ -5,9 +5,9 @@ export class Team {
     scene: Arena;
     id: number;
     members: Player[] = [];
-    totalHPMax: number = 0;
-    totalHP: number = 0;
-    isPlayerTeam: boolean = false;
+    totalHPMax = 0;
+    totalHP = 0;
+    isPlayerTeam = false;
     score = 0;
 
     constructor(scene, number: number, isPlayerTeam: boolean) {
@@ -36,7 +36,6 @@ export class Team {
         });
 
         if (this.isPlayerTeam) {
-            // @ts-ignore
             this.scene.updateMusicIntensity(this.totalHP / this.totalHPMax);
         }
     }

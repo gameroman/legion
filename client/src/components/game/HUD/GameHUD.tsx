@@ -20,7 +20,7 @@ interface State {
 
 const events = new EventEmitter();
 
-class GameHUD extends Component<{}, State> {
+class GameHUD extends Component<object, State> {
   state: State = { 
     playerVisible: false,
     player: null,
