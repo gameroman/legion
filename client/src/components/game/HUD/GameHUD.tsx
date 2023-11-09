@@ -61,13 +61,10 @@ class GameHUD extends Component<{}, State> {
   render() {
     const { playerVisible, player, team1, team2 } = this.state;
     return (
-      <div>
-        <div className="hud-container">
-            <Overview position="left" {...team2} />
-            {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
-            <Overview position="right" {...team1} />
-        </div>
-        <div id="scene"></div>
+      <div className="hud-container">
+          <Overview position="left" {...team2} />
+          {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
+          <Overview position="right" {...team1} />
       </div>
     );
   }
