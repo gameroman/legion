@@ -6,6 +6,8 @@ import { BaseSpell } from "@legion/shared/BaseSpell";
 import { items } from '@legion/shared/Items';
 import { spells } from '@legion/shared/Spells';
 import { Target } from "@legion/shared";
+import { Arena } from "./Arena";
+import { HUD } from "./HUD";
 
 export class Player extends Phaser.GameObjects.Container {
     sprite: Phaser.GameObjects.Sprite;
@@ -14,8 +16,8 @@ export class Player extends Phaser.GameObjects.Container {
     name = 'Player 1';
     isPlayer = false;
     texture: string;
-    arena: Phaser.Scene;
-    hud: Phaser.Scene;
+    arena: Arena;
+    hud: HUD;
     gridX: number;
     gridY: number;
     num: number;
@@ -44,14 +46,14 @@ export class Player extends Phaser.GameObjects.Container {
     animationLock = false;
 
     constructor(
-        scene: Phaser.Scene, team: Team, gridX: number, gridY: number, x: number, y: number,
+        scene: Phaser.Scene, arenaScene: Arena, hudScene: HUD, team: Team, gridX: number, gridY: number, x: number, y: number,
         num: number, texture: string, isPlayer: boolean,
         hp: number, mp: number
         ) {
         super(scene, x, y);
         this.scene = scene;
-        this.arena = this.scene.scene.get('Arena');
-        this.hud = this.scene.scene.get('HUD');
+        this.arena = arenaScene;
+        this.hud = hudScene;
 
         this.team = team;
         this.texture = texture;
@@ -123,7 +125,6 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     getProps() {
-        // @ts-ignore
         const textureFile = this.arena.assetsMap[this.texture];
         // Extract the filename from the path
         const textureFilename = textureFile.split('/').pop();
@@ -182,10 +183,8 @@ export class Player extends Phaser.GameObjects.Container {
 
     checkHeartbeat() {
         if (this.getHPpct() < this.HURT_THRESHOLD  && this.isAlive()) {
-            // @ts-ignore
             this.arena.playSound('heart', 1, true);
         } else {
-            // @ts-ignore
             this.arena.stopSound('heart');
         }
     }
@@ -219,12 +218,10 @@ export class Player extends Phaser.GameObjects.Container {
     displayMovementRange() {
         if (!this.canAct()) return;
         if (this.pendingSkill != null) return;
-        // @ts-ignore
         this.arena.highlightCells(this.gridX, this.gridY, this.distance);
     }
 
     hideMovementRange() {
-        // @ts-ignore
         this.arena.clearHighlight();
     }
 
@@ -240,38 +237,29 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     onPointerOver() {
-        // @ts-ignore
         if(this.isTarget() && this.arena.selectedPlayer.pendingSkill == null) {
-            // @ts-ignore
             this.hud.toggleCursor(true, 'swords');
         }
     }
 
     onPointerOut() {
-        // @ts-ignore
         if(!this.isPlayer && this.arena.selectedPlayer?.pendingSkill == null) {
-            // @ts-ignore
             this.hud.toggleCursor(false, 'scroll');
         }
     }
 
     onClick() {
-        // @ts-ignore
         this.arena.playSound('click');
         if (this.isPlayer) { // If clicking on a player of your team
-            // @ts-ignore
             this.arena.selectPlayer(this);
         } else if(this.isTarget()) {
-            // @ts-ignore
             this.arena.sendAttack(this);
-            // @ts-ignore
             this.hud.toggleCursor(false);
         }
     }
 
     onLetterKey(keyCode) {
         // console.log(`Pressed ${keyCode}`);
-        // @ts-ignore
         this.arena.playSound('click');
         const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
         const itemsIndex = keyboardLayout.indexOf('Z');
@@ -297,17 +285,14 @@ export class Player extends Phaser.GameObjects.Container {
         }
         if (!this.canAct()) {
             console.error(`Can't act`);
-            // @ts-ignore
             this.arena.playSound('nope', 0.2);
             return;
         }
         if (item) {
             if (item.target == Target.SELF) {
-                // @ts-ignore
                 this.arena.sendUseItem(index, this.x, this.y);
             } else if (item.target == Target.SINGLE) {
                 this.pendingItem = index;
-                // @ts-ignore
                 this.arena.toggleItemMode(true);
             }
         }
@@ -324,12 +309,10 @@ export class Player extends Phaser.GameObjects.Container {
             this.playAnim('cast', false);
             this.animationSprite.setVisible(true).play('cast');
             this.displayOverheadText(name, 4000, '#fff');
-            // @ts-ignore
             this.arena.playSound('cast', 1, true);
         } else {
             this.playAnim('idle');
             this.animationSprite.setVisible(false);
-            // @ts-ignore
             this.arena.stopSound('cast');
         }
         this.casting = flag;
@@ -337,7 +320,6 @@ export class Player extends Phaser.GameObjects.Container {
 
     cancelSkill() {
         this.pendingSkill = null;
-        // @ts-ignore
         this.arena.toggleTargetMode(false);
     }
 
@@ -353,18 +335,15 @@ export class Player extends Phaser.GameObjects.Container {
         }
 
         if (!this.canAct() || spell.cost > this.mp) {
-            // @ts-ignore
             this.arena.playSound('nope', 0.2);
             return;
         }
         
         this.pendingSkill = index;
-        // @ts-ignore
         this.arena.toggleTargetMode(true, spell.size);
     }
 
     isTarget() {
-        // @ts-ignore
         return !this.isPlayer && this.isAlive() && this.arena.selectedPlayer?.isNextTo(this.gridX, this.gridY)
     }
 
@@ -372,18 +351,17 @@ export class Player extends Phaser.GameObjects.Container {
         return (Math.abs(x - this.gridX) <= 1 && Math.abs(y - this.gridY) <= 1);
     }
 
-    walkTo(gridX: number, gridY: number, duration: number = 300, callback?: Function) {
+    walkTo(gridX: number, gridY: number, duration = 300, callback?: Function) {
         const oldGridX = this.gridX;
         this.updatePos(gridX, gridY);
         this.playAnim('walk');
 
-        // @ts-ignore
         const {x, y} = this.arena.gridToPixelCoords(gridX, gridY);
         this.scene.tweens.add({
             targets: this,
             props: {
-                x: x,
-                y: y,
+                x,
+                y,
             },
             duration,
             onComplete: () => {
@@ -417,7 +395,6 @@ export class Player extends Phaser.GameObjects.Container {
         }
 
         if(this.hp != _hp) {
-            // @ts-ignore
             this.arena.emitEvent('hpChange', {num: this.num})
             this.team.updateHP();
         }
@@ -433,7 +410,6 @@ export class Player extends Phaser.GameObjects.Container {
         this.MPBar.setHpValue(mp / this.maxMP);
 
         if(this.mp != _mp) {
-            // @ts-ignore
             this.arena.emitEvent('mpChange', {num: this.num})
         }
     }
@@ -442,7 +418,6 @@ export class Player extends Phaser.GameObjects.Container {
         this.healthBar.setVisible(false);
         this.MPBar?.setVisible(false);
         this.playAnim('die');
-        // @ts-ignore
         if (this.arena.selectedPlayer == this) this.arena.deselectPlayer();
     }
 
@@ -467,7 +442,7 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     displayOverheadText(text, duration, color) {
-        let textObject = this.scene.add.text(
+        const textObject = this.scene.add.text(
             0,( -this.sprite.height / 2) + 15, `${String(text)}`, 
             { fontSize: '24px', color, stroke: '#000', strokeThickness: 3 }
             ).setOrigin(0.5).setDepth(10)   ;
@@ -478,7 +453,7 @@ export class Player extends Phaser.GameObjects.Container {
             targets: textObject,
             y: '-=30',  // move up
             alpha: 0,   // fade out
-            duration,  // 1 second
+            duration, 
             ease: 'Power2',  // smooth easing
             onComplete: () => {
                 // remove the text when the tween is complete
@@ -488,8 +463,9 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     displayDamage(damage) {
-        const txt = damage > 0 ? `-${damage}` : `+${damage}`;
-        this.displayOverheadText(Math.round(damage), 2000, '#fff');
+        console.log(`Damage: ${damage}, > 0 = ${damage > 0}`);
+        const txt = damage > 0 ? `+${Math.round(damage)}` : `${Math.round(damage)}`;
+        this.displayOverheadText(txt, 4000, '#fff');
     }
 
     displaySlash(attacker) {
@@ -498,9 +474,7 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     playSuperimposedAnim(name) {
-        // @ts-ignore
         if (this.arena.animationScales[name]) {
-            // @ts-ignore
             this.animationSprite.setScale(this.arena.animationScales[name]);
         } else {
             this.animationSprite.setScale(2);
@@ -522,7 +496,6 @@ export class Player extends Phaser.GameObjects.Container {
         // this.toggleGrayscale();
         this.cooldownDuration = duration;
         this.totalCooldownDuration = duration;
-        // @ts-ignore
         this.arena.emitEvent('cooldownStarted', {num: this.num})
         this.cooldown.setVisible(true);
         if (this.isSelected()) this.hideMovementRange();
@@ -530,12 +503,12 @@ export class Player extends Phaser.GameObjects.Container {
         this.cooldownTween = this.scene.tweens.add({
             targets: this.cooldown,
             progress: { from: 0, to: 1 }, // Start at 0 progress and tween to 1
-            duration: duration, // Duration of the tween in milliseconds
+            duration, // Duration of the tween in milliseconds
             ease: 'Linear', // Use a linear easing function
             onUpdate: () => {
                 this.cooldownDuration = Math.floor(this.totalCooldownDuration * (1 - this.cooldown.progress));
                 this.cooldown.draw(); // Redraw the circle on each update of the tween
-                // @ts-ignore
+                // @ts-
                 this.arena.emitEvent('cooldownChange', {num: this.num})
             },
             onComplete: () => {
@@ -543,9 +516,7 @@ export class Player extends Phaser.GameObjects.Container {
                 this.cooldownDuration = 0;
                 // this.playAnim('idle');
                 if (this.isSelected()) this.displayMovementRange();
-                // @ts-ignore
                 this.arena.emitEvent('cooldownEnded', {num: this.num})
-                // @ts-ignore
                 if (this.selected) this.arena.playSound('cooldown');
             }
         });
