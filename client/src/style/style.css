@@ -1355,3 +1355,66 @@ canvas {
 .character-inventory-container > :first-child {
   margin-right: 30px;
 }
+
+.purchase-dialog {
+  width: auto;
+}
+
+.purchase-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.purchase-item-name {
+  font-weight: bold;
+}
+
+.purchase-quantity {
+  width: 30px;
+  text-align: center;
+}
+
+.purchase-quantity-selector {
+  display: flex;
+  align-items: center;
+  margin-left: 5px;
+}
+
+
+.purchase-quantity-selector input.quantity {
+  text-align: center;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+}
+
+.purchase-total {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.purchase-total-amount {
+  font-weight: bold;
+}
+
+.purchase-buy-button {
+  padding: 10px;
+  border: none;
+  background-color: gold;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Kim';
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  font-size: 20px;
+  border-radius: 5px;
+}
+
+.purchase-buy-button:hover {
+  filter: brightness(1.1);
+}
+
+.purchase-adjust  {
+  border-radius: 5px;
+  cursor: pointer;
+  /* background-color: green; */
+}

@@ -27,7 +27,13 @@ class ShopPage extends Component<object, State> {
   }
 
   changeQuantity = (amount) => {
-    this.setState((prevState) => ({ quantity: prevState.quantity + amount }));
+    this.setState((prevState) => {
+      // Ensure quantity does not go below 1
+      const newQuantity = prevState.quantity + amount;
+      return { 
+        quantity: newQuantity >= 1 ? newQuantity : 1 
+      };
+    });
   }
 
   purchaseItem = () => {
@@ -37,7 +43,7 @@ class ShopPage extends Component<object, State> {
 
   render() {
     const { isDialogOpen, selectedItem, quantity } = this.state;
-
+    const totalPrice = selectedItem ? selectedItem.price * quantity : 0;
     return (
       <div>
         <div className="page-header">
@@ -83,16 +89,20 @@ class ShopPage extends Component<object, State> {
             </div>
             <div className="shop-item-card-content">
             <i className="fa-solid fa-circle-xmark closebtn" onClick={this.closeDialog} />
-            <div className="quantity-container">
-                  <div className="qty-button" onClick={() => this.changeQuantity(-1)}>-</div>
-                  <input className="shop-qty" type="text" value={quantity} />
-                  <div className="qty-button" onClick={() => this.changeQuantity(1)}>+</div>
-            </div>
-            {selectedItem.name}
-            <div>Total: {quantity * selectedItem.price}</div>
-            <div className="" onClick={this.purchaseItem}>
-              Buy
-            </div>
+              <div className="purchase-dialog">
+                <div className="purchase-item">
+                  <span className="purchase-item-name">{selectedItem.name} x</span>
+                  <div className="purchase-quantity-selector">
+                    <button className="purchase-adjust purchase-minus" onClick={() => this.changeQuantity(-1)}>-</button>
+                    <input type="text" className="purchase-quantity" value={quantity} />
+                    <button className="purchase-adjust  purchase-plus" onClick={() => this.changeQuantity(1)}>+</button>
+                  </div>
+                </div>
+                <div className="purchase-total">
+                  <span>Total: {totalPrice}G</span>
+                </div>
+                <button className="purchase-buy-button" onClick={this.purchaseItem}>BUY</button>
+              </div>
             </div>
           </div>
         )}
