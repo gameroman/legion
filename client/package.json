@@ -21,6 +21,7 @@
     ]
   },
   "dependencies": {
+    "@brenoroosevelt/toast": "^2.0.3",
     "firebaseui": "^6.1.0",
     "phaser": "^3.60.0",
     "phaser3-rex-plugins": "^1.60.7",

@@ -26,6 +26,7 @@ export const createUserCharacter = functions.auth.user().onCreate((user) => {
   // Define the character data structure
   const playerData = {
     gold: 100,
+    inventory: [0, 0, 0, 1, 1, 2, 3, 3],
   };
 
   return db.collection("players").doc(user.uid).set(playerData)
@@ -64,10 +65,32 @@ export const inventoryData = onRequest((request, response) => {
       const docSnap = await db.collection("players").doc(uid).get();
 
       if (docSnap.exists) {
-        const gold = docSnap.data()?.gold;
         response.send({
-          gold,
+          gold: docSnap.data()?.gold,
+          inventory: docSnap.data()?.inventory,
         });
+      } else {
+        response.status(404).send("Not Found: Invalid player ID");
+      }
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      response.status(401).send("Unauthorized");
+    }
+  });
+});
+
+export const purchaseItem = onRequest((request, response) => {
+  const db = admin.firestore();
+
+  cors(corsOptions)(request, response, async () => {
+    try {
+      const uid = await getUID(request);
+      const docSnap = await db.collection("players").doc(uid).get();
+
+      if (docSnap.exists) {
+        const inventory = docSnap.data()?.inventory;
+        inventory.push(request.body.itemId);
+        response.send();
       } else {
         response.status(404).send("Not Found: Invalid player ID");
       }

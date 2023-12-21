@@ -3,10 +3,12 @@ import { h, Component } from 'preact';
 import Description from './Description';
 import { items } from '@legion/shared/Items';
 import firebase from '@legion/shared/firebaseConfig';
+import toast from '@brenoroosevelt/toast'
 
 interface State {
   user: firebase.User | null;
   gold: number;
+  inventory: Array<any>;
   items: Array<any>;
   isDialogOpen: boolean;
   selectedItem: any;
@@ -19,6 +21,7 @@ class ShopPage extends Component<object, State> {
   state: State = {
     user: null,
     gold: 0,
+    inventory: [],
     items,
     isDialogOpen: false,
     selectedItem: null,
@@ -52,12 +55,19 @@ class ShopPage extends Component<object, State> {
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        this.setState({ gold: data.gold });
+        this.setState({ 
+          gold: data.gold,
+          inventory: data.inventory
+        });
       })
       .catch(error => console.error('Error:', error));
     }).catch((error) => {
       console.error(error);
     });
+  }
+
+  getAmountOwned = (itemId) => {
+    return this.state.inventory.filter((item) => item === itemId).length;
   }
 
   openDialog = (item) => {
@@ -78,8 +88,24 @@ class ShopPage extends Component<object, State> {
     });
   }
 
+  hasEnoughGold = (itemId) => {
+    const item = this.state.items.find((item) => item.id === itemId);
+    if (!item) {
+      return false;
+    }
+
+    return this.state.gold >= item.price;
+  }
+
   purchaseItem = () => {
-    // handle the purchase here
+    const { selectedItem, quantity } = this.state;
+    if (!selectedItem) {
+      return;
+    }
+    if (!this.hasEnoughGold(selectedItem.id)) {
+      toast.error('Not enough gold!', {closeBtn: false, position: 'top', duration: 3000});
+      return;
+    }
     this.closeDialog();
   }
 
@@ -113,7 +139,7 @@ class ShopPage extends Component<object, State> {
                         <Description action={item} />
                       </div>
                       <div className="shop-item-card-capsules">
-                        <div className="shop-item-card-owned" title='Amount Owned'>23</div>
+                        <div className="shop-item-card-owned" title='Amount Owned'>{this.getAmountOwned(item.id)}</div>
                         <div className="shop-item-card-price" title='Price'>{item.price}</div>
                       </div>
                     </div>
