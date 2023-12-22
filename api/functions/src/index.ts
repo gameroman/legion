@@ -3,6 +3,7 @@ import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import cors from "cors";
+import {items} from "@legion/shared/Items";
 
 admin.initializeApp();
 const corsOptions = {origin: true};
@@ -57,6 +58,7 @@ export const leaderboardData = onRequest((request, response) => {
 
 export const inventoryData = onRequest((request, response) => {
   logger.info("Fetching inventoryData");
+  logger.info(items);
   const db = admin.firestore();
 
   cors(corsOptions)(request, response, async () => {

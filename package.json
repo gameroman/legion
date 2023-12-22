@@ -5,6 +5,6 @@
       "shared",
       "server",
       "client",
-      "API"
+      "api/functions"
     ]
   }

@@ -15,8 +15,7 @@
       "socket.io": "^4.6.1",
       "ts-node": "^10.9.1",
       "typescript": "^5.0.4",
-      "uuidv4": "^6.2.13",
-      "@legion/shared": "*"
+      "uuidv4": "^6.2.13"
     },
     "devDependencies": {
       "@types/express": "^4.17.17",

@@ -52,7 +52,9 @@ class Inventory extends Component<object, InventoryState> {
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        this.setState({ inventory: data });
+        this.setState({ 
+          inventory: data.inventory 
+        });
       })
       .catch(error => console.error('Error:', error));
     }).catch((error) => {
