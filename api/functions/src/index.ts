@@ -7,6 +7,7 @@ import {uniqueNamesGenerator, adjectives, colors, animals}
   from "unique-names-generator";
 
 import {items} from "@legion/shared/Items";
+import {Class} from "@legion/shared/types";
 
 admin.initializeApp();
 const corsOptions = {origin: true};
@@ -23,27 +24,100 @@ async function getUID(request: any) {
   }
 }
 
+
+function getSkillSlots(characterClass: Class) {
+  switch (characterClass) {
+  case Class.WARRIOR:
+    return 0;
+  case Class.WHITE_MAGE:
+    return 3;
+  case Class.BLACK_MAGE:
+    return 3;
+  case Class.THIEF:
+    return 1;
+  }
+}
+
+interface CharacterData {
+  name: string;
+  class: Class;
+  level: number;
+  xp: number;
+  hp: number;
+  mp: number;
+  atk: number;
+  def: number;
+  spatk: number;
+  spdef: number;
+  carrying_capacity: number;
+  skill_slots: number;
+}
+
+function generateCharacterData(): CharacterData {
+  // Define the character data structure
+  const characterClass = Math.floor(Math.random() * 3) as Class;
+  return {
+    name: uniqueNamesGenerator({
+      dictionaries: [adjectives, colors, animals],
+      length: 2,
+    }),
+    class: characterClass,
+    level: 1,
+    xp: 0,
+    hp: 100,
+    mp: 20,
+    atk: 10,
+    def: 10,
+    spatk: 10,
+    spdef: 10,
+    carrying_capacity: 3,
+    skill_slots: getSkillSlots(characterClass),
+  };
+}
+
 export const createUserCharacter = functions.auth.user().onCreate((user) => {
   logger.info("Creating character for user:", user.uid);
   const db = admin.firestore();
+  const playerRef = db.collection("players").doc(user.uid);
 
   // Define the character data structure
   const playerData = {
     name: uniqueNamesGenerator({dictionaries: [adjectives, colors, animals]}),
     gold: 100,
     inventory: [0, 0, 0, 1, 1, 2, 3, 3],
+    characters: [] as admin.firestore.DocumentReference[],
     elo: 100,
     wins: 0,
     losses: 0,
     crowd: 3,
   };
 
-  return db.collection("players").doc(user.uid).set(playerData)
+  // Start a batch to ensure atomicity
+  const batch = db.batch();
+
+  // Add player document to batch
+  batch.set(playerRef, playerData);
+
+  // Create character documents and add references to the player document
+  const characterDataArray = [
+    generateCharacterData(),
+    generateCharacterData(),
+    generateCharacterData(),
+  ];
+
+  characterDataArray.forEach((characterData) => {
+    const characterRef = db.collection("characters").doc();
+    batch.set(characterRef, characterData);
+    playerData.characters.push(characterRef);
+  });
+
+  // Commit the batch
+  return batch.commit()
     .then(() => {
-      logger.info("New player created for user:", user.uid);
+      logger.info("New player and characters created for user:", user.uid);
     })
     .catch((error) => {
-      logger.info("Error creating player:", error);
+      logger.info("Error creating player and characters:", error);
     });
 });
 

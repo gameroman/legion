@@ -80,3 +80,10 @@ export interface ItemData {
     effects: Effect[];
     price: number;
 }
+
+export enum Class {
+    WARRIOR,
+    WHITE_MAGE,
+    BLACK_MAGE,
+    THIEF
+}
