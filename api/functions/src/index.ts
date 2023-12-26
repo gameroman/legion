@@ -3,6 +3,9 @@ import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import cors from "cors";
+import {uniqueNamesGenerator, adjectives, colors, animals}
+  from "unique-names-generator";
+
 import {items} from "@legion/shared/Items";
 
 admin.initializeApp();
@@ -26,8 +29,13 @@ export const createUserCharacter = functions.auth.user().onCreate((user) => {
 
   // Define the character data structure
   const playerData = {
+    name: uniqueNamesGenerator({dictionaries: [adjectives, colors, animals]}),
     gold: 100,
     inventory: [0, 0, 0, 1, 1, 2, 3, 3],
+    elo: 100,
+    wins: 0,
+    losses: 0,
+    crowd: 3,
   };
 
   return db.collection("players").doc(user.uid).set(playerData)
@@ -43,18 +51,6 @@ export const helloWorld = onRequest((request, response) => {
   logger.info("Hello logs!", {structuredData: true});
   response.send("Hello from Firebase!!!");
 });
-
-export const leaderboardData = onRequest((request, response) => {
-  response.send([
-    {rank: 1, player: "Player1", elo: 1500, wins: 10, losses: 2,
-      winsRatio: Math.round((10/(10+2))*100) + "%", crowdScore: 5},
-    {rank: 2, player: "Player2", elo: 1400, wins: 8, losses: 3,
-      winsRatio: Math.round((8/(8+3))*100) + "%", crowdScore: 3},
-    {rank: 3, player: "Me", elo: 1300, wins: 7, losses: 3,
-      winsRatio: Math.round((7/(7+3))*100) + "%", crowdScore: 3},
-  ]);
-});
-
 
 export const inventoryData = onRequest((request, response) => {
   logger.info("Fetching inventoryData");
@@ -121,4 +117,37 @@ export const purchaseItem = onRequest((request, response) => {
   });
 });
 
+export const fetchLeaderboard = onRequest((request, response) => {
+  logger.info("Fetching leaderboard");
+  const db = admin.firestore();
 
+  cors(corsOptions)(request, response, async () => {
+    try {
+      const docSnap = await db.collection("players").get();
+      const players = docSnap.docs.map((doc) => doc.data());
+      const sortedPlayers = players.sort((a, b) => b.elo - a.elo);
+      const leaderboard = sortedPlayers.map((player, index) => {
+        const denominator = player.wins + player.losses;
+        let winsRatio = 0;
+        if (denominator === 0) {
+          winsRatio = 0;
+        } else {
+          winsRatio = Math.round((player.wins/denominator));
+        }
+        return {
+          rank: index + 1,
+          player: player.name,
+          elo: player.elo,
+          wins: player.wins,
+          losses: player.losses,
+          winsRatio: winsRatio*100 + "%",
+          crowdScore: player.crowd,
+        };
+      });
+      response.send(leaderboard);
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      response.status(401).send("Unauthorized");
+    }
+  });
+});

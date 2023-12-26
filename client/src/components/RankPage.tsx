@@ -30,9 +30,11 @@ class RankPage extends Component {
   };
 
   async componentDidMount() {
-    const response = await axios.get(`${process.env.PREACT_APP_API_URL}/leaderboardData`);
+    const response = await axios.get(`${process.env.PREACT_APP_API_URL}/fetchLeaderboard`);
     // eslint-disable-next-line react/no-did-mount-set-state
-    if (response.data) this.setState({ leaderboardData: response.data });
+    if (response.data) {
+      this.setState({ leaderboardData: response.data });
+    }
   }
 
   render() {
