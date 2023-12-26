@@ -2,8 +2,12 @@
 import { h, Component } from 'preact';
 import Description from './Description';
 import { items } from '@legion/shared/Items';
-import firebase from '@legion/shared/firebaseConfig';
 import toast from '@brenoroosevelt/toast'
+
+import firebase from 'firebase/compat/app'
+import firebaseConfig from '@legion/shared/firebaseConfig';
+firebase.initializeApp(firebaseConfig);
+
 
 interface State {
   user: firebase.User | null;

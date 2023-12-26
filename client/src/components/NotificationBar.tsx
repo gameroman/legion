@@ -1,6 +1,8 @@
 // NotificationBar.tsx
 import { h, Component } from 'preact';
-import firebase from '@legion/shared/firebaseConfig';
+import firebase from 'firebase/compat/app'
+import firebaseConfig from '@legion/shared/firebaseConfig';
+firebase.initializeApp(firebaseConfig);
 
 interface State {
     showNotifications: boolean;

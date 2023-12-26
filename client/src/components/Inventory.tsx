@@ -1,11 +1,14 @@
 
 // Inventory.tsx
 import { h, Component } from 'preact';
-import firebase from '@legion/shared/firebaseConfig';
+import firebase from 'firebase/compat/app'
+import firebaseConfig from '@legion/shared/firebaseConfig';
+firebase.initializeApp(firebaseConfig);
 
 import { items } from '@legion/shared/Items';
 import ActionItem from './game/HUD/Action';
 import { ActionType } from './game/HUD/ActionTypes';
+
 
 interface InventoryState {
     user: firebase.User | null;

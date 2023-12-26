@@ -5,7 +5,7 @@ import { BaseItem } from "@legion/shared/BaseItem";
 import { BaseSpell } from "@legion/shared/BaseSpell";
 import { items } from '@legion/shared/Items';
 import { spells } from '@legion/shared/Spells';
-import { Target } from "@legion/shared";
+import { Target } from "@legion/shared/types";
 import { Arena } from "./Arena";
 import { HUD } from "./HUD";
 

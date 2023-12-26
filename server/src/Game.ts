@@ -4,7 +4,7 @@ import { uuid } from 'uuidv4';
 import { ServerPlayer } from './ServerPlayer';
 import { Team } from './Team';
 import { Spell } from './Spell';
-import { lineOfSight, serializeCoords } from '@legion/shared/utils';
+import { lineOfSight } from '@legion/shared/utils';
 
 
 export abstract class Game

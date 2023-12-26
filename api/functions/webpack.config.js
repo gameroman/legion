@@ -15,6 +15,9 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    alias: {
+        '@legion/shared': path.resolve(__dirname, '../../shared'),
+      },
   },
   output: {
     path: path.resolve(__dirname, 'lib'), // Output directory

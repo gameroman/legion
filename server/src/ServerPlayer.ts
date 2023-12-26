@@ -1,7 +1,7 @@
 import { Team } from './Team';
 import { Item } from './Item';
 import { Spell } from './Spell';
-import { Stat } from "@legion/shared";
+import { Stat } from "@legion/shared/types";
 
 export type ActionType = 'move' | 'attack';
 export class ServerPlayer {

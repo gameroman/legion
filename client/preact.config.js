@@ -15,5 +15,10 @@ export default function (config, env, helpers) {
 
     // Add an alias for 'phaser' to point to the non-ESM build
     config.resolve.alias['phaser'] = path.resolve(__dirname, 'node_modules/phaser/dist/phaser.js');
+    config.resolve.alias['@legion/shared'] = path.resolve(__dirname, '../shared/');
+
+
+    let babelLoader = helpers.getLoadersByName(config, 'babel-loader')[0].rule;
+    babelLoader.exclude = /node_modules\/phaser/;
 }
   

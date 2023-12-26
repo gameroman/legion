@@ -1,6 +1,6 @@
 // firebaseConfig.ts
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
+// import firebase from 'firebase/compat/app';
+// import 'firebase/compat/auth';
 
 const config = {
     apiKey: "AIzaSyCRlDX1DYaQpHcs0fZm05pmabuGVWeL8Es",
@@ -12,6 +12,6 @@ const config = {
     measurementId: "G-FWZMZZ038Q"
 };
 
-firebase.initializeApp(config);
+// firebase.initializeApp(config);
 
-export default firebase;
+export default config;

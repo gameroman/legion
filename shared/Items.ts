@@ -1,5 +1,5 @@
 import { BaseItem } from "./BaseItem";
-import { Stat, Target } from "@legion/shared";
+import { Stat, Target } from ".";
 
 export const items:BaseItem[] = [];
 
