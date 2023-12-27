@@ -3,7 +3,9 @@ import { h, Component } from 'preact';
 import ActionItem from './game/HUD/Action';
 import { ActionType } from './game/HUD/ActionTypes';
 import { classEnumToString } from './utils';
-import { CharacterContext } from './CharacterContext';
+
+import toast from '@brenoroosevelt/toast'
+import { apiFetch } from '../services/apiService';
 
 import firebase from 'firebase/compat/app'
 import firebaseConfig from '@legion/shared/firebaseConfig';
@@ -34,51 +36,27 @@ interface CharacterState {
 }
 
 class Character extends Component<CharacterProps, CharacterState> {
-  static contextType = CharacterContext;
-  authSubscription: firebase.Unsubscribe | null = null;
   
   componentDidMount() {
-    console.log('mounting');
-    this.authSubscription = firebase.auth().onAuthStateChanged((user) => {
-      this.setState({ user }, () => {
-        if (user) {
-          console.log('User is logged in');
-          this.fetchCharacterData(this.state.user); 
-        }
-      });
-    });
+    this.fetchCharacterData(); 
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.matches.id !== this.props.matches.id) {
-      this.fetchCharacterData(this.state.user); 
+      this.fetchCharacterData(); 
     }
   }
 
-  componentWillUnmount() {
-    // Don't forget to unsubscribe when the component unmounts
-    this.authSubscription();
-  }
-
-  async fetchCharacterData(user) {
-    user.getIdToken(true).then((idToken) => {
-      // Make the API request, including the token in the Authorization header
-      fetch(`${process.env.PREACT_APP_API_URL}/characterData?id=${this.props.matches.id}`, {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      })
-      .then(response => response.json())
-      .then(data => {
+  async fetchCharacterData() {
+    try {
+        const data = await apiFetch(`characterData?id=${this.props.matches.id}`);
         console.log(data);
         this.setState({ 
-          ...data,
+          ...data
         });
-      })
-      .catch(error => console.error('Error:', error));
-    }).catch((error) => {
-      console.error(error);
-    });
+    } catch (error) {
+        toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
+    }
   }
 
   onActionClick = (type: string, letter: string, index: number) => {

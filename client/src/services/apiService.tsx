@@ -20,7 +20,26 @@ interface ApiFetchOptions {
     body?: any;
 }
 
-async function apiFetch(endpoint, options: ApiFetchOptions = {}) {
+class ApiError extends Error {
+    status;
+    endpoint;
+
+    constructor(message, status, endpoint) {
+        super(message);
+        this.status = status;
+        this.endpoint = endpoint;
+    }
+}
+
+function timeoutPromise(duration) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            reject(new Error('Request timed out'));
+        }, duration);
+    });
+}
+
+async function apiFetch(endpoint, options: ApiFetchOptions = {}, timeoutDuration = 10000) {
     try {
         const idToken = await getFirebaseIdToken();
         const headers = new Headers(options.headers || {});
@@ -33,14 +52,19 @@ async function apiFetch(endpoint, options: ApiFetchOptions = {}) {
 
         headers.append("Authorization", `Bearer ${idToken}`);
 
-        const response = await fetch(`${apiBaseUrl}/${endpoint}`, {
+        const fetchPromise = fetch(`${apiBaseUrl}/${endpoint}`, {
             ...options,
             headers,
         });
 
+        const response = await Promise.race([
+            fetchPromise,
+            timeoutPromise(timeoutDuration)
+        ]) as Response;
+
         if (!response.ok) {
-            const errorInfo = await response.json();
-            throw new Error(errorInfo.message || "API request failed");
+            const errorBody = await response.text();
+            throw new ApiError(`Error ${response.status} from ${endpoint}: ${errorBody}`, response.status, endpoint);
         }
 
         return response.json();
