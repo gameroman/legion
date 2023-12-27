@@ -13,6 +13,7 @@ interface TeamPageProps {
 }
 
 class TeamPage extends Component<TeamPageProps> {
+  
   render() {
     return (
         <div>

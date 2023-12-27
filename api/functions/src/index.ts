@@ -78,6 +78,8 @@ interface CharacterData {
   spdef: number;
   carrying_capacity: number;
   skill_slots: number;
+  inventory: number[];
+  skills: number[];
 }
 
 function generateCharacterData(): CharacterData {
@@ -100,6 +102,8 @@ function generateCharacterData(): CharacterData {
     spdef: 11,
     carrying_capacity: 3,
     skill_slots: getSkillSlots(characterClass),
+    inventory: [],
+    skills: [],
   };
 }
 
@@ -270,13 +274,47 @@ export const rosterData = onRequest((request, response) => {
           characters.map((character) => character.get())
         );
         const rosterData = characterDocs.map(
-          (characterDoc) => characterDoc.data()
+          (characterDoc) => {
+            const characterData = characterDoc.data();
+            return {
+              id: characterDoc.id, // Include the document ID
+              ...characterData,
+            };
+          }
         );
         response.send({
           characters: rosterData,
         });
       } else {
         response.status(404).send("Not Found: Invalid player ID");
+      }
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      response.status(401).send("Unauthorized");
+    }
+  });
+});
+
+export const characterData = onRequest((request, response) => {
+  logger.info("Fetching characterData");
+  const db = admin.firestore();
+
+  cors(corsOptions)(request, response, async () => {
+    try {
+      const uid = await getUID(request);
+      if (!request.query.id || typeof request.query.id !== "string") {
+        response.status(404).send("Not Found: Invalid character ID");
+      }
+      const docSnap =
+        await db.collection("characters").doc(request.query.id as string).get();
+
+      if (docSnap.exists) {
+        const characterData = docSnap.data();
+        response.send({
+          ...characterData,
+        });
+      } else {
+        response.status(404).send("Not Found: Invalid character ID");
       }
     } catch (error) {
       console.error("Error verifying token:", error);

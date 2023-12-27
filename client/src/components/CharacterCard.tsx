@@ -2,6 +2,7 @@
 import { h, Component } from 'preact';
 import { route } from 'preact-router';
 import {Class} from "@legion/shared/types";
+import { classEnumToString } from './utils';
 
 interface CharacterProps {
   id: number;
@@ -37,19 +38,12 @@ class CharacterCard extends Component<CharacterProps> {
     classToCssClass[Class.THIEF] = "thief";
     const cssClass = classToCssClass[characterClass];
     
-    const classToName: { [key in Class]?: string } = {};
-    classToName[Class.WARRIOR] = "Warrior";
-    classToName[Class.WHITE_MAGE] = "White Mage";
-    classToName[Class.BLACK_MAGE] = "Black Mage";
-    classToName[Class.THIEF] = "Thief";
-    const className = classToName[characterClass];
-
     return (
       <div className={`character-card ${cssClass}`} onClick={this.handleCardClick}>
         <div className="character-portrait" style={portraitStyle}></div>
         <div className="character-info">
           <span className="character-name">{name}</span>
-          <span className="character-class">{className}</span>
+          <span className="character-class">{classEnumToString(characterClass)}</span>
         </div>
         <div className="level-badge">
             <span>lvl</span>

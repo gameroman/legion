@@ -4,7 +4,11 @@ import ActionItem from './game/HUD/Action';
 import { ActionType } from './game/HUD/ActionTypes';
 import { items } from '@legion/shared/Items';
 import { spells } from '@legion/shared/Spells';
+import { classEnumToString } from './utils';
 
+import firebase from 'firebase/compat/app'
+import firebaseConfig from '@legion/shared/firebaseConfig';
+firebase.initializeApp(firebaseConfig);
 interface CharacterProps {
     matches: {
         id: string;
@@ -12,70 +16,92 @@ interface CharacterProps {
 }
 
 interface CharacterState {
+  user: firebase.User | null;
   portrait: string;
   name: string;
-  class: string;
+  class: number;
   level: number;
   xp: number;
-  xpToLevel: number;
   hp: number;
   mp: number;
   atk: number;
   def: number;
   spAtk: number;
   spDef: number;
-  items: any[];
-  spells: any[];
+  inventory: any[];
+  skills: any[];
+  carrying_capacity: number;
+  skill_slots: number;
 }
 
 class Character extends Component<CharacterProps, CharacterState> {
+  authSubscription: firebase.Unsubscribe | null = null;
+  
   componentDidMount() {
-    // Fetch the character's data here, using this.props.id
-    // For now, we'll just use some dummy data
-    this.setState({
-      portrait: '/assets/sprites/1_1.png',
-      name: 'Character Name!',
-      class: 'Black Mage',
-      level: 1,
-      xp: 67,
-      xpToLevel: 100,
-      hp: 100,
-      mp: 50,
-      atk: 10,
-      def: 10,
-      spAtk: 10,
-      spDef: 10,
-      items: [
-        items[0], items[2]
-      ],
-      spells
+    console.log('mounting');
+    this.authSubscription = firebase.auth().onAuthStateChanged((user) => {
+      this.setState({ user }, () => {
+        if (user) {
+          console.log('User is logged in');
+          this.fetchCharacterData(this.state.user); 
+        }
+      });
     });
   }
-  
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.matches.id !== this.props.matches.id) {
+      this.fetchCharacterData(this.state.user); 
+    }
+  }
+
+  componentWillUnmount() {
+    // Don't forget to unsubscribe when the component unmounts
+    this.authSubscription();
+  }
+
+  async fetchCharacterData(user) {
+    user.getIdToken(true).then((idToken) => {
+      // Make the API request, including the token in the Authorization header
+      fetch(`${process.env.PREACT_APP_API_URL}/characterData?id=${this.props.matches.id}`, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        this.setState({ 
+          ...data,
+        });
+      })
+      .catch(error => console.error('Error:', error));
+    }).catch((error) => {
+      console.error(error);
+    });
+  }
 
   render() {
-    const { id } = this.props.matches;
-    const { portrait, name, class: characterClass, level, xp, xpToLevel, items, spells } = this.state;
-
-    if (items) {
-      while (items.length < 3) {
-        items.push({id: -1});
-      }
-    }
+    const { portrait, name, class: characterClass, level, xp, inventory, carrying_capacity, skills, skill_slots } = this.state;
+    const xpToLevel = 100;
 
     const portraitStyle = {
-        backgroundImage: `url(${portrait})`,
+        backgroundImage: `url(/assets/sprites/${portrait}.png)`,
     };
     const xpRatio = xp / (xp + xpToLevel) * 100;
 
-    const stats = ['hp', 'atk', 'spAtk', 'mp', 'def', 'spDef'];
+    const stats = ['hp', 'atk', 'spatk', 'mp', 'def', 'spdef'];
+
+    const filledItems = Array.from({ length: carrying_capacity }, (_, i) => inventory[i] ?? -1);
+    const filledSpells = Array.from({ length: skill_slots }, (_, i) => skills[i] ?? -1);
+
 
     return (
       <div className="character-full">
         <div className="character-header">
             <div className="character-header-name">{name}</div>
             <div className="character-header-name-shadow">{name}</div>
-            <div className={`character-header-class`}>{characterClass}</div>
+            <div className={`character-header-class`}>{classEnumToString(characterClass)}</div>
         </div>
         <div className="character-full-content">
             <div className="character-full-stats">
@@ -103,7 +129,7 @@ class Character extends Component<CharacterProps, CharacterState> {
                 <div className="player-items">
                   <div className='slots-header'>Items</div>
                   <div className="slots"> 
-                  {items && items.map((item, i) => (
+                  {filledItems && filledItems.map((item, i) => (
                     <ActionItem 
                       action={item} 
                       index={i} 
@@ -114,10 +140,10 @@ class Character extends Component<CharacterProps, CharacterState> {
                   ))}
                   </div>
                 </div>
-                {spells && spells.length > 0 && <div className="player-skills">
+                {filledSpells && filledSpells.length > 0 && <div className="player-skills">
                   <div className='slots-header'>Skills</div>
                   <div className="slots">
-                  {spells && spells.map((spell, i) => (
+                  {filledSpells && filledSpells.map((spell, i) => (
                     <ActionItem 
                       action={spell} 
                       index={i} 
