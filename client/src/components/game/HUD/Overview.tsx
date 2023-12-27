@@ -66,6 +66,7 @@ class Overview extends Component<Props, State> {
         }
         previousHPs[memberIndex] = member.hp;
       });
+      // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ cooldowns, previousHPs, blinking });
     }
   }
@@ -103,16 +104,16 @@ class Overview extends Component<Props, State> {
                 </div>
                 <div className="member-name">Player #{memberIndex + 1}</div>
                 <div className="hp-bar">
-                  <div className="hp-fill" style={{width: `${(member.hp / member.maxHP) * 100}%`}}></div>
+                  <div className="hp-fill" style={{width: `${(member.hp / member.maxHP) * 100}%`}} />
                 </div>
                 {member.isPlayer && (
                   <div className="mp-bar">
-                    <div className="mp-fill" style={{width: `${(member.mp / member.maxMP) * 100}%`}}></div>
+                    <div className="mp-fill" style={{width: `${(member.mp / member.maxMP) * 100}%`}} />
                   </div>
                 )}
                 {member.isPlayer && (
                 <div className="cooldown-bar">
-                  <div className="cooldown-fill" style={{width: `${(1 - (cooldown / member.totalCooldown)) * 100}%`}}></div>
+                  <div className="cooldown-fill" style={{width: `${(1 - (cooldown / member.totalCooldown)) * 100}%`}} />
                 </div>
                 )}
               </div>
