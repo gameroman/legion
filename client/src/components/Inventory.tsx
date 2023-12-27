@@ -12,12 +12,16 @@ import { apiFetch } from '../services/apiService';
 interface InventoryState {
     capacity: number;
     inventory: number[];
-  }
+}
 
-class Inventory extends Component<object, InventoryState> {
+interface InventoryProps {
+  id: string;
+}
+
+class Inventory extends Component<InventoryProps, InventoryState> {
   capacity = 50;
-  constructor(props: object) {
-      super(props);
+  constructor() {
+      super();
       this.state = {
           capacity: this.capacity,
           inventory: []
@@ -42,7 +46,19 @@ class Inventory extends Component<object, InventoryState> {
 
   onActionClick = (type: string, letter: string, index: number) => {
     console.log('clicked', index);
-  
+    const payload = {
+        index,
+        characterId: this.props.id,
+    };
+    
+    apiFetch('equipItem', {
+        method: 'POST',
+        body: payload
+    })
+    .then(() => {
+        toast.success('Item equipped!', {closeBtn: false, position: 'top', duration: 3000});
+    })
+    .catch(error => toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'}));
   }
   
   render() {

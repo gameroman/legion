@@ -13,6 +13,7 @@ interface ActionItemProps {
   hideHotKey?: boolean;
   onActionClick?: (type: string, letter: string, index: number) => void;
 }
+/* eslint-disable react/prefer-stateless-function */
 
 class Action extends Component<ActionItemProps> {
   render() {
@@ -20,6 +21,11 @@ class Action extends Component<ActionItemProps> {
     const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
     const startPosition = keyboardLayout.indexOf(actionType === 'item' ? 'Z' : 'Q');
     const keyBinding = keyboardLayout.charAt(startPosition + index);
+    
+    if (!action) {
+      return <div className={`${actionType}`} />;
+    }
+
     return (
       <div 
         className={`${actionType} ${index === clickedIndex ? 'flash-effect' : ''}`} 

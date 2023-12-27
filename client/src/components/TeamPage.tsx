@@ -8,18 +8,15 @@ import Inventory from './Inventory';
 
 interface TeamPageProps {
   matches: {
-    id: string;
+    id?: string;
   };
 }
+/* eslint-disable react/prefer-stateless-function */
 
-class TeamPage extends Component<TeamPageProps> {
-  state = { characterId: '' };
-
-  setCharacterId = (id: string) => {
-    this.setState({ characterId: id });
-  };
-
+class TeamPage extends Component<TeamPageProps> { 
   render() {
+    const characterId = this.props.matches.id || ''; // Fallback to empty string if ID is not present
+
     return (
         <div>
           <div className="page-header">
@@ -30,9 +27,9 @@ class TeamPage extends Component<TeamPageProps> {
             <Roster />
             <div className="character-inventory-container">
               <Router>
-                <Route path="/team/:id" component={Character} />
+                <Route path="/team/:id" component={() => <Character id={characterId} />} />
               </Router>
-              <Inventory />
+              <Inventory id={characterId} />
             </div>
           </div>
         </div>

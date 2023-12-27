@@ -3,6 +3,7 @@ import { h, Component } from 'preact';
 import ActionItem from './game/HUD/Action';
 import { ActionType } from './game/HUD/ActionTypes';
 import { classEnumToString } from './utils';
+import { items } from '@legion/shared/Items';
 
 import toast from '@brenoroosevelt/toast'
 import { apiFetch } from '../services/apiService';
@@ -11,9 +12,7 @@ import firebase from 'firebase/compat/app'
 import firebaseConfig from '@legion/shared/firebaseConfig';
 firebase.initializeApp(firebaseConfig);
 interface CharacterProps {
-    matches: {
-        id: string;
-    };
+    id: string;
 }
 
 interface CharacterState {
@@ -42,14 +41,14 @@ class Character extends Component<CharacterProps, CharacterState> {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.matches.id !== this.props.matches.id) {
+    if (prevProps.id !== this.props.id) {
       this.fetchCharacterData(); 
     }
   }
 
   async fetchCharacterData() {
     try {
-        const data = await apiFetch(`characterData?id=${this.props.matches.id}`);
+        const data = await apiFetch(`characterData?id=${this.props.id}`);
         console.log(data);
         this.setState({ 
           ...data
@@ -64,7 +63,6 @@ class Character extends Component<CharacterProps, CharacterState> {
   }
 
   render() {
-    const { characterId } = this.context;
     const { portrait, name, class: characterClass, level, xp, inventory, carrying_capacity, skills, skill_slots } = this.state;
     const xpToLevel = 100;
 
@@ -77,7 +75,7 @@ class Character extends Component<CharacterProps, CharacterState> {
 
     const filledItems = Array.from({ length: carrying_capacity }, (_, i) => inventory[i] ?? -1);
     const filledSpells = Array.from({ length: skill_slots }, (_, i) => skills[i] ?? -1);
-
+    console.log(filledItems);
 
     return (
       <div className="character-full">
@@ -114,7 +112,7 @@ class Character extends Component<CharacterProps, CharacterState> {
                   <div className="slots"> 
                   {filledItems && filledItems.map((item, i) => (
                     <ActionItem 
-                      action={item} 
+                      action={item > -1 ? items[item] : null} 
                       index={i} 
                       clickedIndex={-1}
                       canAct={true} 

@@ -5,6 +5,7 @@ import Description from './Description';
 interface InfoBoxProps {
   action: any;
 }
+/* eslint-disable react/prefer-stateless-function */
 
 class InfoBox extends Component<InfoBoxProps> {
   render() {

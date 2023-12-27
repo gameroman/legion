@@ -5,6 +5,7 @@ import { Stat, Target } from '@legion/shared/types';
 interface DescProps {
   action: any;
 }
+/* eslint-disable react/prefer-stateless-function */
 
 class Description extends Component<DescProps> {
   render() {

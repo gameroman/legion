@@ -336,3 +336,65 @@ export const characterData = onRequest((request, response) => {
     }
   });
 });
+
+export const equipItem = onRequest((request, response) => {
+  logger.info("Equipping item");
+  const db = admin.firestore();
+
+  cors(corsOptions)(request, response, async () => {
+    try {
+      const uid = await getUID(request);
+      const characterId = request.body.characterId as string;
+      const index = request.body.index;
+
+      await db.runTransaction(async (transaction) => {
+        const playerRef = db.collection("players").doc(uid);
+        const characterRef = db.collection("characters").doc(characterId);
+
+        const playerDoc = await transaction.get(playerRef);
+        const characterDoc = await transaction.get(characterRef);
+
+        if (!playerDoc.exists || !characterDoc.exists) {
+          throw new Error("Documents do not exist");
+        }
+
+        const playerData = playerDoc.data();
+        const characterData = characterDoc.data();
+
+        if (!playerData || !characterData) {
+          throw new Error("Data does not exist");
+        }
+
+        // Check that character is owned by player
+        const characters =
+          playerData.characters as admin.firestore.DocumentReference[];
+        const characterIds = characters.map((character) => character.id);
+        if (!characterIds.includes(characterId)) {
+          throw new Error("Character not owned by player");
+        }
+
+        const playerInventory = playerData.inventory.sort();
+
+        if (playerInventory.length >= playerData.carrying_capacity) {
+          throw new Error("Inventory full");
+        }
+
+        const inventory = characterData.inventory as number[];
+        const item = playerInventory[index];
+
+        playerInventory.splice(index, 1);
+        inventory.push(item);
+
+        // Update player and character documents within the transaction
+        transaction.update(playerRef, {inventory: playerInventory});
+        transaction.update(characterRef, {inventory});
+      });
+      console.log("Transaction successfully committed!");
+
+      response.send();
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      response.status(401).send("Unauthorized");
+    }
+  });
+});
