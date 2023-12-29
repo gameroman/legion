@@ -153,6 +153,19 @@ export class NewCharacter {
     }
   }
 
+  getSkills(): number[] {
+    switch (this.characterClass) {
+    case Class.WARRIOR:
+      return [];
+    case Class.WHITE_MAGE:
+      return [1];
+    case Class.BLACK_MAGE:
+      return [0, 2, 3];
+    case Class.THIEF:
+      return [];
+    }
+  }
+
   generateCharacterData(): CharacterData {
     return {
       name: uniqueNamesGenerator({
@@ -172,7 +185,7 @@ export class NewCharacter {
       carrying_capacity: 3,
       skill_slots: this.getSkillSlots(),
       inventory: [],
-      skills: [],
+      skills: this.getSkills(),
     };
   }
 }

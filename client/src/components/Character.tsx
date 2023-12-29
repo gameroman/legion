@@ -4,6 +4,7 @@ import ActionItem from './game/HUD/Action';
 import { ActionType } from './game/HUD/ActionTypes';
 import { classEnumToString } from './utils';
 import { items } from '@legion/shared/Items';
+import { spells } from '@legion/shared/Spells';
 
 import toast from '@brenoroosevelt/toast'
 import { apiFetch } from '../services/apiService';
@@ -93,7 +94,7 @@ class Character extends Component<CharacterProps, CharacterState> {
 
     const filledItems = Array.from({ length: carrying_capacity }, (_, i) => inventory[i] ?? -1);
     const filledSpells = Array.from({ length: skill_slots }, (_, i) => skills[i] ?? -1);
-    console.log(filledItems);
+    console.log(filledSpells);
 
     return (
       <div className="character-full">
@@ -146,12 +147,11 @@ class Character extends Component<CharacterProps, CharacterState> {
                   <div className="slots">
                   {filledSpells && filledSpells.map((spell, i) => (
                     <ActionItem 
-                      action={spell} 
+                      action={spell > -1 ? spells[spell] : null} 
                       index={i} 
                       clickedIndex={-1}
                       canAct={true} 
                       actionType={ActionType.Skill}
-                      onActionClick={this.onActionClick}
                       key={i}
                     />
                   ))}

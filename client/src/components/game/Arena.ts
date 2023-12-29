@@ -214,18 +214,31 @@ export class Arena extends Phaser.Scene
         return (x < skip || x >= this.gridWidth - skip);
     }
 
-    drawGrid() {
-        
+    floatTiles(startX, startY) {
+        // Loop over each row
+        for (let y = 0; y < this.gridHeight; y++) {
+            // In each row, loop over each column
+            for (let x = 0; x < this.gridWidth; x++) {
+                
+                if (this.isSkip(x, y)) continue;
+                this.floatOneTile(x, y, startX, startY);
+            }
+        }
 
-        const totalWidth = this.tileSize * this.gridWidth;
-        const totalHeight = this.tileSize * this.gridHeight;
+        for (let x = -5; x < 0; x++) {
+            for (let y = 2; y < 7; y++) {
+                this.floatOneTile(x, y, startX, startY);
+            }
+        }
 
-        const gameWidth = this.scale.gameSize.width;
-        const gameHeight = this.scale.gameSize.height;
+        for (let x = 20; x < 26; x++) {
+            for (let y = 2; y < 7; y++) {
+                this.floatOneTile(x, y, startX, startY);
+            }
+        }
+    }
 
-        const startX = (gameWidth - totalWidth) / 2;
-        const startY = (gameHeight - totalHeight) / 2 + 150;
-
+    floatOneTile(x, y, startX, startY) {
         const tileWeights = {
             53: 15,
             54: 2,
@@ -244,34 +257,49 @@ export class Arena extends Phaser.Scene
             }
         }
 
-        // Loop over each row
-        for (let y = 0; y < this.gridHeight; y++) {
-            // In each row, loop over each column
-            for (let x = 0; x < this.gridWidth; x++) {
-                
-                if (this.isSkip(x, y)) continue;
-                
-                const tile = tiles[Math.floor(Math.random() * tiles.length)];
-                const tileSprite = this.add.image(startX + x * this.tileSize, startY + y * this.tileSize + this.scale.gameSize.height, 'groundTiles', `element_${tile}`)
-                    .setDisplaySize(this.tileSize, this.tileSize)
-                    .setDepth(1)
-                    .setOrigin(0); 
-                
-                // Add a random vertical and/or horizontal flip
-                const flipX = Math.random() < 0.5;
-                const flipY = Math.random() < 0.5;
-                tileSprite.setFlip(flipX, flipY);
+        const tile = tiles[Math.floor(Math.random() * tiles.length)];
+        const tileSprite = this.add.image(startX + x * this.tileSize, startY + y * this.tileSize + this.scale.gameSize.height, 'groundTiles', `element_${tile}`)
+            .setDisplaySize(this.tileSize, this.tileSize)
+            .setDepth(1)
+            .setOrigin(0); 
+        
+        // Add a random vertical and/or horizontal flip
+        const flipX = Math.random() < 0.5;
+        const flipY = Math.random() < 0.5;
+        tileSprite.setFlip(flipX, flipY);
 
-                // Tween the tile to its intended position
-                this.tweens.add({
-                    targets: tileSprite,
-                    y: startY + y * this.tileSize,
-                    duration: 1000, // duration of the tween in milliseconds
-                    ease: 'Power2', // easing function to make the movement smooth
-                    delay: Math.random() * 500 // random delay to make the tiles fall at different times
-                });
-            }
-        }
+        // Tween the tile to its intended position
+        this.tweens.add({
+            targets: tileSprite,
+            y: startY + y * this.tileSize,
+            duration: 1000, // duration of the tween in milliseconds
+            ease: 'Power2', // easing function to make the movement smooth
+            delay: Math.random() * 500 // random delay to make the tiles fall at different times
+        });
+
+        // After the initial tween, add another tween to give a floating effect
+        // this.tweens.add({
+        //     targets: tileSprite,
+        //     y: startY + y * this.tileSize + 10,
+        //     duration: 1000, // duration of the tween in milliseconds
+        //     ease: 'Power1', // easing function to make the movement smooth
+        //     repeat: -1, // repeat the tween indefinitely
+        //     yoyo: true, // reverse the tween at the end
+        //     delay: 2000 // wait 1 second before starting the tween
+        // });
+    }
+
+    setUpArena() {
+        const totalWidth = this.tileSize * this.gridWidth;
+        const totalHeight = this.tileSize * this.gridHeight;
+
+        const gameWidth = this.scale.gameSize.width;
+        const gameHeight = this.scale.gameSize.height;
+
+        const startX = (gameWidth - totalWidth) / 2;
+        const startY = (gameHeight - totalHeight) / 2 + 150;
+
+        this.floatTiles(startX, startY);
 
         this.gridCorners = {
             startX,
@@ -797,7 +825,7 @@ export class Arena extends Phaser.Scene
     // PhaserCreate
     create()
     {
-        this.drawGrid();
+        this.setUpArena();
         this.createAnims();
         this.createSounds();
         this.connectToServer();

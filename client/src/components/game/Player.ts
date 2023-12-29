@@ -121,7 +121,8 @@ export class Player extends Phaser.GameObjects.Container {
         this.sprite.on('pointerover', this.onPointerOver, this);
         this.sprite.on('pointerout', this.onPointerOut, this);
 
-        this.makeEntrance();
+        // Delay by X seconds
+        scene.time.delayedCall(750, this.makeEntrance, [], this);
     }
 
     getProps() {
