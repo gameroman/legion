@@ -47,10 +47,8 @@ export class Team {
     getOverview() {
         const members = [];
         this.members.forEach(member => {
-            const textureFile = this.scene.assetsMap[member.texture];
-            const textureFilename = textureFile.split('/').pop();
             members.push({
-                texture: textureFilename,
+                texture: member.texture,
                 name: member.name,
                 hp: member.hp,
                 maxHP: member.maxHP,

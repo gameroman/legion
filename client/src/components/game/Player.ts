@@ -126,14 +126,10 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     getProps() {
-        const textureFile = this.arena.assetsMap[this.texture];
-        // Extract the filename from the path
-        const textureFilename = textureFile.split('/').pop();
-  
         return {
             name: this.name,
             number: this.num,
-            portrait: textureFilename,
+            portrait: this.texture,
             hp: this.hp,
             maxHp: this.maxHP,
             mp: this.mp,

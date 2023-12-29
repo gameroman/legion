@@ -1,4 +1,6 @@
 import {Class} from "@legion/shared/types";
+import {warriorSprites, whiteMageSprites, blackMageSprites, thiefSprites}
+  from "@legion/shared/sprites";
 import {uniqueNamesGenerator, adjectives, colors, animals}
   from "unique-names-generator";
 
@@ -41,33 +43,19 @@ export class NewCharacter {
   }
 
   getFrame(): string {
-    const warriorFrames = [
-      "1_1", "1_2", "1_3", "1_4", "2_1", "2_2", "2_6", "2_7", "3_1", "3_6",
-      "3_8", "4_7", "4_8", "5_1", "5_2", "5_4", "6_8", "7_4", "mil1_7",
-      "mil1_8",
-    ];
-    const whiteMageFrames = [
-      "1_7", "1_8", "2_8", "3_3", "4_6", "5_6", "6_4", "7_7",
-    ];
-    const blackMageFrames = [
-      "1_5", "1_6", "2_3", "3_2", "4_3", "3_5", "4_5", "5_5", "5_7", "7_6",
-    ];
-    const thiefFrames = [
-      "2_4", "2_5", "3_4", "3_7", "4_2", "5_3", "6_1", "6_2", "6_7",
-    ];
     switch (this.characterClass) {
     case Class.WARRIOR:
-      return warriorFrames[Math.floor(Math.random() * warriorFrames.length)];
+      return warriorSprites[Math.floor(Math.random() * warriorSprites.length)];
     case Class.WHITE_MAGE:
-      return whiteMageFrames[
-        Math.floor(Math.random() * whiteMageFrames.length)
+      return whiteMageSprites[
+        Math.floor(Math.random() * whiteMageSprites.length)
       ];
     case Class.BLACK_MAGE:
-      return blackMageFrames[
-        Math.floor(Math.random() * blackMageFrames.length)
+      return blackMageSprites[
+        Math.floor(Math.random() * blackMageSprites.length)
       ];
     case Class.THIEF:
-      return thiefFrames[Math.floor(Math.random() * thiefFrames.length)];
+      return thiefSprites[Math.floor(Math.random() * thiefSprites.length)];
     }
   }
 

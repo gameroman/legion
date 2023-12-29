@@ -74,4 +74,13 @@ export class Team {
     setSocket(socket: Socket) {
         this.socket = socket;
     }
+
+    getSocket() {
+        return this.socket;
+    }
+
+    getFirebaseToken() {
+        // @ts-ignore
+        return this.socket?.firebaseToken;
+    }
 }

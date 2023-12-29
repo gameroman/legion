@@ -1,6 +1,9 @@
 import express from 'express';
 import { Socket, Server } from 'socket.io';
 import { createServer } from 'http';
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 import { Game } from './Game';
 import { AIGame } from './AIGame';
@@ -16,7 +19,7 @@ const server = createServer(app);
 // Create a new socket.io instance
 const io = new Server(server, {
     cors: {
-      origin: "http://0.0.0.0:8080", // TODO: make env var
+      origin: process.env.CLIENT_ORIGIN || "http://0.0.0.0:8080",
       methods: ["GET", "POST"],
       credentials: true
     }
@@ -36,10 +39,13 @@ const io = new Server(server, {
 const socketMap = new Map<Socket, Game>();
 
 io.on('connection', (socket: any) => {
-    console.log('A user connected');
+    // console.log(`Connected user ${socket.handshake.auth.token}`);
+    socket.firebaseToken = socket.handshake.auth.token;
 
     const game = new AIGame(io, [socket]);
     socketMap.set(socket, game);
+
+    game.start();
 
     socket.on('disconnect', () => {
         console.log('A user disconnected');

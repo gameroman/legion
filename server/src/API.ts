@@ -1,18 +1,4 @@
-// apiService.js
-import { firebaseAuth } from './firebaseService'; 
-
-const apiBaseUrl = process.env.PREACT_APP_API_URL;
-
-export async function getFirebaseIdToken() {
-    try {
-        const user = firebaseAuth.currentUser;
-        if (!user) throw new Error("No authenticated user found");
-        return await user.getIdToken(true);
-    } catch (error) {
-        console.error("Error getting Firebase ID token", error);
-        throw error;
-    }
-}
+import fetch, { Headers } from 'node-fetch';
 
 interface ApiFetchOptions {
     method?: string;
@@ -39,30 +25,29 @@ function timeoutPromise(duration) {
     });
 }
 
-async function apiFetch(endpoint, options: ApiFetchOptions = {}, timeoutDuration = 10000) {
+export async function apiFetch(endpoint, idToken, options: ApiFetchOptions = {}, timeoutDuration = 10000) {
     try {
-        const idToken = await getFirebaseIdToken();
         const headers = new Headers(options.headers || {});
 
-        // Automatically set 'Content-Type' to 'application/json' if there is a body
         if (options.body && !headers.has('Content-Type')) {
             headers.append('Content-Type', 'application/json');
-            options.body = JSON.stringify(options.body); // Stringify the body if it's an object
+            options.body = JSON.stringify(options.body);
         }
 
         headers.append("Authorization", `Bearer ${idToken}`);
 
-        const fetchPromise = fetch(`${apiBaseUrl}/${endpoint}`, {
+        const fetchPromise = fetch(`${process.env.API_URL}/${endpoint}`, {
             ...options,
             headers,
         });
 
         const response = await Promise.race([
             fetchPromise,
-            timeoutPromise(timeoutDuration)
+            timeoutPromise(timeoutDuration) // Make sure this utility is implemented
         ]) as Response;
 
         if (!response.ok) {
+            console.log(idToken);
             const errorBody = await response.text();
             throw new ApiError(`Error ${response.status} from ${endpoint}: ${errorBody}`, response.status, endpoint);
         }
@@ -73,5 +58,3 @@ async function apiFetch(endpoint, options: ApiFetchOptions = {}, timeoutDuration
         throw error;
     }
 }
-
-export { apiFetch };

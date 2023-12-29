@@ -64,7 +64,7 @@ class PlayerTab extends Component<Props, State> {
     const { player } = props;
 
       const portraitStyle = {
-        backgroundImage: `url(assets/sprites/${player.portrait})`,
+        backgroundImage: `url(assets/sprites/${player.portrait}.png)`,
       };
       const isCooldownActive = player.cooldown > 0;
       const isDead = player.hp <= 0;

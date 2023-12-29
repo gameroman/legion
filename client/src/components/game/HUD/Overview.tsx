@@ -90,7 +90,7 @@ class Overview extends Component<Props, State> {
       <div className="overview">
           {members.map((member, memberIndex) => {
             const portraitStyle = {
-              backgroundImage: `url(assets/sprites/${member.texture})`,
+              backgroundImage: `url(assets/sprites/${member.texture}.png)`,
               backgroundPosition: '-45px -45px',
               backgroundRepeat: 'no-repeat',
               filter: member.isAlive ? 'none' : 'grayscale(100%)',

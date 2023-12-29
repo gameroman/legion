@@ -32,15 +32,27 @@ export abstract class Game
 
         this.teams.set(1, new Team(1, this));
         this.teams.set(2, new Team(2, this));
-        this.socketMap.set(sockets[0], this.teams.get(1)!);
-        this.teams.get(1)?.setSocket(sockets[0]);
-        
-        this.populateTeams();
-        this.populateGrid();
-        this.sendGameStart();
+
+        sockets.forEach((socket, index) => {
+            this.socketMap.set(socket, this.teams.get(index + 1)!);
+            this.teams.get(index + 1)?.setSocket(socket);
+        });
+        // this.socketMap.set(sockets[0], this.teams.get(1)!);
+        // this.teams.get(1)?.setSocket(sockets[0]);
     }
 
     abstract populateTeams(): void;
+
+    async start() {
+        try {
+            await this.populateTeams();
+            this.populateGrid();
+            this.sendGameStart();
+        } catch (error) {
+            // TODO: send match end
+            console.error(error);
+        }
+    }
 
     isFree(gridX: number, gridY: number) {
         return !this.gridMap.get(`${gridX},${gridY}`);

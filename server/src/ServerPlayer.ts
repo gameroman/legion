@@ -2,6 +2,8 @@ import { Team } from './Team';
 import { Item } from './Item';
 import { Spell } from './Spell';
 import { Stat } from "@legion/shared/types";
+import { items } from '@legion/shared/Items';
+import { spells } from '@legion/shared/Spells';
 
 export type ActionType = 'move' | 'attack';
 export class ServerPlayer {
@@ -184,9 +186,17 @@ export class ServerPlayer {
         return this.mp;
     }
 
+    setHP(hp: number) {
+        this.hp = hp;
+    }
+
     getHP() {
         return this.hp;
     } 
+
+    setMP(mp: number) {
+        this.mp = mp;
+    }
 
     getMP() {
         return this.mp;
@@ -227,6 +237,11 @@ export class ServerPlayer {
         this.team = team;
     }
 
+    setInventory(capacity: number, inventory: number[]) {
+        this.inventoryCapacity = capacity;
+        this.inventory = inventory.map(id => new Item(items[id]));
+    }
+
     addItem(item: Item) {
         if (this.inventory.length >= this.inventoryCapacity) {
             console.error(`Cannot add ${item.name} to player ${this.num}'s inventory because it is full`);
@@ -247,6 +262,10 @@ export class ServerPlayer {
     getItemAtIndex(index: number): Item | null {
         if (index < 0 || index >= this.inventory.length) return null;
         return this.inventory[index];
+    }
+
+    setSpells(slots: number, spellsIds: number[]) {
+        this.spells = spellsIds.map(id => new Spell(spells[id]));
     }
 
     addSpell(spell: Spell) {

@@ -7,6 +7,8 @@ import { MusicManager } from './MusicManager';
 import { CellsHighlight } from './CellsHighlight';
 import { spells } from '@legion/shared/Spells';
 import { lineOfSight, serializeCoords } from '@legion/shared/utils';
+import { getFirebaseIdToken } from '../../services/apiService';
+import { allSprites } from '@legion/shared/sprites';
 
 type AssetsMap = {
     [key: string]: string;
@@ -34,19 +36,6 @@ export class Arena extends Phaser.Scene
     overviewReady = false;
     musicManager: MusicManager;
 
-    assetsMap: AssetsMap = {
-        warrior_1: 'assets/sprites/1_1.png',
-        warrior_2: 'assets/sprites/1_2.png',
-        warrior_3: 'assets/sprites/1_3.png',
-        warrior_4: 'assets/sprites/1_4.png',
-        mage_1: 'assets/sprites/1_5.png',
-        mage_2: 'assets/sprites/1_6.png',
-        warrior_5: 'assets/sprites/2_1.png',
-        warrior_6: 'assets/sprites/2_6.png',
-        warrior_7: 'assets/sprites/2_2.png',
-        warrior_8: 'assets/sprites/2_7.png',
-    };
-
     constructor() {
         super({ key: 'Arena' });
     }
@@ -61,9 +50,9 @@ export class Arena extends Phaser.Scene
         // this.load.svg('pop', 'assets/pop.svg',  { width: 24, height: 24 } );
         const frameConfig = { frameWidth: 144, frameHeight: 144};
         // Iterate over assetsMap and load spritesheets
-        for (const key in this.assetsMap) {
-            this.load.spritesheet(key, this.assetsMap[key], frameConfig);
-        }
+        allSprites.forEach((sprite) => {
+            this.load.spritesheet(sprite, `assets/sprites/${sprite}.png`, frameConfig);
+        });
         this.load.spritesheet('potion_heal', 'assets/animations/potion_heal.png', { frameWidth: 48, frameHeight: 64});
         this.load.spritesheet('explosion', 'assets/animations/explosion.png', { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('cast', 'assets/animations/cast.png', { frameWidth: 48, frameHeight: 64});
@@ -95,8 +84,15 @@ export class Arena extends Phaser.Scene
 
     }
 
-    connectToServer() {
-        this.socket = io('http://localhost:3123');
+    async connectToServer() {
+        this.socket = io(
+            process.env.PREACT_APP_GAME_SERVER_URL,
+            {
+                auth: {
+                    token: await getFirebaseIdToken()
+                }
+            }
+        );
 
         this.socket.on('connect', () => {
             console.log('Connected to the server');
@@ -635,7 +631,7 @@ export class Arena extends Phaser.Scene
     
 
     createAnims() {
-        Object.keys(this.assetsMap).forEach((asset) => {
+        allSprites.forEach((asset) => {
             this.anims.create({
                 key: `${asset}_anim_idle`, // The name of the animation
                 frames: this.anims.generateFrameNumbers(asset, { frames: [9, 10, 11] }), 
@@ -867,6 +863,7 @@ export class Arena extends Phaser.Scene
     }
 
     initializeGame(data) {
+        console.log(data);
         this.createHUD(); 
         this.playerTeamId = data.player.teamId;
 
