@@ -82,14 +82,14 @@ class PlayerTab extends Component<Props, State> {
           </div>
           <div className="character-full-content">
             <div className="player-content">
-              <div className="character-portrait" style={portraitStyle}></div>
+              <div className="character-portrait" style={portraitStyle} />
               <div className="player-bars">
                 <div className="">
                   <TabBar title="HP" value={player.hp} maxValue={player.maxHp} barClass="hp-bar" />
                   <TabBar title="MP" value={player.mp} maxValue={player.maxMp} barClass="mp-bar" />
                   <div className="bar-title">Cooldown</div>
                   <div className="xp-bar-bg">
-                      <div className="hud-bar cooldown-bar" style={cooldownBarStyle}></div>
+                      <div className="hud-bar cooldown-bar" style={cooldownBarStyle} />
                   </div>
                 </div>
               </div>
@@ -106,6 +106,7 @@ class PlayerTab extends Component<Props, State> {
                         canAct={canAct} 
                         actionType={ActionType.Skill} 
                         onActionClick={this.actionClick.bind(this)} 
+                        key={i}
                       />
                     ))}
                   </div>
@@ -123,6 +124,7 @@ class PlayerTab extends Component<Props, State> {
                         canAct={canAct} 
                         actionType={ActionType.Item}
                         onActionClick={this.actionClick.bind(this)} 
+                        key={i}
                       />
                     ))}
                   </div>

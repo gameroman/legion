@@ -3,11 +3,8 @@ import { Socket, Server } from 'socket.io';
 import { Game } from './Game';
 import { ServerPlayer } from './ServerPlayer';
 import { AIServerPlayer } from './AIServerPlayer';
-import { items } from '@legion/shared/Items';
-import { spells } from '@legion/shared/Spells';
-import { Item } from './Item';
-import { Spell, convertBaseToSpell } from './Spell';
 import {apiFetch} from './API';
+import { Stat } from "@legion/shared/types";
 
 const TICK = 100;
 const AI_VS_AI = false;
@@ -38,7 +35,10 @@ export class AIGame extends Game {
                 newPlayer.setTeam(playerTeam!);
                 newPlayer.setHP(character.hp);
                 newPlayer.setMP(character.mp);
-                newPlayer.setCooldown(character.cooldown);
+                newPlayer.setStat(Stat.ATK, character.atk);
+                newPlayer.setStat(Stat.DEF, character.def);
+                newPlayer.setStat(Stat.SPATK, character.spatk);
+                newPlayer.setStat(Stat.SPDEF, character.spdef);
                 newPlayer.setInventory(character.carrying_capacity, character.inventory);
                 newPlayer.setSpells(character.skill_slots, character.skills);
                 playerTeam?.addMember(newPlayer);

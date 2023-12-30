@@ -10,10 +10,6 @@ import { lineOfSight, serializeCoords } from '@legion/shared/utils';
 import { getFirebaseIdToken } from '../../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
 
-type AssetsMap = {
-    [key: string]: string;
-};
-
 export class Arena extends Phaser.Scene
 {
     gamehud;
@@ -22,6 +18,7 @@ export class Arena extends Phaser.Scene
     playerTeamId;
     gridCorners;
     gridMap: Map<string, Player> = new Map<string, Player>();
+    terrainMap: Map<string, Phaser.GameObjects.Sprite> = new Map<string, Phaser.GameObjects.Sprite>();
     teamsMap: Map<number, Team> = new Map<number, Team>();
     selectedPlayer: Player | null = null;
     highlight: Phaser.GameObjects.Graphics;
@@ -211,6 +208,8 @@ export class Arena extends Phaser.Scene
     }
 
     floatTiles(startX, startY) {
+        // this.localAnimationSprite = this.add.sprite(0, 0, '').setScale(3).setOrigin(0.5, 0.7).setVisible(false);
+
         // Loop over each row
         for (let y = 0; y < this.gridHeight; y++) {
             // In each row, loop over each column
@@ -633,7 +632,7 @@ export class Arena extends Phaser.Scene
     createAnims() {
         allSprites.forEach((asset) => {
             this.anims.create({
-                key: `${asset}_anim_idle`, // The name of the animation
+                key: `${asset}_anim_idle`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [9, 10, 11] }), 
                 frameRate: 5, // Number of frames per second
                 repeat: -1,
@@ -641,7 +640,7 @@ export class Arena extends Phaser.Scene
             });
 
             this.anims.create({
-                key: `${asset}_anim_idle_hurt`, // The name of the animation
+                key: `${asset}_anim_idle_hurt`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [33, 34, 35] }), 
                 frameRate: 5, // Number of frames per second
                 repeat: -1, // Loop indefinitely,
@@ -649,50 +648,50 @@ export class Arena extends Phaser.Scene
             });
 
             this.anims.create({
-                key: `${asset}_anim_walk`, // The name of the animation
+                key: `${asset}_anim_walk`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [6, 7, 8] }), 
                 frameRate: 5, // Number of frames per second
                 repeat: -1 // Loop indefinitely
             });
 
             this.anims.create({
-                key: `${asset}_anim_attack`, // The name of the animation
+                key: `${asset}_anim_attack`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [12, 13, 14] }), 
                 frameRate: 10, // Number of frames per second
             });
 
             this.anims.create({
-                key: `${asset}_anim_dodge`, // The name of the animation
+                key: `${asset}_anim_dodge`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [45, 46, 47] }), 
                 frameRate: 10, // Number of frames per second
             });
 
             this.anims.create({
-                key: `${asset}_anim_item`, // The name of the animation
+                key: `${asset}_anim_item`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [48, 49, 50] }), 
                 frameRate: 5, // Number of frames per second
             });
 
             this.anims.create({
-                key: `${asset}_anim_hurt`, // The name of the animation
+                key: `${asset}_anim_hurt`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [42, 43, 44] }), 
                 frameRate: 5, // Number of frames per second
             });
 
             this.anims.create({
-                key: `${asset}_anim_cast`, // The name of the animation
+                key: `${asset}_anim_cast`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [39, 40, 41] }), 
                 frameRate: 5, // Number of frames per second
             });
 
             this.anims.create({
-                key: `${asset}_anim_die`, // The name of the animation
+                key: `${asset}_anim_die`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [51, 52, 53] }), 
                 frameRate: 10, // Number of frames per second
             });
 
             this.anims.create({
-                key: `${asset}_anim_victory`, // The name of the animation
+                key: `${asset}_anim_victory`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [15, 16, 17] }), 
                 frameRate: 5, // Number of frames per second
                 repeat: -1,
@@ -700,7 +699,7 @@ export class Arena extends Phaser.Scene
             });
 
             this.anims.create({
-                key: `${asset}_anim_boast`, // The name of the animation
+                key: `${asset}_anim_boast`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [15, 16, 17] }), 
                 frameRate: 10, // Number of frames per second
                 repeat: 2,
@@ -709,38 +708,44 @@ export class Arena extends Phaser.Scene
         }, this);
 
         this.anims.create({
-            key: `potion_heal`, // The name of the animation
+            key: `potion_heal`, 
             frames: this.anims.generateFrameNumbers('potion_heal'), 
             frameRate: 10, // Number of frames per second
         });
 
         this.anims.create({
-            key: `explosion`, // The name of the animation
+            key: `explosion`, 
             frames: this.anims.generateFrameNumbers('explosion', { frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] }), 
             frameRate: 15, // Number of frames per second
         });
 
         this.anims.create({
-            key: `thunder`, // The name of the animation
+            key: `thunder`, 
             frames: this.anims.generateFrameNumbers('thunder', { frames: [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47] }), 
             frameRate: 15, // Number of frames per second
         });
 
         this.anims.create({
-            key: `ice`, // The name of the animation
+            key: `ground_flame`, 
+            frames: this.anims.generateFrameNumbers('thunder', { frames: [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59] }), 
+            frameRate: 15, // Number of frames per second
+        });
+
+        this.anims.create({
+            key: `ice`, 
             frames: this.anims.generateFrameNumbers('ice', { frames: [54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 64, 66, 67] }), 
             frameRate: 15, // Number of frames per second
         });
 
         this.anims.create({
-            key: `cast`, // The name of the animation
+            key: `cast`, 
             frames: this.anims.generateFrameNumbers('cast', { frames: [10, 11, 12] }), 
             frameRate: 15, // Number of frames per second
             repeat: -1
         });
 
         this.anims.create({
-            key: `slash`, // The name of the animation
+            key: `slash`, 
             frames: this.anims.generateFrameNumbers('slash', { frames: [99, 100, 101, 102] }), 
             frameRate: 15, // Number of frames per second
         });

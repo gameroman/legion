@@ -38,23 +38,14 @@ export class ServerPlayer {
         this.frame = frame;
         this.x = x;
         this.y = y;
-        this.maxHP = 100;
-        this.hp = this.maxHP;
-        this._hp = this.maxHP;
-        this.maxMP = 20;
-        this.mp = this.maxMP;
         this.distance = 3;
-        // Random number between 8 and 12
-        this.atk = Math.floor(Math.random() * 5) + 8;
-        this.def = Math.floor(Math.random() * 5) + 8;
-        this.spatk = Math.floor(Math.random() * 5) + 8;
-        this.spdef = Math.floor(Math.random() * 5) + 8;
+        
         this.cooldowns = {
             'move': 2000,
             'attack': 4000
         };
-        this.setCooldown(0 + this.entranceTime * 1000);
-        // this.setCooldown(this.cooldowns.move + this.entranceTime * 1000);
+        // this.setCooldown(0 + this.entranceTime * 1000);
+        this.setCooldown(this.cooldowns.move + this.entranceTime * 1000);
 
 //         Every level up, a character gains:
 //         Attack: +2 and +10% of current attack
@@ -187,7 +178,9 @@ export class ServerPlayer {
     }
 
     setHP(hp: number) {
-        this.hp = hp;
+        this.maxHP = hp;
+        this.hp = this.maxHP;
+        this._hp = this.maxHP;
     }
 
     getHP() {
@@ -195,11 +188,31 @@ export class ServerPlayer {
     } 
 
     setMP(mp: number) {
-        this.mp = mp;
+        this.maxMP = mp;
+        this.mp = this.maxMP;
     }
 
     getMP() {
         return this.mp;
+    }
+
+    setStat(stat: Stat, value: number) {
+        switch (stat) {
+            case Stat.SPATK:
+                this.spatk = value;
+                break;
+            case Stat.SPDEF:
+                this.spdef = value;
+                break;
+            case Stat.ATK:
+                this.atk = value;
+                break;
+            case Stat.DEF:
+                this.def = value;
+                break;
+            default:
+                throw new Error(`Invalid stat ${stat}`);
+        }
     }
 
     getStat(stat: Stat) {

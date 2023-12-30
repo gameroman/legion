@@ -46,19 +46,13 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
     const characterId = this.props.matches.id || ''; // Fallback to empty string if ID is not present
 
     return (
-        <div>
-          <div className="page-header">
-            <img src="/assets/team.png" className="page-icon" />
-            <h1 className="page-title">Team</h1>
-          </div>
-          <div className="team-content">
-            <Roster />
-            <div className="character-inventory-container">
-              <Router>
-                <Route path="/team/:id" component={() => <Character id={characterId} refreshInventory={this.fetchInventoryData} />} />
-              </Router>
-              <Inventory id={characterId} inventory={this.state.inventory} carrying_capacity={this.state.carrying_capacity} refreshInventory={this.fetchInventoryData} />
-            </div>
+        <div className="team-content">
+          <Roster />
+          <div className="character-inventory-container">
+            <Router>
+              <Route path="/team/:id" component={() => <Character id={characterId} refreshInventory={this.fetchInventoryData} />} />
+            </Router>
+            <Inventory id={characterId} inventory={this.state.inventory} carrying_capacity={this.state.carrying_capacity} refreshInventory={this.fetchInventoryData} />
           </div>
         </div>
       );

@@ -110,17 +110,7 @@ class ShopPage extends Component<object, State> {
     const { isDialogOpen, selectedItem, quantity } = this.state;
     const totalPrice = selectedItem ? selectedItem.price * quantity : 0;
     return (
-      <div>
-        <div className="page-header">
-          <img src="assets/shop.png" className="page-icon" />
-          <h1 className="page-title">Shop</h1>
-        </div>
         <div className="shop-content">
-            <div className="gold-container" title='Your gold'>
-                <img src="assets/gold2.png" className="gold-icon" /> {/* Replace with your gold icon */}
-                <span>{this.state.gold}</span>
-            </div>
-
             <div className="shop-grid">
               {this.state.items.map((item) => (
                 <div key={item.id} className="shop-item-card" onClick={() => this.openDialog(item)}>
@@ -144,7 +134,6 @@ class ShopPage extends Component<object, State> {
                 </div>
               ))}
             </div>
-        </div>
 
         {isDialogOpen && (
           <div className="dialog">

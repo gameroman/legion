@@ -498,6 +498,23 @@ canvas {
     display: flex;
     align-items: center;
     padding: 5px;
+    justify-content: space-between;
+}
+
+.left-group {
+  display: flex;
+  align-items: center; /* Align items vertically in the center */
+  flex: 1;
+  justify-content: flex-start; /* Align items to the start (left) */
+}
+
+.left-group, .right-group {
+  flex: 1;
+}
+
+.header-capsules {
+  /* Centered content, adjust flex-basis to control width */
+  flex: 0 1 auto; 
 }
   
 .page-icon {
@@ -1417,4 +1434,18 @@ canvas {
   border-radius: 5px;
   cursor: pointer;
   /* background-color: green; */
+}
+
+.header-gold {
+  background: url('../assets/gold2.png') no-repeat left center;
+  background-size: contain;
+  color: white;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  border-radius: 25px; 
+  padding: 5px 10px; 
+  padding-left: 60px;
+  font-family: Kim;
+  margin-left: 10px;
+  border: 1px solid #CD853F;
+  font-size: 30px;
 }

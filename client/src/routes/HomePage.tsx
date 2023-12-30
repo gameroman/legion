@@ -17,6 +17,7 @@ import NotificationBar from '../components/NotificationBar';
 interface State {
     currentPage: string;
     showFirebaseUI: boolean;
+    gold: number;
 }
 
 class HomePage extends Component<object, State> {
@@ -25,6 +26,7 @@ class HomePage extends Component<object, State> {
     state: State = {
         currentPage: 'play',
         showFirebaseUI: false,
+        gold: 100,
     };
 
     componentDidMount() {
@@ -142,6 +144,17 @@ class HomePage extends Component<object, State> {
                 <NotificationBar initFirebaseUI={this.initFirebaseUI} logout={this.logout} user={user} />
 
                 <div className="mainContent">
+                    <div className="page-header">
+                        <div className="left-group">
+                            <img src={`assets/${currentPage}.png`} className="page-icon" />
+                            <span className="page-title">{currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}</span>
+                        </div>
+                        <div className="header-capsules">
+                            <div className="header-gold" title='Gold'>{this.state.gold}</div>
+                        </div>
+                        <div className="right-group" />
+                    </div>
+
                     <Router onChange={this.handleRouteChange}>
                         <Route default path="/play" component={PlayPage} />
                         <Route path="/team/:id?" component={TeamPage} />
