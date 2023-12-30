@@ -85,5 +85,6 @@ export enum Class {
     WARRIOR,
     WHITE_MAGE,
     BLACK_MAGE,
-    THIEF
+    THIEF,
+    RANDOM
 }
