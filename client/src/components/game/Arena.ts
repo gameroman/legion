@@ -18,7 +18,6 @@ export class Arena extends Phaser.Scene
     playerTeamId;
     gridCorners;
     gridMap: Map<string, Player> = new Map<string, Player>();
-    terrainMap: Map<string, Phaser.GameObjects.Sprite> = new Map<string, Phaser.GameObjects.Sprite>();
     teamsMap: Map<number, Team> = new Map<number, Team>();
     selectedPlayer: Player | null = null;
     highlight: Phaser.GameObjects.Graphics;

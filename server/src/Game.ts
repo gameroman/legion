@@ -170,7 +170,7 @@ export abstract class Game
                 this.processUseItem(data, team!);
                 break;
             case 'skill':
-                this.processSkill(data, team!);
+                this.processMagic(data, team!);
                 break;
         }
 
@@ -305,7 +305,44 @@ export abstract class Game
         });
     }
 
-    processSkill({num, x, y, index}: {num: number, x: number, y: number, index: number}, team: Team ) {
+    applyMagic(spell: Spell, player: ServerPlayer, x: number, y: number, team: Team) {
+        const targets = spell.getTargets(this, x, y);
+        // console.log(`Spell ${spell.name} found ${targets.length} targets`);
+        spell.applyEffect(player, targets);
+        player.setCasting(false);
+
+        targets.forEach(target => {
+            if (target.HPHasChanged()) {
+                const delta = target.getHPDelta();
+                player.increaseDamageDealt(delta);
+                // if (!target.isAlive()) player.team!.increaseScoreFromKill(player);
+                // if (delta < 0) player.team!.increaseScoreFromDamage(-delta);
+                this.broadcastHPchange(target.team!, target.num, target.getHP(), target.getHPDelta());
+            }
+        });            
+        // player.team!.increaseScoreFromMultiHits(targets.length);
+        // player.team!.increaseScoreFromSpell(spell.score);
+        
+        this.broadcast('localanimation', {
+            x,
+            y,
+            id: spell.id,
+        });
+
+        team.socket?.emit('cooldown', {
+            num: player.num,
+            cooldown: spell.cooldown * 1000,
+        });
+
+        this.broadcast('endcast', {
+            team: team.id,
+            num: player.num
+        });
+        
+        // team.sendScore();
+    }
+
+    processMagic({num, x, y, index}: {num: number, x: number, y: number, index: number}, team: Team ) {
         const player = team.getMembers()[num - 1];
         if (!player.canAct()) {
             console.log('cannot act');
@@ -332,46 +369,9 @@ export abstract class Game
         });
 
         this.emitMPchange(team, num, mp);
-
-        // Display danger zone
-
         player.setCasting(true);
-        setTimeout(() => {
-            const targets = spell.getTargets(this, x, y);
-            // console.log(`Spell ${spell.name} found ${targets.length} targets`);
-            spell.applyEffect(player, targets);
-            player.setCasting(false);
 
-            targets.forEach(target => {
-                if (target.HPHasChanged()) {
-                    const delta = target.getHPDelta();
-                    player.increaseDamageDealt(delta);
-                    if (!target.isAlive()) player.team!.increaseScoreFromKill(player);
-                    if (delta < 0) player.team!.increaseScoreFromDamage(-delta);
-                    this.broadcastHPchange(target.team!, target.num, target.getHP(), target.getHPDelta());
-                }
-            });            
-            player.team!.increaseScoreFromMultiHits(targets.length);
-            player.team!.increaseScoreFromSpell(spell.score);
-            
-            this.broadcast('localanimation', {
-                x,
-                y,
-                id: spell.id,
-            });
-
-            team.socket?.emit('cooldown', {
-                num,
-                cooldown,
-            });
-
-            this.broadcast('endcast', {
-                team: team.id,
-                num
-            });
-            
-            team.sendScore();
-        }, spell.castTime * 1000);
+        setTimeout(this.applyMagic.bind(this, spell, player, x, y, team), spell.castTime * 1000);
     }
 
     broadcastScoreChange(team: Team) {

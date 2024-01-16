@@ -134,7 +134,7 @@ export class AIServerPlayer extends ServerPlayer {
                     y: ally.y,
                     index: i,
                 };
-                this.team?.game.processSkill(data, this.team);
+                this.team?.game.processMagic(data, this.team);
                 return true;
             }
         }
@@ -160,7 +160,7 @@ export class AIServerPlayer extends ServerPlayer {
                     y: tile!.y,
                     index: i,
                 };
-                this.team?.game.processSkill(data, this.team);
+                this.team?.game.processMagic(data, this.team);
                 return true;
             }
         }
