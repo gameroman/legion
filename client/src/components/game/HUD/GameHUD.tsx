@@ -17,6 +17,9 @@ interface State {
   clickedSpell: number;
   team1: Team;
   team2: Team;
+  gameOver: boolean;
+  xpReward: number;
+  goldReward: number;
 }
 
 const events = new EventEmitter();
@@ -29,6 +32,9 @@ class GameHUD extends Component<object, State> {
     clickedSpell: -1,
     team1: null,
     team2: null,
+    gameOver: false,
+    xpReward: 0,
+    goldReward: 0,
   }
 
   componentDidMount() {
@@ -36,6 +42,7 @@ class GameHUD extends Component<object, State> {
     events.on('hidePlayerBox', this.hidePlayerBox);
     events.on('keyPress', this.keyPress);
     events.on('updateOverview', this.updateOverview);
+    events.on('gameEnd', this.endGame);
   }
 
   componentWillUnmount() {
@@ -55,13 +62,20 @@ class GameHUD extends Component<object, State> {
     // console.log(`team1: `, team1);
   }
 
+  endGame = (xp, gold) => {
+    this.setState({ 
+      gameOver: true,
+      xpReward: xp,
+      goldReward: gold,
+    });
+  }
+
   keyPress = (key: string) => {
     this.setState({ clickedSpell: 0 });
   }
 
   render() {
     const { playerVisible, player, team1, team2 } = this.state;
-    const gameEnded = true;
     return (
       <div>
         <div className="hud-container">
@@ -69,7 +83,7 @@ class GameHUD extends Component<object, State> {
             {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
             <Overview position="right" {...team1} />
         </div>
-        {gameEnded && <Endgame />}
+        {this.state.gameOver && <Endgame xpReward={this.state.xpReward} goldReward={this.state.goldReward} />}
       </div>
     );
   }

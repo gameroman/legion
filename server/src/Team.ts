@@ -3,6 +3,10 @@ import { Socket } from "socket.io";
 import { ServerPlayer } from "./ServerPlayer";
 import { Game } from "./Game";
 
+const MULTIHIT_SCORE_BASE = 6;
+const KILL_SCORE_BONUS = 1000;
+const HEAL_SCORE_BONUS = 200;
+
 export class Team {
     id: number;
     members: ServerPlayer[] = [];
@@ -47,17 +51,17 @@ export class Team {
     increaseScoreFromMultiHits(amount: number) {
         if (amount > 1) {
             // Apply an exponential multiplier to the score
-            this.score += Math.pow(6, amount);
+            this.score += Math.pow(MULTIHIT_SCORE_BASE, amount);
             console.log(`Multi hit: ${this.id} score: ${this.score}`);
         }
     }
 
     increaseScoreFromKill(player: ServerPlayer) {
-        this.score += 1000 * (1 + (1 - player.getHPratio()));
+        this.score += KILL_SCORE_BONUS * (1 + (1 - player.getHPratio()));
     }
 
     increaseScoreFromHeal(player: ServerPlayer) {
-        this.score += 200 * (1 + (1 - player.getPreviousHPRatio()));
+        this.score += HEAL_SCORE_BONUS * (1 + (1 - player.getPreviousHPRatio()));
     }
 
     snapshotScore() {

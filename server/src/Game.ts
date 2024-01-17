@@ -190,10 +190,16 @@ export abstract class Game
 
     endGame(winner: number) {
         console.log(`Team ${winner} wins!`);
-        this.broadcast('gameEnd', {
-            winner
-        });
         this.gameOver = true;
+
+        // this.broadcast('gameEnd', {
+        //     winner
+        // });
+
+        this.sockets.forEach(socket => {
+            const team = this.socketMap.get(socket);
+            socket.emit('gameEnd', this.computeGameEndRewards(team, winner));
+        });
     }
 
     setCooldown(player: ServerPlayer, cooldown: number) {
@@ -315,13 +321,13 @@ export abstract class Game
             if (target.HPHasChanged()) {
                 const delta = target.getHPDelta();
                 player.increaseDamageDealt(delta);
-                // if (!target.isAlive()) player.team!.increaseScoreFromKill(player);
-                // if (delta < 0) player.team!.increaseScoreFromDamage(-delta);
+                if (!target.isAlive()) player.team!.increaseScoreFromKill(player);
+                if (delta < 0) player.team!.increaseScoreFromDamage(-delta);
                 this.broadcastHPchange(target.team!, target.num, target.getHP(), target.getHPDelta());
             }
         });            
-        // player.team!.increaseScoreFromMultiHits(targets.length);
-        // player.team!.increaseScoreFromSpell(spell.score);
+        player.team!.increaseScoreFromMultiHits(targets.length);
+        player.team!.increaseScoreFromSpell(spell.score);
 
         if (spell.terrain) {
             this.broadcast('terrain', {
@@ -347,7 +353,7 @@ export abstract class Game
             num: player.num
         });
         
-        // team.sendScore();
+        team.sendScore();
     }
 
     processMagic({num, x, y, index}: {num: number, x: number, y: number, index: number}, team: Team ) {
@@ -500,6 +506,32 @@ export abstract class Game
         } else {
             return null;
         }
+    }
+
+    computeGameEndRewards(team: Team, winnerTeamId: number) {
+        // Compute character gold and xp
+        // TODO: compute player XP
+        // TODO: update db with rewards
+        if (team.id === winnerTeamId) {
+            return {
+                winner: winnerTeamId,
+                gold: this.computeTeamGold(team),
+                xp: 542,
+            }
+        } else {
+            return {
+                winner: winnerTeamId,
+                gold: 0,
+                xp: 540,
+            }
+        }
+    }
+
+    computeTeamGold(team: Team) {
+        return Math.max(Math.ceil(team.score/20), 10);
+    }
+
+    computeTeamXP(team: Team) {
     }
 }
 

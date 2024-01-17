@@ -24,7 +24,7 @@ spells[0] = new BaseSpell({
     sfx: "fireball",
     shake: true,
     cost: 5,
-    cooldown: 6,
+    cooldown: 1,
     castTime: 1,
     target: Target.AOE,
     effects: [{stat: Stat.HP, value: -30, modifiers: SPBasedBoostDeboost}],

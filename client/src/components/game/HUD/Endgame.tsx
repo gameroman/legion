@@ -1,4 +1,5 @@
 import { h, Component } from 'preact';
+import { route } from 'preact-router';
 /* eslint-disable react/prefer-stateless-function */
 interface EndgameState {
     finalGold: number;
@@ -6,12 +7,17 @@ interface EndgameState {
     displayGold: number;
     displayXp: number;
 }
-export class Endgame extends Component<object, EndgameState> {
+
+interface EndgameProps {
+    xpReward: number;
+    goldReward: number;
+}
+export class Endgame extends Component<EndgameProps, EndgameState> {
     constructor(props) {
         super(props);
         this.state = {
-            finalGold: 200, 
-            finalXp: 540,
+            finalGold: props.goldReward, 
+            finalXp: props.xpReward,
             displayGold: 0, // These are for display and will be incremented
             displayXp: 0
         };
@@ -44,6 +50,10 @@ export class Endgame extends Component<object, EndgameState> {
         }, stepTime);
     }
 
+    closeGame = () => {
+        route('/play');
+    }
+
     render() {
         return (
             <div className="endgame">
@@ -60,7 +70,7 @@ export class Endgame extends Component<object, EndgameState> {
                         </div>
                     </div>
                 </div>
-                {/* <div className="endgame-button">Close</div> */}
+                <i className="fa-solid fa-circle-xmark closebtn" onClick={this.closeGame}>X</i>
             </div>
         );
     }

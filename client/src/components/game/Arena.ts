@@ -434,6 +434,10 @@ export class Arena extends Phaser.Scene
         if (this.overviewReady) events.emit('updateOverview', team1, team2);
     }
 
+    showEndgameScreen({winner, xp, gold}) {
+        if (this.overviewReady) events.emit('gameEnd', xp, gold);
+    }
+
     emitEvent(event, data?) {
         switch (event) {
             case 'hpChange':
@@ -474,6 +478,9 @@ export class Arena extends Phaser.Scene
                 if (this.selectedPlayer) {
                     events.emit('keyPress', data);
                 }
+                break;
+            case 'gameEnd':
+                this.showEndgameScreen(data);
                 break;
             default:
                 break;
@@ -591,7 +598,7 @@ export class Arena extends Phaser.Scene
         if (spell.shake) this.cameras.main.shake(250, 0.01); // More intense shake
     }
 
-    processGameEnd({winner}) {
+    processGameEnd({winner, xp, gold}) {
         this.musicManager.playEnd();
         console.log(`Team ${winner} won!`);
         const winningTeam = this.teamsMap.get(winner);
@@ -600,6 +607,7 @@ export class Arena extends Phaser.Scene
                 player.victoryDance();
             });
         }, 200);
+        this.emitEvent('gameEnd', {winner, xp, gold});
     }
 
     processScoreUpdate({teamId, score}) {
