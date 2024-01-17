@@ -1,6 +1,6 @@
 
 import { BaseSpell } from "./BaseSpell";
-import { Stat, Target, Effect, EffectModifiers, EffectModifier, EffectDirection, SpellData } from "./types";
+import { Stat, Target, EffectModifiers, EffectModifier, EffectDirection, Terrain } from "./types";
 
 export const spells:BaseSpell[] = [];
 
@@ -29,6 +29,7 @@ spells[0] = new BaseSpell({
     target: Target.AOE,
     effects: [{stat: Stat.HP, value: -30, modifiers: SPBasedBoostDeboost}],
     score: 100,
+    terrain: Terrain.FIRE
 });
 
 spells[1] = new BaseSpell({

@@ -65,6 +65,7 @@ export interface SpellData {
     shake: boolean;
     score: number;
     yoffset?: number;
+    terrain?: Terrain;
 }
 
 export interface ItemData {
@@ -87,4 +88,9 @@ export enum Class {
     BLACK_MAGE,
     THIEF,
     RANDOM
+}
+
+export enum Terrain {
+    NONE,
+    FIRE
 }

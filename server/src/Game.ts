@@ -322,6 +322,14 @@ export abstract class Game
         });            
         // player.team!.increaseScoreFromMultiHits(targets.length);
         // player.team!.increaseScoreFromSpell(spell.score);
+
+        if (spell.terrain) {
+            this.broadcast('terrain', {
+                x,
+                y,
+                type: spell.terrain,
+            });
+        }
         
         this.broadcast('localanimation', {
             x,

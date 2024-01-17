@@ -136,6 +136,10 @@ export class Arena extends Phaser.Scene
             this.processCast(false, data);
         });
 
+        this.socket.on('terrain', (data) => {
+            this.processTerrain(data);
+        });
+
         this.socket.on('localanimation', (data) => {
             this.processLocalAnimation(data);
         });
@@ -562,6 +566,17 @@ export class Arena extends Phaser.Scene
         if (flag) this.displaySpellArea(location, spell.size, spell.castTime);
     }
 
+    processTerrain({x, y, type}) {
+        // Add a sprite at the coordinates and play the `ground_flame` animation
+        const {x: pixelX, y: pixelY} = this.gridToPixelCoords(x, y);
+        const sprite = this.add.sprite(pixelX, pixelY, 'groundTiles', `element_${type}`)
+            // .setDisplaySize(this.tileSize, this.tileSize)
+            .setDepth(2)
+            // .setOrigin(0);
+        sprite.anims.play('ground_flame');
+    
+    }
+
     processLocalAnimation({x, y, id}) {
         // Convert x and y in grid coords to pixels
         const {x: pixelX, y: pixelYInitial} = this.gridToPixelCoords(x, y);
@@ -728,12 +743,13 @@ export class Arena extends Phaser.Scene
             key: `ground_flame`, 
             frames: this.anims.generateFrameNumbers('thunder', { frames: [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59] }), 
             frameRate: 15, // Number of frames per second
+            repeat: -1
         });
 
         this.anims.create({
             key: `ice`, 
             frames: this.anims.generateFrameNumbers('ice', { frames: [54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 64, 66, 67] }), 
-            frameRate: 15, // Number of frames per second
+            frameRate: 15,
         });
 
         this.anims.create({

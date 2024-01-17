@@ -1,4 +1,4 @@
-import { Target, Effect, SpellData } from "./types";
+import { Target, Effect, SpellData, Terrain } from "./types";
 
 export class BaseSpell {
     id: number = -1;
@@ -16,6 +16,7 @@ export class BaseSpell {
     sfx: string = '';
     score: number= 0;
     yoffset: number = 0;
+    terrain: Terrain = Terrain.NONE;
     
     constructor(props: SpellData) {
         Object.assign(this, props);
