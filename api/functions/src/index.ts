@@ -8,7 +8,7 @@ import {uniqueNamesGenerator, adjectives, colors, animals}
   from "unique-names-generator";
 import {items} from "@legion/shared/Items";
 import {NewCharacter} from "@legion/shared/NewCharacter";
-import {Class} from "@legion/shared/types";
+import {Class, RewardsData} from "@legion/shared/types";
 
 admin.initializeApp();
 const corsOptions = {origin: true};
@@ -44,6 +44,8 @@ export const createUserCharacter = functions.auth.user().onCreate((user) => {
     wins: 0,
     losses: 0,
     crowd: 3,
+    xp: 0,
+    lvl: 1,
   };
 
   // Start a batch to ensure atomicity
@@ -374,6 +376,65 @@ export const unequipItem = onRequest((request, response) => {
         // Update player and character documents within the transaction
         transaction.update(playerRef, {inventory});
         transaction.update(characterRef, {inventory: characterInventory});
+      });
+      console.log("Transaction successfully committed!");
+
+      response.send({status: 0});
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      response.status(401).send("Unauthorized");
+    }
+  });
+});
+
+export const rewardsUpdate = onRequest((request, response) => {
+  logger.info("Updating rewards");
+  const db = admin.firestore();
+
+  cors(corsOptions)(request, response, async () => {
+    try {
+      const uid = await getUID(request);
+      const {isWinner, xp, gold} = request.body as RewardsData;
+
+      await db.runTransaction(async (transaction) => {
+        const playerRef = db.collection("players").doc(uid);
+        const playerDoc = await transaction.get(playerRef);
+
+        if (!playerDoc.exists) {
+          throw new Error("Documents do not exist");
+        }
+
+        const playerData = playerDoc.data();
+
+        if (!playerData) {
+          throw new Error("Data does not exist");
+        }
+
+        // Increase player xp and number of wins or losses
+        transaction.update(playerRef, {
+          xp: admin.firestore.FieldValue.increment(xp),
+          gold: admin.firestore.FieldValue.increment(gold),
+        });
+        if (isWinner) {
+          transaction.update(playerRef, {
+            wins: admin.firestore.FieldValue.increment(1),
+          });
+        } else {
+          transaction.update(playerRef, {
+            losses: admin.firestore.FieldValue.increment(1),
+          });
+        }
+
+        // Iterate over the player's characters and increase their XP
+        // Update XP for each character directly using their references
+        if (playerData.characters) {
+          playerData.characters.forEach((characterId: string) => {
+            const characterRef = db.collection("characters").doc(characterId);
+            transaction.update(characterRef, {
+              xp: admin.firestore.FieldValue.increment(xp),
+            });
+          });
+        }
       });
       console.log("Transaction successfully committed!");
 

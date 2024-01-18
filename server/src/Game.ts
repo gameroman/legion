@@ -5,6 +5,8 @@ import { ServerPlayer } from './ServerPlayer';
 import { Team } from './Team';
 import { Spell } from './Spell';
 import { lineOfSight } from '@legion/shared/utils';
+import {apiFetch} from './API';
+import { RewardsData } from '@legion/shared/types';
 
 
 export abstract class Game
@@ -16,6 +18,8 @@ export abstract class Game
     sockets: Socket[] = [];
     tickTimer: NodeJS.Timeout | null = null;
     socketMap = new Map<Socket, Team>();
+    startTime: number = Date.now();
+    duration: number = 0;
     gameOver: boolean = false;
     cooldownCoef: number = 1;
 
@@ -37,8 +41,6 @@ export abstract class Game
             this.socketMap.set(socket, this.teams.get(index + 1)!);
             this.teams.get(index + 1)?.setSocket(socket);
         });
-        // this.socketMap.set(sockets[0], this.teams.get(1)!);
-        // this.teams.get(1)?.setSocket(sockets[0]);
     }
 
     abstract populateTeams(): void;
@@ -49,7 +51,7 @@ export abstract class Game
             this.populateGrid();
             this.sendGameStart();
         } catch (error) {
-            // TODO: send match end
+            this.endGame(-1);
             console.error(error);
         }
     }
@@ -76,6 +78,7 @@ export abstract class Game
     }
 
     sendGameStart() {
+        this.startTime = Date.now();
         this.sockets.forEach(socket => {
             const teamId = this.socketMap.get(socket)?.id!;
             socket.emit('gameStart', this.getPlacementData(teamId));
@@ -157,6 +160,7 @@ export abstract class Game
             team = this.teams.get(2);
         }
 
+        team!.incrementActions();
         team!.snapshotScore();
 
         switch (action) {
@@ -190,15 +194,14 @@ export abstract class Game
 
     endGame(winner: number) {
         console.log(`Team ${winner} wins!`);
+        this.duration = Date.now() - this.startTime;
         this.gameOver = true;
-
-        // this.broadcast('gameEnd', {
-        //     winner
-        // });
 
         this.sockets.forEach(socket => {
             const team = this.socketMap.get(socket);
-            socket.emit('gameEnd', this.computeGameEndRewards(team, winner));
+            const rewards = this.computeGameEndRewards(team, winner, this.duration);
+            this.writeRewardsToDb(team, rewards);
+            socket.emit('gameEnd', rewards);
         });
     }
 
@@ -508,21 +511,18 @@ export abstract class Game
         }
     }
 
-    computeGameEndRewards(team: Team, winnerTeamId: number) {
-        // Compute character gold and xp
-        // TODO: compute player XP
-        // TODO: update db with rewards
+    computeGameEndRewards(team: Team, winnerTeamId: number, duration: number): RewardsData {
         if (team.id === winnerTeamId) {
             return {
-                winner: winnerTeamId,
+                isWinner: true,
                 gold: this.computeTeamGold(team),
-                xp: 542,
+                xp: this.computeTeamXP(team, this.getOtherTeam(team.id), duration, true),
             }
         } else {
             return {
-                winner: winnerTeamId,
+                isWinner: false,
                 gold: 0,
-                xp: 540,
+                xp: this.computeTeamXP(team, this.getOtherTeam(team.id), duration, false)
             }
         }
     }
@@ -531,7 +531,45 @@ export abstract class Game
         return Math.max(Math.ceil(team.score/20), 10);
     }
 
-    computeTeamXP(team: Team) {
+    computeLevelDifference(team: Team, otherTeam: Team) {
+        const teamLevel = team.getMembers().reduce((sum, player) => sum + player.level, 0);
+        const otherTeamLevel = otherTeam.getMembers().reduce((sum, player) => sum + player.level, 0);
+        return teamLevel - otherTeamLevel;
+    }
+
+    computeTeamXP(team: Team, otherTeam: Team, gameDuration: number, isWinner: boolean) {
+        const baseXP = 100;
+        const winningCoefficient = 1.2;
+        const losingCoefficient = 0.8;
+        const levelDifferenceConstant = 10; // At what level differnce does the level coefficient become 2
+        const actionsConstant = 50;
+        const minDuration = 120;
+        const teamLevelDifference = this.computeLevelDifference(team, otherTeam);
+        const totalActions = team.actions; 
+
+        // Calculate factors
+        const levelFactor = Math.max(1 + (teamLevelDifference / levelDifferenceConstant), 0.1);
+        const actionFactor = 1 + (totalActions / actionsConstant);
+        const durationFactor = gameDuration < minDuration ? gameDuration / minDuration : 1;
+
+        // Calculate base XP
+        let xp = baseXP * levelFactor * actionFactor * durationFactor;
+
+        // Apply winning or losing coefficient
+        xp *= isWinner ? winningCoefficient : losingCoefficient;
+
+        return Math.round(xp); // Round to nearest whole number
+    }
+
+    async writeRewardsToDb(team: Team, rewards: RewardsData) {
+        await apiFetch(
+            'rewardsUpdate',
+            team.getFirebaseToken(),
+            {
+                method: 'POST',
+                body: rewards,
+            }
+        );
     }
 }
 

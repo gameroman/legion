@@ -434,7 +434,7 @@ export class Arena extends Phaser.Scene
         if (this.overviewReady) events.emit('updateOverview', team1, team2);
     }
 
-    showEndgameScreen({winner, xp, gold}) {
+    showEndgameScreen({isWinner, xp, gold}) {
         if (this.overviewReady) events.emit('gameEnd', xp, gold);
     }
 
@@ -598,16 +598,16 @@ export class Arena extends Phaser.Scene
         if (spell.shake) this.cameras.main.shake(250, 0.01); // More intense shake
     }
 
-    processGameEnd({winner, xp, gold}) {
+    processGameEnd({isWinner, xp, gold}) {
+        // TODO: handle winner = -1 for errors
         this.musicManager.playEnd();
-        console.log(`Team ${winner} won!`);
-        const winningTeam = this.teamsMap.get(winner);
+        const winningTeam = isWinner ? this.teamsMap.get(this.playerTeamId) : this.teamsMap.get(this.getOtherTeam(this.playerTeamId));
         setTimeout(() => {
             winningTeam.members.forEach((player) => {
                 player.victoryDance();
             });
         }, 200);
-        this.emitEvent('gameEnd', {winner, xp, gold});
+        this.emitEvent('gameEnd', {isWinner, xp, gold});
     }
 
     processScoreUpdate({teamId, score}) {

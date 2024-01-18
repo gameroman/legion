@@ -94,3 +94,9 @@ export enum Terrain {
     NONE,
     FIRE
 }
+
+export interface RewardsData {
+    isWinner: boolean;
+    xp: number;
+    gold: number;
+}

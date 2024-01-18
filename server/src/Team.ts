@@ -12,6 +12,7 @@ export class Team {
     members: ServerPlayer[] = [];
     score: number = 0;
     _score: number = 0;
+    actions: number = 0;
     game: Game;
     socket: Socket | null = null;
 
@@ -38,6 +39,10 @@ export class Team {
             if (this.members[i].isAlive()) return false;
         }
         return true;
+    }
+
+    incrementActions() {
+        this.actions++;
     }
 
     increaseScoreFromDamage(amount: number) {

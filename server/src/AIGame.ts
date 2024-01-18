@@ -15,8 +15,6 @@ const FREEZE = true;
 export class AIGame extends Game {
     constructor(io: Server, sockets: Socket[]) {
         super(io, sockets);
-
-        this.tickTimer = setInterval(this.AItick.bind(this), TICK);
     }
 
     createAITeam(team: Team) {
@@ -25,6 +23,7 @@ export class AIGame extends Game {
             const position = this.getPosition(i, true);
             const newPlayer = new AIServerPlayer(i + 1, character.name, character.portrait, position.x, position.y)
             newPlayer.setTeam(team!);
+            newPlayer.setLevel(character.level);
             newPlayer.setHP(character.hp);
             newPlayer.setMP(character.mp);
             newPlayer.setStat(Stat.ATK, character.atk);
@@ -77,6 +76,11 @@ export class AIGame extends Game {
             position.x = 19 - position.x;
         }
         return position;
+    }
+
+    async start() {
+        super.start();
+        this.tickTimer = setInterval(this.AItick.bind(this), TICK);
     }
 
     AItick() {

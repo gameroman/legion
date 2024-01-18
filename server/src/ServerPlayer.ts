@@ -13,6 +13,7 @@ export class ServerPlayer {
     x;
     y;
     team: Team | null = null;
+    level: number = 1;
     _hp: number = 0;
     _mp: number = 0;
     hp;
@@ -178,6 +179,10 @@ export class ServerPlayer {
             this.mp = this.maxMP;
         }
         return this.mp;
+    }
+    
+    setLevel(level: number) {
+        this.level = level;
     }
 
     setHP(hp: number) {
