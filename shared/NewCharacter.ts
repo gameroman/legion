@@ -1,8 +1,9 @@
-import {Class} from "./types";
+import {Class, Stat} from "./types";
 import {warriorSprites, whiteMageSprites, blackMageSprites, thiefSprites}
   from "./sprites";
 import {uniqueNamesGenerator, adjectives, colors, animals}
   from "unique-names-generator";
+import {selectStatToLevelUp, increaseStat} from "./levelling";
 
 interface CharacterData {
     name: string;
@@ -25,8 +26,21 @@ interface CharacterData {
 export class NewCharacter {
   name: string;
   characterClass: Class;
+  xp: number
+  level: number;
+  portrait: string;
+  hp: number;
+  mp: number;
+  atk: number;
+  def: number;
+  spatk: number;
+  spdef: number;
+  carrying_capacity: number;
+  skill_slots: number;
+  inventory: number[];
+  skills: number[];
 
-  constructor(characterClass = Class.RANDOM) {
+  constructor(characterClass = Class.RANDOM, level = 1) {
     const nameOpts = {dictionaries: [adjectives, colors, animals], length: 2};
 
     this.name = uniqueNamesGenerator(nameOpts);
@@ -38,6 +52,52 @@ export class NewCharacter {
       ];
     } else {
       this.characterClass = characterClass;
+    }
+
+    this.portrait = this.getFrame();
+    this.xp = 0;
+    this.level = level;
+    this.carrying_capacity = 3;
+    this.skill_slots = this.getSkillSlots();
+    this.inventory = [];
+    this.skills = this.getSkills();
+    this.hp = this.getHP();
+    this.mp = this.getMP();
+    this.atk = this.getAtk();
+    this.def = this.getDef();
+    this.spatk = this.getSpatk();
+    this.spdef = this.getSpdef();
+
+    for (let i = 1; i < level; i++) {
+      this.lvlUp();
+    }
+  }
+
+  lvlUp(): void {
+    const NB_INCREASES = 2;
+    this.level++;
+    for (let i = 0; i < NB_INCREASES; i++) {
+      const stat = selectStatToLevelUp(this.characterClass);
+      switch (stat) {
+        case Stat.HP:
+          this.hp = increaseStat(stat, this.hp, this.level, this.characterClass);
+          break;
+        case Stat.MP:
+          this.mp = increaseStat(stat, this.mp, this.level, this.characterClass);
+          break;
+        case Stat.ATK:
+          this.atk = increaseStat(stat, this.atk, this.level, this.characterClass);
+          break;
+        case Stat.DEF:
+          this.def = increaseStat(stat, this.def, this.level, this.characterClass);
+          break;
+        case Stat.SPATK:
+          this.spatk = increaseStat(stat, this.spatk, this.level, this.characterClass);
+          break;
+        case Stat.SPDEF:
+          this.spdef = increaseStat(stat, this.spdef, this.level, this.characterClass);
+          break;
+      }
     }
   }
 
@@ -75,14 +135,14 @@ export class NewCharacter {
 
   getHP(): number {
     switch (this.characterClass) {
-    case Class.WARRIOR:
-      return 100;
-    case Class.WHITE_MAGE:
-      return 80;
-    case Class.BLACK_MAGE:
-      return 80;
-    case Class.THIEF:
-      return 90;
+      case Class.WARRIOR:
+        return 100;
+      case Class.WHITE_MAGE:
+        return 80;
+      case Class.BLACK_MAGE:
+        return 80;
+      case Class.THIEF:
+        return 90;
     }
     return 100;
   }
@@ -178,20 +238,20 @@ export class NewCharacter {
   generateCharacterData(): CharacterData {
     return {
       name: this.name,
-      portrait: this.getFrame(),
+      portrait: this.portrait,
       class: this.characterClass,
-      level: 1,
+      level: this.level,
       xp: 0,
-      hp: this.getHP(),
-      mp: this.getMP(),
-      atk: this.getAtk(),
-      def: this.getDef(),
-      spatk: this.getSpatk(),
-      spdef: this.getSpdef(),
-      carrying_capacity: 3,
-      skill_slots: this.getSkillSlots(),
-      inventory: [],
-      skills: this.getSkills(),
+      hp: this.hp,
+      mp: this.mp,
+      atk: this.atk,
+      def: this.def,
+      spatk: this.spatk,
+      spdef: this.spdef,
+      carrying_capacity: this.carrying_capacity,
+      skill_slots: this.skill_slots,
+      inventory: this.inventory,
+      skills: this.skills,
     };
   }
 }

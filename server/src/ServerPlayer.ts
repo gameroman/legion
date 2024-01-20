@@ -49,15 +49,6 @@ export class ServerPlayer {
         };
         // this.setCooldown(0 + this.entranceTime * 1000);
         this.setCooldown(this.cooldowns.move + this.entranceTime * 1000);
-
-//         Every level up, a character gains:
-//         Attack: +2 and +10% of current attack
-//         Defense: +3 and +8% of current defense
-
-// Written as formulas, these might be:
-
-//     New Attack = Current Attack + 2 + Current Attack * 0.10
-//     New Defense = Current Defense + 3 + Current Defense * 0.08
     }
 
     getPlacementData(includePersonal = false): playerNetworkData {
