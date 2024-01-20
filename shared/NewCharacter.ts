@@ -235,7 +235,7 @@ export class NewCharacter {
       return [];
   }
 
-  generateCharacterData(): CharacterData {
+  getCharacterData(): CharacterData {
     return {
       name: this.name,
       portrait: this.portrait,

@@ -63,7 +63,7 @@ export const createUserCharacter = functions.auth.user().onCreate((user) => {
     characterDataArray.push(
       new NewCharacter(
         classes[i]
-      ).generateCharacterData()
+      ).getCharacterData()
     );
   }
 

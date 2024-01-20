@@ -4,7 +4,7 @@ import { Game } from './Game';
 import { ServerPlayer } from './ServerPlayer';
 import { AIServerPlayer } from './AIServerPlayer';
 import {apiFetch} from './API';
-import { Stat } from "@legion/shared/types";
+import { Stat, Class } from "@legion/shared/types";
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {Team} from "./Team";
 
@@ -17,9 +17,18 @@ export class AIGame extends Game {
         super(io, sockets);
     }
 
-    createAITeam(team: Team) {
-        for (let i = 0; i < 3; i++) {
-            const character = new NewCharacter().generateCharacterData();
+    createAITeam(team: Team, nb: number, levels?: number[]) {
+        const classes = [Class.WARRIOR, Class.WHITE_MAGE, Class.BLACK_MAGE];
+        if (!levels) {
+            // Populate levels array with as many random values between 1 and 10 as needed
+            levels = [];
+            for (let i = 0; i < nb; i++) {
+                levels.push(Math.floor(Math.random() * 10) + 1);
+            }
+        }
+
+        for (let i = 0; i < nb; i++) {
+            const character = new NewCharacter(classes[i], levels[i]).getCharacterData();
             const position = this.getPosition(i, true);
             const newPlayer = new AIServerPlayer(i + 1, character.name, character.portrait, position.x, position.y)
             newPlayer.setTeam(team!);
@@ -34,14 +43,19 @@ export class AIGame extends Game {
             newPlayer.setSpells(character.skill_slots, character.skills);
             team?.addMember(newPlayer);
         }
+
+        return levels;
     }
 
     async populateTeams() {
+        const DEFAULT_SIZE = 3;
         const playerTeam = this.teams.get(1);
         const aiTeam = this.teams.get(2);
+        let levels = [];
+        let nb = DEFAULT_SIZE;
 
         if (AI_VS_AI) {
-            this.createAITeam(playerTeam!);
+            levels = this.createAITeam(playerTeam!, DEFAULT_SIZE);
         } else {
             const teamData = await apiFetch('rosterData', playerTeam.getFirebaseToken());
             teamData.characters.forEach((character: any, index) => {
@@ -57,10 +71,12 @@ export class AIGame extends Game {
                 newPlayer.setInventory(character.carrying_capacity, character.inventory);
                 newPlayer.setSpells(character.skill_slots, character.skills);
                 playerTeam?.addMember(newPlayer);
+                levels.push(character.level);
             });
+            nb = teamData.characters.length;
         }
 
-        this.createAITeam(aiTeam!);
+        this.createAITeam(aiTeam!, nb, levels);
     }
 
     getPosition(index, flip) {
