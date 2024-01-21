@@ -1,4 +1,4 @@
-import {Class, Stat} from "@legion/shared/types";
+import {Class, Stat} from "@legion/shared/enums";
 
 
 export function classEnumToString(characterClass: Class) {

@@ -1,7 +1,7 @@
 // CharacterCard.tsx
 import { h, Component } from 'preact';
 import { route } from 'preact-router';
-import {Class} from "@legion/shared/types";
+import {Class} from "@legion/shared/enums";
 import { classEnumToString } from './utils';
 
 interface CharacterProps {

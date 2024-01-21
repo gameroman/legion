@@ -1,4 +1,4 @@
-import { Class, Stat } from "./types";
+import { Class, Stat } from "./enums";
 
 interface StatWeights {
     [Stat.NONE]? : number;

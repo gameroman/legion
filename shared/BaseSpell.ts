@@ -1,4 +1,5 @@
-import { Target, Effect, SpellData, Terrain } from "./types";
+import { Target, Terrain } from "./enums";
+import { Effect, SpellData } from "./interfaces";
 
 export class BaseSpell {
     id: number = -1;

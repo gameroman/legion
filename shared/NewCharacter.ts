@@ -1,4 +1,4 @@
-import {Class, Stat} from "./types";
+import {Class, Stat} from "./enums";
 import {warriorSprites, whiteMageSprites, blackMageSprites, thiefSprites}
   from "./sprites";
 import {uniqueNamesGenerator, adjectives, colors, animals}

@@ -1,6 +1,6 @@
 // Effect.tsx
 import { h, Component } from 'preact';
-import { Stat, Target } from '@legion/shared/types';
+import { Stat, Target } from '@legion/shared/enums';
 
 interface DescProps {
   action: any;

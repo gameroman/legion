@@ -7,7 +7,9 @@ import admin, {corsMiddleware, getUID} from "./APIsetup";
 import {uniqueNamesGenerator, adjectives, colors, animals}
   from "unique-names-generator";
 import {NewCharacter} from "@legion/shared/NewCharacter";
-import {Class, RewardsData} from "@legion/shared/types";
+import {Class} from "@legion/shared/enums";
+import {RewardsData} from "@legion/shared/interfaces";
+
 
 export const createUserCharacter = functions.auth.user().onCreate((user) => {
   logger.info("Creating character for user:", user.uid);

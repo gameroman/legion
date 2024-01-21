@@ -1,4 +1,6 @@
-import { Target, Effect, ItemData } from "./types";
+import { Target } from "./enums";
+import { Effect, ItemData } from "./interfaces";
+
 
 export class BaseItem {
     id: number = -1;

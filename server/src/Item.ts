@@ -1,6 +1,6 @@
 import { ServerPlayer } from "./ServerPlayer";
 import { Game } from "./Game";
-import { Stat, Target } from "@legion/shared/types";
+import { Stat, Target } from "@legion/shared/enums";
 import { BaseItem } from "@legion/shared/BaseItem";
 
 export class Item extends BaseItem {

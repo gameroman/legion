@@ -1,6 +1,8 @@
 import { ServerPlayer } from "./ServerPlayer";
 import { Game } from "./Game";
-import { Stat, Target, Effect, EffectModifiers, EffectModifier, EffectDirection } from "@legion/shared/types";
+import { Stat, Target, EffectDirection } from "@legion/shared/enums";
+import { EffectModifiers, EffectModifier, Effect } from "@legion/shared/interfaces";
+
 import { BaseSpell } from "@legion/shared/BaseSpell";
 
 export function convertBaseToSpell(base: BaseSpell): Spell {

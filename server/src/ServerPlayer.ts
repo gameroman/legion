@@ -1,7 +1,7 @@
 import { Team } from './Team';
 import { Item } from './Item';
 import { Spell } from './Spell';
-import { Stat, Terrain } from "@legion/shared/types";
+import { Stat, Terrain } from "@legion/shared/enums";
 import { items } from '@legion/shared/Items';
 import { spells } from '@legion/shared/Spells';
 

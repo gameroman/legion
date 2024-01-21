@@ -1,23 +1,4 @@
-export enum Stat {
-    HP,
-    MP,
-    ATK,
-    DEF,
-    SPATK,
-    SPDEF,
-    NONE
-}
-
-export enum Target {
-    SELF,
-    AOE,
-    SINGLE
-}
-
-export enum EffectDirection {
-    PLUS,
-    MINUS,
-}
+import { Stat, Target, EffectDirection, Class, Terrain } from "./enums";
 
 export class EffectModifier {
     stat;
@@ -80,19 +61,6 @@ export interface ItemData {
     size: number;
     effects: Effect[];
     price: number;
-}
-
-export enum Class {
-    WARRIOR,
-    WHITE_MAGE,
-    BLACK_MAGE,
-    THIEF,
-    RANDOM
-}
-
-export enum Terrain {
-    NONE,
-    FIRE
 }
 
 export interface RewardsData {

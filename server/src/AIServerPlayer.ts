@@ -1,5 +1,5 @@
 import { ServerPlayer, ActionType } from './ServerPlayer';
-import { Target } from "@legion/shared/types";
+import { Target } from "@legion/shared/enums";
 
 type Comparator<T> = (a: T, b: T) => number;
 

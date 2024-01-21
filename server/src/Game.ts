@@ -6,7 +6,9 @@ import { Team } from './Team';
 import { Spell } from './Spell';
 import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import {apiFetch} from './API';
-import { RewardsData, Terrain } from '@legion/shared/types';
+import { Terrain } from '@legion/shared/enums';
+import { RewardsData } from '@legion/shared/interfaces';
+
 
 
 export abstract class Game
