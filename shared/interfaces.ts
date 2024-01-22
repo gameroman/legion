@@ -68,3 +68,12 @@ export interface RewardsData {
     xp: number;
     gold: number;
 }
+
+export interface CharacterStats {
+    hp: number;
+    mp: number;
+    atk: number;
+    def: number;
+    spatk: number;
+    spdef: number;
+}

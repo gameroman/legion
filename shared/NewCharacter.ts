@@ -1,4 +1,5 @@
 import {Class, Stat} from "./enums";
+import { CharacterStats } from "./interfaces";
 import {warriorSprites, whiteMageSprites, blackMageSprites, thiefSprites}
   from "./sprites";
 import {uniqueNamesGenerator, adjectives, colors, animals}
@@ -11,12 +12,7 @@ interface CharacterData {
     class: Class;
     level: number;
     xp: number;
-    hp: number;
-    mp: number;
-    atk: number;
-    def: number;
-    spatk: number;
-    spdef: number;
+    stats: CharacterStats;
     carrying_capacity: number;
     skill_slots: number;
     inventory: number[];
@@ -31,12 +27,7 @@ export class NewCharacter {
   xp: number
   level: number;
   portrait: string;
-  hp: number;
-  mp: number;
-  atk: number;
-  def: number;
-  spatk: number;
-  spdef: number;
+  stats: CharacterStats;
   carrying_capacity: number;
   skill_slots: number;
   inventory: number[];
@@ -63,12 +54,14 @@ export class NewCharacter {
     this.skill_slots = this.getSkillSlots();
     this.inventory = [];
     this.skills = this.getSkills();
-    this.hp = this.getHP();
-    this.mp = this.getMP();
-    this.atk = this.getAtk();
-    this.def = this.getDef();
-    this.spatk = this.getSpatk();
-    this.spdef = this.getSpdef();
+    this.stats = {
+      hp: this.getHP(),
+      mp: this.getMP(),
+      atk: this.getAtk(),
+      def: this.getDef(),
+      spatk: this.getSpatk(),
+      spdef: this.getSpdef(),
+    }
 
     for (let i = 1; i < level; i++) {
       this.lvlUp();
@@ -81,22 +74,22 @@ export class NewCharacter {
       const stat = selectStatToLevelUp(this.characterClass);
       switch (stat) {
         case Stat.HP:
-          this.hp = increaseStat(stat, this.hp, this.level, this.characterClass);
+          this.stats.hp = increaseStat(stat, this.stats.hp, this.level, this.characterClass);
           break;
         case Stat.MP:
-          this.mp = increaseStat(stat, this.mp, this.level, this.characterClass);
+          this.stats.mp = increaseStat(stat, this.stats.mp, this.level, this.characterClass);
           break;
         case Stat.ATK:
-          this.atk = increaseStat(stat, this.atk, this.level, this.characterClass);
+          this.stats.atk = increaseStat(stat, this.stats.atk, this.level, this.characterClass);
           break;
         case Stat.DEF:
-          this.def = increaseStat(stat, this.def, this.level, this.characterClass);
+          this.stats.def = increaseStat(stat, this.stats.def, this.level, this.characterClass);
           break;
         case Stat.SPATK:
-          this.spatk = increaseStat(stat, this.spatk, this.level, this.characterClass);
+          this.stats.spatk = increaseStat(stat, this.stats.spatk, this.level, this.characterClass);
           break;
         case Stat.SPDEF:
-          this.spdef = increaseStat(stat, this.spdef, this.level, this.characterClass);
+          this.stats.spdef = increaseStat(stat, this.stats.spdef, this.level, this.characterClass);
           break;
       }
     }
@@ -243,12 +236,7 @@ export class NewCharacter {
       class: this.characterClass,
       level: this.level,
       xp: 0,
-      hp: this.hp,
-      mp: this.mp,
-      atk: this.atk,
-      def: this.def,
-      spatk: this.spatk,
-      spdef: this.spdef,
+      stats: this.stats,
       carrying_capacity: this.carrying_capacity,
       skill_slots: this.skill_slots,
       inventory: this.inventory,

@@ -3,6 +3,7 @@ import { h, Component } from 'preact';
 import { route } from 'preact-router';
 import {Class} from "@legion/shared/enums";
 import { classEnumToString } from './utils';
+import { CharacterStats } from '@legion/shared/interfaces';
 
 interface CharacterProps {
   id: number;
@@ -11,12 +12,7 @@ interface CharacterProps {
   class: number;
   level: number;
   xp: number;
-  hp: number;
-  mp: number;
-  atk: number;
-  def: number;
-  spAtk: number;
-  spDef: number;
+  stats: CharacterStats
 }
 
 class CharacterCard extends Component<CharacterProps> {

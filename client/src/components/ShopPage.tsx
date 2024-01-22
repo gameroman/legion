@@ -173,7 +173,7 @@ class ShopPage extends Component<object, State> {
                           {statStrings.map((stat) => (
                             <div key={stat} className={`badge ${stat}`}>
                               <span className="badge-label">{stat.toUpperCase()}</span> 
-                              <span>{this.state[stat]}</span>
+                              <span>{character.stats[stat]}</span>
                             </div>
                           ))}
                         </div>

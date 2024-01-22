@@ -195,6 +195,17 @@ export class ServerPlayer {
         return this.mp;
     }
 
+    setUpCharacter(data) {
+        this.setHP(data.stats.hp);
+        this.setMP(data.stats.mp);
+        this.setStat(Stat.ATK, data.stats.atk);
+        this.setStat(Stat.DEF, data.stats.def);
+        this.setStat(Stat.SPATK, data.stats.spatk);
+        this.setStat(Stat.SPDEF, data.stats.spdef);
+        this.setInventory(data.carrying_capacity, data.inventory);
+        this.setSpells(data.skill_slots, data.skills);
+    }
+
     setStat(stat: Stat, value: number) {
         switch (stat) {
             case Stat.SPATK:

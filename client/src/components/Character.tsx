@@ -5,31 +5,23 @@ import { ActionType } from './game/HUD/ActionTypes';
 import { classEnumToString, statStrings } from './utils';
 import { items } from '@legion/shared/Items';
 import { spells } from '@legion/shared/Spells';
+import { CharacterStats } from '@legion/shared/interfaces';
 
 import toast from '@brenoroosevelt/toast'
 import { apiFetch } from '../services/apiService';
 
-import firebase from 'firebase/compat/app'
-import firebaseConfig from '@legion/shared/firebaseConfig';
-firebase.initializeApp(firebaseConfig);
 interface CharacterProps {
     id: string;
     refreshInventory: () => void;
 }
 
 interface CharacterState {
-  user: firebase.User | null;
   portrait: string;
   name: string;
   class: number;
   level: number;
   xp: number;
-  hp: number;
-  mp: number;
-  atk: number;
-  def: number;
-  spAtk: number;
-  spDef: number;
+  stats: CharacterStats;
   inventory: any[];
   skills: any[];
   carrying_capacity: number;
@@ -115,10 +107,10 @@ class Character extends Component<CharacterProps, CharacterState> {
                   </div>
               </div>
               <div className="stats-area">
-                {statStrings.map((stat) => (
+                {this.state.stats && statStrings.map((stat) => (
                   <div key={stat} className={`badge ${stat}`}>
                     <span className="badge-label">{stat.toUpperCase()}</span> 
-                    <span>{this.state[stat]}</span>
+                    <span>{this.state.stats[stat]}</span>
                   </div>
                 ))}
               </div>

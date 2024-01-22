@@ -32,15 +32,7 @@ export class AIGame extends Game {
             const position = this.getPosition(i, true);
             const newPlayer = new AIServerPlayer(i + 1, character.name, character.portrait, position.x, position.y)
             newPlayer.setTeam(team!);
-            newPlayer.setLevel(character.level);
-            newPlayer.setHP(character.hp);
-            newPlayer.setMP(character.mp);
-            newPlayer.setStat(Stat.ATK, character.atk);
-            newPlayer.setStat(Stat.DEF, character.def);
-            newPlayer.setStat(Stat.SPATK, character.spatk);
-            newPlayer.setStat(Stat.SPDEF, character.spdef);
-            newPlayer.setInventory(character.carrying_capacity, character.inventory);
-            newPlayer.setSpells(character.skill_slots, character.skills);
+            newPlayer.setUpCharacter(character);
             team?.addMember(newPlayer);
         }
 
@@ -62,14 +54,7 @@ export class AIGame extends Game {
                 const position = this.getPosition(index, false);
                 const newPlayer = new ServerPlayer(index + 1, character.name, character.portrait, position.x, position.y);
                 newPlayer.setTeam(playerTeam!);
-                newPlayer.setHP(character.hp);
-                newPlayer.setMP(character.mp);
-                newPlayer.setStat(Stat.ATK, character.atk);
-                newPlayer.setStat(Stat.DEF, character.def);
-                newPlayer.setStat(Stat.SPATK, character.spatk);
-                newPlayer.setStat(Stat.SPDEF, character.spdef);
-                newPlayer.setInventory(character.carrying_capacity, character.inventory);
-                newPlayer.setSpells(character.skill_slots, character.skills);
+                newPlayer.setUpCharacter(character);
                 playerTeam?.addMember(newPlayer);
                 levels.push(character.level);
             });
