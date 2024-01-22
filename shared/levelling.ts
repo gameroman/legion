@@ -1,14 +1,8 @@
 import { Class, Stat } from "./enums";
 
-interface StatWeights {
-    [Stat.NONE]? : number;
-    [Stat.HP]?: number;
-    [Stat.MP]?: number;
-    [Stat.ATK]?: number;
-    [Stat.DEF]?: number;
-    [Stat.SPATK]?: number;
-    [Stat.SPDEF]?: number;
-}
+type StatWeights = {
+    [key in Stat]?: number;
+};
 
 const classStatWeights: Record<Class, StatWeights> = {
     [Class.RANDOM]: {},
@@ -18,20 +12,26 @@ const classStatWeights: Record<Class, StatWeights> = {
     [Class.THIEF]: { [Stat.ATK]: 6, [Stat.HP]: 3, [Stat.DEF]: 3, [Stat.SPATK]: 1, [Stat.SPDEF]: 1, [Stat.MP]: 1 } // TODO: update
 };
 
-export function selectStatToLevelUp(characterClass: Class) {
+export function selectStatToLevelUp(characterClass: Class): Stat {
     const weights = classStatWeights[characterClass];
     const weightedStats: Stat[] = [];
 
-    for (const stat in weights) {
-        const weight = weights[stat as unknown as Stat]!;
-        for (let i = 0; i < weight; i++) {
-            weightedStats.push(stat as unknown as Stat);
+    for (const statKey in weights) {
+        if (weights.hasOwnProperty(statKey)) {
+            const statEnumKey = Number(statKey) as Stat;
+            const weight = weights[statEnumKey];
+            if (weight) {
+                for (let i = 0; i < weight; i++) {
+                    weightedStats.push(statEnumKey);
+                }
+            }
         }
     }
 
     const randomIndex = Math.floor(Math.random() * weightedStats.length);
     return weightedStats[randomIndex];
 }
+
 
 export function increaseStat(stat: Stat, currentValue: number, level: number, characterClass: Class) {
     const increments = [1, 1, 1, 1, 2, 2, 2, 3, 3, 4];

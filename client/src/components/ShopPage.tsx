@@ -9,12 +9,19 @@ import ActionItem from './game/HUD/Action';
 import { spells } from '@legion/shared/Spells';
 import { ActionType } from './game/HUD/ActionTypes';
 
+enum DialogType {
+  ITEM_PURCHASE,
+  CHARACTER_PURCHASE,
+  EQUIPMENT_PURCHASE,
+  NONE // Represents no dialog open
+}
+
 interface State {
   gold: number;
   inventory: Array<any>;
   items: Array<any>;
   characters: Array<any>;
-  isDialogOpen: boolean;
+  openDialog: DialogType;
   selectedItem: any;
   quantity: number;
 }
@@ -26,7 +33,7 @@ class ShopPage extends Component<object, State> {
     inventory: [],
     items,
     characters: [],
-    isDialogOpen: false,
+    openDialog: DialogType.NONE,
     selectedItem: null,
     quantity: 1,
   };
@@ -65,12 +72,16 @@ class ShopPage extends Component<object, State> {
     return this.state.inventory.filter((item) => item === itemId).length;
   }
 
-  openDialog = (item) => {
-    this.setState({ isDialogOpen: true, selectedItem: item, quantity: 1 });
+  openDialog = (dialogType: DialogType, item: any = null) => {
+    this.setState({ 
+      openDialog: dialogType, 
+      selectedItem: item, 
+      quantity: 1 
+    });
   }
 
   closeDialog = () => {
-    this.setState({ isDialogOpen: false, selectedItem: null });
+    this.setState({ openDialog: DialogType.NONE, selectedItem: null });
   }
 
   changeQuantity = (amount) => {
@@ -125,13 +136,13 @@ class ShopPage extends Component<object, State> {
   }
 
   render() {
-    const { isDialogOpen, selectedItem, quantity } = this.state;
+    const { openDialog, selectedItem, quantity } = this.state;
     const totalPrice = selectedItem ? selectedItem.price * quantity : 0;
     return (
         <div className="shop-content">
             <div className="shop-grid">
               {this.state.items.map((item) => (
-                <div key={item.id} className="shop-item-card" onClick={() => this.openDialog(item)}>
+                <div key={item.id} className="shop-item-card" onClick={() => this.openDialog(DialogType.ITEM_PURCHASE, item)}>
                   <div className="shop-item-card-header">
                     <div className="shop-item-card-name">{item.name}</div>
                     <div className="shop-item-card-name-shadow">{item.name}</div>
@@ -201,7 +212,7 @@ class ShopPage extends Component<object, State> {
               ))}
             </div>
 
-        {isDialogOpen && (
+        {openDialog === DialogType.ITEM_PURCHASE && (
           <div className="dialog">
             <div className="shop-item-card-header">
               <div className="shop-item-card-name">Buy</div>

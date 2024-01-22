@@ -205,6 +205,17 @@ export const rewardsUpdate = onRequest((request, response) => {
   });
 });
 
+async function createCharacterForSale(db: FirebaseFirestore.Firestore) {
+  const level = Math.floor(Math.random() * 100);
+  const price = level * 1000;
+  const character =
+        new NewCharacter(Class.RANDOM, level).getCharacterData();
+  character.onSale = true;
+  character.price = price;
+  // Add the character to the collection
+  await db.collection("characters").add(character);
+}
+
 export const generateOnSaleCharacters = onRequest((request, response) => {
   logger.info("Generating on sale characters");
   const db = admin.firestore();
@@ -221,14 +232,7 @@ export const generateOnSaleCharacters = onRequest((request, response) => {
       let delta = 0;
       console.log(`Number of on sale characters: ${onSaleCount}`);
       while (onSaleCount < TARGET_COUNT) {
-        const level = Math.floor(Math.random() * 100);
-        const price = level * 1000;
-        const character =
-            new NewCharacter(Class.RANDOM, level).getCharacterData();
-        character.onSale = true;
-        character.price = price;
-        // Add the character to the collection
-        await db.collection("characters").add(character);
+        await createCharacterForSale(db);
         // Increment the on sale count
         onSaleCount++;
         delta++;
@@ -259,3 +263,90 @@ export const listOnSaleCharacters = onRequest((request, response) => {
   });
 });
 
+export const deleteOnSaleCharacters = onRequest((request, response) => {
+  logger.info("Deleting on sale characters");
+  const db = admin.firestore();
+
+  corsMiddleware(request, response, async () => {
+    try {
+      const querySnapshot = await db.collection("characters")
+        .where("onSale", "==", true)
+        .get();
+      const batch = db.batch();
+      querySnapshot.docs.forEach((doc) => batch.delete(doc.ref));
+      await batch.commit();
+      response.send({status: 0});
+    } catch (error) {
+      console.error("Error deleting on sale characters:", error);
+      response.status(401).send("Unauthorized");
+    }
+  });
+});
+
+export const purchaseCharacter = onRequest((request, response) => {
+  logger.info("Purchasing character");
+  const db = admin.firestore();
+
+  corsMiddleware(request, response, async () => {
+    try {
+      const uid = await getUID(request);
+      const characterId = request.body.characterId;
+
+      // Fetch the price of the character
+      const characterDoc = await db.collection("characters")
+        .doc(characterId).get();
+      const characterData = characterDoc.data();
+      if (!characterData) {
+        throw new Error("Character does not exist");
+      }
+      if (!characterData.onSale) {
+        throw new Error("Character is not on sale");
+      }
+      const price = characterData.price;
+
+      await db.runTransaction(async (transaction) => {
+        const playerRef = db.collection("players").doc(uid);
+        const playerDoc = await transaction.get(playerRef);
+
+        if (!playerDoc.exists) {
+          throw new Error("Documents do not exist");
+        }
+
+        const playerData = playerDoc.data();
+
+        if (!playerData) {
+          throw new Error("Data does not exist");
+        }
+
+        // Check that player has enough gold to purchase character
+        if (playerData.gold < price) {
+          throw new Error("Player does not have enough gold");
+        }
+
+        // Subtract gold from player
+        transaction.update(playerRef, {
+          gold: admin.firestore.FieldValue.increment(-price),
+        });
+
+        // Add character to player's roster
+        transaction.update(playerRef, {
+          characters: admin.firestore.FieldValue.arrayUnion(
+            db.collection("characters").doc(characterId)
+          ),
+        });
+
+        transaction.update(db.collection("characters").doc(characterId), {
+          onSale: false,
+          price: 0,
+        });
+      });
+      console.log("Transaction successfully committed!");
+      createCharacterForSale(db);
+
+      response.send({status: 0});
+    } catch (error) {
+      console.error("Error purchasing character:", error);
+      response.status(401).send("Unauthorized");
+    }
+  });
+});

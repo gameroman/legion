@@ -73,7 +73,6 @@ export class NewCharacter {
     const NB_INCREASES = 2;
     for (let i = 0; i < NB_INCREASES; i++) {
       const stat = selectStatToLevelUp(this.characterClass);
-      console.log(`Increasing ${Stat[stat]}`);
       switch (stat) {
         case Stat.HP:
           this.stats.hp = increaseStat(stat, this.stats.hp, this.level, this.characterClass);
@@ -81,7 +80,7 @@ export class NewCharacter {
         case Stat.MP:
           this.stats.mp = increaseStat(stat, this.stats.mp, this.level, this.characterClass);
           break;
-        case Stat.ATK:
+        case 2:
           this.stats.atk = increaseStat(stat, this.stats.atk, this.level, this.characterClass);
           break;
         case Stat.DEF:
@@ -99,34 +98,34 @@ export class NewCharacter {
 
   getSkillSlots(): number {
     switch (this.characterClass) {
-    case Class.WARRIOR:
+      case Class.WARRIOR:
+        return 0;
+      case Class.WHITE_MAGE:
+        return 3;
+      case Class.BLACK_MAGE:
+        return 3;
+      case Class.THIEF:
+        return 1;
+      }
       return 0;
-    case Class.WHITE_MAGE:
-      return 3;
-    case Class.BLACK_MAGE:
-      return 3;
-    case Class.THIEF:
-      return 1;
-    }
-    return 0;
   }
 
   getFrame(): string {
     switch (this.characterClass) {
-    case Class.WARRIOR:
+      case Class.WARRIOR:
+        return warriorSprites[Math.floor(Math.random() * warriorSprites.length)];
+      case Class.WHITE_MAGE:
+        return whiteMageSprites[
+          Math.floor(Math.random() * whiteMageSprites.length)
+        ];
+      case Class.BLACK_MAGE:
+        return blackMageSprites[
+          Math.floor(Math.random() * blackMageSprites.length)
+        ];
+      case Class.THIEF:
+        return thiefSprites[Math.floor(Math.random() * thiefSprites.length)];
+      }
       return warriorSprites[Math.floor(Math.random() * warriorSprites.length)];
-    case Class.WHITE_MAGE:
-      return whiteMageSprites[
-        Math.floor(Math.random() * whiteMageSprites.length)
-      ];
-    case Class.BLACK_MAGE:
-      return blackMageSprites[
-        Math.floor(Math.random() * blackMageSprites.length)
-      ];
-    case Class.THIEF:
-      return thiefSprites[Math.floor(Math.random() * thiefSprites.length)];
-    }
-    return warriorSprites[Math.floor(Math.random() * warriorSprites.length)];
   }
 
   getHP(): number {

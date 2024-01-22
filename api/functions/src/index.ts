@@ -5,12 +5,13 @@ import {fetchLeaderboard} from "./leaderboardsAPI";
 import {inventoryData, purchaseItem, equipItem, unequipItem}
   from "./inventoryAPI";
 import {createUserCharacter, rosterData, characterData, rewardsUpdate,
-  generateOnSaleCharacters, listOnSaleCharacters} from "./characterAPI";
+  generateOnSaleCharacters, listOnSaleCharacters,
+  deleteOnSaleCharacters} from "./characterAPI";
 
 export {
   fetchLeaderboard, inventoryData, purchaseItem, equipItem, unequipItem,
   createUserCharacter, rosterData, characterData, rewardsUpdate,
-  generateOnSaleCharacters, listOnSaleCharacters,
+  generateOnSaleCharacters, listOnSaleCharacters, deleteOnSaleCharacters,
 };
 
 export const helloWorld = onRequest((request, response) => {
