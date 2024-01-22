@@ -113,13 +113,29 @@ export class ServerPlayer {
     }
 
     takeDamage(damage: number) {
+        this.updateHP(damage);
+    }
+
+    heal(amount: number) {
+        this.updateHP(-amount);
+    }
+
+    updateHP(amount: number) {
         this._hp = this.hp;
-        this.hp -= Math.round(damage);
-        if (this.hp < 0) {
-            this.hp = 0;
+        this.hp -= Math.round(amount);
+        this.hp = Math.max(Math.min(this.hp, this.maxHP), 0);
+
+        if (this.HPHasChanged()){
+            this.broadcastHPChange();
         }
 
-        this.team?.game.checkEndGame();
+        if (this.hp <= 0) {
+            this.team!.game.checkEndGame();
+        }
+    }
+
+    broadcastHPChange() {
+        this.team!.game.broadcastHPchange(this.team, this.num, this.hp, this.getHPDelta());
     }
 
     getHPDelta() {
@@ -136,14 +152,6 @@ export class ServerPlayer {
 
     resetPreviousHP() {
         this._hp = this.hp;
-    }
-
-    heal(amount: number) {
-        this._hp = this.hp;
-        this.hp += amount;
-        if (this.hp > this.maxHP) {
-            this.hp = this.maxHP;
-        }
     }
 
     HPHasChanged() {

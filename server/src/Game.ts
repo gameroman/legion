@@ -343,7 +343,6 @@ export abstract class Game
                 player.increaseDamageDealt(delta);
                 if (!target.isAlive()) player.team!.increaseScoreFromKill(player);
                 if (delta < 0) player.team!.increaseScoreFromDamage(-delta);
-                this.broadcastHPchange(target.team!, target.num, target.getHP(), target.getHPDelta());
             }
         });            
         player.team!.increaseScoreFromMultiHits(targets.length);

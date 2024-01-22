@@ -34,6 +34,7 @@ export class NewCharacter {
   skills: number[];
 
   constructor(characterClass = Class.RANDOM, level = 1) {
+    console.log(`Creating new character of class ${Class[characterClass]} and level ${level}`);
     const nameOpts = {dictionaries: [adjectives, colors, animals], length: 2};
 
     this.name = uniqueNamesGenerator(nameOpts);
@@ -72,6 +73,7 @@ export class NewCharacter {
     const NB_INCREASES = 2;
     for (let i = 0; i < NB_INCREASES; i++) {
       const stat = selectStatToLevelUp(this.characterClass);
+      console.log(`Increasing ${Stat[stat]}`);
       switch (stat) {
         case Stat.HP:
           this.stats.hp = increaseStat(stat, this.stats.hp, this.level, this.characterClass);
