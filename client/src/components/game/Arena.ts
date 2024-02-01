@@ -40,49 +40,49 @@ export class Arena extends Phaser.Scene
     {
         this.gamehud = new GameHUD();
         
-        this.load.image('bg',  '/assets/aarena_bg.png');
-        this.load.image('killzone',  '/assets/killzone.png');
-        this.load.image('spark',  '/assets/spark.png');
-        // this.load.svg('pop', 'assets/pop.svg',  { width: 24, height: 24 } );
+        this.load.image('bg',  'aarena_bg.png');
+        this.load.image('killzone',  'killzone.png');
+        this.load.image('spark',  'spark.png');
+        // this.load.svg('pop', 'pop.svg',  { width: 24, height: 24 } );
         const frameConfig = { frameWidth: 144, frameHeight: 144};
         // Iterate over assetsMap and load spritesheets
         allSprites.forEach((sprite) => {
-            this.load.spritesheet(sprite, `assets/sprites/${sprite}.png`, frameConfig);
+            this.load.spritesheet(sprite, `sprites/${sprite}.png`, frameConfig);
         });
-        this.load.spritesheet('potion_heal', 'assets/animations/potion_heal.png', { frameWidth: 48, frameHeight: 64});
-        this.load.spritesheet('explosion', 'assets/animations/explosion.png', { frameWidth: 96, frameHeight: 96});
-        this.load.spritesheet('cast', 'assets/animations/cast.png', { frameWidth: 48, frameHeight: 64});
-        this.load.spritesheet('slash', 'assets/animations/slash.png', { frameWidth: 96, frameHeight: 96});
-        this.load.spritesheet('thunder', 'assets/animations/bolts.png', { frameWidth: 96, frameHeight: 96});
-        this.load.spritesheet('ice', 'assets/animations/ice.png', { frameWidth: 96, frameHeight: 96});
+        this.load.spritesheet('potion_heal', 'animations/potion_heal.png', { frameWidth: 48, frameHeight: 64});
+        this.load.spritesheet('explosion', 'animations/explosion.png', { frameWidth: 96, frameHeight: 96});
+        this.load.spritesheet('cast', 'animations/cast.png', { frameWidth: 48, frameHeight: 64});
+        this.load.spritesheet('slash', 'animations/slash.png', { frameWidth: 96, frameHeight: 96});
+        this.load.spritesheet('thunder', 'animations/bolts.png', { frameWidth: 96, frameHeight: 96});
+        this.load.spritesheet('ice', 'animations/ice.png', { frameWidth: 96, frameHeight: 96});
 
 
-        this.load.audio('click', 'assets/sfx/click_2.wav');
-        this.load.audio('slash', 'assets/sfx/swish_2.wav');
-        this.load.audio('steps', 'assets/sfx/steps.wav');
-        this.load.audio('nope', 'assets/sfx/nope.wav');
-        this.load.audio('heart', 'assets/sfx/heart.wav');
-        this.load.audio('cooldown', 'assets/sfx/cooldown.wav');
-        this.load.audio('healing', 'assets/sfx/healing.wav');
-        this.load.audio('cast', 'assets/sfx/curse.ogg');
+        this.load.audio('click', 'sfx/click_2.wav');
+        this.load.audio('slash', 'sfx/swish_2.wav');
+        this.load.audio('steps', 'sfx/steps.wav');
+        this.load.audio('nope', 'sfx/nope.wav');
+        this.load.audio('heart', 'sfx/heart.wav');
+        this.load.audio('cooldown', 'sfx/cooldown.wav');
+        this.load.audio('healing', 'sfx/healing.wav');
+        this.load.audio('cast', 'sfx/curse.ogg');
 
-        this.load.audio('fireball', 'assets/sfx/fireball.wav');
-        this.load.audio('thunder', 'assets/sfx/thunder.wav');
-        this.load.audio('ice', 'assets/sfx/ice.wav');
+        this.load.audio('fireball', 'sfx/fireball.wav');
+        this.load.audio('thunder', 'sfx/thunder.wav');
+        this.load.audio('ice', 'sfx/ice.wav');
 
-        this.load.audio(`bgm_start`, `assets/music/bgm_start.wav`);
+        this.load.audio(`bgm_start`, `music/bgm_start.wav`);
         for (let i = 2; i <= 13; i++) {
-            this.load.audio(`bgm_loop_${i}`, `assets/music/bgm_loop_${i}.wav`);
+            this.load.audio(`bgm_loop_${i}`, `music/bgm_loop_${i}.wav`);
         }
-        this.load.audio(`bgm_end`, `assets/music/bgm_end.wav`);
+        this.load.audio(`bgm_end`, `music/bgm_end.wav`);
 
-        this.load.atlas('groundTiles', 'assets/tiles.png', 'assets/tiles.json');
+        this.load.atlas('groundTiles', 'tiles.png', 'tiles.json');
 
     }
 
     async connectToServer() {
         this.socket = io(
-            process.env.PREACT_APP_GAME_SERVER_URL,
+            process.env.GAME_SERVER_URL,
             {
                 auth: {
                     token: await getFirebaseIdToken()

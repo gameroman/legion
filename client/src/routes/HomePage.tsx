@@ -14,7 +14,11 @@ import ShopPage from '../components/ShopPage';
 import RankPage from '../components/RankPage';
 import NotificationBar from '../components/NotificationBar';
 
-import legionLogo from '../assets/legionlogo.png';
+import legionLogo from '@assets/legionlogo.png';
+import playIcon from '@assets/play.png';
+import teamIcon from '@assets/team.png';
+import shopIcon from '@assets/shop.png';
+import rankIcon from '@assets/rank.png';
 
 interface State {
     currentPage: string;
@@ -30,21 +34,6 @@ class HomePage extends Component<object, State> {
         showFirebaseUI: false,
         gold: 100,
     };
-
-    componentDidMount() {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css';
-        link.id = 'font-awesome-css';
-        document.head.appendChild(link);
-    }
-
-    componentWillUnmount() {
-        const link = document.getElementById('font-awesome-css');
-        if (link) {
-            document.head.removeChild(link);
-        }
-    }
 
     handleRouteChange = (e) => {
         const pathParts = e.url.split('/');
@@ -111,31 +100,31 @@ class HomePage extends Component<object, State> {
                 <div className="menu">
                 <Link href="/play">
                     <div className="menuItemContainer">
-                        <img src="/assets/legionlogo.png" className="gameLogo" />
+                        <img src={legionLogo} className="gameLogo" />
                     </div>
                 </Link>
                 <div className="menuItems">
                     <Link href="/play">
                         <div className="menuItemContainer">
-                            <img className="menuItem" src="/assets/play.png" />
+                            <img className="menuItem" src={playIcon} />
                             <span className="menuItemText">PLAY</span>
                         </div>
                     </Link>
                     <Link href="/team">
                         <div className="menuItemContainer">
-                            <img className="menuItem" src="/assets/team.png" />
+                            <img className="menuItem" src={teamIcon} />
                             <span className="menuItemText">TEAM</span>
                         </div>
                     </Link>
                     <Link href="/shop">
                         <div className="menuItemContainer">
-                            <img className="menuItem" src="/assets/shop.png" />
+                            <img className="menuItem" src={shopIcon} />
                             <span className="menuItemText">SHOP</span>
                         </div>
                     </Link>
                     <Link href="/rank">
                         <div className="menuItemContainer">
-                            <img className="menuItem" src="/assets/rank.png" />
+                            <img className="menuItem" src={rankIcon} />
                             <span className="menuItemText">RANK</span>
                         </div>
                     </Link>

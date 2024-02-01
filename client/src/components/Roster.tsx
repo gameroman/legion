@@ -1,7 +1,7 @@
 // Roster.tsx
 import { h, Component } from 'preact';
 import CharacterCard from './CharacterCard';
-import toast from '@brenoroosevelt/toast'
+// import toast from '@brenoroosevelt/toast'
 import { apiFetch } from '../services/apiService';
 
 interface RosterState {
@@ -22,7 +22,7 @@ class Roster extends Component<object, RosterState> {
           characters: data.characters
         });
     } catch (error) {
-        toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
+        // toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
     }
   }
 

@@ -1,13 +1,20 @@
-// ShopPage.tsx
 import { h, Component } from 'preact';
 import Description from './Description';
 import { items } from '@legion/shared/Items';
-import toast from '@brenoroosevelt/toast'
+// import toast from '@brenoroosevelt/toast'
 import { apiFetch } from '../services/apiService';
 import { classEnumToString, statStrings } from './utils';
 import ActionItem from './game/HUD/Action';
 import { spells } from '@legion/shared/Spells';
 import { ActionType } from './game/HUD/ActionTypes';
+
+const imageContext = require.context('@assets/items', false, /\.png$/);
+
+const images = imageContext.keys().map(key => ({
+  name: key,
+  path: imageContext(key)
+}));
+
 
 enum DialogType {
   ITEM_PURCHASE,
@@ -52,7 +59,7 @@ class ShopPage extends Component<object, State> {
             inventory: data.inventory
         });
     } catch (error) {
-        toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
+        // toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
     }
   }
 
@@ -64,7 +71,7 @@ class ShopPage extends Component<object, State> {
             characters: data
         });
     } catch (error) {
-        toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
+        // toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
     }
   }
 
@@ -109,7 +116,7 @@ class ShopPage extends Component<object, State> {
       return;
     }
     if (!this.hasEnoughGold(selectedItem.id, quantity)) {
-      toast.error('Not enough gold!', {closeBtn: false, position: 'top', duration: 3000});
+      // toast.error('Not enough gold!', {closeBtn: false, position: 'top', duration: 3000});
       return;
     }
 
@@ -128,9 +135,9 @@ class ShopPage extends Component<object, State> {
             gold: data.gold,
             inventory: data.inventory
         });
-        toast.success('Purchase successful!', {closeBtn: false, position: 'top', duration: 3000});
+        // toast.success('Purchase successful!', {closeBtn: false, position: 'top', duration: 3000});
     })
-    .catch(error => toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'}));
+    // .catch(error => toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'}));
     
     this.closeDialog();
   }
@@ -148,7 +155,7 @@ class ShopPage extends Component<object, State> {
                     <div className="shop-item-card-name-shadow">{item.name}</div>
                   </div>
                   <div className="shop-item-card-content">
-                    <div style={{ backgroundImage: `url(/assets/items/${item.frame})` }} className="shop-item-image" />
+                    <div style={{ backgroundImage: `url(/items/${item.frame})` }} className="shop-item-image" />
                     <div className="shop-item-card-content-info">
                       <div className="shop-item-details">
                         {item.description}

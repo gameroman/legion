@@ -6,7 +6,7 @@ import Roster from './Roster';
 import Character from './Character';
 import Inventory from './Inventory';
 
-import toast from '@brenoroosevelt/toast'
+// import toast from '@brenoroosevelt/toast'
 import { apiFetch } from '../services/apiService';
 
 interface TeamPageState {
@@ -38,7 +38,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
           inventory: data.inventory.sort()
         });
     } catch (error) {
-        toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
+        // toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
     }
   }
 

@@ -7,7 +7,7 @@ import { items } from '@legion/shared/Items';
 import { spells } from '@legion/shared/Spells';
 import { CharacterStats } from '@legion/shared/interfaces';
 
-import toast from '@brenoroosevelt/toast'
+// import toast from '@brenoroosevelt/toast'
 import { apiFetch } from '../services/apiService';
 
 interface CharacterProps {
@@ -48,7 +48,7 @@ class Character extends Component<CharacterProps, CharacterState> {
           ...data
         });
     } catch (error) {
-        toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
+        // toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
     }
   }
 
@@ -64,13 +64,13 @@ class Character extends Component<CharacterProps, CharacterState> {
     })
     .then((data) => {
       if(data.status == 0) {
-        toast.success('Item unequipped!', {closeBtn: false, position: 'top', duration: 5000});
+        // toast.success('Item unequipped!', {closeBtn: false, position: 'top', duration: 5000});
         this.props.refreshInventory();
       } else {
-        toast.error('Inventory is full!', {closeBtn: false, position: 'top', duration: 5000});
+        // toast.error('Inventory is full!', {closeBtn: false, position: 'top', duration: 5000});
       }
     })
-    .catch(error => toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'}));
+    // .catch(error => toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'}));
   }
 
   render() {

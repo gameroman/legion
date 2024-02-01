@@ -1,7 +1,7 @@
 // apiService.js
 import { firebaseAuth } from './firebaseService'; 
 
-const apiBaseUrl = process.env.PREACT_APP_API_URL;
+const apiBaseUrl = process.env.API_URL;
 
 export async function getFirebaseIdToken() {
     try {

@@ -6,7 +6,7 @@ import { items } from '@legion/shared/Items';
 import ActionItem from './game/HUD/Action';
 import { ActionType } from './game/HUD/ActionTypes';
 
-import toast from '@brenoroosevelt/toast'
+// import toast from '@brenoroosevelt/toast'
 import { apiFetch } from '../services/apiService';
 interface InventoryProps {
   id: string;
@@ -30,13 +30,13 @@ class Inventory extends Component<InventoryProps> {
     })
     .then((data) => {
       if(data.status == 0) {
-        toast.success('Item equipped!', {closeBtn: false, position: 'top', duration: 5000});
+        // toast.success('Item equipped!', {closeBtn: false, position: 'top', duration: 5000});
         this.props.refreshInventory();
       } else {
-        toast.error('Character inventory is full!', {closeBtn: false, position: 'top', duration: 5000});
+        // toast.error('Character inventory is full!', {closeBtn: false, position: 'top', duration: 5000});
       }
     })
-    .catch(error => toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'}));
+    // .catch(error => toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'}));
   }
   
   render() {
