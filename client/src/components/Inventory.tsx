@@ -2,14 +2,12 @@
 // Inventory.tsx
 import { h, Component } from 'preact';
 
-import Toastify from 'toastify-js'
-import "toastify-js/src/toastify.css"
-
 import { items } from '@legion/shared/Items';
 import ActionItem from './game/HUD/Action';
 import { ActionType } from './game/HUD/ActionTypes';
 
 import { apiFetch } from '../services/apiService';
+import { successToast, errorToast } from './utils';
 interface InventoryProps {
   id: string;
   inventory: number[];
@@ -32,27 +30,13 @@ class Inventory extends Component<InventoryProps> {
     })
     .then((data) => {
       if(data.status == 0) {
-        // toast.success('Item equipped!', {closeBtn: false, position: 'top', duration: 5000});
-        Toastify({
-          text: "This is a toast",
-          duration: 3000,
-          destination: "https://github.com/apvarun/toastify-js",
-          newWindow: true,
-          close: true,
-          gravity: "top", // `top` or `bottom`
-          position: "left", // `left`, `center` or `right`
-          stopOnFocus: true, // Prevents dismissing of toast on hover
-          style: {
-            background: "linear-gradient(to right, #00b09b, #96c93d)",
-          },
-          onClick: function(){} // Callback after click
-        }).showToast();
+        successToast('Item equipped!');
         this.props.refreshInventory();
       } else {
-        // toast.error('Character inventory is full!', {closeBtn: false, position: 'top', duration: 5000});
+        errorToast('Character inventory is full!');
       }
     })
-    // .catch(error => toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'}));
+    .catch(error => errorToast(`Error: ${error}`));
   }
   
   render() {

@@ -1,15 +1,12 @@
 import { h, Component } from 'preact';
 import Description from './Description';
 import { items } from '@legion/shared/Items';
-// import toast from '@brenoroosevelt/toast'
 import { apiFetch } from '../services/apiService';
 import { classEnumToString, statStrings } from './utils';
 import ActionItem from './game/HUD/Action';
 import { spells } from '@legion/shared/Spells';
 import { ActionType } from './game/HUD/ActionTypes';
-
-import Toastify from 'toastify-js'
-import "toastify-js/src/toastify.css"
+import { successToast, errorToast } from './utils';
 
 const imageContext = require.context('@assets/items', false, /\.png$/);
 
@@ -62,7 +59,7 @@ class ShopPage extends Component<object, State> {
             inventory: data.inventory
         });
     } catch (error) {
-        // toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
+        errorToast(`Error: ${error}`);
     }
   }
 
@@ -74,7 +71,7 @@ class ShopPage extends Component<object, State> {
             characters: data
         });
     } catch (error) {
-        // toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
+        errorToast(`Error: ${error}`);
     }
   }
 
@@ -119,7 +116,7 @@ class ShopPage extends Component<object, State> {
       return;
     }
     if (!this.hasEnoughGold(selectedItem.id, quantity)) {
-      // toast.error('Not enough gold!', {closeBtn: false, position: 'top', duration: 3000});
+      errorToast('Not enough gold!');
       return;
     }
 
@@ -138,9 +135,9 @@ class ShopPage extends Component<object, State> {
             gold: data.gold,
             inventory: data.inventory
         });
-        // toast.success('Purchase successful!', {closeBtn: false, position: 'top', duration: 3000});
+        successToast('Purchase successful!');
     })
-    // .catch(error => toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'}));
+    .catch(error => errorToast(`Error: ${error}`));
     
     this.closeDialog();
   }

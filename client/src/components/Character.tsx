@@ -8,6 +8,7 @@ import { spells } from '@legion/shared/Spells';
 import { CharacterStats } from '@legion/shared/interfaces';
 
 import { apiFetch } from '../services/apiService';
+import { successToast, errorToast } from './utils';
 
 interface CharacterProps {
     id: string;
@@ -47,7 +48,7 @@ class Character extends Component<CharacterProps, CharacterState> {
           ...data
         });
     } catch (error) {
-        // toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
+        errorToast(`Error: ${error}`);
     }
   }
 
@@ -63,13 +64,13 @@ class Character extends Component<CharacterProps, CharacterState> {
     })
     .then((data) => {
       if(data.status == 0) {
-        // toast.success('Item unequipped!', {closeBtn: false, position: 'top', duration: 5000});
+        successToast('Item unequipped!');
         this.props.refreshInventory();
       } else {
-        // toast.error('Inventory is full!', {closeBtn: false, position: 'top', duration: 5000});
+        errorToast('Inventory is full!');
       }
     })
-    // .catch(error => toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'}));
+    .catch(error => errorToast(`Error: ${error}`));
   }
 
   render() {

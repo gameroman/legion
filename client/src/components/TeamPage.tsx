@@ -6,8 +6,8 @@ import Roster from './Roster';
 import Character from './Character';
 import Inventory from './Inventory';
 
-// import toast from '@brenoroosevelt/toast'
 import { apiFetch } from '../services/apiService';
+import { successToast, errorToast } from './utils';
 
 interface TeamPageState {
   inventory: number[];
@@ -38,7 +38,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
           inventory: data.inventory.sort()
         });
     } catch (error) {
-        // toast.error(`Error: ${error}`, {closeBtn: true, position: 'top'});
+        errorToast(`Error: ${error}`);
     }
   }
 
