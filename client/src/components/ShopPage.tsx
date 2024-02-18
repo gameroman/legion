@@ -29,7 +29,7 @@ interface State {
   items: Array<any>;
   characters: Array<any>;
   openDialog: DialogType;
-  selectedItem: any;
+  selectedArticle: any;
   quantity: number;
 }
 
@@ -41,7 +41,7 @@ class ShopPage extends Component<object, State> {
     items,
     characters: [],
     openDialog: DialogType.NONE,
-    selectedItem: null,
+    selectedArticle: null,
     quantity: 1,
   };
 
@@ -79,16 +79,16 @@ class ShopPage extends Component<object, State> {
     return this.state.inventory.filter((item) => item === itemId).length;
   }
 
-  openDialog = (dialogType: DialogType, item: any = null) => {
+  openDialog = (dialogType: DialogType, article: any = null) => {
     this.setState({ 
       openDialog: dialogType, 
-      selectedItem: item, 
+      selectedArticle: article, 
       quantity: 1 
     });
   }
 
   closeDialog = () => {
-    this.setState({ openDialog: DialogType.NONE, selectedItem: null });
+    this.setState({ openDialog: DialogType.NONE, selectedArticle: null });
   }
 
   changeQuantity = (amount) => {
@@ -101,40 +101,47 @@ class ShopPage extends Component<object, State> {
     });
   }
 
-  hasEnoughGold = (itemId, quantity) => {
-    const item = this.state.items.find((item) => item.id === itemId);
-    if (!item) {
+  hasEnoughGold = (articleId, quantity, isCharacterPurchase) => {
+    const array = isCharacterPurchase ? this.state.characters : this.state.items;
+    const article = array.find((article) => article.id === articleId);
+    if (!article) {
       return false;
     }
 
-    return this.state.gold >= item.price * quantity;
+    return this.state.gold >= article.price * quantity;
   }
 
-  purchaseItem = () => {
-    const { selectedItem, quantity } = this.state;
-    if (!selectedItem) {
+  purchase = () => {
+    const { selectedArticle, quantity } = this.state;
+    const isCharacterPurchase = this.state.openDialog === DialogType.CHARACTER_PURCHASE;
+
+    if (!selectedArticle) {
+      errorToast('No article selected!');
       return;
     }
-    if (!this.hasEnoughGold(selectedItem.id, quantity)) {
+    if (!this.hasEnoughGold(selectedArticle.id, quantity, isCharacterPurchase)) {
       errorToast('Not enough gold!');
       return;
     }
 
     const payload = {
-        itemId: selectedItem.id,
+        articleId: selectedArticle.id,
         quantity,
     };
+    console.log(payload);
+
+    const endpoint = isCharacterPurchase ? 'purchaseCharacter' : 'purchaseItem';
     
-    apiFetch('purchaseItem', {
+    apiFetch(endpoint, {
         method: 'POST',
         body: payload
     })
     .then(data => {
         console.log(data);
-        this.setState({ 
-            gold: data.gold,
-            inventory: data.inventory
-        });
+        this.fetchInventoryData(); 
+        if (isCharacterPurchase) {
+          this.fetchCharactersOnSale();
+        }
         successToast('Purchase successful!');
     })
     .catch(error => errorToast(`Error: ${error}`));
@@ -143,8 +150,8 @@ class ShopPage extends Component<object, State> {
   }
 
   render() {
-    const { openDialog, selectedItem, quantity } = this.state;
-    const totalPrice = selectedItem ? selectedItem.price * quantity : 0;
+    const { openDialog, selectedArticle, quantity } = this.state;
+    const totalPrice = selectedArticle ? selectedArticle.price * quantity : 0;
     return (
         <div className="shop-content">
             <div className="shop-grid">
@@ -173,7 +180,7 @@ class ShopPage extends Component<object, State> {
 
             <div className="shop-grid">
               {this.state.characters && this.state.characters.map((character) => (
-                <div key={character.id} className="character-full">
+                <div key={character.id} className="character-full" onClick={() => this.openDialog(DialogType.CHARACTER_PURCHASE, character)}>
                   <div className="character-header">
                       <div className="character-header-name">{character.name}</div>
                       <div className="character-header-name-shadow">{character.name}</div>
@@ -213,7 +220,7 @@ class ShopPage extends Component<object, State> {
                           </div>}
                         </div>
                       </div>
-                      <div className="character-portrait" style={{backgroundImage: `url(/assets/sprites/${character.portrait}.png)`}} />
+                      <div className="character-portrait" style={{backgroundImage: `url(/sprites/${character.portrait}.png)`}} />
                   </div>
                 </div>
               ))}
@@ -226,10 +233,10 @@ class ShopPage extends Component<object, State> {
               <div className="shop-item-card-name-shadow">Buy</div>
             </div>
             <div className="shop-item-card-content">
-            <i className="fa-solid fa-circle-xmark closebtn" onClick={this.closeDialog} />
+            <i className="fa-solid fa-circle-xmark closebtn" onClick={this.closeDialog} >X</i>
               <div className="purchase-dialog">
                 <div className="purchase-item">
-                  <span className="purchase-item-name">{selectedItem.name} x</span>
+                  <span className="purchase-item-name">{selectedArticle.name} x</span>
                   <div className="purchase-quantity-selector">
                     <button className="purchase-adjust purchase-minus" onClick={() => this.changeQuantity(-1)}>-</button>
                     <input type="text" className="purchase-quantity" value={quantity} />
@@ -239,7 +246,28 @@ class ShopPage extends Component<object, State> {
                 <div className="purchase-total">
                   <span>Total: {totalPrice}G</span>
                 </div>
-                <button className="purchase-buy-button" onClick={this.purchaseItem}>BUY</button>
+                <button className="purchase-buy-button" onClick={this.purchase}>BUY</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {openDialog === DialogType.CHARACTER_PURCHASE && (
+          <div className="dialog">
+            <div className="shop-item-card-header">
+              <div className="shop-item-card-name">Buy</div>
+              <div className="shop-item-card-name-shadow">Buy</div>
+            </div>
+            <div className="shop-item-card-content">
+            <i className="fa-solid fa-circle-xmark closebtn" onClick={this.closeDialog} >X</i>
+              <div className="purchase-dialog">
+                <div className="purchase-item">
+                  <span className="purchase-item-name">{selectedArticle.name} x</span>
+                </div>
+                <div className="purchase-total">
+                  <span>Total: {totalPrice}G</span>
+                </div>
+                <button className="purchase-buy-button" onClick={this.purchase}>BUY</button>
               </div>
             </div>
           </div>

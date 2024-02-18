@@ -78,7 +78,7 @@ class Character extends Component<CharacterProps, CharacterState> {
     const xpToLevel = 100;
 
     const portraitStyle = {
-        backgroundImage: `url(/assets/sprites/${portrait}.png)`,
+        backgroundImage: `url(/sprites/${portrait}.png)`,
     };
     const xpRatio = xp / (xp + xpToLevel) * 100;
 

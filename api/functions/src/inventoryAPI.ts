@@ -39,7 +39,7 @@ export const purchaseItem = onRequest((request, response) => {
       if (docSnap.exists) {
         let gold = docSnap.data()?.gold;
         console.log(`gold: ${gold}`);
-        const itemId = request.body.itemId;
+        const itemId = request.body.articleId;
         const nb = request.body.quantity;
         const itemPrice = items[itemId].price;
         const totalPrice = itemPrice * nb;

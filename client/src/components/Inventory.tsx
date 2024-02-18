@@ -58,7 +58,7 @@ class Inventory extends Component<InventoryProps> {
     return (
         <div className="inventory-full">
         <div className="inventory-header">
-            <img src="/assets/backpacks.png" className="inventory-header-image" />
+            <img src="/backpacks.png" className="inventory-header-image" />
             <div className="inventory-header-name">
               Inventory
               <span className="inventory-capacity">{this.props.inventory.length}/{this.props.carrying_capacity}</span>

@@ -579,7 +579,7 @@ export class Arena extends Phaser.Scene
             for (let j = y - Math.floor(size/2); j <= y + Math.floor(size/2); j++) {
                 const {x: pixelX, y: pixelY} = this.gridToPixelCoords(i, j);
                 const sprite = this.add.sprite(pixelX, pixelY, 'groundTiles', `element_${type}`)
-                    .setDepth(5).setScale(2);
+                    .setDepth(5).setScale(2).setAlpha(0.9);
                 sprite.anims.play('ground_flame');
             }
         }

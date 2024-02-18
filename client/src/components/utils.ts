@@ -1,6 +1,7 @@
 import {Class, Stat} from "@legion/shared/enums";
 
 import Toastify from 'toastify-js'
+import "toastify-js/src/toastify.css"
 
 export function classEnumToString(characterClass: Class) {
     const classToName: { [key in Class]?: string } = {};

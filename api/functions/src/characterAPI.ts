@@ -254,7 +254,13 @@ export const listOnSaleCharacters = onRequest((request, response) => {
       const querySnapshot = await db.collection("characters")
         .where("onSale", "==", true)
         .get();
-      const characters = querySnapshot.docs.map((doc) => doc.data());
+      const characters = querySnapshot.docs.map((doc) => {
+        const characterData = doc.data();
+        return {
+          id: doc.id, // Include the document ID
+          ...characterData,
+        };
+      });
       response.send(characters);
     } catch (error) {
       console.error("Error listing on sale characters:", error);
@@ -290,7 +296,11 @@ export const purchaseCharacter = onRequest((request, response) => {
   corsMiddleware(request, response, async () => {
     try {
       const uid = await getUID(request);
-      const characterId = request.body.characterId;
+      const characterId = request.body.articleId;
+
+      if (!characterId) {
+        throw new Error("Character ID is not provided or is invalid.");
+      }
 
       // Fetch the price of the character
       const characterDoc = await db.collection("characters")
