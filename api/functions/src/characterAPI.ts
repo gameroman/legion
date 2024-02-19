@@ -148,7 +148,7 @@ export const rewardsUpdate = onRequest((request, response) => {
   corsMiddleware(request, response, async () => {
     try {
       const uid = await getUID(request);
-      const {isWinner, xp, gold} = request.body as RewardsData;
+      const {isWinner, xp, gold, characters} = request.body as RewardsData;
 
       await db.runTransaction(async (transaction) => {
         const playerRef = db.collection("players").doc(uid);
@@ -186,9 +186,22 @@ export const rewardsUpdate = onRequest((request, response) => {
           playerData.characters.forEach(
             (characterRef: admin.firestore.DocumentReference) => {
               if (characterRef instanceof admin.firestore.DocumentReference) {
-                transaction.update(characterRef, {
-                  xp: admin.firestore.FieldValue.increment(xp),
-                });
+                // Find the corresponding CharacterRewards object
+                const characterRewards =
+                  characters!.find((c) => c.id === characterRef.id);
+
+                if (characterRewards) {
+                  const sp = characterRewards.points;
+                  transaction.update(characterRef, {
+                    xp: characterRewards.xp,
+                    level: characterRewards.level,
+                    sp: admin.firestore.FieldValue.increment(sp),
+                    allTimeSP: admin.firestore.FieldValue.increment(sp),
+                  });
+                } else {
+                  console.error(`No matching CharacterRewards found for
+                    ${characterRef.id}`);
+                }
               } else {
                 console.error(`Invalid character reference ${characterRef}`);
               }

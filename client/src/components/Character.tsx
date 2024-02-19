@@ -6,6 +6,7 @@ import { classEnumToString, statStrings } from './utils';
 import { items } from '@legion/shared/Items';
 import { spells } from '@legion/shared/Spells';
 import { CharacterStats } from '@legion/shared/interfaces';
+import { getXPThreshold } from '@legion/shared/levelling';
 
 import { apiFetch } from '../services/apiService';
 import { successToast, errorToast } from './utils';
@@ -75,7 +76,7 @@ class Character extends Component<CharacterProps, CharacterState> {
 
   render() {
     const { portrait, name, class: characterClass, level, xp, inventory, carrying_capacity, skills, skill_slots } = this.state;
-    const xpToLevel = 100;
+    const xpToLevel = getXPThreshold(level);
 
     const portraitStyle = {
         backgroundImage: `url(/sprites/${portrait}.png)`,

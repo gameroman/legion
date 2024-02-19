@@ -63,10 +63,17 @@ export interface ItemData {
     price: number;
 }
 
+export interface CharacterUpdate {
+    id: string;
+    points: number;
+    xp: number;
+    level: number;
+}
 export interface RewardsData {
     isWinner: boolean;
     xp: number;
     gold: number;
+    characters?: CharacterUpdate[];
 }
 
 export interface CharacterStats {

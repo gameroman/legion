@@ -185,6 +185,7 @@ export abstract class Game
     }
 
     checkEndGame() {
+        if (this.gameOver) return;
         if (this.teams.get(1)!.isDefeated() || this.teams.get(2)!.isDefeated()) {
             this.endGame(this.teams.get(1).isDefeated() ? 2 : 1);
         }
@@ -198,13 +199,18 @@ export abstract class Game
     }
 
     endGame(winner: number) {
-        // console.log(`Team ${winner} wins!`);
+        console.log(`Team ${winner} wins!`);
         this.duration = Date.now() - this.startTime;
         this.gameOver = true;
+
+        this.teams.forEach(team => {
+            team.clearAllTimers();
+        }, this);
 
         this.sockets.forEach(socket => {
             const team = this.socketMap.get(socket);
             const rewards = this.computeGameEndRewards(team, winner, this.duration);
+            team.distributeXp(rewards.xp);
             this.writeRewardsToDb(team, rewards);
             socket.emit('gameEnd', rewards);
         });
@@ -602,13 +608,19 @@ export abstract class Game
     }
 
     async writeRewardsToDb(team: Team, rewards: RewardsData) {
+        console.log('Writing rewards to DB');
         try {
             await apiFetch(
                 'rewardsUpdate',
                 team.getFirebaseToken(),
                 {
                     method: 'POST',
-                    body: rewards,
+                    body: {
+                        isWinner: rewards.isWinner,
+                        gold: rewards.gold,
+                        xp: rewards.xp,
+                        characters: team.getCharactersDBUpdates(),
+                    },
                 }
             );
         } catch (error) {
@@ -621,3 +633,4 @@ interface Tile {
     x: number;
     y: number;
 }
+

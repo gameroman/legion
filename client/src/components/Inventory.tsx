@@ -19,6 +19,8 @@ class Inventory extends Component<InventoryProps> {
   capacity = 50;
 
   onActionClick = (type: string, letter: string, index: number) => {
+    if (!this.props.id) return;
+    
     const payload = {
         index,
         characterId: this.props.id,

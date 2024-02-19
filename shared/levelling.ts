@@ -38,3 +38,7 @@ export function increaseStat(stat: Stat, currentValue: number, level: number, ch
     const increment = increments[Math.floor(Math.random() * increments.length)];
     return currentValue + increment;
 }
+
+export function getXPThreshold(level: number) {
+    return 100 + (level - 1) * 20;
+}

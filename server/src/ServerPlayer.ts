@@ -4,9 +4,11 @@ import { Spell } from './Spell';
 import { Stat, Terrain } from "@legion/shared/enums";
 import { items } from '@legion/shared/Items';
 import { spells } from '@legion/shared/Spells';
+import { getXPThreshold } from '@legion/shared/levelling';
 
 export type ActionType = 'move' | 'attack';
 export class ServerPlayer {
+    dbId: string;
     num;
     name;
     frame;
@@ -14,6 +16,8 @@ export class ServerPlayer {
     y;
     team: Team | null = null;
     level: number = 1;
+    xp: number = 0;
+    earnedStatsPoints: number = 0;
     _hp: number = 0;
     _mp: number = 0;
     hp;
@@ -213,6 +217,9 @@ export class ServerPlayer {
         this.setStat(Stat.SPDEF, data.stats.spdef);
         this.setInventory(data.carrying_capacity, data.inventory);
         this.setSpells(data.skill_slots, data.skills);
+        this.level = data.level;
+        this.xp = data.xp;
+        this.dbId = data.id;
     }
 
     setStat(stat: Stat, value: number) {
@@ -337,6 +344,41 @@ export class ServerPlayer {
     }
 
     stopDoT() {
+        if (this.DoTTimer) {
+            clearTimeout(this.DoTTimer);
+        }
+    }
+
+    gainXP(amount: number) {
+        console.log(`Player ${this.num} gained ${amount} XP`)
+        this.xp += amount;
+        console.log(`${this.xp} / ${getXPThreshold(this.level)}`)
+        while (this.xp >= getXPThreshold(this.level)) {
+            this.levelUp();
+        }
+    }
+
+    levelUp() {
+        console.log(`Player ${this.num} leveled up!`)
+        console.log(`Before: ${this.xp}`);
+        this.xp -= getXPThreshold(this.level);
+        console.log(`After: ${this.xp}`);
+        this.level++;
+        this.earnStatsPoints();
+    }
+
+    earnStatsPoints() {
+        // Earn 3 + floor(level/10) points + a small chance of 1 extra point
+        const reward = (3 + Math.floor(this.level / 10) + (Math.random() < 0.1 ? 1 : 0));
+        console.log(`Player ${this.num} earned ${reward} stats points`);
+        this.earnedStatsPoints += reward;
+    }
+
+    clearAllTimers() {
+        console.log(`Clearing all timers for player ${this.num}`);
+        if (this.cooldownTimer) {
+            clearTimeout(this.cooldownTimer);
+        }
         if (this.DoTTimer) {
             clearTimeout(this.DoTTimer);
         }

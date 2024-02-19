@@ -12,6 +12,8 @@ interface CharacterData {
     class: Class;
     level: number;
     xp: number;
+    sp: number;
+    allTimeSP: number;
     stats: CharacterStats;
     carrying_capacity: number;
     skill_slots: number;
@@ -237,6 +239,8 @@ export class NewCharacter {
       class: this.characterClass,
       level: this.level,
       xp: 0,
+      sp: 0,
+      allTimeSP: 0,
       stats: this.stats,
       carrying_capacity: this.carrying_capacity,
       skill_slots: this.skill_slots,

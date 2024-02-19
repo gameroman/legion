@@ -2,6 +2,8 @@ import { Socket } from "socket.io";
 
 import { ServerPlayer } from "./ServerPlayer";
 import { Game } from "./Game";
+import { CharacterUpdate } from '@legion/shared/interfaces';
+
 
 const MULTIHIT_SCORE_BASE = 6;
 const KILL_SCORE_BONUS = 1000;
@@ -90,5 +92,27 @@ export class Team {
     getFirebaseToken() {
         // @ts-ignore
         return this.socket?.firebaseToken;
+    }
+
+    distributeXp(xp: number) {
+        for (let i = 0; i < this.members.length; i++) {
+            this.members[i].gainXP(xp);
+        }
+    }
+
+    getCharactersDBUpdates(): CharacterUpdate[] {
+        // Map character id to the number of stats points earned
+        return this.members.map((member) => ({
+            id: member.dbId,
+            points: member.earnedStatsPoints,
+            xp: member.xp,
+            level: member.level
+        }));
+    }    
+
+    clearAllTimers() {
+        for (let i = 0; i < this.members.length; i++) {
+            this.members[i].clearAllTimers();
+        }
     }
 }
