@@ -38,7 +38,7 @@ class RankPage extends Component {
   }
 
   render() {
-    const columns = ['rank', 'player', 'elo', 'wins', 'losses', 'winsRatio', 'crowdScore']; 
+    const columns = ['rank', 'player', 'elo', 'wins', 'losses', 'winsRatio']; 
 
     return (
       <div className="rank-content">
@@ -66,7 +66,6 @@ class RankPage extends Component {
                   <td>{data.wins}</td>
                   <td>{data.losses}</td>
                   <td>{data.winsRatio}</td>
-                  <td>{Array.from({length: data.crowdScore}, (_, i) => <i key={i} class="fa-solid fa-star golden-star" />)}</td>
                 </tr>
               ))}
             </tbody>

@@ -24,6 +24,7 @@ export const createUserCharacter = functions.auth.user().onCreate((user) => {
     inventory: [0, 0, 0, 1, 1, 2, 3, 3],
     characters: [] as admin.firestore.DocumentReference[],
     elo: 100,
+    league: "Bronze",
     wins: 0,
     losses: 0,
     crowd: 3,

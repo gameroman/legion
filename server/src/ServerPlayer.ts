@@ -335,6 +335,7 @@ export class ServerPlayer {
     }
 
     setUpDoT(terrain: Terrain) {
+        console.log(`Setting up DoT for player ${this.num}`);
         if (this.DoTTimer) {
             clearTimeout(this.DoTTimer);
         }

@@ -1,7 +1,7 @@
 import {onRequest} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 
-import {fetchLeaderboard} from "./leaderboardsAPI";
+import {fetchLeaderboard, leaguesUpdate} from "./leaderboardsAPI";
 import {inventoryData, purchaseItem, equipItem, unequipItem}
   from "./inventoryAPI";
 import {createUserCharacter, rosterData, characterData, rewardsUpdate,
@@ -12,7 +12,7 @@ export {
   fetchLeaderboard, inventoryData, purchaseItem, equipItem, unequipItem,
   createUserCharacter, rosterData, characterData, rewardsUpdate,
   generateOnSaleCharacters, listOnSaleCharacters, deleteOnSaleCharacters,
-  purchaseCharacter,
+  purchaseCharacter, leaguesUpdate,
 };
 
 export const helloWorld = onRequest((request, response) => {
