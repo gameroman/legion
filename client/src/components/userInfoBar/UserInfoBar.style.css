@@ -1,4 +1,4 @@
-.barContainer {
+.userInfoBar {
     display: flex;
     align-items: center;
 }
@@ -12,7 +12,7 @@
     z-index: 1;
 }
 
-.labelContainer {
+.userInfoLabel {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -27,7 +27,7 @@
     background-color: #253644;
 }
 
-.labelContainer span {
+.userInfoLabel span {
     font-size: 14px;
     font-weight: 600;
     color: #fff;

@@ -11,9 +11,9 @@ class UserInfoBar extends Component<BarProps> {
 
   render() {
     return (
-      <div className="barContainer">
+      <div className="userInfoBar">
         <div className={`barLogo ${this.props.elo ? 'eloBorder' : ''}`}></div>
-        <div className="labelContainer">
+        <div className="userInfoLabel">
           <span>{this.props.label}</span>
           {this.props.elo && <span className="eloSpan">{this.props.elo} <strong>elo</strong></span>}
         </div>
