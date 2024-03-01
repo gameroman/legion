@@ -22,12 +22,12 @@ class MiddleButton extends Component<ButtonProps> {
     
     render() {
         const btnBg = {
-            backgroundImage: `url(./middle_play_${this.state.active ? 'active' : 'idle'}.png)`,
+            backgroundImage: `url(./${this.props.label === 'ranked' ? 'special_btn_bg_' : 'middle_play_'}` + `${this.state.active ? 'active' : 'idle'}.png)`,
             cursor: 'pointer'
         };
 
         const playerSpanStyle = {
-            color: `${this.state.active ? '#ffb653' : '#4ff4f6'}`
+            color: `${this.state.active ? '#4ff4f6' : '#ffb653'}`
         }
 
         const btnIcons = {

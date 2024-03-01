@@ -16,6 +16,7 @@
     height: 86px;
     display: flex;
     justify-content: flex-end;
+    cursor: pointer;
 }
 
 .addCard {
@@ -28,6 +29,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.addCard:hover {
+    background-color: #242830;
 }
 
 .addCard img {
