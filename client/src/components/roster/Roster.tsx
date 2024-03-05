@@ -5,6 +5,7 @@ import CharacterCard from '../characterCard/CharacterCard';
 import { apiFetch } from '../../services/apiService';
 import { successToast, errorToast } from '../utils';
 import BottomBorderDivider from '../bottomBorderDivider/BottomBorderDivider';
+import { route } from 'preact-router';
 import PlusIcon from '@assets/plus.svg';
 
 interface RosterState {
@@ -29,6 +30,10 @@ class Roster extends Component<object, RosterState> {
     }
   }
 
+  handleCardClick = () => {
+    route(`/shop`);
+  }
+
   render() {
     return (
       <div className="rosterContainer">
@@ -36,7 +41,7 @@ class Roster extends Component<object, RosterState> {
         <div className="rosters">
             {this.state.characters && this.state.characters.map(character => <CharacterCard {...character} key={character} />)}
             <div className="addCardContainer">
-              <div className="addCard">
+              <div className="addCard" onClick={this.handleCardClick}>
                 <img src={PlusIcon} alt="Plus" />
               </div>
             </div>

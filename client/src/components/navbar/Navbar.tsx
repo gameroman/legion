@@ -4,6 +4,8 @@ import './navbar.style.css';
 import { h, Component } from 'preact';
 import { Link, useRouter } from 'preact-router';
 import firebase from 'firebase/compat/app'
+import { apiFetch } from '../../services/apiService';
+import { successToast, errorToast } from '../utils';
 
 import UserInfoBar from '../userInfoBar/UserInfoBar';
 
@@ -38,11 +40,43 @@ interface Props {
     user: firebase.User | null;
 }
 
-class Navbar extends Component<Props, {}> {
+interface State {
+    hovered: string;
+    openDropdown: boolean;
+    name: string;
+    lvl: number;
+    gold: number;
+    elo: number;
+}
+
+class Navbar extends Component<Props, State> {
     state = {
         hovered: '',
         openDropdown: false,
+        name: '',
+        lvl: 0,
+        gold: 0,
+        elo: 0,
     }
+
+    componentDidMount() {
+        this.fetchPlayerData();
+      }
+    
+      async fetchPlayerData() {
+        try {
+            const data = await apiFetch('playerData');
+            console.log(data);
+            this.setState({ 
+                name: data.name,
+                lvl: data.lvl,
+                gold: data.gold,
+                elo: data.elo
+            });
+        } catch (error) {
+            errorToast(`Error: ${error}`);
+        }
+      }
 
     render() {
         const route = useRouter();
@@ -61,8 +95,8 @@ class Navbar extends Component<Props, {}> {
                     <div className="avatarContainer">
                         <div className="avatar"></div>
                         <div className="userInfo">
-                            <span>AVATAR NAME</span>
-                            <div className="userLevel"><span>Lv.13</span></div>
+                            <span>{this.state.name}</span>
+                            <div className="userLevel"><span>Lvl. {this.state.lvl}</span></div>
                         </div>
                     </div>
                 </div>
@@ -93,8 +127,8 @@ class Navbar extends Component<Props, {}> {
                 <div className="flexContainer">
                     {this.props.user === null && <div className="notificationBarButton" onClick={this.props.initFirebaseUI}>Log in</div>}
                     {this.props.user !== null && <div className="notificationBarButton" onClick={this.props.logout}>Log out</div>}
-                    <UserInfoBar label="3.000.000" />
-                    <UserInfoBar label="1.235" elo={5.302} />
+                    <UserInfoBar label={`${this.state.gold}`}  />
+                    <UserInfoBar label="# 1" elo={this.state.elo} />
                     <div class="expand_btn" onClick={() => this.setState({ openDropdown: !this.state.openDropdown })} onMouseEnter={() => this.setState({ openDropdown: true })}>
                         <div class="dropdown-content" style={dropdownContentStyle} onMouseLeave={() => this.setState({ openDropdown: false })}>
                             <Link href="/"><span>Link 1</span></Link>

@@ -17,7 +17,7 @@ class MiddleButton extends Component<ButtonProps> {
     }
 
     handleCardClick = () => {
-        route(`/play`);
+        route(`/game`);
     }
     
     render() {
