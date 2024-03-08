@@ -2,6 +2,7 @@
 import { h, Component } from 'preact';
 import './UserInfoBar.style.css';
 import GoldIcon from '@assets/gold_icon.png';
+import RankIcon from '@assets/rank_icon.png';
 
 interface BarProps {
     elo?: number;
@@ -14,7 +15,7 @@ class UserInfoBar extends Component<BarProps> {
     return (
       <div className="userInfoBar">
         <div className={`barLogo ${this.props.elo ? 'eloBorder' : ''}`}>
-          {!this.props.elo && <img src={GoldIcon} alt="gold_icon" />}
+          {this.props.elo ? <img src={RankIcon} alt="rank_icon" /> : <img src={GoldIcon} alt="gold_icon" />}
         </div>
         <div className="userInfoLabel">
           <span>{this.props.label}</span>
