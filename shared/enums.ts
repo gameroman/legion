@@ -34,3 +34,9 @@ export enum Terrain {
     FIRE
 }
 
+export enum PlayMode {
+    PRACTICE,
+    CASUAL,
+    RANKED
+}
+

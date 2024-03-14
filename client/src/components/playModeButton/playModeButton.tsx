@@ -5,10 +5,12 @@ import { route } from 'preact-router';
 import PracticeIcon from '@assets/practice_icon.png';
 import CasualIcon from '@assets/casual_icon.png';
 import RankedIcon from '@assets/ranked_icon.png';
+import { PlayMode } from '@legion/shared/enums';
 
 interface ButtonProps {
     players?: number;
     label: string;
+    mode: PlayMode;
 }
 
 class PlayModeButton extends Component<ButtonProps> {
@@ -17,7 +19,7 @@ class PlayModeButton extends Component<ButtonProps> {
     }
 
     handleCardClick = () => {
-        route(`/queue`);
+        route(`/queue/${this.props.mode}`);
     }
     
     render() {

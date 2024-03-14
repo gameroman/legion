@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { apiFetch } from "./API";
+import { PlayMode } from '@legion/shared/enums';
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
@@ -19,7 +20,7 @@ interface Player {
     socketId: string;
     elo: number;
     range: number;
-    mode: 'practice' | 'casual' | 'ranked';
+    mode: number;
     league?: string;
     waitingTime: number;
 }
@@ -75,7 +76,7 @@ function tryMatchPlayers() {
 
 function canBeMatched(player1: Player, player2: Player): boolean {
     const isEloCompatible = Math.abs(player1.elo - player2.elo) <= player1.range && Math.abs(player1.elo - player2.elo) <= player2.range;
-    const isLeagueCompatible = player1.mode !== 'ranked' || player1.league === player2.league;
+    const isLeagueCompatible = player1.mode !== PlayMode.RANKED || player1.league === player2.league;
     return isEloCompatible && isLeagueCompatible;
 }
 
@@ -93,7 +94,7 @@ io.on("connection", (socket: any) => {
     console.log(`Player connected`);
     socket.firebaseToken = socket.handshake.auth.token;
 
-    socket.on("joinQueue", async (data: { mode: 'practice' | 'casual' | 'ranked'; }) => {
+    socket.on("joinQueue", async (data: { mode: PlayMode }) => {
         const queuingData = await apiFetch(
             'queuingData',
             socket.firebaseToken,
@@ -108,7 +109,7 @@ io.on("connection", (socket: any) => {
             waitingTime: 0,
         };
         playersQueue.push(player);
-        console.log(`Player joined queue: ${socket.id}`);
+        console.log(`Player ${socket.id} joined queue  in mode ${data.mode} with elo ${player.elo} and league ${player.league}`);
     });
 
     socket.on("disconnect", () => {

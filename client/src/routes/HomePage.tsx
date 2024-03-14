@@ -80,28 +80,18 @@ class HomePage extends Component<object, State> {
         const { currentPage, showFirebaseUI } = this.state;
         const { user } = this.context;
 
-        const bgcolors = {
-            play: '#080c15',
-            team: '#06090a',
-            shop: '#070507',
-            rank: '#060607',
-        }
-        const bgImage = {
-            backgroundImage: `url(/assets/${currentPage}bg.png)`,
-            backgroundColor: bgcolors[currentPage]
-        };
         return (
             <div className="homePage">
 
                 <Navbar user={user} initFirebaseUI={this.initFirebaseUI} logout={this.logout}/>
 
-                <div className="content" style={bgImage}>
+                <div className="content">
 
                 <div className="mainContent">
 
                     <Router onChange={this.handleRouteChange}>
                         <Route default path="/play" component={PlayPage} />
-                        <Route path="/queue" component={QueuePage} />
+                        <Route path="/queue/:mode?" component={QueuePage} />
                         <Route path="/team/:id?" component={TeamPage} />
                         <Route path="/shop" component={ShopPage} />
                         <Route path="/rank" component={RankPage} />
