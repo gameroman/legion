@@ -23,6 +23,11 @@ class QueuePage extends Component<QPageProps, {}> {
                 }
             }
         );
+
+        this.socket.on('matchFound', ({gameId}) => {
+            console.log(`Found game ${gameId}!`);
+        });
+
         this.socket.emit('joinQueue', {mode: this.props.matches.mode || 0});
         console.log('Joining queue');
     }

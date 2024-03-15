@@ -82,8 +82,8 @@ function canBeMatched(player1: Player, player2: Player): boolean {
 
 function notifyPlayers(player1: Player, player2: Player, gameId: string) {
     // Here you would notify both players about their match and the game ID
-    io.to(player1.socketId).emit("matchFound", { opponentId: player2.socketId, gameId });
-    io.to(player2.socketId).emit("matchFound", { opponentId: player1.socketId, gameId });
+    io.to(player1.socketId).emit("matchFound", { gameId });
+    io.to(player2.socketId).emit("matchFound", { gameId });
 }
 
 httpServer.listen(3000, () => {
