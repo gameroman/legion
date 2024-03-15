@@ -1,4 +1,4 @@
-import { Server } from "socket.io";
+import { Socket, Server } from "socket.io";
 import { createServer } from "http";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from 'dotenv';
@@ -17,7 +17,7 @@ const io = new Server(httpServer, {
 });
 
 interface Player {
-    socketId: string;
+    socket: any,
     elo: number;
     range: number;
     mode: number;
@@ -57,12 +57,14 @@ function tryMatchPlayers() {
         for (let j = i + 1; j < playersQueue.length; j++) {
             let player2 = playersQueue[j];
             if (player1.mode === player2.mode && canBeMatched(player1, player2)) {
-                console.log(`Match found between ${player1.socketId} and ${player2.socketId}`);
+                console.log(`Match found between ${player1.socket.id} and ${player2.socket.id}`);
                 // Start a game for these two players
                 const gameId = uuidv4();
-                notifyPlayers(player1, player2, gameId);
-                playersQueue.splice(j, 1); // Remove player2 first since it's later in the array
-                playersQueue.splice(i, 1); // Remove player1
+                const success = notifyPlayers(player1, player2, gameId);
+                if (success) {
+                    playersQueue.splice(j, 1); // Remove player2 first since it's later in the array
+                    playersQueue.splice(i, 1); // Remove player1
+                }
                 matchFound = true;
                 break;
             }
@@ -80,10 +82,26 @@ function canBeMatched(player1: Player, player2: Player): boolean {
     return isEloCompatible && isLeagueCompatible;
 }
 
-function notifyPlayers(player1: Player, player2: Player, gameId: string) {
-    // Here you would notify both players about their match and the game ID
-    io.to(player1.socketId).emit("matchFound", { gameId });
-    io.to(player2.socketId).emit("matchFound", { gameId });
+async function notifyPlayers(player1: Player, player2: Player, gameId: string) {
+    try {
+        await apiFetch(
+            'createGame',
+            '', // TODO: add API key
+            {
+                method: 'POST',
+                body: {
+                    gameId,
+                    players: [player1.socket.firebaseToken, player2.socket.firebaseToken]
+                }
+            }
+        );
+        io.to(player1.socket.id).emit("matchFound", { gameId });
+        io.to(player2.socket.id).emit("matchFound", { gameId });
+        return true;
+    } catch (error) {
+        console.error(`Error creating game: ${error}`);
+        return false;
+    }
 }
 
 httpServer.listen(3000, () => {
@@ -101,7 +119,7 @@ io.on("connection", (socket: any) => {
         );
 
         const player: Player = {
-            socketId: socket.id,
+            socket,
             elo: queuingData.elo,
             range: eloRangeStart,
             mode: data.mode,
@@ -113,7 +131,7 @@ io.on("connection", (socket: any) => {
     });
 
     socket.on("disconnect", () => {
-        const index = playersQueue.findIndex(player => player.socketId === socket.id);
+        const index = playersQueue.findIndex(player => player.socket.id === socket.id);
         if (index !== -1) {
             playersQueue.splice(index, 1);
         }

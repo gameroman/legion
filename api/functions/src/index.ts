@@ -8,12 +8,13 @@ import {rosterData, characterData, rewardsUpdate,
   generateOnSaleCharacters, listOnSaleCharacters,
   deleteOnSaleCharacters, purchaseCharacter} from "./characterAPI";
 import {createPlayer, playerData, queuingData} from "./playerAPI";
+import {createGame} from "./gameAPI";
 
 export {
   fetchLeaderboard, inventoryData, purchaseItem, equipItem, unequipItem,
   createPlayer, rosterData, characterData, rewardsUpdate,
   generateOnSaleCharacters, listOnSaleCharacters, deleteOnSaleCharacters,
-  purchaseCharacter, leaguesUpdate, playerData, queuingData,
+  purchaseCharacter, leaguesUpdate, playerData, queuingData, createGame,
 };
 
 export const helloWorld = onRequest((request, response) => {
