@@ -21,9 +21,23 @@ interface CardProps {
 }
 
 class ArenaCard extends Component<CardProps> {
+  private timer: NodeJS.Timeout | null = null;
 
   state = {
-    active: false
+    active: false,
+    time: this.props.gameData.duration
+  }
+
+  componentDidMount(): void {
+    this.timer = setInterval(() => {
+      this.setState({time: this.state.time + 1});
+    }, 1000);
+  }
+  
+  componentWillUnmount(): void {
+    if(this.timer) {
+      clearInterval(this.timer);
+    }
   }
 
   render() {
@@ -40,7 +54,8 @@ class ArenaCard extends Component<CardProps> {
         </div>
         <div className="team_a_info">
           <span>{data.teamA.name}</span>
-          <span className="teamScore">{data.duration}</span>
+          <span className="teamScore">{`${Math.floor(this.state.time / 60)}`.padStart(2, "0")}:
+          {`${this.state.time % 60}`.padStart(2, "0")}</span>
         </div>
         <div className="vsSpan"><span>VS</span></div>
         <div className="team_b_info">

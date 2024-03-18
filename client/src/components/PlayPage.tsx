@@ -40,7 +40,7 @@ class PlayPage extends Component {
             aliveCharacters: 5,
           },
           spectators: 5,
-          duration: 900, // seconds
+          duration: 412, // seconds
         },
         {
           teamA: {
@@ -54,7 +54,7 @@ class PlayPage extends Component {
             aliveCharacters: 5,
           },
           spectators: 5,
-          duration: 900, // seconds
+          duration: 328, // seconds
         },
         {
           teamA: {
@@ -68,7 +68,7 @@ class PlayPage extends Component {
             aliveCharacters: 5,
           },
           spectators: 5,
-          duration: 900, // seconds
+          duration: 621, // seconds
         }
       ]
     }
