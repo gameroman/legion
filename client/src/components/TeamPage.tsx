@@ -8,6 +8,7 @@ import Inventory from './inventory/Inventory';
 
 import { apiFetch } from '../services/apiService';
 import { successToast, errorToast } from './utils';
+import TeamContentCard from './teamContentCard/TeamContentCard';
 
 interface TeamPageState {
   inventory: number[];
@@ -49,7 +50,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
         <div className="team-content">
           <Roster />
           <div className="character-inventory-container">
-              <div>Team Detail card</div>
+              <TeamContentCard />
               <Inventory id={characterId} inventory={this.state.inventory} carrying_capacity={this.state.carrying_capacity} refreshInventory={this.fetchInventoryData} />
           </div>
         </div>

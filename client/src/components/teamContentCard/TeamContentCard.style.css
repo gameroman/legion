@@ -1,0 +1,158 @@
+.team-content-card-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.team-equip-container {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-image: url('@assets/inventory/equip_panel_bg.png');
+    background-size: 100% 100%;
+    padding: 8px;
+    margin-left: -4px;
+}
+
+.team-content-container {
+    display: flex;
+    flex-direction: column;
+    background-image: url('@assets/inventory/charinfo_bg.png');
+    background-size: 100% 100%;
+    width: 382px;
+    height: 400px;
+    position: relative;
+}
+
+.equip-item {
+    background-image: url('@assets/inventory/box_btn_idle.png');
+    background-size: 100% 100%;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.equip-item:hover {
+    cursor: pointer;
+    background-image: url('@assets/inventory/box_btn_active.png');
+}
+
+.equip-item img {
+    width: 24px;
+    height: 28px;
+}
+
+.team-level {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 18px;
+    left: -30px;
+    background-image: url('@assets/inventory/sp_bg.png');
+    background-size: 100% 100%;
+    width: 64px;
+    height: 64px;
+}
+
+.team-level span {
+    font-size: 10px;
+    color: #ffa600;
+}
+
+.team-level .level-span {
+    font-size: 16px;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.team-info-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 92px;
+    padding: 0 16px 0 52px;
+}
+
+.team-sp-container {
+    cursor: pointer;
+    background-image: url('@assets/inventory/sp_bg_active.png');  
+    background-size: 100% 100%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 2px;
+}
+
+.team-sp-container span {
+    font-size: 12px;
+    color: #ffffff;
+}
+
+.team-sp-container .sp-span {
+    font-size: 16px;
+    font-weight: 600;
+    color: #71deff;
+}
+
+.team-character-name {
+    max-width: 132px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 16px;
+    font-weight: 500;
+    color: #ffffff;
+    text-transform: capitalize;
+}
+
+.team-character-class {
+    max-width: 114px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 10px;
+    font-weight: 500;
+    color: #ffa600;
+    text-transform: uppercase;
+}
+
+.team-exp-info span {
+    font-size: 10px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.team-exp-info span .team-curr-exp {
+    font-weight: 400;
+    color: #71deff;
+}
+
+.team-exp-info span .team-total-exp {
+    font-weight: 400;
+}
+
+.team-exp-slider-container {
+    width: 214px;
+    height: 6px;
+    background-color: #1c1f25;
+    border-radius: 2px;
+    margin-top: 8px;
+    position: relative;
+}
+
+.team-curr-exp-slider {
+    background-color: #71deff;
+    border-radius: 2px;
+    height: 100%;
+    width: 74%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
