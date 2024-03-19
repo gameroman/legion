@@ -57,19 +57,20 @@ class Inventory extends Component<InventoryProps> {
           }
         </div>
       ));
+
     return (
       <div className="inventoryFullContainer">
         <div className="inventoryContainer">
           <div className="inventoryCategoryContainer">
             <p className="inventoryLabel">INVENTORY</p>
             <div className="inventoryCategories">
-              <div className="inventoryCategory">Home</div>
+              <div className="categoryBtn" style={{ backgroundImage: 'url(./inventory/shop_btn.png)' }}></div>
               <div className="inventoryCategory">CONSUMABLES</div>
               <div className="inventoryCategory">EQUIPMENTS</div>
               <div className="inventoryCategory">SKILLS</div>
               <div className="inventoryCategory">UTILITIES</div>
               <div className="categoryCount"><span>15 </span>&nbsp;/&nbsp;50</div>
-              <div className="inventoryCategory">?</div>
+              <div className="categoryBtn" style={{ backgroundImage: 'url(./inventory/info_btn.png)' }}></div>
             </div>
           </div>
           <div className="inventoryWrapper">{slots}</div>

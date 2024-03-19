@@ -9,74 +9,164 @@ import { h, Component } from 'preact';
 //   }
 
 class TeamContentCard extends Component {
-//   handleClick = () => {
-//     route(this.props.to);
-//   }
+    //   handleClick = () => {
+    //     route(this.props.to);
+    //   }
 
-  render() {
-    const EQUIPITEMS = [
-        {
-            name: 'weapon',
-            url: './inventory/weapon_icon.png'
-        },
-        {
-            name: 'helm',
-            url: './inventory/helm_icon.png'
-        },
-        {
-            name: 'armor',
-            url: './inventory/armor_icon.png'
-        },
-        {
-            name: 'belt',
-            url: './inventory/belt_icon.png'
-        },
-        {
-            name: 'gloves',
-            url: './inventory/gloves_icon.png'
-        },
-        {
-            name: 'boots',
-            url: './inventory/boots_icon.png'
-        }
-    ];
+    render() {
+        const EQUIPITEMS = [
+            {
+                name: 'weapon',
+                url: './inventory/weapon_icon.png'
+            },
+            {
+                name: 'helm',
+                url: './inventory/helm_icon.png'
+            },
+            {
+                name: 'armor',
+                url: './inventory/armor_icon.png'
+            },
+            {
+                name: 'belt',
+                url: './inventory/belt_icon.png'
+            },
+            {
+                name: 'gloves',
+                url: './inventory/gloves_icon.png'
+            },
+            {
+                name: 'boots',
+                url: './inventory/boots_icon.png'
+            }
+        ];
 
-    const renderEquipItems = () => EQUIPITEMS.map((item, index) => (
-        <div className="equip-item" key={index}>
-            <img src={item.url} alt={item.name} />
-        </div>
-    ))
+        const CHARACTERINFO = [
+            {
+                name: 'HP',
+                currVal: 100,
+                additionVal: '+2',
+                bgStyle: { backgroundColor: '#628c27' }
+            },
+            {
+                name: 'MP',
+                currVal: 20,
+                additionVal: '-3',
+                bgStyle: { backgroundColor: '#1f659a' }
+            },
+            {
+                name: 'ATK',
+                currVal: 11,
+                additionVal: '+5',
+                bgStyle: { backgroundColor: '#9a1f3c' }
+            },
+            {
+                name: 'DEF',
+                currVal: 10,
+                additionVal: '',
+                bgStyle: { backgroundColor: '#cc872d' }
+            },
+            {
+                name: 'SP.ATK',
+                currVal: 11,
+                additionVal: '',
+                bgStyle: { backgroundColor: '#26846b' }
+            },
+            {
+                name: 'SP.DEF',
+                currVal: 10,
+                additionVal: '',
+                bgStyle: { backgroundColor: '#703fba' }
+            },
+        ]
 
-    return (
-      <div className="team-content-card-container">
-        <div className="team-content-container">
-            <div className="team-level">
-                <span>Lv</span>
-                <span className="level-span">10</span>
+        const renderInfoBars = () => CHARACTERINFO.map((item, index) => (
+            <div className="character-info-bar" key={index}>
+                <div className="info-class" style={item.bgStyle}><span>{item.name}</span></div>
+                <p className="curr-info">{item.currVal} <span style={item.additionVal && Number(item.additionVal) > 0 ? { color: '#9ed94c' } : { color: '#c95a74' }}>{item.additionVal}</span></p>
+                <button className="info-bar-plus"></button>
             </div>
-            <div className="team-info-container">
-                <div className="team-info">
-                    <p className="team-character-name">Alternative_Gray</p>
-                    <p className="team-character-class">WARRIOR</p>
-                    <div className="team-exp-slider-container">
-                        <div className="team-curr-exp-slider"></div>
+        ));
+
+        const renderEquipItems = () => EQUIPITEMS.map((item, index) => (
+            <div className="equip-item" key={index}>
+                <img src={item.url} alt={item.name} />
+            </div>
+        ))
+
+        return (
+            <div className="team-content-card-container">
+                <div className="team-content-container">
+                    <div className="team-level">
+                        <span>Lv</span>
+                        <span className="level-span">10</span>
                     </div>
-                    <div className="team-exp-info">
-                        <span>EXP <span className="team-curr-exp">980.200</span> / <span className="team-total-exp">1.600.0000</span></span>
+                    <div className="team-info-container">
+                        <div className="team-info">
+                            <p className="team-character-name">Alternative_Gray</p>
+                            <p className="team-character-class">WARRIOR</p>
+                            <div className="team-exp-slider-container">
+                                <div className="team-curr-exp-slider"></div>
+                            </div>
+                            <div className="team-exp-info">
+                                <span>EXP <span className="team-curr-exp">980.200</span> / <span className="team-total-exp">1.600.0000</span></span>
+                            </div>
+                        </div>
+                        <div className="team-sp-container">
+                            <span>SP</span>
+                            <span className="sp-span">3</span>
+                        </div>
+                    </div>
+                    <div className="team-character-info-container">
+                        <div className="team-character-container">
+                            <div className="team-character"></div>
+                        </div>
+                        <div className="team-character-info">
+                            {renderInfoBars()}
+                        </div>
+                    </div>
+                    <div className="team-items-container">
+                        <div className="character-icon-container">
+                            <div className="character-icon">
+                                <img src="./inventory/ring_icon.png" alt="" />
+                            </div>
+                            <div className="character-icon">
+                                <img src="./inventory/ring_icon.png" alt="" />
+                            </div>
+                            <div className="character-icon necklace">
+                                <img src="./inventory/necklace_icon.png" alt="" />
+                            </div>
+                        </div>
+                        <div className="team-item-container">
+                            <p className="team-item-heading">SPELLS</p>
+                            <div className="team-items">
+                                <div className="team-item"></div>
+                                <div className="team-item"></div>
+                                <div className="team-item"></div>
+                                <div className="team-item"></div>
+                                <div className="team-item"></div>
+                                <div className="team-item"></div>
+                            </div>
+                        </div>
+                        <div className="team-item-container">
+                            <p className="team-item-heading">ITEMS</p>
+                            <div className="team-items">
+                                <div className="team-item"></div>
+                                <div className="team-item"></div>
+                                <div className="team-item"></div>
+                                <div className="team-item"></div>
+                                <div className="team-item"></div>
+                                <div className="team-item"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="team-sp-container">
-                    <span>SP</span>
-                    <span className="sp-span">3</span>
+                <div className="team-equip-container">
+                    {renderEquipItems()}
                 </div>
             </div>
-        </div>
-        <div className="team-equip-container">
-            {renderEquipItems()}
-        </div>
-      </div>
-    );
-  }
+        );
+    }
 }
 
 export default TeamContentCard;
