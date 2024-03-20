@@ -800,7 +800,6 @@ export class Arena extends Phaser.Scene
 
     placeCharacters(data, isPlayer, team: Team) {
         data.forEach((character, i) => {
-            // if (isPlayer) console.log(character);
 
             let offset;
             if (character.x < this.gridWidth/2) offset = -Math.floor(this.gridWidth/2);

@@ -1,19 +1,19 @@
 import { Socket, Server } from 'socket.io';
-import { uuid } from 'uuidv4';
 
 import { ServerPlayer } from './ServerPlayer';
 import { Team } from './Team';
 import { Spell } from './Spell';
 import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import {apiFetch} from './API';
-import { Terrain } from '@legion/shared/enums';
+import { Terrain, PlayMode } from '@legion/shared/enums';
 import { RewardsData } from '@legion/shared/interfaces';
 
 
 
 export abstract class Game
 {
-    id: string = uuid();
+    id: string;
+    mode: PlayMode;
     teams: Map<number, Team> = new Map<number, Team>();
     gridMap: Map<string, ServerPlayer> = new Map<string, ServerPlayer>();
     terrainMap = new Map<string, Terrain>();
@@ -30,7 +30,9 @@ export abstract class Game
     gridWidth: number = 20;
     gridHeight: number = 10;
 
-    constructor(io: Server) {
+    constructor(id: string, mode: PlayMode, io: Server) {
+        this.id = id;
+        this.mode = mode;
         this.io = io;
 
         this.teams.set(1, new Team(1, this));
@@ -38,17 +40,20 @@ export abstract class Game
         console.log(`Created game ${this.id}`);
     }
 
-    addPlayer(socket: Socket) {
+    addPlayer(socket: Socket, elo: number) {
         this.sockets.push(socket);
         socket.join(this.id);
         const index = this.sockets.indexOf(socket);
         this.socketMap.set(socket, this.teams.get(index + 1)!);
-        this.teams.get(index + 1)?.setSocket(socket);
+        const team = this.teams.get(index + 1);
+        team.setSocket(socket);
+        team.setElo(elo);
     }
 
     abstract populateTeams(): void;
 
     async start() {
+        console.log(`Starting game ${this.id}`);
         try {
             await this.populateTeams();
             this.populateGrid();
@@ -225,10 +230,10 @@ export abstract class Game
 
         this.sockets.forEach(socket => {
             const team = this.socketMap.get(socket);
-            const rewards = this.computeGameEndRewards(team, winner, this.duration);
-            team.distributeXp(rewards.xp);
-            this.writeRewardsToDb(team, rewards);
-            socket.emit('gameEnd', rewards);
+            const outcomes = this.computeGameOutcomes(team, winner, this.duration, this.mode);
+            team.distributeXp(outcomes.xp);
+            this.writeOutcomesToDb(team, outcomes);
+            socket.emit('gameEnd', outcomes);
         });
     }
 
@@ -573,7 +578,7 @@ export abstract class Game
         }
     }
 
-    computeGameEndRewards(team: Team, winnerTeamId: number, duration: number): RewardsData {
+    computeGameOutcomes(team: Team, winnerTeamId: number, duration: number, mode: PlayMode): RewardsData {
         if (team.id === winnerTeamId) {
             return {
                 isWinner: true,
@@ -623,7 +628,7 @@ export abstract class Game
         return Math.round(xp); // Round to nearest whole number
     }
 
-    async writeRewardsToDb(team: Team, rewards: RewardsData) {
+    async writeOutcomesToDb(team: Team, rewards: RewardsData) {
         console.log('Writing rewards to DB');
         try {
             await apiFetch(

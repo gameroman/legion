@@ -121,30 +121,34 @@ httpServer.listen(3000, () => {
 
 
 async function addToQueue(socket: any, mode: PlayMode) {
-    const queuingData = await apiFetch(
-        'queuingData',
-        socket.firebaseToken,
-    );
-
-    const player: Player = {
-        socket,
-        elo: queuingData.elo,
-        range: eloRangeStart,
-        mode,
-        league: queuingData.league,
-        waitingTime: 0,
-    };
-    playersQueue.push(player);
-    console.log(`Player ${socket.id} joined queue  in mode ${mode} with elo ${player.elo} and league ${player.league}`);
+    try {
+        const queuingData = await apiFetch(
+            'queuingData',
+            socket.firebaseToken,
+        );
+    
+        const player: Player = {
+            socket,
+            elo: queuingData.elo,
+            range: eloRangeStart,
+            mode,
+            league: queuingData.league,
+            waitingTime: 0,
+        };
+        playersQueue.push(player);
+        console.log(`Player ${socket.id} joined queue  in mode ${mode} with elo ${player.elo} and league ${player.league}`);
+    } catch (error) {
+        console.error(`Error adding player to queue: ${error}`);
+    }
 }
 
 io.on("connection", (socket: any) => {
     console.log(`Player connected`);
-    const firebaseToken = socket.handshake.auth.token;
+    socket.firebaseToken = socket.handshake.auth.token;
 
     socket.on("joinQueue", async (data: { mode: PlayMode }) => {
 
-        const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+        const decodedToken = await admin.auth().verifyIdToken(socket.firebaseToken);
         socket.uid = decodedToken.uid;
 
         if (data.mode == PlayMode.PRACTICE) {

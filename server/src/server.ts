@@ -58,6 +58,7 @@ io.on('connection', async (socket: any) => {
         socket.disconnect();
         return;
       }
+      console.log(`User ${shortToken(socket.uid)} connecting to game ${gameId}`);
 
       const gameData = await apiFetch(
         `gameData?id=${gameId}`,
@@ -74,11 +75,21 @@ io.on('connection', async (socket: any) => {
       let game: Game;
       if (!gamesMap.has(gameId)) {
         const gameType = gameData.mode === PlayMode.PRACTICE ? AIGame : PvPGame;
-        game = new gameType(io);
+        game = new gameType(gameId, gameData.mode, io);
         gamesMap.set(gameId, game);
       }
+      game = gamesMap.get(gameId)!;
 
-      game.addPlayer(socket);
+      let elo = 0;
+      if (gameData.mode === PlayMode.RANKED) {
+        const playerData = await apiFetch(
+          `playerData?id=${gameId}`,
+          socket.firebaseToken,
+        );
+        elo = playerData.elo;
+      }
+
+      game.addPlayer(socket, elo);
       socketMap.set(socket, game);
   
       socket.on('disconnect', () => {

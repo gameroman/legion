@@ -85,7 +85,6 @@ export class Player extends Phaser.GameObjects.Container {
 
             this.baseSquare.lineStyle(4, 0x0000ff); // blue color
 
-            // 0x87CEFA
             this.cooldown = new CircularProgress(scene, -8, 28, 10, 0xffc400).setVisible(false);
             this.add(this.cooldown);
 
@@ -98,9 +97,10 @@ export class Player extends Phaser.GameObjects.Container {
             this.moveTo(this.sprite, 2);
 
         } else {
-            this.sprite.flipX = true;
             this.baseSquare.lineStyle(4, 0xff0000); // red color
         }
+
+        if (this.x < this.arena.gridWidth/2) this.sprite.flipX = true;
 
         this.healthBar = new HealthBar(scene, 0, -50, 0x00ff08);
         this.add(this.healthBar);

@@ -17,6 +17,7 @@ export class Team {
     actions: number = 0;
     game: Game;
     socket: Socket | null = null;
+    elo: number = 0;
 
     constructor(number: number, game: Game) {
         this.id = number;
@@ -83,6 +84,10 @@ export class Team {
 
     setSocket(socket: Socket) {
         this.socket = socket;
+    }
+
+    setElo(elo: number) {
+        this.elo = elo;
     }
 
     getSocket() {

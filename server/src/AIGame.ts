@@ -4,7 +4,7 @@ import { Game } from './Game';
 import { ServerPlayer } from './ServerPlayer';
 import { AIServerPlayer } from './AIServerPlayer';
 import {apiFetch} from './API';
-import { Class } from "@legion/shared/enums";
+import { Class, PlayMode } from "@legion/shared/enums";
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {Team} from "./Team";
 
@@ -13,8 +13,8 @@ const AI_VS_AI = false;
 const FREEZE = true;
 
 export class AIGame extends Game {
-    constructor(io: Server) {
-        super(io);
+    constructor(id: string, mode: PlayMode, io: Server) {
+        super(id, mode, io);
     }
 
     createAITeam(team: Team, nb: number, levels?: number[]) {
@@ -64,8 +64,8 @@ export class AIGame extends Game {
         this.createAITeam(aiTeam!, nb, levels);
     }
 
-    async addPlayer(socket: Socket) {
-        super.addPlayer(socket);
+    async addPlayer(socket: Socket, elo: number) {
+        super.addPlayer(socket, elo);
         if (this.sockets.length === 1) {
             this.start();
         }
