@@ -19,7 +19,7 @@
 
 .inventoryWrapper {
     display: grid;
-    grid-template-columns: repeat(11, 1fr);
+    grid-template-columns: repeat(10, 1fr);
     grid-template-rows: repeat(5, 1fr);
     gap: 4px 6px;
 }

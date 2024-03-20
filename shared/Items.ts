@@ -1,7 +1,7 @@
 import { BaseItem } from "./BaseItem";
 import { Rarity, Stat, Target } from ".";
 
-export const items:BaseItem[] = [];
+export const items: BaseItem[] = [];
 
 items[0] = new BaseItem({
     id: 0,

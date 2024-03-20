@@ -8,7 +8,7 @@ import { spells } from '@legion/shared/Spells';
 import { ActionType } from './game/HUD/ActionTypes';
 import { successToast, errorToast } from './utils';
 
-const imageContext = require.context('@assets/items', false, /\.png$/);
+const imageContext = require.context('@assets/consumables', false, /\.png$/);
 
 const images = imageContext.keys().map(key => ({
   name: key,
@@ -212,7 +212,7 @@ class ShopPage extends Component<object, State> {
                                 index={i} 
                                 clickedIndex={-1}
                                 canAct={true} 
-                                actionType={ActionType.Skill}
+                                actionType={ActionType.SKILLS}
                                 key={i}
                               />
                             ))}

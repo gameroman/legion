@@ -11,9 +11,11 @@ import { successToast, errorToast } from './utils';
 import TeamContentCard from './teamContentCard/TeamContentCard';
 
 interface TeamPageState {
-  inventory: number[];
-  equipments: number[];
-  spells: number[];
+  inventory: {
+    consumables: number[];
+    equipments: number[];
+    spells: number[];
+  };
   carrying_capacity: number;
 }
 interface TeamPageProps {
@@ -25,14 +27,23 @@ interface TeamPageProps {
 
 class TeamPage extends Component<TeamPageProps, TeamPageState> { 
   state = {
-    inventory: [],
-    equipments: [],
-    spells: [],
+    inventory: {
+      consumables: [],
+      equipments: [],
+      spells: [],
+    },
     carrying_capacity: 50,
   }
 
   componentDidMount() {
     this.fetchInventoryData();
+    this.setState({ 
+      inventory: {
+        consumables: [0,0,0, 1, 2, 3,3,3],
+        equipments: [0,1,2],
+        spells: [0,2,3],
+      } //data.inventory.sort()
+    });
   }
 
   fetchInventoryData = async () => {
@@ -40,9 +51,11 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
         const data = await apiFetch('inventoryData');
         console.log(data);
         this.setState({ 
-          inventory: [0,0,0, 1,1, 2, 3,3,3], //data.inventory.sort()
-          equipments: [0,1,2],
-          spells: [0,2,3],
+          inventory: {
+            consumables: [0,0,0, 1,1, 2, 3,3,3],
+            equipments: [0,1,2],
+            spells: [0,2,3],
+          }
         });
     } catch (error) {
         errorToast(`Error: ${error}`);

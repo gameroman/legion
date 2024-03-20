@@ -50,7 +50,7 @@ export interface SpellData {
     rarity: Rarity;
 }
 
-export interface ItemData {
+export interface ConsumableData {
     id: number;
     name: string;
     description: string;

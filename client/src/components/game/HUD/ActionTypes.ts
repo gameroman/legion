@@ -1,4 +1,6 @@
 export enum ActionType {
-    Skill = 'skill',
-    Item = 'item'
+    SKILLS = 'spells',
+    EQUIPMENTS = 'equipments',
+    CONSUMABLES = 'consumables',
+    UTILITIES = 'utilities'
 }

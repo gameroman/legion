@@ -4,9 +4,10 @@ import { ActionType } from './ActionTypes';
 import InfoBox from '../../InfoBox';
 import { BaseItem } from "@legion/shared/BaseItem";
 import { BaseSpell } from "@legion/shared/BaseSpell";
+import { BaseEquipment } from '@legion/shared/BaseEquipment';
 
 interface ActionItemProps {
-  action: BaseItem | BaseSpell;
+  action: BaseItem | BaseSpell | BaseEquipment | null;
   index: number;
   clickedIndex: number;
   canAct: boolean;
@@ -20,7 +21,7 @@ class Action extends Component<ActionItemProps> {
   render() {
     const { action, index, clickedIndex, canAct, actionType, hideHotKey, onActionClick } = this.props;
     const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
-    const startPosition = keyboardLayout.indexOf(actionType === 'item' ? 'Z' : 'Q');
+    const startPosition = keyboardLayout.indexOf(actionType === ActionType.CONSUMABLES ? 'Z' : 'Q');
     const keyBinding = keyboardLayout.charAt(startPosition + index);
     
     if (!action) {
@@ -33,12 +34,12 @@ class Action extends Component<ActionItemProps> {
         onClick={() => onActionClick(actionType, keyBinding, index)}>
         {action.id > -1 && <div 
           className={!canAct ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}
-          style={{backgroundImage: `url(/${actionType}s/${action.frame})`, cursor: 'pointer'}}
+          style={{backgroundImage: `url(/${actionType}/${action.frame})`, cursor: 'pointer'}}
           />}
         {!hideHotKey && <span className="key-binding">{keyBinding}</span>}
-        {action.id > -1 && <div className="info-box box">
+        {/* {action.id > -1 && <div className="info-box box">
           <InfoBox action={action} />
-        </div>}
+        </div>} */}
       </div>
     );
   }

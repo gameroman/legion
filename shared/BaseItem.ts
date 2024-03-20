@@ -1,5 +1,5 @@
 import { Target, Rarity } from "./enums";
-import { Effect, ItemData } from "./interfaces";
+import { Effect, ConsumableData } from "./interfaces";
 
 
 export class BaseItem {
@@ -16,7 +16,7 @@ export class BaseItem {
     price: number = 0;
     rarity: Rarity = Rarity.COMMON;
 
-    constructor(props: ItemData) {
+    constructor(props: ConsumableData) {
         Object.assign(this, props);
     }
 }

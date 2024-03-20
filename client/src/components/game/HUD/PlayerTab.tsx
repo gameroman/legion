@@ -104,7 +104,7 @@ class PlayerTab extends Component<Props, State> {
                         index={i} 
                         clickedIndex={this.state.clickedSpell} 
                         canAct={canAct} 
-                        actionType={ActionType.Skill} 
+                        actionType={ActionType.SKILLS} 
                         onActionClick={this.actionClick.bind(this)} 
                         key={i}
                       />
@@ -122,7 +122,7 @@ class PlayerTab extends Component<Props, State> {
                         index={i} 
                         clickedIndex={this.state.clickedItem} 
                         canAct={canAct} 
-                        actionType={ActionType.Item}
+                        actionType={ActionType.CONSUMABLES}
                         onActionClick={this.actionClick.bind(this)} 
                         key={i}
                       />

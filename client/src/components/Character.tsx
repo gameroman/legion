@@ -150,7 +150,7 @@ class Character extends Component<CharacterProps, CharacterState> {
                       index={i} 
                       clickedIndex={-1}
                       canAct={true} 
-                      actionType={ActionType.Item}
+                      actionType={ActionType.CONSUMABLES}
                       onActionClick={this.onActionClick}
                       key={i}
                     />
@@ -166,7 +166,7 @@ class Character extends Component<CharacterProps, CharacterState> {
                       index={i} 
                       clickedIndex={-1}
                       canAct={true} 
-                      actionType={ActionType.Skill}
+                      actionType={ActionType.SKILLS}
                       key={i}
                     />
                   ))}

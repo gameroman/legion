@@ -230,7 +230,7 @@ canvas {
     height: 36px; 
     background-size: contain;
     background-repeat: no-repeat;
-    margin: 5px;
+    border-radius: 6px;
 }
 
 .skill-item-image-off {
