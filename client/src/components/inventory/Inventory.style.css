@@ -23,6 +23,8 @@
     grid-template-rows: repeat(5, 1fr);
     gap: 4px 6px;
     position: relative;
+    min-height: 240px;
+    min-width: 540px;
 }
 
 .inventoryCategoryContainer {

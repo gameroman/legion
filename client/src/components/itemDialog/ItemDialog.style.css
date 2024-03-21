@@ -1,0 +1,42 @@
+.dialog-container {
+    box-sizing: border-box;
+    background-color: #1c1f25;
+    border: 1px solid #3c616c;
+    padding: 8px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dialog-heading {
+    font-size: 12px;
+    text-align: center;
+}
+
+.dialog-button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    width: 100%;
+}
+
+.dialog-button-container button {
+    background: transparent;
+    border: 1px solid #244752;
+    border-radius: 4px;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dialog-button-container button:hover {
+    border: 1px solid #71deff;
+}
+
+.dialog-button-container button img {
+    width: 14px;
+    height: 14px;
+}

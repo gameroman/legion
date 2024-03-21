@@ -142,11 +142,11 @@ class Inventory extends Component<InventoryProps> {
               <div className="categoryBtn" style={{ backgroundImage: 'url(./inventory/info_btn.png)' }} onClick={this.handleOpenModal}></div>
             </div>
           </div>
-          <div className="inventoryWrapper">{slots}
-            {isCategoryEmpty && (<div className='empty-slots-container'>
+          <div className="inventoryWrapper">
+            {isCategoryEmpty ? (<div className='empty-slots-container'>
               <p>No items in this category, take a look at the shop!</p>
               <Link href='/shop'>Next <img src="./inventory/shop_btn.png" alt="shop" /></Link>
-            </div>)}
+            </div>) : slots}
           </div>
         </div>
         <Modal isOpen={this.state.openModal} style={customStyles} onRequestClose={this.handleCloseModal}>

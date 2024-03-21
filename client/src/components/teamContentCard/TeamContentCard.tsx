@@ -1,17 +1,33 @@
 // TeamContentCard.tsx
+import ItemDialog from '../itemDialog/ItemDialog';
+import { ItemDialogType } from '../itemDialog/ItemDialogType';
 import './TeamContentCard.style.css';
 import { h, Component } from 'preact';
-// import { route } from 'preact-router';
-
-// interface ButtonProps {
-//     to: string;
-//     label: string;
-//   }
 
 class TeamContentCard extends Component {
-    //   handleClick = () => {
-    //     route(this.props.to);
-    //   }
+    state = {
+        openModal: false,
+        modalType: ItemDialogType.EQUIPMENTS,
+        modalPosition: {
+            top: 0,
+            left: 0
+        }
+    }
+
+    handleOpenModal = (e: any, modalType: string) => {
+        const elementRect = e.currentTarget.getBoundingClientRect();
+
+        const modalPosition = {
+            top: elementRect.top + elementRect.height / 2,
+            left: elementRect.left + elementRect.width / 2,
+        };
+
+        this.setState({openModal: true, modalType, modalPosition});
+    }
+
+    handleCloseModal = () => {
+        this.setState({openModal: false});
+    }
 
     render() {
         const EQUIPITEMS = [
@@ -81,7 +97,7 @@ class TeamContentCard extends Component {
         ]
 
         const renderInfoBars = () => CHARACTERINFO.map((item, index) => (
-            <div className="character-info-bar" key={index}>
+            <div className="character-info-bar" key={index} onClick={(e) => this.handleOpenModal(e, ItemDialogType.CHARACTER_INFO)}>
                 <div className="info-class" style={item.bgStyle}><span>{item.name}</span></div>
                 <p className="curr-info">{item.currVal} <span style={item.additionVal && Number(item.additionVal) > 0 ? { color: '#9ed94c' } : { color: '#c95a74' }}>{item.additionVal}</span></p>
                 <button className="info-bar-plus"></button>
@@ -89,10 +105,18 @@ class TeamContentCard extends Component {
         ));
 
         const renderEquipItems = () => EQUIPITEMS.map((item, index) => (
-            <div className="equip-item" key={index}>
+            <div className="equip-item" key={index} onClick={(e) => this.handleOpenModal(e, ItemDialogType.EQUIPMENTS)}>
                 <img src={item.url} alt={item.name} />
             </div>
         ))
+
+        const renderSpellsItem = () => Array.from({length: 6}, (_, i) => (
+            <div className="team-item" key={i} onClick={(e) => this.handleOpenModal(e, ItemDialogType.SKILLS)}></div>
+        ));
+
+        const renderConsumableItems = () => Array.from({length: 6}, (_, i) => (
+            <div className="team-item" key={i} onClick={(e) => this.handleOpenModal(e, ItemDialogType.CONSUMABLES)}></div>
+        ));
 
         return (
             <div className="team-content-card-container">
@@ -140,23 +164,13 @@ class TeamContentCard extends Component {
                         <div className="team-item-container">
                             <p className="team-item-heading">SPELLS</p>
                             <div className="team-items">
-                                <div className="team-item"></div>
-                                <div className="team-item"></div>
-                                <div className="team-item"></div>
-                                <div className="team-item"></div>
-                                <div className="team-item"></div>
-                                <div className="team-item"></div>
+                                {renderSpellsItem()}
                             </div>
                         </div>
                         <div className="team-item-container">
                             <p className="team-item-heading">ITEMS</p>
                             <div className="team-items">
-                                <div className="team-item"></div>
-                                <div className="team-item"></div>
-                                <div className="team-item"></div>
-                                <div className="team-item"></div>
-                                <div className="team-item"></div>
-                                <div className="team-item"></div>
+                                {renderConsumableItems()}
                             </div>
                         </div>
                     </div>
@@ -164,6 +178,7 @@ class TeamContentCard extends Component {
                 <div className="team-equip-container">
                     {renderEquipItems()}
                 </div>
+                <ItemDialog dialogOpen={this.state.openModal} dialogType={this.state.modalType} position={this.state.modalPosition} handleClose={this.handleCloseModal} />
             </div>
         );
     }
