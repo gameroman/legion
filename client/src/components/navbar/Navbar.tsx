@@ -65,13 +65,13 @@ class Navbar extends Component<Props, State> {
     
       async fetchPlayerData() {
         try {
-            // const data = await apiFetch('playerData');
-            // console.log(data);
+            const data = await apiFetch('playerData');
+            console.log(data);
             this.setState({ 
-                name: 'popular_tomato_caterpillar', //data.name,
-                lvl: 1, // data.lvl,
-                gold: 1200, // data.gold,
-                elo: 160, // data.elo
+                name: data.name,
+                lvl: data.lvl,
+                gold: data.gold,
+                elo: data.elo
             });
         } catch (error) {
             errorToast(`Error: ${error}`);

@@ -49,3 +49,15 @@ export enum Rarity {
     EPIC,
     LEGENDARY
 }
+
+export enum InventoryType {
+    SKILLS = 'spells',
+    EQUIPMENTS = 'equipment',
+    CONSUMABLES = 'consumables',
+    UTILITIES = 'utilities'
+}
+
+export enum InventoryActionType {
+    EQUIP,
+    UNEQUIP
+}

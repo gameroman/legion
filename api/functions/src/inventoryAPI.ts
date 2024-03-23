@@ -2,6 +2,10 @@ import {onRequest} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import admin, {corsMiddleware, getUID} from "./APIsetup";
 import {items} from "@legion/shared/Items";
+import {equipments} from "@legion/shared/Equipments";
+import {InventoryType, InventoryActionType, EquipmentSlot}
+  from "@legion/shared/enums";
+import {Equipment} from "@legion/shared/interfaces";
 
 export const inventoryData = onRequest((request, response) => {
   logger.info("Fetching inventoryData");
@@ -69,14 +73,118 @@ export const purchaseItem = onRequest((request, response) => {
   });
 });
 
-export const equipItem = onRequest((request, response) => {
-  logger.info("Equipping item");
+function canEquipConsumable(characterData: any) {
+  return characterData.inventory.length < characterData.carrying_capacity;
+}
+
+function canLearnSpell(characterData: any) {
+  return characterData.skills.length < characterData.skill_slots;
+}
+
+function equipConsumable(playerData: any, characterData: any, index: number) {
+  const playerInventory = playerData.inventory;
+  const consumables = playerInventory.consumables.sort();
+  const inventory = characterData.inventory as number[];
+
+  // Check if index is valid
+  if (index < 0 || index >= consumables.length) {
+    return -1;
+  }
+
+  const item = consumables[index];
+  consumables.splice(index, 1);
+  inventory.push(item);
+
+  playerInventory.consumables = consumables;
+  return {
+    playerUpdate: {inventory: playerInventory},
+    characterUpdate: {inventory},
+  };
+}
+
+function unequipConsumable(playerData: any, characterData: any, index: number) {
+  const playerInventory = playerData.inventory;
+  const consumables = playerInventory.consumables.sort();
+  const inventory = characterData.inventory as number[];
+
+  // Check if index is valid
+  if (index < 0 || index >= inventory.length) {
+    return -1;
+  }
+
+  const item = inventory[index];
+  inventory.splice(index, 1);
+  consumables.push(item);
+
+  playerInventory.consumables = consumables;
+  return {
+    playerUpdate: {inventory: playerInventory},
+    characterUpdate: {inventory},
+  };
+}
+
+function learnSpell(playerData: any, characterData: any, index: number) {
+  const playerInventory = playerData.inventory;
+  const skills = playerInventory.skills.sort();
+  const inventory = characterData.skills as number[];
+
+  // Check if index is valid
+  if (index < 0 || index >= skills.length) {
+    return -1;
+  }
+
+  const item = skills[index];
+  skills.splice(index, 1);
+  inventory.push(item);
+
+  playerInventory.skills = skills;
+  return {
+    playerUpdate: {inventory: playerInventory},
+    characterUpdate: {skills: inventory},
+  };
+}
+
+function equipEquipment(playerData: any, characterData: any, index: number) {
+  const playerInventory = playerData.inventory;
+  const equipment = playerInventory.equipment.sort();
+  const equipped = characterData.equipment as Equipment;
+
+  // Check if index is valid
+  if (index < 0 || index >= equipment.length) {
+    return -1;
+  }
+
+  const item = equipment[index];
+  equipment.splice(index, 1);
+
+  const data = equipments[item];
+  const slotNumber: number = data.slot;
+  const equipmentFields = ["weapon", "helmet", "armor", "belt", "gloves",
+    "boots", "rings", "necklace"];
+
+  const field = equipmentFields[slotNumber];
+  if (equipped[field as keyof Equipment] !== -1) {
+    equipment.push(equipped[field as keyof Equipment]);
+  }
+  equipped[field as keyof Equipment] = item;
+
+  playerInventory.equipment = equipment;
+  return {
+    playerUpdate: {inventory: playerInventory},
+    characterUpdate: {equipment: equipped},
+  };
+}
+
+export const inventoryTransaction = onRequest((request, response) => {
+  logger.info("Processing inventory transaction");
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
     try {
-      const uid = await getUID(request);
+      const uid = request.body.uid; // await getUID(request);
       const characterId = request.body.characterId as string;
+      const inventoryType = request.body.inventoryType as InventoryType;
+      const action = request.body.action as InventoryActionType;
       const index = request.body.index;
 
       await db.runTransaction(async (transaction) => {
@@ -105,91 +213,66 @@ export const equipItem = onRequest((request, response) => {
           throw new Error("Character not owned by player");
         }
 
-        const playerInventory = playerData.inventory.sort();
+        // Check for max capacity, if applicable
+        if (action === InventoryActionType.EQUIP) {
+          let canDo = false;
+          switch (inventoryType) {
+          case InventoryType.CONSUMABLES:
+            canDo = canEquipConsumable(characterData);
+            break;
+          case InventoryType.SKILLS:
+            canDo = canLearnSpell(characterData);
+            break;
+          }
+          if (!canDo) {
+            response.send({status: 1});
+            return;
+          }
+        } else { // unequipping
+          // Sum the length of the fields in playerData.inventory
+          const load = Object.values(playerData.inventory)
+            .filter(Array.isArray)
+            .map((arr) => arr.length)
+            .reduce((acc, curr) => acc + curr, 0);
+          if (load == characterData.carrying_capacity) {
+            response.send({status: 1});
+            return;
+          }
+        }
 
-        if (characterData.inventory.length >= characterData.carrying_capacity) {
+        let update;
+        if (action === InventoryActionType.EQUIP) {
+          switch (inventoryType) {
+          case InventoryType.CONSUMABLES:
+            update = equipConsumable(playerData, characterData, index);
+            break;
+          case InventoryType.SKILLS:
+            update = learnSpell(playerData, characterData, index);
+            break;
+          }
+        } else { // unequipping
+          switch (inventoryType) {
+          case InventoryType.CONSUMABLES:
+            update = unequipConsumable(playerData, characterData, index);
+            break;
+          }
+        }
+
+        if (update === -1) {
           response.send({status: 1});
           return;
         }
-
-        const inventory = characterData.inventory as number[];
-        const item = playerInventory[index];
-
-        playerInventory.splice(index, 1);
-        inventory.push(item);
-
-        // Update player and character documents within the transaction
-        transaction.update(playerRef, {inventory: playerInventory});
-        transaction.update(characterRef, {inventory});
+        if (typeof update != "number" && update !== undefined) {
+          transaction.update(playerRef, update.playerUpdate);
+          transaction.update(characterRef, update.characterUpdate);
+        }
       });
       console.log("Transaction successfully committed!");
 
       response.send({status: 0});
     } catch (error) {
       console.error("equipItem error:", error);
-      response.status(401).send("Unauthorized");
-    }
-  });
-});
-
-export const unequipItem = onRequest((request, response) => {
-  logger.info("Unequipping item");
-  const db = admin.firestore();
-
-  corsMiddleware(request, response, async () => {
-    try {
-      const uid = await getUID(request);
-      const characterId = request.body.characterId as string;
-      const index = request.body.index;
-
-      await db.runTransaction(async (transaction) => {
-        const playerRef = db.collection("players").doc(uid);
-        const characterRef = db.collection("characters").doc(characterId);
-
-        const playerDoc = await transaction.get(playerRef);
-        const characterDoc = await transaction.get(characterRef);
-
-        if (!playerDoc.exists || !characterDoc.exists) {
-          throw new Error("Documents do not exist");
-        }
-
-        const playerData = playerDoc.data();
-        const characterData = characterDoc.data();
-
-        if (!playerData || !characterData) {
-          throw new Error("Data does not exist");
-        }
-
-        // Check that character is owned by player
-        const characters =
-            playerData.characters as admin.firestore.DocumentReference[];
-        const characterIds = characters.map((character) => character.id);
-        if (!characterIds.includes(characterId)) {
-          throw new Error("Character not owned by player");
-        }
-
-        const inventory = playerData.inventory.sort();
-        const characterInventory = characterData.inventory as number[];
-        const item = characterInventory[index];
-
-        if (playerData.inventory.length >= playerData.carrying_capacity) {
-          response.send({status: 1});
-          return;
-        }
-
-        characterInventory.splice(index, 1);
-        inventory.push(item);
-
-        // Update player and character documents within the transaction
-        transaction.update(playerRef, {inventory});
-        transaction.update(characterRef, {inventory: characterInventory});
-      });
-      console.log("Transaction successfully committed!");
-
-      response.send({status: 0});
-    } catch (error) {
-      console.error("unequipItem error:", error);
-      response.status(401).send("Unauthorized");
+      response.status(500).send("Error processing transaction");
     }
   });
 });

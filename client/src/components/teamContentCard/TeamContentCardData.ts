@@ -31,7 +31,7 @@ export const EQUIPITEMS = [
     {
         type: EQUIPMENT_TYPE.WEAPON,
         name: 'sword_001',
-        url: './equipments/sword_001.png'
+        url: './equipment/sword_001.png'
     },
     {
         type: EQUIPMENT_TYPE.HELM,
@@ -46,7 +46,7 @@ export const EQUIPITEMS = [
     {
         type: EQUIPMENT_TYPE.BELT,
         name: 'ring_001',
-        url: './equipments/ring_001.png'
+        url: './equipment/ring_001.png'
     },
     {
         type: EQUIPMENT_TYPE.GLOVES,
