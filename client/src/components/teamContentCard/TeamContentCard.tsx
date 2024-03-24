@@ -6,7 +6,7 @@ import { h, Component } from 'preact';
 import { CHARACTERINFO, CONSUMABLEITEMS, EQUIPITEMS, EQUIPITEMS_DEFAULT, SPELLITEMS } from './TeamContentCardData';
 import { apiFetch } from '../../services/apiService';
 import {InventoryType, InventoryActionType} from "@legion/shared/enums";
-import { successToast, errorToast } from './utils';
+import { successToast, errorToast } from '../utils';
 
 interface InventoryRequestPayload {
     characterId: string;
@@ -26,25 +26,25 @@ class TeamContentCard extends Component {
         }
     }
 
-    onClick = (index: number) => {
-        const payload: InventoryRequestPayload = {
-            // specify fields here
-        };
+    // onClick = (index: number) => {
+    //     const payload: InventoryRequestPayload = {
+    //         // specify fields here
+    //     };
         
-        apiFetch('inventoryTransaction', {
-            method: 'POST',
-            body: payload
-        })
-        .then((data) => {
-          if(data.status == 0) {
-            successToast('...');
-            // refresh inventory
-          } else {
-            errorToast('Inventory is full!');
-          }
-        })
-        .catch(error => errorToast(`Error: ${error}`));
-    }
+    //     apiFetch('inventoryTransaction', {
+    //         method: 'POST',
+    //         body: payload
+    //     })
+    //     .then((data) => {
+    //       if(data.status == 0) {
+    //         successToast('...');
+    //         // refresh inventory
+    //       } else {
+    //         errorToast('Inventory is full!');
+    //       }
+    //     })
+    //     .catch(error => errorToast(`Error: ${error}`));
+    // }
 
     handleOpenModal = (e: any, modalData: EQUIPMENT | CONSUMABLE | CHARACTER_INFO | SPELL, modalType: string) => {
         if (!modalData.name) return;
