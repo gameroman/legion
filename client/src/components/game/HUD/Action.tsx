@@ -28,6 +28,8 @@ class Action extends Component<ActionItemProps> {
       return <div className={`${actionType}`} />;
     }
 
+    console.log('_____________', action);
+
     return (
       <div 
         className={`${actionType} ${index === clickedIndex ? 'flash-effect' : ''}`} 

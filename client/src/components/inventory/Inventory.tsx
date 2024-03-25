@@ -38,11 +38,11 @@ class Inventory extends Component<InventoryProps> {
   }
 
   handleOpenModal = () => {
-    this.setState({openModal: true});
+    this.setState({ openModal: true });
   }
 
   handleCloseModal = () => {
-    this.setState({openModal: false});
+    this.setState({ openModal: false });
   }
 
   onActionClick = (type: string, letter: string, index: number) => {
@@ -88,21 +88,23 @@ class Inventory extends Component<InventoryProps> {
       }
     }
 
-    const slots = Array.from({ length: this.props.carrying_capacity }, (_, i) =>
-    (<div key={i} className="item">
-      {i < this.props.inventory[this.state.actionType]?.length &&
-        <ActionItem
-          action={getAction(i)}
-          index={i}
-          clickedIndex={-1}
-          canAct={true}
-          hideHotKey={true}
-          actionType={this.state.actionType}
-          onActionClick={this.onActionClick}
-        />
-      }
-    </div>
-    ));
+    const slots = Array.from({ length: this.props.carrying_capacity }, (_, i) => (
+      i < this.props.inventory[this.state.actionType]?.length &&
+      (
+        <div key={i} className="item">
+          <ActionItem
+            action={getAction(i)}
+            index={i}
+            clickedIndex={-1}
+            canAct={true}
+            hideHotKey={true}
+            actionType={this.state.actionType}
+            onActionClick={this.onActionClick}
+          />
+        </div>
+      )
+    )
+    );
 
     const currCategoryStyle = {
       backgroundColor: 'transparent',

@@ -52,7 +52,7 @@
     position: absolute;
     top: 18px;
     left: -30px;
-    background-image: url('@assets/inventory/sp_bg.png');
+    background-image: url('@assets/lv_bg.png');
     background-size: 100% 100%;
     width: 64px;
     height: 64px;
