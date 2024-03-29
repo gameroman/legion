@@ -4,6 +4,8 @@ import { Route, Router } from 'preact-router';
 import AuthProvider from './providers/AuthProvider';
 import HomePage from './routes/HomePage';
 import GamePage from './routes/GamePage';
+import withAuth from './components/withAuth';
+import TeamPage from './components/TeamPage';
 
 const App = () => (
 	<AuthProvider>

@@ -32,18 +32,18 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
       equipments: [],
       spells: [],
     },
-    carrying_capacity: 50,
+    carrying_capacity: 0,
   }
 
   componentDidMount() {
     this.fetchInventoryData();
-    this.setState({ 
-      inventory: {
-        consumables: [0,0,0, 1, 2, 3,3,3],
-        equipments: [0,1,2],
-        spells: [0,2,3],
-      } //data.inventory.sort()
-    });
+    // this.setState({ 
+    //   inventory: {
+    //     consumables: [0,0,0, 1, 2, 3,3,3],
+    //     equipments: [0,1,2],
+    //     spells: [0,2,3],
+    //   } //data.inventory.sort()
+    // });
   }
 
   fetchInventoryData = async () => {
@@ -52,10 +52,11 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
         console.log(data);
         this.setState({ 
           inventory: {
-            consumables: [0,0,0, 1,1, 2, 3,3,3],
-            equipments: [0,1,2],
-            spells: [0,2,3],
-          }
+            consumables: data.inventory,
+            equipments: [],
+            spells: [],
+          },
+          carrying_capacity: data.carrying_capacity
         });
     } catch (error) {
         errorToast(`Error: ${error}`);
@@ -69,8 +70,8 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
         <div className="team-content">
           <Roster />
           <div className="character-inventory-container">
-              <TeamContentCard />
-              <Inventory id={characterId} inventory={this.state.inventory} carrying_capacity={this.state.carrying_capacity} refreshInventory={this.fetchInventoryData} />
+            <TeamContentCard />
+            <Inventory id={characterId} inventory={this.state.inventory} carrying_capacity={this.state.carrying_capacity} refreshInventory={this.fetchInventoryData} />
           </div>
         </div>
       );
