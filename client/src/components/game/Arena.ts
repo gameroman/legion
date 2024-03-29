@@ -76,7 +76,7 @@ export class Arena extends Phaser.Scene
         }
         this.load.audio(`bgm_end`, `music/bgm_end.wav`);
 
-        this.load.atlas('groundTiles', 'tiles.png', 'tiles.json');
+        this.load.atlas('groundTiles', 'tiles2.png', 'tiles2.json');
 
     }
 
@@ -236,28 +236,29 @@ export class Arena extends Phaser.Scene
 
         for (let x = -5; x < 0; x++) {
             for (let y = 2; y < 7; y++) {
-                this.floatOneTile(x, y, startX, startY);
+                this.floatOneTile(x, y, startX, startY, true);
             }
         }
 
         for (let x = 20; x < 26; x++) {
             for (let y = 2; y < 7; y++) {
-                this.floatOneTile(x, y, startX, startY);
+                this.floatOneTile(x, y, startX, startY, true);
             }
         }
     }
 
-    floatOneTile(x, y, startX, startY) {
+    floatOneTile(x, y, startX, startY, yoyo = false) {
         const tileWeights = {
-            53: 15,
-            54: 2,
-            52: 2,
-            51: 2,
-            50: 1,
-            49: 1,
-            48: 1,
-            47: 1,
-            46: 1,
+            54: 1,
+            // 53: 15,
+            // 54: 2,
+            // 52: 2,
+            // 51: 2,
+            // 50: 1,
+            // 49: 1,
+            // 48: 1,
+            // 47: 1,
+            // 46: 1,
         };
         const tiles = [];
         for (const tile in tileWeights) {
@@ -268,34 +269,54 @@ export class Arena extends Phaser.Scene
 
         const tile = tiles[Math.floor(Math.random() * tiles.length)];
         const tileSprite = this.add.image(startX + x * this.tileSize, startY + y * this.tileSize + this.scale.gameSize.height, 'groundTiles', `element_${tile}`)
-            .setDisplaySize(this.tileSize, this.tileSize)
             .setDepth(1)
             .setOrigin(0); 
-        
-        // Add a random vertical and/or horizontal flip
-        const flipX = Math.random() < 0.5;
-        const flipY = Math.random() < 0.5;
-        tileSprite.setFlip(flipX, flipY);
-
+    
         // Tween the tile to its intended position
         this.tweens.add({
             targets: tileSprite,
             y: startY + y * this.tileSize,
             duration: 1000, // duration of the tween in milliseconds
             ease: 'Power2', // easing function to make the movement smooth
-            delay: Math.random() * 500 // random delay to make the tiles fall at different times
+            delay: Math.random() * 500, // random delay to make the tiles fall at different times
+            yoyo, // Enable yoyo to make the tween reverse after completing
+            hold: yoyo ? 1300 : 0, // Holds the end position before reversing (optional, adjust as needed)
+            repeat: 0, // No repeats, just go there and back again
+            onComplete: () => {
+                // Add a random delay before starting the wobble effect to desynchronize tiles
+                this.time.addEvent({
+                    delay: Phaser.Math.Between(0, 500), // random delay
+                    callback: () => {
+                        // Wobble effect tween
+                        this.tweens.add({
+                            targets: tileSprite,
+                            y: `+=2`, // change the tile position by 10 pixels
+                            duration: 1000, // duration of the tween in milliseconds
+                            ease: 'Sine.easeInOut', // easing function to make the movement smooth
+                            repeat: -1, // repeat the tween indefinitely
+                            yoyo: true, // reverse the tween at the end
+                        });
+                    },
+                    callbackScope: this,
+                    loop: false
+                });
+            }
         });
+     
+        // Set up an interactive event
+        // tileSprite.setInteractive();
 
-        // After the initial tween, add another tween to give a floating effect
-        // this.tweens.add({
-        //     targets: tileSprite,
-        //     y: startY + y * this.tileSize + 10,
-        //     duration: 1000, // duration of the tween in milliseconds
-        //     ease: 'Power1', // easing function to make the movement smooth
-        //     repeat: -1, // repeat the tween indefinitely
-        //     yoyo: true, // reverse the tween at the end
-        //     delay: 2000 // wait 1 second before starting the tween
+        // // Highlight on pointer over
+        // tileSprite.on('pointerover', function () {
+        //     // this.setTint(0xffff00);
+        //     this.setTint(0xff0000);
         // });
+
+        // Clear tint on pointer out
+        // tileSprite.on('pointerout', function () {
+        //     this.clearTint();
+        // });
+
     }
 
     setUpArena() {
@@ -351,12 +372,12 @@ export class Arena extends Phaser.Scene
             }
         }, this);
 
-        const bg = this.add.image(0, -230, 'bg').setOrigin(0, 0);
+        // const bg = this.add.image(0, -230, 'bg').setOrigin(0, 0);
 
-        const scaleX = gameWidth / bg.width;
-        const scaleY = gameHeight / bg.height;
-        const scale = Math.max(scaleX, scaleY);
-        bg.setScale(scale).setAlpha(0.7);
+        // const scaleX = gameWidth / bg.width;
+        // const scaleY = gameHeight / bg.height;
+        // const scale = Math.max(scaleX, scaleY);
+        // bg.setScale(scale).setAlpha(0.7);
 
         this.input.keyboard.on('keydown', this.handleKeyDown, this);
     }

@@ -41,11 +41,13 @@ export abstract class Game
     }
 
     addPlayer(socket: Socket, elo: number) {
+        if (this.sockets.length === 2) return;
         this.sockets.push(socket);
         socket.join(this.id);
         const index = this.sockets.indexOf(socket);
-        this.socketMap.set(socket, this.teams.get(index + 1)!);
+        console.log(`Adding player ${index + 1} to game ${this.id}`);
         const team = this.teams.get(index + 1);
+        this.socketMap.set(socket, team);
         team.setSocket(socket);
         team.setElo(elo);
     }

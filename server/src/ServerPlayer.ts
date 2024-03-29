@@ -373,7 +373,6 @@ export class ServerPlayer {
     }
 
     clearAllTimers() {
-        console.log(`Clearing all timers for player ${this.num}`);
         if (this.cooldownTimer) {
             clearTimeout(this.cooldownTimer);
         }
