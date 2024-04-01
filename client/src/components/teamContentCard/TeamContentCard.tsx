@@ -7,6 +7,7 @@ import { CHARACTERINFO, CONSUMABLEITEMS, EQUIPITEMS, EQUIPITEMS_DEFAULT, SPELLIT
 
 class TeamContentCard extends Component {
     state = {
+        defaultSP: 3,
         openModal: false,
         modalType: ItemDialogType.EQUIPMENTS,
         modalData: null,
@@ -34,10 +35,12 @@ class TeamContentCard extends Component {
 
     render() {
         const renderInfoBars = () => CHARACTERINFO.map((item, index) => (
-            <div className="character-info-bar" key={index} onClick={(e) => this.handleOpenModal(e, item, ItemDialogType.CHARACTER_INFO)}>
+            <div className="character-info-bar" key={index}>
                 <div className="info-class" style={{backgroundColor: INFO_BG_COLOR[item.name]}}><span>{item.name}</span></div>
-                <p className="curr-info">{item.currVal} <span style={item.additionVal && Number(item.additionVal) > 0 ? { color: '#9ed94c' } : { color: '#c95a74' }}>{item.additionVal}</span></p>
-                <button className="info-bar-plus"></button>
+                <p className="curr-info">{item.currVal} 
+                    {this.state.defaultSP > 0 && <span style={item.additionVal && Number(item.additionVal) > 0 ? { color: '#9ed94c' } : { color: '#c95a74' }}>{item.additionVal}</span>}
+                </p>
+                {this.state.defaultSP > 0 && <button className="info-bar-plus" onClick={(e) => this.handleOpenModal(e, item, ItemDialogType.CHARACTER_INFO)}></button>}
             </div>
         ));
 

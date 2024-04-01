@@ -42,6 +42,10 @@ class ItemDialog extends Component<DialogProps> {
       }
     };
 
+    const getInfoVal = (val: string) => {
+      return Number(val) < 0 ? Number(val) + 1 : `+${Number(val) + 1}`;
+    };
+
     const equipmentDialog = (dialogData: EQUIPMENT) => {
       if (!dialogData.url) return null;
       return (
@@ -120,9 +124,9 @@ class ItemDialog extends Component<DialogProps> {
     const characterInfoDialog = (dialogData: CHARACTER_INFO) => (
       <div className="character-info-dialog-container">
         <div className="character-info-dialog-card" style={{ backgroundColor: INFO_BG_COLOR[dialogData.name] }}><span>{dialogData.name}</span></div>
-        <p>{dialogData.currVal} <span style={dialogData.additionVal && Number(dialogData.additionVal) > 0 ? { color: '#9ed94c' } : { color: '#c95a74' }}>{dialogData.additionVal}</span></p>
+        <p>{dialogData.currVal} <span className='character-info-addition' style={dialogData.additionVal && Number(dialogData.additionVal) < 0 ? { color: '#c95a74' } : { color: '#9ed94c' }}>{getInfoVal(dialogData.additionVal)}</span></p>
         <div className="dialog-button-container">
-          <button className="dialog-accept" onClick={handleClose}><img src="./inventory/confirm_icon.png" alt="confirm" /></button>
+          <button className="dialog-accept" onClick={() => console.log('___SP spent___')}><img src="./inventory/confirm_icon.png" alt="confirm" /></button>
           <button className="dialog-decline" onClick={handleClose}><img src="./inventory/cancel_icon.png" alt="decline" /></button>
         </div>
       </div>

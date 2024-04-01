@@ -154,5 +154,3 @@ items[9] = new BaseItem({
     price: 1000,
     rarity: Rarity.LEGENDARY,
 });
-
-
