@@ -122,7 +122,7 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    max-width: 124px;
+    max-width: 98px;
     position: relative;
 }
 
@@ -185,7 +185,7 @@
 .dialog-item-container {
     background-image: url("@assets/inventory/itemequip_bg.png");
     background-size: 100% 100%;
-    width: 124px;
+    width: 98px;
     padding: 6px 12px;
     display: flex;
     flex-direction: column;

@@ -1,13 +1,11 @@
 import './HUD.style.css';
 import { h, Component } from 'preact';
 import { InventoryType } from '@legion/shared/enums';
-import InfoBox from '../../InfoBox';
 import { BaseItem } from "@legion/shared/BaseItem";
 import { BaseSpell } from "@legion/shared/BaseSpell";
 import { BaseEquipment } from '@legion/shared/BaseEquipment';
 import ItemDialog from '../../itemDialog/ItemDialog';
-import { CHARACTER_INFO, CONSUMABLE, EQUIPMENT, ItemDialogType, SPELL } from '../../itemDialog/ItemDialogType';
-import { CONSUMABLEITEMS, EQUIPITEMS, SPELLITEMS } from '../../teamContentCard/TeamContentCardData';
+import { CHARACTER_INFO, ItemDialogType } from '../../itemDialog/ItemDialogType';
 
 interface ActionItemProps {
   action: BaseItem | BaseSpell | BaseEquipment | null;
@@ -31,46 +29,32 @@ class Action extends Component<ActionItemProps> {
     }
 }
 
-handleOpenModal = (e: any, modalData: EQUIPMENT | CONSUMABLE | CHARACTER_INFO | SPELL, modalType: string) => {
-    if (!modalData.name) return;
-    const elementRect = e.currentTarget.getBoundingClientRect();
+  handleOpenModal = (e: any, modalData: BaseItem | BaseSpell | BaseEquipment | CHARACTER_INFO, modalType: string) => {
+      if (!modalData.name) return;
+      const elementRect = e.currentTarget.getBoundingClientRect();
 
-    const modalPosition = {
-        top: elementRect.top + elementRect.height / 2,
-        left: elementRect.left + elementRect.width / 2,
-    };
+      const modalPosition = {
+          top: elementRect.top + elementRect.height / 2,
+          left: elementRect.left + elementRect.width / 2,
+      };
 
-    this.setState({openModal: true, modalType, modalPosition, modalData});
-}
+      this.setState({openModal: true, modalType, modalPosition, modalData});
+  }
 
-handleCloseModal = () => {
-    this.setState({openModal: false});
-}
+  handleCloseModal = () => {
+      this.setState({openModal: false});
+  }
 
   render() {
     const { action, index, clickedIndex, canAct, actionType, hideHotKey, onActionClick } = this.props;
+
     const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
     const startPosition = keyboardLayout.indexOf(actionType === InventoryType.CONSUMABLES ? 'Z' : 'Q');
     const keyBinding = keyboardLayout.charAt(startPosition + index);
 
-    const getActionItemData = (actionType: string, actionIndex: number) => {
-      switch (actionType) {
-        case ItemDialogType.CONSUMABLES:
-          return CONSUMABLEITEMS[actionIndex];
-        case ItemDialogType.EQUIPMENTS:
-          return EQUIPITEMS[actionIndex];
-        case ItemDialogType.SKILLS:
-          return SPELLITEMS[actionIndex];
-        default: return null;
-      }
-    }
-
-    const handleOnClickAnction = (e: any) => {
+    const handleOnClickAction = (e: any) => {
       onActionClick(actionType, keyBinding, index);
-      const item = getActionItemData(actionType, index);
-      if (item && item.url) {
-        this.handleOpenModal(e, item, actionType);
-      }
+      this.handleOpenModal(e, action, actionType);
     }
 
     if (!action) {
@@ -80,7 +64,7 @@ handleCloseModal = () => {
     return (
       <div 
         className={`${actionType} ${index === clickedIndex ? 'flash-effect' : ''}`} 
-        onClick={handleOnClickAnction}>
+        onClick={handleOnClickAction}>
         {action.id > -1 && <div 
           className={!canAct ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}
           style={{backgroundImage: `url(/${actionType}/${action.frame})`, cursor: 'pointer'}}

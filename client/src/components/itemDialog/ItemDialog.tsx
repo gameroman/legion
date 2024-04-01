@@ -2,13 +2,17 @@
 import './ItemDialog.style.css';
 import { h, Component } from 'preact';
 import Modal from 'react-modal';
-import { CHARACTER_INFO, CONSUMABLE, EQUIPMENT, INFO_BG_COLOR, INFO_TYPE, ItemDialogType, SPELL } from './ItemDialogType';
+import { CHARACTER_INFO, INFO_BG_COLOR, ItemDialogType } from './ItemDialogType';
+import { BaseItem } from '@legion/shared/BaseItem';
+import { BaseSpell } from '@legion/shared/BaseSpell';
+import { BaseEquipment } from '@legion/shared/BaseEquipment';
+import { Stat } from '@legion/shared/enums';
 
 Modal.setAppElement('#root');
 interface DialogProps {
   dialogType: string;
   dialogOpen: boolean;
-  dialogData: EQUIPMENT | CONSUMABLE | CHARACTER_INFO | SPELL | null;
+  dialogData: BaseItem | BaseSpell | BaseEquipment | CHARACTER_INFO | null;
   position: {
     top: number,
     left: number
@@ -20,6 +24,8 @@ class ItemDialog extends Component<DialogProps> {
 
   render() {
     const { dialogType, dialogData, position, dialogOpen, handleClose } = this.props;
+
+    // console.log('___ dialog body ___', dialogData, dialogType);
 
     if (!dialogData) {
       return null;
@@ -46,11 +52,11 @@ class ItemDialog extends Component<DialogProps> {
       return Number(val) < 0 ? Number(val) + 1 : `+${Number(val) + 1}`;
     };
 
-    const equipmentDialog = (dialogData: EQUIPMENT) => {
-      if (!dialogData.url) return null;
+    const equipmentDialog = (dialogData: BaseEquipment) => {
+      if (!dialogData.frame) return null;
       return (
         <div className="equip-dialog-container">
-          <img src={dialogData.url} alt={dialogData.name} />
+          <img src={`./${dialogType}/${dialogData.frame}`} alt={dialogData.name} />
           <p className='equip-dialog-name'>{dialogData.name}</p>
           <p className='equip-dialog-desc'>Remove Item</p>
           <div className="dialog-button-container">
@@ -61,27 +67,27 @@ class ItemDialog extends Component<DialogProps> {
       )
     };
 
-    const consumableDialog = (dialogData: CONSUMABLE) => {
-      if (!dialogData.url) return;
+    const consumableDialog = (dialogData: BaseItem) => {
+      if (!dialogData.frame) return;
 
       return (
         <div className="dialog-item-container">
           <div className="dialog-item-heading">
-            <img src={dialogData.url} alt={dialogData.name} />
+            <img src={`./${dialogType}/${dialogData.frame}`} alt={dialogData.name} />
             <div className="dialog-item-title">
               <span>{dialogData.name}</span>
               <span className="dialog-item-title-info">Self</span>
             </div>
           </div>
-          <p className="dialog-item-desc">{dialogData.desc}</p>
+          <p className="dialog-item-desc">{dialogData.description}</p>
           <div className="dialog-item-info-container">
             {
-              Object.entries(dialogData.info).map(([type, val]) => ({ type, val })).map((item) => (
+              dialogData.effects.map(effect => 
                 <div className="dialog-item-info">
-                  <div className="character-info-dialog-card" style={{ backgroundColor: INFO_BG_COLOR[INFO_TYPE[item.type]] }}><span>{item.type.toUpperCase()}</span></div>
-                  <span style={item.val > 0 ? { color: '#9ed94c' } : { color: '#c95a74' }}>{item.val > 0 ? `+${item.val}` : item.val}</span>
+                  <div className="character-info-dialog-card" style={{ backgroundColor: INFO_BG_COLOR[Stat[effect.stat]] }}><span>{Stat[effect.stat]}</span></div>
+                  <span style={effect.value > 0 ? { color: '#9ed94c' } : { color: '#c95a74' }}>{effect.value > 0 ? `+${effect.value}` : effect.value}</span>
                 </div>
-              ))
+              )
             }
           </div>
           <div className="dialog-button-container">
@@ -92,14 +98,14 @@ class ItemDialog extends Component<DialogProps> {
       );
     };
 
-    const skillDialog = (dialogData: SPELL) => {
-      if (!dialogData.url) return;
+    const skillDialog = (dialogData: BaseSpell) => {
+      if (!dialogData.frame) return;
       return (
         <div className="dialog-spell-container">
-          <img src={dialogData.url} alt={dialogData.name} />
+          <img src={`./${dialogType}/${dialogData.frame}`} alt={dialogData.name} />
           <p className="dialog-spell-name">{dialogData.name}</p>
-          <p className="dialog-spell-desc">{dialogData.desc}</p>
-          <div className="dialog-spell-info-container">
+          <p className="dialog-spell-desc">{dialogData.description}</p>
+          {/* <div className="dialog-spell-info-container">
             <div className="dialog-spell-info">
               <img src={'./inventory/mp_icon.png'} alt="mp" />
               <span>{dialogData.info.mp}</span>
@@ -112,7 +118,7 @@ class ItemDialog extends Component<DialogProps> {
               <img src={'./inventory/target_icon.png'} alt="target" />
               <span>ADE</span>
             </div>
-          </div>
+          </div> */}
           <div className="dialog-button-container">
             <button className="dialog-accept" onClick={handleClose}><img src="./inventory/confirm_icon.png" alt="confirm" /></button>
             <button className="dialog-decline" onClick={handleClose}><img src="./inventory/cancel_icon.png" alt="decline" /></button>
@@ -135,11 +141,11 @@ class ItemDialog extends Component<DialogProps> {
     const renderBody = () => {
       switch (dialogType) {
         case ItemDialogType.EQUIPMENTS:
-          return equipmentDialog(dialogData as EQUIPMENT);
+          return equipmentDialog(dialogData as BaseEquipment);
         case ItemDialogType.CONSUMABLES:
-          return consumableDialog(dialogData as CONSUMABLE);
+          return consumableDialog(dialogData as BaseItem);
         case ItemDialogType.SKILLS:
-          return skillDialog(dialogData as SPELL);
+          return skillDialog(dialogData as BaseSpell);
         case ItemDialogType.CHARACTER_INFO:
           return characterInfoDialog(dialogData as CHARACTER_INFO);
         default: null;

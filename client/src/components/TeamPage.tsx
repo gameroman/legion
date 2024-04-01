@@ -48,7 +48,8 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
             consumables: data.inventory.consumables.sort(),
             equipment: data.inventory.equipment.sort(), 
             spells: data.inventory.spells.sort(),
-          }
+          },
+          carrying_capacity: data.carrying_capacity
         });
     } catch (error) {
         errorToast(`Error: ${error}`);
