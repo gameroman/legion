@@ -79,7 +79,6 @@ class Inventory extends Component<InventoryProps> {
             action={actionItem}
             index={i}
             clickedIndex={-1}
-            itemIndex={this.props.inventory[this.state.actionType][i]}
             canAct={true}
             hideHotKey={true}
             actionType={this.state.actionType}

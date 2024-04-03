@@ -8,7 +8,6 @@ import ItemDialog from '../../itemDialog/ItemDialog';
 import { CHARACTER_INFO, ItemDialogType } from '../../itemDialog/ItemDialogType';
 
 interface ActionItemProps {
-  itemIndex?: number;
   characterId?: string,
   action: BaseItem | BaseSpell | BaseEquipment | null;
   index: number;
@@ -48,7 +47,7 @@ class Action extends Component<ActionItemProps> {
   }
 
   render() {
-    const { action, index, clickedIndex, itemIndex, canAct, actionType, hideHotKey, onActionClick } = this.props;
+    const { action, index, clickedIndex, canAct, actionType, hideHotKey, onActionClick } = this.props;
 
     const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
     const startPosition = keyboardLayout.indexOf(actionType === InventoryType.CONSUMABLES ? 'Z' : 'Q');
@@ -56,7 +55,6 @@ class Action extends Component<ActionItemProps> {
 
     const handleOnClickAction = (e: any) => {
       this.handleOpenModal(e, action, actionType);
-      console.log('1111111111');
     }
 
     if (!action) {
@@ -77,7 +75,8 @@ class Action extends Component<ActionItemProps> {
         </div>} */}
         
         <ItemDialog 
-          index={itemIndex}
+          index={index}
+          isEquipped={false}
           characterId={this.props.characterId} 
           actionType={InventoryActionType.EQUIP} 
           dialogOpen={this.state.openModal} 

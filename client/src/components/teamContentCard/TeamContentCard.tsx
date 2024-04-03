@@ -88,8 +88,8 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
             const items = Object.entries(characterData.equipment).map(([key, value]) => ({ key, value: value as number })).slice(6, 9);
 
             return items.map((item, index) => (
-                <div className="equip-item sheet-item" key={index} onClick={(e) => this.handleOpenModal(e, equipments[index + 6], ItemDialogType.EQUIPMENTS, index + 6)}>
-                    <img style={item.value < 0 && { transform: 'scaleY(0.6)' }} src={item.value > 0 ? `/equipment/${equipments[index + 6]?.frame}` : `/inventory/${item.key}_icon.png`} alt={item.key} />
+                <div className="equip-item sheet-item" key={index} onClick={(e) => this.handleOpenModal(e, equipments[item.value], ItemDialogType.EQUIPMENTS, item.value)}>
+                    <img style={item.value < 0 && { transform: 'scaleY(0.6)' }} src={item.value > 0 ? `/equipment/${equipments[item.value]?.frame}` : `/inventory/${item.key}_icon.png`} alt={item.key} />
                 </div>
             ))
         }, [characterData]);
@@ -183,7 +183,18 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
                 <div className="team-equip-container">
                     {renderEquipItems()}
                 </div>
-                <ItemDialog actionType={InventoryActionType.UNEQUIP}  refreshCharacter={refreshCharacter} characterId={characterId} index={this.state.itemIndex} dialogOpen={this.state.openModal} dialogType={this.state.modalType} position={this.state.modalPosition} dialogData={this.state.modalData} handleClose={this.handleCloseModal} />
+                <ItemDialog 
+                    isEquipped={true}
+                    actionType={InventoryActionType.UNEQUIP}  
+                    refreshCharacter={refreshCharacter} 
+                    characterId={characterId} 
+                    index={this.state.itemIndex} 
+                    dialogOpen={this.state.openModal} 
+                    dialogType={this.state.modalType} 
+                    position={this.state.modalPosition} 
+                    dialogData={this.state.modalData} 
+                    handleClose={this.handleCloseModal} 
+                />
             </div>
         );
     }

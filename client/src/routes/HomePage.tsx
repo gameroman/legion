@@ -1,6 +1,6 @@
 // HomePage.tsx
 import { h, Component } from 'preact';
-import { Router, Route, Link } from 'preact-router';
+import { Router, Route } from 'preact-router';
 import AuthContext from '../contexts/AuthContext';
 
 import firebase from 'firebase/compat/app'
@@ -31,6 +31,9 @@ class HomePage extends Component<object, State> {
 
     handleRouteChange = (e) => {
         const pathParts = e.url.split('/');
+
+        console.log('___ path parts ___', pathParts);
+
         const currentPage = pathParts[1]; // This will be 'team' if the URL is '/team/2'
         const showFirebaseUI = false;
 
@@ -79,25 +82,14 @@ class HomePage extends Component<object, State> {
         const { currentPage, showFirebaseUI } = this.state;
         const { user } = this.context;
 
-        const bgcolors = {
-            play: '#080c15',
-            team: '#06090a',
-            shop: '#070507',
-            rank: '#060607',
-        }
-        const bgImage = {
-            backgroundImage: `url(/assets/${currentPage}bg.png)`,
-            backgroundColor: bgcolors[currentPage]
-        };
         return (
             <div className="homePage">
 
                 <Navbar user={user} initFirebaseUI={this.initFirebaseUI} logout={this.logout}/>
 
-                <div className="content" style={bgImage}>
+                <div className="content">
 
                 <div className="mainContent">
-
                     <Router onChange={this.handleRouteChange}>
                         <Route default path="/play" component={PlayPage} />
                         <Route path="/queue" component={QueuePage} />

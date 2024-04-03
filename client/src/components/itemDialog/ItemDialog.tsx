@@ -14,6 +14,7 @@ Modal.setAppElement('#root');
 interface DialogProps {
   characterId?: string;
   index?: number;
+  isEquipped?: boolean;
   actionType: InventoryActionType;
   dialogType: string;
   dialogOpen: boolean;
@@ -58,7 +59,7 @@ class ItemDialog extends Component<DialogProps> {
   }
 
   render() {
-    const { dialogType, dialogData, position, dialogOpen, handleClose } = this.props;
+    const { dialogType, dialogData, position, dialogOpen, isEquipped, handleClose } = this.props;
 
     if (!dialogData) {
       return null;
@@ -142,20 +143,20 @@ class ItemDialog extends Component<DialogProps> {
           <p className="dialog-spell-desc">{dialogData.description}</p>
           <div className="dialog-spell-info-container">
             <div className="dialog-spell-info">
-              <img src={'./inventory/mp_icon.png'} alt="mp" />
+              <img src={'/inventory/mp_icon.png'} alt="mp" />
               <span>{dialogData.cost}</span>
             </div>
             <div className="dialog-spell-info">
-              <img src={'./inventory/cd_icon.png'} alt="cd" />
+              <img src={'/inventory/cd_icon.png'} alt="cd" />
               <span>{dialogData.cooldown}s</span>
             </div>
             <div className="dialog-spell-info">
-              <img src={'./inventory/target_icon.png'} alt="target" />
+              <img src={'/inventory/target_icon.png'} alt="target" />
               <span>{Target[dialogData.target]}</span>
             </div>
           </div>
           <div className="dialog-button-container">
-            <button className="dialog-accept" onClick={() => this.AcceptAction(dialogType, this.props.index)}><img src="/inventory/confirm_icon.png" alt="confirm" /></button>
+            {!isEquipped && <button className="dialog-accept" onClick={() => this.AcceptAction(dialogType, this.props.index)}><img src="/inventory/confirm_icon.png" alt="confirm" /></button>}
             <button className="dialog-decline" onClick={handleClose}><img src="/inventory/cancel_icon.png" alt="decline" /></button>
           </div>
         </div>
