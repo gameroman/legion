@@ -445,7 +445,7 @@ export class Player extends Phaser.GameObjects.Container {
 
         const textObject = this.scene.add.text(
             randomXOffset,( -this.sprite.height / 2) + 15 + randomYOffset, `${String(text)}`, 
-            { fontSize: '24px', color, stroke: '#000', strokeThickness: 3 }
+            { fontSize: '24px', color, stroke: '#000', strokeThickness: 3, fontFamily: 'Kim',}
             ).setOrigin(0.5).setDepth(10)   ;
         this.add(textObject);
     

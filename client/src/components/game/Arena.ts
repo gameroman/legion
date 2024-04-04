@@ -971,12 +971,70 @@ export class Arena extends Phaser.Scene
         this.placeCharacters(data.player.team, true, this.teamsMap.get(data.player.teamId));
         this.placeCharacters(data.opponent.team, false, this.teamsMap.get(data.opponent.teamId));
 
-        setTimeout(this.updateOverview.bind(this), 2000);
+        const delay = 3000;
+        setTimeout(this.startAnimation.bind(this), delay);
+        setTimeout(this.updateOverview.bind(this), delay + 1000);
 
         events.on('itemClick', (letter) => {
             this.selectedPlayer?.onLetterKey(letter);
         });
     }
+
+    startAnimation() {
+        const bandHeight = 300; 
+        const screenWidth = this.cameras.main.width;
+        const screenHeight = this.cameras.main.height;
+        const bandY = (screenHeight - bandHeight) / 2; // Position Y so the band is centered vertically
+    
+        // Create the semi-transparent black band
+        let currentHeight = 1; // Start with a height of 1
+        const band = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.5 } }).setDepth(10);
+        band.fillRect(0, bandY, screenWidth, currentHeight);
+    
+        // Animate the height of the band
+        this.tweens.add({
+            targets: { height: 1 },
+            height: bandHeight, // Target height for the animation
+            duration: 500,
+            ease: 'Power2',
+            onUpdate: (tween) => {
+                currentHeight = tween.getValue();
+                band.clear(); // Clear previous frame
+                band.fillRect(0, bandY, screenWidth, currentHeight);
+            },
+            onComplete: () => {
+                // Once band animation is complete, animate 'START' text
+                const startText = this.add.text(0, bandY + (bandHeight - 20) / 2, 'FIGHT!', { fontSize: '40px', color: '#FFFFFF', fontFamily: 'Kim' }).setAlpha(0).setDepth(11);
+                startText.x = -startText.width; // Position text off-screen to the left
+    
+                // Slide in animation for 'START' text
+                this.tweens.add({
+                    targets: startText,
+                    x: (screenWidth - startText.width) / 2,
+                    alpha: 1,
+                    duration: 500,
+                    ease: 'Power2',
+                    hold: 500, // Keep in place for a bit
+                    onComplete: () => {
+                        // Slide out to the right
+                        this.tweens.add({
+                            targets: startText,
+                            x: screenWidth,
+                            alpha: 0,
+                            duration: 200,
+                            ease: 'Power2',
+                            onComplete: () => {
+                                // Cleanup: remove the text and band
+                                startText.destroy();
+                                band.destroy();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+     
 
     updateOverview() {
         this.overviewReady = true;
