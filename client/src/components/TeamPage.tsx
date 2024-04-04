@@ -53,9 +53,9 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
         console.log(data);
         this.setState({ 
           inventory: {
-            consumables: data.inventory.consumables.sort(),
-            equipment: data.inventory.equipment.sort(), 
-            spells: data.inventory.spells.sort(),
+            consumables: data.inventory.consumables?.sort(),
+            equipment: data.inventory.equipment?.sort(), 
+            spells: data.inventory.spells?.sort(),
           },
           carrying_capacity: data.carrying_capacity
         });

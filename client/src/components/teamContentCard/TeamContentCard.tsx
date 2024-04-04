@@ -86,7 +86,7 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
         };
 
         const renderEquipItems = () => {
-            if (!characterData) return;
+            if (!characterData || !characterData.equipment) return;
             const items = Object.entries(characterData.equipment).map(([key, value]) => ({ key, value: value as number })); // for equipments of right hand
 
             return items.slice(0, 6).map((item, index) => (
@@ -97,7 +97,7 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
         }
 
         const renderCharacterItems = useMemo(() => {
-            if (!characterData) return;
+            if (!characterData || !characterData.equipment) return;
 
             const items = Object.entries(characterData.equipment).map(([key, value]) => ({ key, value: value as number })).slice(6, 9);
 
