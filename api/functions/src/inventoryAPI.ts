@@ -128,7 +128,7 @@ function unequipConsumable(playerData: any, characterData: any, index: number) {
 
 function learnSpell(playerData: any, characterData: any, index: number) {
   const playerInventory = playerData.inventory;
-  const skills = playerInventory.skills.sort();
+  const skills = playerInventory.spells.sort();
   const inventory = characterData.skills as number[];
 
   // Check if index is valid
@@ -306,7 +306,7 @@ export const inventoryTransaction = onRequest((request, response) => {
 
       response.send({status: 0});
     } catch (error) {
-      console.error("equipItem error:", error);
+      console.error("inventoryTransaction error:", error);
       response.status(500).send("Error processing transaction");
     }
   });
