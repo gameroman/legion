@@ -327,7 +327,6 @@ export class ServerPlayer {
     applyTerrainEffect(terrain: Terrain) {
         switch (terrain) {
             case Terrain.FIRE:
-                console.log(`Player ${this.num} is standing on fire!`);
                 this.takeDamage(10);
                 break;
             default:
@@ -335,14 +334,22 @@ export class ServerPlayer {
         }
     }
 
-    setUpDoT(terrain: Terrain) {
-        console.log(`Setting up DoT for player ${this.num}`);
-        if (this.DoTTimer) {
-            clearTimeout(this.DoTTimer);
+    setUpTerrainEffect(terrain: Terrain) {
+        switch (terrain) {
+            case Terrain.FIRE:
+                if (this.DoTTimer) {
+                    clearTimeout(this.DoTTimer);
+                }
+                this.DoTTimer = setInterval(() => {
+                    this.applyTerrainEffect(terrain);
+                }, 3000);
+                break;
+            case Terrain.ICE:
+                break;
+            default:
+                break;
         }
-        this.DoTTimer = setInterval(() => {
-            this.applyTerrainEffect(terrain);
-        }, 3000);
+        
     }
 
     stopDoT() {

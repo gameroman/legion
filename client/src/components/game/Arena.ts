@@ -9,7 +9,7 @@ import { spells } from '@legion/shared/Spells';
 import { lineOfSight, serializeCoords } from '@legion/shared/utils';
 import { getFirebaseIdToken } from '../../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
-import { Target } from "@legion/shared/enums";
+import { Target, Terrain } from "@legion/shared/enums";
 
 export class Arena extends Phaser.Scene
 {
@@ -25,6 +25,7 @@ export class Arena extends Phaser.Scene
     cellsHighlight: CellsHighlight;
     localAnimationSprite: Phaser.GameObjects.Sprite;
     tileSize = 60;
+    tilesMap: Map<string, Phaser.GameObjects.Image> = new Map<string, Phaser.GameObjects.Image>();
     gridWidth = 20;
     gridHeight = 9;
     server;
@@ -43,8 +44,7 @@ export class Arena extends Phaser.Scene
         
         this.load.image('bg',  'aarena_bg.png');
         this.load.image('killzone',  'killzone.png');
-        this.load.image('spark',  'spark.png');
-        // this.load.svg('pop', 'pop.svg',  { width: 24, height: 24 } );
+        this.load.image('iceblock',  'iceblock.png');
         const frameConfig = { frameWidth: 144, frameHeight: 144};
         // Iterate over assetsMap and load spritesheets
         allSprites.forEach((sprite) => {
@@ -285,7 +285,7 @@ export class Arena extends Phaser.Scene
             ease: 'Power2', // easing function to make the movement smooth
             delay: Math.random() * 500, // random delay to make the tiles fall at different times
             yoyo, // Enable yoyo to make the tween reverse after completing
-            hold: yoyo ? 1500 : 0, // Holds the end position before reversing (optional, adjust as needed)
+            hold: yoyo ? 2000 : 0, // Holds the end position before reversing (optional, adjust as needed)
             repeat: 0, // No repeats, just go there and back again
             onComplete: () => {
                 // Add a random delay before starting the wobble effect to desynchronize tiles
@@ -293,7 +293,8 @@ export class Arena extends Phaser.Scene
                     delay: Phaser.Math.Between(0, 500), // random delay
                     callback: () => {
                         // Wobble effect tween
-                        this.tweens.add({
+                        // @ts-ignore
+                        tileSprite.tween = this.tweens.add({
                             targets: tileSprite,
                             y: `+=2`, // change the tile position by 10 pixels
                             duration: 1000, // duration of the tween in milliseconds
@@ -307,7 +308,7 @@ export class Arena extends Phaser.Scene
                 });
             }
         });
-     
+
         // Set up an interactive event
         // tileSprite.setInteractive();
 
@@ -321,6 +322,9 @@ export class Arena extends Phaser.Scene
         // tileSprite.on('pointerout', function () {
         //     this.clearTint();
         // });
+
+        // @ts-ignore
+        this.tilesMap.set(serializeCoords(x, y), tileSprite);
 
     }
 
@@ -619,13 +623,27 @@ export class Arena extends Phaser.Scene
     }
 
     processTerrain({x, y, size, type}) {
+        console.log(`Processing terrain: ${x} ${y} ${size} ${type}`);
         // Iterate over x - floor(size/2) to x + floor(size/2) and y - floor(size/2) to y + floor(size/2)
         for (let i = x - Math.floor(size/2); i <= x + Math.floor(size/2); i++) {
             for (let j = y - Math.floor(size/2); j <= y + Math.floor(size/2); j++) {
                 const {x: pixelX, y: pixelY} = this.gridToPixelCoords(i, j);
-                const sprite = this.add.sprite(pixelX, pixelY, 'groundTiles', `element_${type}`)
-                    .setDepth(5).setScale(2).setAlpha(0.9);
-                sprite.anims.play('ground_flame');
+                switch (type) {
+                    case Terrain.FIRE:
+                        const sprite = this.add.sprite(pixelX, pixelY, '')
+                            .setDepth(5).setScale(2).setAlpha(0.9);
+                        sprite.anims.play('ground_flame');
+                        break;
+                    case Terrain.ICE:
+                        this.add.sprite(pixelX, pixelY, 'iceblock')
+                            .setDepth(5).setAlpha(0.9).setOrigin(0.5, 0.35);
+                        const tile = this.tilesMap.get(serializeCoords(i, j));
+                        // @ts-ignore
+                        if (tile.tween) tile.tween.stop();
+                    default:
+                        break;
+                }
+                
             }
         }
     

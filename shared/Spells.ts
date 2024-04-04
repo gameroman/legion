@@ -83,4 +83,5 @@ spells[3] = new BaseSpell({
     effects: [{stat: Stat.HP, value: -30, modifiers: SPBasedBoostDeboost}],
     score: 60,
     yoffset: 30,
+    terrain: Terrain.ICE
 });

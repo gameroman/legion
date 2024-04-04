@@ -31,7 +31,8 @@ export enum Class {
 
 export enum Terrain {
     NONE,
-    FIRE
+    FIRE,
+    ICE
 }
 
 export enum PlayMode {

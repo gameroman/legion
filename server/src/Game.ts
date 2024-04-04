@@ -281,6 +281,7 @@ export abstract class Game
         });
     }
 
+    // Called when traversing cells with terrain effects
     checkForTerrainEffects(player: ServerPlayer, cells: Set<string>) {
         cells.forEach(cell => {
             const terrain = this.terrainMap.get(cell);
@@ -290,10 +291,11 @@ export abstract class Game
         });
     }
 
+    // Apply when ending on cell with terrain effect
     checkForStandingOnTerrain(player: ServerPlayer) {
         const terrain = this.terrainMap.get(`${player.x},${player.y}`);
         if (terrain) {
-            player.setUpDoT(terrain);
+            player.setUpTerrainEffect(terrain);
         }
     }
 
@@ -504,7 +506,7 @@ export abstract class Game
                 this.terrainMap.set(`${i},${j}`, spell.terrain);
                 // Get player at position
                 const player = this.getPlayerAt(i, j);
-                if (player) player.setUpDoT(spell.terrain);
+                if (player) player.setUpTerrainEffect(spell.terrain);
             }
         }
     }
