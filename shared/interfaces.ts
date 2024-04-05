@@ -1,4 +1,4 @@
-import { Stat, Target, EffectDirection, Class, Terrain } from "./enums";
+import { Stat, Target, EffectDirection, EquipmentSlot, Terrain, Rarity } from "./enums";
 
 export class EffectModifier {
     stat;
@@ -47,9 +47,10 @@ export interface SpellData {
     score: number;
     yoffset?: number;
     terrain?: Terrain;
+    rarity: Rarity;
 }
 
-export interface ItemData {
+export interface ConsumableData {
     id: number;
     name: string;
     description: string;
@@ -61,6 +62,18 @@ export interface ItemData {
     size: number;
     effects: Effect[];
     price: number;
+    rarity: Rarity;
+}
+
+export interface EquipmentData {
+    id: number;
+    name: string;
+    description: string;
+    frame: string;
+    effects: Effect[];
+    slot: EquipmentSlot,
+    price: number;
+    rarity: Rarity;
 }
 
 export interface CharacterUpdate {
@@ -84,3 +97,14 @@ export interface CharacterStats {
     spatk: number;
     spdef: number;
 }
+export interface Equipment {
+    weapon: number;
+    armor: number;
+    helmet: number;
+    belt: number;
+    gloves: number;
+    boots: number;
+    left_ring: number;
+    right_ring: number;
+    necklace: number;
+  }

@@ -1,0 +1,262 @@
+.dialog-container {
+    box-sizing: border-box;
+    background-color: #1c1f25;
+    border: 1px solid #3c616c;
+    padding: 8px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dialog-heading {
+    font-size: 12px;
+    text-align: center;
+}
+
+.dialog-button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    width: 100%;
+}
+
+.dialog-button-container button {
+    background: transparent;
+    border: 1px solid #244752;
+    border-radius: 4px;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 8px;
+    color: #ffffff;
+}
+
+.dialog-button-container button:hover {
+    border: 1px solid #71deff;
+}
+
+.dialog-button-container button img {
+    width: 10px;
+    height: 10px;
+    margin-right: 4px;
+}
+
+.character-info-dialog-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    background-color: #1c1f25;
+    border: 1px solid #3c616c;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+.character-info-dialog-card {
+    border-radius: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.character-info-dialog-card span {
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffffff;
+    padding: 2px;
+}
+
+.character-info-dialog-container p {
+    display: flex;
+    justify-content: space-between;
+    min-width: 28px;
+    margin-right: 4px;
+    font-size: 12px;
+}
+
+.character-info-addition {
+    display: flex;
+}
+
+.equip-dialog-container {
+    max-width: 96px;
+    background-color: #1c1f25;
+    border: 1px solid #3c616c;
+    border-radius: 4px;
+    padding: 8px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.equip-dialog-container > img {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #244752;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.equip-dialog-container .equip-dialog-name {
+    font-size: 12px;
+    margin-bottom: -6px;
+    text-transform: capitalize;
+}
+
+.equip-dialog-container .equip-dialog-desc {
+    font-size: 10px;
+    text-align: center;
+    color: #71deff;
+}
+
+.equip-dialog-container .dialog-button-container {
+    justify-content: center;
+}
+
+.dialog-spell-container {
+    background-color: #1c1f25;
+    border: 1px solid #3c616c;
+    border-radius: 4px;
+    padding: 6px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    max-width: 98px;
+    position: relative;
+}
+
+.dialog-spell-container > img {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #244752;
+    padding: 4px;
+    border-radius: 4px;
+    position: absolute;
+    top: -16px;
+    background-color: #1c1f25;    
+}
+
+.dialog-spell-container p {
+    font-size: 10px;
+    text-align: center;
+}
+
+.dialog-spell-container .dialog-spell-name {
+    margin-top: 24px;
+    text-transform: capitalize;
+}
+
+.dialog-spell-container .dialog-spell-desc {
+    color: #71deff;
+}
+
+.dialog-spell-info-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+}
+
+.dialog-spell-info {
+    flex: 1;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background-color: #303540;
+    border-radius: 4px;
+}
+
+.dialog-spell-info img {
+    width: 12px;
+    height: 16px;
+}
+
+.dialog-spell-info span {
+    font-size: 10px;
+    color: #ffffff;
+}
+
+.dialog-spell-container .dialog-button-container {
+    justify-content: center;
+}
+
+.dialog-item-container {
+    background-image: url("@assets/inventory/itemequip_bg.png");
+    background-size: 100% 100%;
+    width: 98px;
+    padding: 6px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+}
+
+.dialog-item-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: 12px;
+    width: 100%;
+    position: absolute;
+    top: -16px;
+}
+
+.dialog-item-heading img {
+    width: 32px;
+    height: 32px;
+    background-color: #303540;
+    border: 1px solid #3c616c;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+.dialog-item-title {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.dialog-item-title span {
+    font-size: 11px;
+    color: #ffffff;
+    text-transform: capitalize;
+}
+
+.dialog-item-desc {
+    margin-top: 28px;
+    color: #71deff;
+}
+
+.dialog-item-title .dialog-item-title-info {
+    font-size: 8px;
+    color: #71deff;
+}
+
+.dialog-item-container .dialog-button-container {
+    justify-content: center;
+}
+
+.dialog-item-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.dialog-item-info span {
+    font-size: 10px;
+}
+
+.dialog-item-info .character-info-dialog-card {
+    min-width: 28px;
+}
+
+.dialog-item-info .character-info-dialog-card span {
+    font-size: 10px;
+}

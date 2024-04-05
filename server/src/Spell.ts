@@ -21,6 +21,9 @@ export function convertBaseToSpell(base: BaseSpell): Spell {
         effects: base.effects,
         shake: base.shake,
         score: base.score,
+        yoffset: base.yoffset,
+        terrain: base.terrain,
+        rarity: base.rarity
     });
 }
 

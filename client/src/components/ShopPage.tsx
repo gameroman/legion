@@ -5,10 +5,10 @@ import { apiFetch } from '../services/apiService';
 import { classEnumToString, statStrings } from './utils';
 import ActionItem from './game/HUD/Action';
 import { spells } from '@legion/shared/Spells';
-import { ActionType } from './game/HUD/ActionTypes';
+import { InventoryType } from '@legion/shared/enums';
 import { successToast, errorToast } from './utils';
 
-const imageContext = require.context('@assets/items', false, /\.png$/);
+const imageContext = require.context('@assets/consumables', false, /\.png$/);
 
 const images = imageContext.keys().map(key => ({
   name: key,
@@ -212,7 +212,7 @@ class ShopPage extends Component<object, State> {
                                 index={i} 
                                 clickedIndex={-1}
                                 canAct={true} 
-                                actionType={ActionType.Skill}
+                                actionType={InventoryType.SKILLS}
                                 key={i}
                               />
                             ))}

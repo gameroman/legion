@@ -1,6 +1,6 @@
 // HomePage.tsx
 import { h, Component } from 'preact';
-import { Router, Route, Link } from 'preact-router';
+import { Router, Route } from 'preact-router';
 import AuthContext from '../contexts/AuthContext';
 
 import firebase from 'firebase/compat/app'
@@ -14,11 +14,11 @@ import ShopPage from '../components/ShopPage';
 import RankPage from '../components/RankPage';
 import Navbar from '../components/navbar/Navbar';
 import QueuePage from '../components/QueuePage';
+import withAuth from '../components/withAuth';
 
 interface State {
     currentPage: string;
     showFirebaseUI: boolean;
-    gold: number;
 }
 
 class HomePage extends Component<object, State> {
@@ -27,11 +27,11 @@ class HomePage extends Component<object, State> {
     state: State = {
         currentPage: 'play',
         showFirebaseUI: false,
-        gold: 100,
     };
 
     handleRouteChange = (e) => {
         const pathParts = e.url.split('/');
+
         const currentPage = pathParts[1]; // This will be 'team' if the URL is '/team/2'
         const showFirebaseUI = false;
 
@@ -88,11 +88,10 @@ class HomePage extends Component<object, State> {
                 <div className="content">
 
                 <div className="mainContent">
-
                     <Router onChange={this.handleRouteChange}>
                         <Route default path="/play" component={PlayPage} />
-                        <Route path="/queue/:mode?" component={QueuePage} />
-                        <Route path="/team/:id?" component={TeamPage} />
+                        <Route path="/queue" component={QueuePage} />
+                        <Route path="/team/:id?" component={withAuth(TeamPage)} />
                         <Route path="/shop" component={ShopPage} />
                         <Route path="/rank" component={RankPage} />
                     </Router>

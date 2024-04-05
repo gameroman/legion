@@ -66,7 +66,6 @@ class Navbar extends Component<Props, State> {
       async fetchPlayerData() {
         try {
             const data = await apiFetch('playerData');
-            console.log(data);
             this.setState({ 
                 name: data.name,
                 lvl: data.lvl,
@@ -82,6 +81,13 @@ class Navbar extends Component<Props, State> {
         const route = useRouter();
         const dropdownContentStyle = {
             display: `${this.state.openDropdown ? 'block' : 'none'}`
+        }
+
+        const currentPage = (pageRoute: string) => {
+            if (pageRoute === Routes.PLAY) {
+                return route[0].url.includes(pageRoute) || route[0].url === Routes.HOME;
+            }
+            return route[0].url.includes(pageRoute);
         }
 
         return (
@@ -103,22 +109,22 @@ class Navbar extends Component<Props, State> {
 
                 <div className="menuItems">
                     <Link href="/play" onMouseOver={() => this.setState({ hovered: MenuItems.PLAY })} onMouseLeave={() => this.setState({ hovered: '' })}>
-                        <div className={`menuItemContainer ${route[0].url === Routes.PLAY || route[0].url === Routes.HOME ? 'activeFlag' : ''}`}>
+                        <div className={`menuItemContainer ${currentPage(Routes.PLAY) ? 'activeFlag' : ''}`}>
                             <img className="menuItem" src={this.state.hovered === MenuItems.PLAY ? playActiveIcon : playIcon} />
                         </div>
                     </Link>
                     <Link href="/team" onMouseOver={() => this.setState({ hovered: MenuItems.TEAM })} onMouseLeave={() => this.setState({ hovered: '' })}>
-                        <div className={`menuItemContainer ${route[0].url === Routes.TEAM ? 'activeFlag' : ''}`}>
+                        <div className={`menuItemContainer ${currentPage(Routes.TEAM) ? 'activeFlag' : ''}`}>
                             <img className="menuItem" src={this.state.hovered === MenuItems.TEAM ? teamActiveIcon : teamIcon} />
                         </div>
                     </Link>
                     <Link href="/shop" onMouseOver={() => this.setState({ hovered: MenuItems.SHOP })} onMouseLeave={() => this.setState({ hovered: '' })}>
-                        <div className={`menuItemContainer ${route[0].url === Routes.SHOP ? 'activeFlag' : ''}`}>
+                        <div className={`menuItemContainer ${currentPage(Routes.SHOP) ? 'activeFlag' : ''}`}>
                             <img className="menuItem" src={this.state.hovered === MenuItems.SHOP ? shopActiveIcon : shopIcon} />
                         </div>
                     </Link>
                     <Link href="/rank" onMouseOver={() => this.setState({ hovered: MenuItems.RANK })} onMouseLeave={() => this.setState({ hovered: '' })}>
-                        <div className={`menuItemContainer ${route[0].url === Routes.RANK ? 'activeFlag' : ''}`}>
+                        <div className={`menuItemContainer ${currentPage(Routes.RANK) ? 'activeFlag' : ''}`}>
                             <img className="menuItem" src={this.state.hovered === MenuItems.RANK ? rankActiveIcon : rankIcon} />
                         </div>
                     </Link>
@@ -128,15 +134,14 @@ class Navbar extends Component<Props, State> {
                     {this.props.user === null && <div className="notificationBarButton" onClick={this.props.initFirebaseUI}>Log in</div>}
                     {this.props.user !== null && <div className="notificationBarButton" onClick={this.props.logout}>Log out</div>}
                     <UserInfoBar label={`${this.state.gold}`}  />
-                    <UserInfoBar label="# 1" elo={this.state.elo} />
-                    <div class="expand_btn" onClick={() => this.setState({ openDropdown: !this.state.openDropdown })} onMouseEnter={() => this.setState({ openDropdown: true })}>
+                    <UserInfoBar label="1.235" elo={this.state.elo} />
+                    <div class="expand_btn" style={{backgroundImage: 'url("/expand_btn.png")'}} onClick={() => this.setState({ openDropdown: !this.state.openDropdown })} onMouseEnter={() => this.setState({ openDropdown: true })}>
                         <div class="dropdown-content" style={dropdownContentStyle} onMouseLeave={() => this.setState({ openDropdown: false })}>
-                            <Link href="/"><span>Link 1</span></Link>
-                            <Link href="/"><span>Link 2</span></Link>
-                            <Link href="/"><span>Link 3</span></Link>
+                            <div className="" onClick={this.props.user ? this.props.logout : this.props.initFirebaseUI}>{this.props.user ? 'Log out' : 'Log in'}</div>
+                            <div><span>Link 2</span></div>
+                            <div><span>Link 3</span></div>
                         </div>
                     </div>
-
                 </div>
             </div>
         );

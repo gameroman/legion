@@ -1,7 +1,7 @@
 // Character.tsx
 import { h, Component } from 'preact';
 import ActionItem from './game/HUD/Action';
-import { ActionType } from './game/HUD/ActionTypes';
+import { InventoryType } from '@legion/shared/enums';
 import { classEnumToString, statStrings } from './utils';
 import { items } from '@legion/shared/Items';
 import { spells } from '@legion/shared/Spells';
@@ -59,7 +59,7 @@ class Character extends Component<CharacterProps, CharacterState> {
         characterId: this.props.id,
     };
     
-    apiFetch('unequipItem', {
+    apiFetch('unequipConsumable', {
         method: 'POST',
         body: payload
     })
@@ -125,7 +125,7 @@ class Character extends Component<CharacterProps, CharacterState> {
                       index={i} 
                       clickedIndex={-1}
                       canAct={true} 
-                      actionType={ActionType.Item}
+                      actionType={InventoryType.CONSUMABLES}
                       onActionClick={this.onActionClick}
                       key={i}
                     />
@@ -141,7 +141,7 @@ class Character extends Component<CharacterProps, CharacterState> {
                       index={i} 
                       clickedIndex={-1}
                       canAct={true} 
-                      actionType={ActionType.Skill}
+                      actionType={InventoryType.SKILLS}
                       key={i}
                     />
                   ))}
