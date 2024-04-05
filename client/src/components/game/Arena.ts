@@ -925,7 +925,7 @@ export class Arena extends Phaser.Scene
 
         this.input.mouse.disableContextMenu();
 
-        this.musicManager = new MusicManager(this, 2, 13, [5, 6]);
+        this.musicManager = new MusicManager(this, 2, 13, [5, 6, 11]);
         this.musicManager.playBeginning();
 
     }
