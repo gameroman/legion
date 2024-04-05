@@ -82,7 +82,11 @@ export abstract class Game
     }
 
     isFree(gridX: number, gridY: number) {
-        return !this.gridMap.get(`${gridX},${gridY}`);
+        return !this.gridMap.get(`${gridX},${gridY}`) && !this.hasObstacle(gridX, gridY);
+    }
+
+    hasObstacle(gridX: number, gridY: number) {
+        return this.terrainMap.get(`${gridX},${gridY}`) === Terrain.ICE;
     }
 
     freeCell(gridX: number, gridY: number) {
@@ -554,6 +558,7 @@ export abstract class Game
     isValidCell(fromX: number, fromY: number, toX: number, toY: number) {
         return !this.isSkip(toX, toY)
         && this.isFree(toX, toY)
+        && !this.hasObstacle(toX, toY)
         && lineOfSight(fromX, fromY, toX, toY, this.isFree.bind(this));
     }
 

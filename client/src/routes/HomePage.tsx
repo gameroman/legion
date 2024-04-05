@@ -90,7 +90,7 @@ class HomePage extends Component<object, State> {
                 <div className="mainContent">
                     <Router onChange={this.handleRouteChange}>
                         <Route default path="/play" component={PlayPage} />
-                        <Route path="/queue" component={QueuePage} />
+                        <Route path="/queue/:mode" component={QueuePage} />
                         <Route path="/team/:id?" component={withAuth(TeamPage)} />
                         <Route path="/shop" component={ShopPage} />
                         <Route path="/rank" component={RankPage} />

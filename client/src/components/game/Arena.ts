@@ -26,6 +26,7 @@ export class Arena extends Phaser.Scene
     localAnimationSprite: Phaser.GameObjects.Sprite;
     tileSize = 60;
     tilesMap: Map<string, Phaser.GameObjects.Image> = new Map<string, Phaser.GameObjects.Image>();
+    obstaclesMap: Map<string, boolean> = new Map<string, boolean>();
     gridWidth = 20;
     gridHeight = 9;
     server;
@@ -438,8 +439,7 @@ export class Arena extends Phaser.Scene
     }
 
     isFree(gridX, gridY) {
-        const isFree = !this.gridMap[serializeCoords(gridX, gridY)];
-        return isFree;
+        return !this.gridMap[serializeCoords(gridX, gridY)] && !this.obstaclesMap.get(serializeCoords(gridX, gridY));
     }
 
     handleTileClick(gridX, gridY) {
@@ -640,6 +640,8 @@ export class Arena extends Phaser.Scene
                         const tile = this.tilesMap.get(serializeCoords(i, j));
                         // @ts-ignore
                         if (tile.tween) tile.tween.stop();
+                        this.obstaclesMap.set(serializeCoords(i, j), true);
+                        break;
                     default:
                         break;
                 }
