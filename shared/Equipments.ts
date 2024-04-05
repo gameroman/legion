@@ -1,5 +1,5 @@
 import { BaseEquipment } from "./BaseEquipment";
-import { Stat, EquipmentSlot, Rarity } from ".";
+import { Stat, EquipmentSlot, Rarity, Class } from ".";
 
 export const equipments:BaseEquipment[] = [];
 
@@ -12,6 +12,8 @@ equipments[0] = new BaseEquipment({
     slot: EquipmentSlot.WEAPON,
     price: 100,
     rarity: Rarity.COMMON,
+    minLevel: 1,
+    classes: [Class.WARRIOR],
 });
 
 
@@ -24,6 +26,8 @@ equipments[1] = new BaseEquipment({
     slot: EquipmentSlot.WEAPON,
     price: 120,
     rarity: Rarity.COMMON,
+    minLevel: 1,
+    classes: [Class.BLACK_MAGE, Class.WHITE_MAGE],
 });
 
 
@@ -36,4 +40,6 @@ equipments[2] = new BaseEquipment({
     slot: EquipmentSlot.LEFT_RING,
     price: 30,
     rarity: Rarity.RARE,
+    minLevel: 1,
+    classes: [Class.WARRIOR, Class.BLACK_MAGE, Class.WHITE_MAGE],
 });

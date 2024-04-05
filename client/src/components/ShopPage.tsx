@@ -7,6 +7,7 @@ import ActionItem from './game/HUD/Action';
 import { spells } from '@legion/shared/Spells';
 import { InventoryType } from '@legion/shared/enums';
 import { successToast, errorToast } from './utils';
+import { PlayerInventory } from '@legion/shared/interfaces';
 
 const imageContext = require.context('@assets/consumables', false, /\.png$/);
 
@@ -25,7 +26,7 @@ enum DialogType {
 
 interface State {
   gold: number;
-  inventory: Array<any>;
+  inventory: PlayerInventory;
   items: Array<any>;
   characters: Array<any>;
   openDialog: DialogType;
@@ -37,7 +38,11 @@ class ShopPage extends Component<object, State> {
 
   state: State = {
     gold: 0,
-    inventory: [],
+    inventory: {
+      consumables: [],
+      equipment: [],
+      spells: [],
+    },
     items,
     characters: [],
     openDialog: DialogType.NONE,
@@ -56,7 +61,11 @@ class ShopPage extends Component<object, State> {
         console.log(data);
         this.setState({ 
             gold: data.gold,
-            inventory: data.inventory
+            inventory: {
+              consumables: data.inventory.consumables?.sort(),
+              equipment: data.inventory.equipment?.sort(), 
+              spells: data.inventory.spells?.sort(),
+            },
         });
     } catch (error) {
         errorToast(`Error: ${error}`);
@@ -76,7 +85,11 @@ class ShopPage extends Component<object, State> {
   }
 
   getAmountOwned = (itemId) => {
-    return this.state.inventory.filter((item) => item === itemId).length;
+    // TODO: need to implement this, by looking at the right field
+    // in inventory and returning the amount
+    // Old implementation:
+    // return this.state.inventory.filter((item) => item === itemId).length;
+    return 0;
   }
 
   openDialog = (dialogType: DialogType, article: any = null) => {

@@ -11,6 +11,8 @@ export class BaseEquipment {
     effects: Effect[] = [];
     price: number = 0;
     rarity: Rarity = Rarity.COMMON;
+    minLevel: number = 0;
+    classes: Class[] = [];
 
     constructor(props: EquipmentData) {
         Object.assign(this, props);

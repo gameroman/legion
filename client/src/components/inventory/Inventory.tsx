@@ -8,20 +8,14 @@ import { equipments } from '@legion/shared/Equipments';
 import ActionItem from '../game/HUD/Action';
 import { InventoryActionType, InventoryType, RarityColor } from '@legion/shared/enums';
 
-import { apiFetch } from '../../services/apiService';
-import { successToast, errorToast } from '../utils';
-import { Link, route } from 'preact-router';
+import { Link } from 'preact-router';
 import Modal from 'react-modal';
-import { Effect } from '@legion/shared/interfaces';
+import { Effect, PlayerInventory } from '@legion/shared/interfaces';
 
 Modal.setAppElement('#root');
 interface InventoryProps {
   id: string;
-  inventory: {
-    consumables: number[];
-    equipment: number[];
-    spells: number[];
-  };
+  inventory: PlayerInventory;
   carrying_capacity: number;
   refreshCharacter: () => void;
   handleItemEffect: (effects: Effect[], actionType: InventoryActionType,  index?: number) => void;

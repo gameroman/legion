@@ -1,4 +1,4 @@
-import { Stat, Target, EffectDirection, EquipmentSlot, Terrain, Rarity } from "./enums";
+import { Stat, Target, EffectDirection, EquipmentSlot, Terrain, Rarity, Class } from "./enums";
 
 export class EffectModifier {
     stat;
@@ -48,6 +48,9 @@ export interface SpellData {
     yoffset?: number;
     terrain?: Terrain;
     rarity: Rarity;
+    price?: number;
+    minLevel?: number;
+    classes?: Class[];
 }
 
 export interface ConsumableData {
@@ -74,6 +77,8 @@ export interface EquipmentData {
     slot: EquipmentSlot,
     price: number;
     rarity: Rarity;
+    minLevel?: number;
+    classes?: Class[];
 }
 
 export interface CharacterUpdate {
@@ -107,4 +112,10 @@ export interface Equipment {
     left_ring: number;
     right_ring: number;
     necklace: number;
-  }
+}
+
+export interface PlayerInventory {
+    consumables: number[];
+    spells: number[];
+    equipment: number[];
+}
