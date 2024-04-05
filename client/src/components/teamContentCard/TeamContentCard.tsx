@@ -135,7 +135,7 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
         const renderConsumableItems = () => {
             if (!characterData) return;
 
-            return Array.from({ length: 6 }, (_, i) => (
+            return Array.from({ length: characterData.carrying_capacity }, (_, i) => (
                 i < characterData.inventory.length ? (
                     <div className="team-item" key={i} onClick={(e) => this.handleOpenModal(e, items[characterData.inventory[i]], ItemDialogType.CONSUMABLES, i)}>
                         <img src={`/consumables/${items[characterData.inventory[i]]?.frame}`} alt={items[characterData.inventory[i]].name} />
