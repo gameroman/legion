@@ -30,7 +30,9 @@ export class MusicManager {
     updateMusicIntensity(ratio) {
         if (this.gameOver) return;
         this.combatIntensity = this.computeMusicIntensity(ratio) + this.startinIntensity; 
-        if (this.combatIntensity > this.intensity) this.intensity++;
+        if (this.combatIntensity > this.intensity) {
+            this.intensity++;
+        }
         if (this.intensity > this.nbIntensities) this.intensity = this.nbIntensities;
     }
 

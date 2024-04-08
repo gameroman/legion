@@ -705,6 +705,12 @@ export class Arena extends Phaser.Scene
 
     playSound(name, volume = 1, loop = false) {
         // this.SFX[name].play({volume, loop});
+
+        // const playerPosition = { x: 100, y: 100 };
+        // const audioSourcePosition = { x: 300, y: 100 };
+        // // Calculate panning (left/right balance) based on positions
+        // const pan = 100; // Phaser.Math.Clamp((audioSourcePosition.x - playerPosition.x) / 400, -1, 1);
+
         this.SFX[name].play({delay: 0});
     }
 
