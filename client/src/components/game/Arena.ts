@@ -256,16 +256,14 @@ export class Arena extends Phaser.Scene
 
     floatOneTile(x, y, startX, startY, yoyo = false) {
         const tileWeights = {
-            54: 1,
-            // 53: 15,
-            // 54: 2,
-            // 52: 2,
-            // 51: 2,
-            // 50: 1,
-            // 49: 1,
-            // 48: 1,
-            // 47: 1,
-            // 46: 1,
+            1: 15,
+            2: 1,
+            3: 1,
+            4: 1,
+            5: 1,
+            6: 1,
+            7: 1,
+            8: 1,
         };
         const tiles = [];
         for (const tile in tileWeights) {
@@ -275,7 +273,7 @@ export class Arena extends Phaser.Scene
         }
 
         const tile = tiles[Math.floor(Math.random() * tiles.length)];
-        const tileSprite = this.add.image(startX + x * this.tileSize, startY + y * this.tileSize + this.scale.gameSize.height, 'groundTiles', `element_${tile}`)
+        const tileSprite = this.add.image(startX + x * this.tileSize, startY + y * this.tileSize + this.scale.gameSize.height, 'groundTiles', `tile_${tile}`)
             .setDepth(1)
             .setOrigin(0); 
     
