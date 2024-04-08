@@ -31,12 +31,15 @@ interface Player {
     mode: number;
     league?: string;
     waitingTime: number;
+    gold: number;
 }
 
 const playersQueue: Player[] = [];
 const eloRangeIncreaseInterval = 20; // seconds
 const eloRangeStart = 50;
 const eloRangeStep = 50; // Increase range by 50 points every interval
+const goldRewardInterval = 15;
+const goldReward = 1;
 
 // Initialize matchmaking functionality
 function setupMatchmaking() {
@@ -49,6 +52,13 @@ function setupMatchmaking() {
 function increaseEloRange() {
     playersQueue.forEach(player => {
         player.waitingTime += 1;
+
+        if (player.mode != PlayMode.PRACTICE && player.waitingTime % goldRewardInterval === 0) {
+            player.gold += goldReward; 
+            // Send gold increment to the player's socket
+            player.socket.emit("updateGold", { gold: player.gold });
+        }
+
         if (player.waitingTime >= eloRangeIncreaseInterval) {
             player.waitingTime = 0;
             player.range += eloRangeStep;
@@ -69,6 +79,8 @@ function tryMatchPlayers() {
                 // Start a game for these two players
                 const success = createGame(player1.socket, player2.socket, player1.mode);
                 if (success) {
+                    savePlayerGold(player1); 
+                    savePlayerGold(player2);
                     playersQueue.splice(j, 1); // Remove player2 first since it's later in the array
                     playersQueue.splice(i, 1); // Remove player1
                 }
@@ -134,6 +146,7 @@ async function addToQueue(socket: any, mode: PlayMode) {
             mode,
             league: queuingData.league,
             waitingTime: 0,
+            gold: 0,
         };
         playersQueue.push(player);
         console.log(`Player ${socket.id} joined queue  in mode ${mode} with elo ${player.elo} and league ${player.league}`);
@@ -141,6 +154,29 @@ async function addToQueue(socket: any, mode: PlayMode) {
         console.error(`Error adding player to queue: ${error}`);
     }
 }
+
+async function savePlayerGold(player: Player) {
+    if (player.gold == 0) return;
+    try {
+        await apiFetch(
+            'saveGoldReward',
+            '', // TODO: Add API key or player identification
+            {
+                method: 'POST',
+                body: {
+                    uid: player.socket.uid, 
+                    gold: player.gold,
+                },
+            }
+        );
+        console.log(`Saved ${player.gold} gold for player ${player.socket.id}`);
+    } catch (error) {
+        console.error(`Error saving player gold: ${error}`);
+    }
+}
+
+// Call savePlayerGold when removing a player from the queue
+
 
 io.on("connection", (socket: any) => {
     console.log(`Player connected`);
@@ -159,9 +195,10 @@ io.on("connection", (socket: any) => {
         addToQueue(socket, data.mode);
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
         const index = playersQueue.findIndex(player => player.socket.id === socket.id);
         if (index !== -1) {
+            await savePlayerGold(playersQueue[index]); 
             playersQueue.splice(index, 1);
         }
     });

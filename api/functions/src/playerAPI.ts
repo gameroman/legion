@@ -136,3 +136,40 @@ export const queuingData = onRequest((request, response) => {
   });
 });
 
+export const saveGoldReward = onRequest((request, response) => {
+  logger.info("Saving gold reward");
+  const db = admin.firestore();
+
+  corsMiddleware(request, response, async () => {
+    try {
+      const uid = request.body.uid;
+      const gold = request.body.gold;
+
+      const playerRef = db.collection("players").doc(uid);
+      const playerDoc = await playerRef.get();
+
+      if (!playerDoc.exists) {
+        throw new Error("Invalid player ID");
+      }
+
+      const playerData = playerDoc.data();
+      if (!playerData) {
+        throw new Error("playerData is null");
+      }
+
+      const newGold = playerData.gold + gold;
+
+      await playerRef.update({
+        gold: newGold,
+      });
+
+      response.send({
+        gold: newGold,
+      });
+    } catch (error) {
+      console.error("saveGoldReward error:", error);
+      response.status(500).send("Error");
+    }
+  });
+});
+

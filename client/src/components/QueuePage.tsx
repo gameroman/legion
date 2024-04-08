@@ -30,6 +30,10 @@ class QueuePage extends Component<QPageProps, {}> {
             route(`/game/${gameId}`);
         });
 
+        this.socket.on('updateGold', ({gold}) => {
+            console.log(`Received gold update: ${gold}`);
+        });
+
         this.socket.emit('joinQueue', {mode: this.props.matches.mode || 0});
         console.log('Joining queue');
     }
