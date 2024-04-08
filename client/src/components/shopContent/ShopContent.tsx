@@ -1,12 +1,13 @@
 // ShopContent.tsx
-import { PlayerInventory } from '@legion/shared/interfaces';
-import { ShopTabIcons, ShopTabs } from './ShopContent.data';
 import './ShopContent.style.css';
 import { h, Component } from 'preact';
+import { PlayerInventory } from '@legion/shared/interfaces';
+import { ShopTabIcons, ShopTabs } from './ShopContent.data';
+import ShopSpellCard from '../shopSpellCard/ShopSpellCard';
 
 interface ShopContentProps {
     inventoryData: PlayerInventory;
-    characters: any;
+    characters: CharacterData[];
 }
 
 class ShopContent extends Component<ShopContentProps> {
@@ -14,9 +15,19 @@ class ShopContent extends Component<ShopContentProps> {
         curr_tab: ShopTabs.CONSUMABLES
     }
     render() {
+        const {inventoryData, characters} = this.props;
         const tabItemStyle = (index: number) => {
             return {
                 backgroundImage: `url(/shop/tabs_${index === this.state.curr_tab ? 'active' : 'idle'}.png)`,
+            }
+        }
+
+        const renderItems = () => {
+            switch(this.state.curr_tab) {
+                case ShopTabs.SPELLS:
+                    return inventoryData.spells.map((item, index) => <ShopSpellCard key={index} index={item} />)
+                default:
+                    return null;
             }
         }
 
@@ -33,7 +44,7 @@ class ShopContent extends Component<ShopContentProps> {
                         </div>
                     )}
                 </div>
-                <div className='shop-items-container'>Items container</div>
+                <div className='shop-items-container'>{renderItems()}</div>
             </div>
         );
     }
