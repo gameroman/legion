@@ -337,6 +337,7 @@ export class ServerPlayer {
 
     // Called when the terrain effect is applied for the first time
     setUpTerrainEffect(terrain: Terrain) {
+        if (!terrain) return;
         switch (terrain) {
             case Terrain.FIRE:
                 if (this.DoTTimer) {

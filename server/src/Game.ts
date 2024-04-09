@@ -6,9 +6,7 @@ import { Spell } from './Spell';
 import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import {apiFetch} from './API';
 import { Terrain, PlayMode, Target } from '@legion/shared/enums';
-import { OutcomeData } from '@legion/shared/interfaces';
-
-
+import { OutcomeData, TerrainUpdate } from '@legion/shared/interfaces';
 
 export abstract class Game
 {
@@ -423,13 +421,8 @@ export abstract class Game
         player.team!.increaseScoreFromSpell(spell.score);
 
         if (spell.terrain) {
-            this.setUpTerrainEffect(spell, x, y);
-            this.broadcast('terrain', {
-                x,
-                y,
-                size: spell.size,
-                type: spell.terrain,
-            });
+            const terrainUodates = this.manageTerrain(spell, x, y);
+            this.broadcastTerrain(terrainUodates);
         }
         
         this.broadcast('localanimation', {
@@ -516,15 +509,34 @@ export abstract class Game
         });
     }
 
-    setUpTerrainEffect(spell, x, y) {
+    manageTerrain(spell: Spell, x: number, y: number) {
+        const terrainUpdates: TerrainUpdate[] = [];
         for (let i = x - Math.floor(spell.size/2); i <= x + Math.floor(spell.size/2); i++) {
             for (let j = y - Math.floor(spell.size/2); j <= y + Math.floor(spell.size/2); j++) {
-                this.terrainMap.set(`${i},${j}`, spell.terrain);
-                // Get player at position
+
+                const existingTerrain = this.terrainMap.get(`${i},${j}`);
+                if (existingTerrain && (existingTerrain == Terrain.ICE && spell.terrain == Terrain.FIRE
+                    || existingTerrain == Terrain.FIRE && spell.terrain == Terrain.ICE)) {
+                    this.terrainMap.delete(`${i},${j}`);
+                } else {
+                    this.terrainMap.set(`${i},${j}`, spell.terrain);
+                }
+
+                terrainUpdates.push({
+                    x: i,
+                    y: j,
+                    terrain: this.terrainMap.get(`${i},${j}`) || Terrain.NONE,
+                });
+
                 const player = this.getPlayerAt(i, j);
-                if (player) player.setUpTerrainEffect(spell.terrain);
+                if (player) player.setUpTerrainEffect(this.terrainMap.get(`${player.x},${player.y}`));
             }
         }
+        return terrainUpdates;
+    }
+
+    broadcastTerrain(terrainUpdates: TerrainUpdate[]) {
+        this.broadcast('terrain', terrainUpdates);
     }
 
     listAdjacentEnemies(player: ServerPlayer): ServerPlayer[] {

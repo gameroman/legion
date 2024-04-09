@@ -109,3 +109,9 @@ export interface Equipment {
     right_ring: number;
     necklace: number;
   }
+
+export interface TerrainUpdate {
+    x: number;
+    y: number;
+    terrain: Terrain;
+}

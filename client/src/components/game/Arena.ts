@@ -10,6 +10,7 @@ import { lineOfSight, serializeCoords } from '@legion/shared/utils';
 import { getFirebaseIdToken } from '../../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain } from "@legion/shared/enums";
+import { TerrainUpdate } from '@legion/shared/interfaces';
 
 export class Arena extends Phaser.Scene
 {
@@ -27,6 +28,7 @@ export class Arena extends Phaser.Scene
     tileSize = 60;
     tilesMap: Map<string, Phaser.GameObjects.Image> = new Map<string, Phaser.GameObjects.Image>();
     obstaclesMap: Map<string, boolean> = new Map<string, boolean>();
+    terrainSpritesMap: Map<string, Phaser.GameObjects.Sprite> = new Map<string, Phaser.GameObjects.Sprite>();
     gridWidth = 20;
     gridHeight = 9;
     server;
@@ -620,40 +622,44 @@ export class Arena extends Phaser.Scene
         if (flag) this.displaySpellArea(location, spell.size, spell.castTime);
     }
 
-    processTerrain({x, y, size, type}) {
-        console.log(`Processing terrain: ${x} ${y} ${size} ${type}`);
-        // Iterate over x - floor(size/2) to x + floor(size/2) and y - floor(size/2) to y + floor(size/2)
-        for (let i = x - Math.floor(size/2); i <= x + Math.floor(size/2); i++) {
-            for (let j = y - Math.floor(size/2); j <= y + Math.floor(size/2); j++) {
-                const {x: pixelX, y: pixelY} = this.gridToPixelCoords(i, j);
-                switch (type) {
-                    case Terrain.FIRE:
-                        const sprite = this.add.sprite(pixelX, pixelY, '')
-                            .setDepth(3 + y/10).setScale(2).setAlpha(0.9);
-                        sprite.anims.play('ground_flame');
-                        this.sprites.push(sprite);
-                        break;
-                    case Terrain.ICE:
-                        this.add.sprite(pixelX, pixelY, 'iceblock')
-                            .setDepth(3 + y/10).setAlpha(0.9).setOrigin(0.5, 0.35);
-                        const tile = this.tilesMap.get(serializeCoords(i, j));
-                        // @ts-ignore
-                        if (tile.tween) tile.tween.stop();
-                        this.obstaclesMap.set(serializeCoords(i, j), true);
-                        console.log(`Looking for player at ${i}, ${j}`);
-                        const player = this.gridMap.get(serializeCoords(i, j));
-                        if (player){
-                            console.log(`Found player at ${i}, ${j}`);
-                            player.setFrozen();
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                
+    processTerrain(updates: TerrainUpdate[]) {
+        updates.forEach(({x, y, terrain}) => {
+            const {x: pixelX, y: pixelY} = this.gridToPixelCoords(x, y);
+            switch (terrain) {
+                case Terrain.FIRE:
+                    const sprite = this.add.sprite(pixelX, pixelY, '')
+                        .setDepth(3 + y/10).setScale(2).setAlpha(0.9);
+                    sprite.anims.play('ground_flame');
+                    this.sprites.push(sprite);
+                    this.terrainSpritesMap.set(serializeCoords(x, y), sprite);
+                    break;
+                case Terrain.ICE:
+                    const icesprite = this.add.sprite(pixelX, pixelY, 'iceblock')
+                        .setDepth(3 + y/10).setAlpha(0.9).setOrigin(0.5, 0.35);
+                    this.terrainSpritesMap.set(serializeCoords(x, y), icesprite);
+                    
+                    const tile = this.tilesMap.get(serializeCoords(x, y));
+                    // @ts-ignore
+                    if (tile.tween) tile.tween.stop();
+                    this.obstaclesMap.set(serializeCoords(x, y), true);
+                    
+                    const player = this.gridMap.get(serializeCoords(x, y));
+                    if (player){
+                        player.setFrozen();
+                    }
+                    break;
+                case Terrain.NONE:
+                    this.obstaclesMap.delete(serializeCoords(x, y));
+                    const terrainsprite = this.terrainSpritesMap.get(serializeCoords(x, y));
+                    if (terrainsprite) {
+                        terrainsprite.destroy();
+                        this.terrainSpritesMap.delete(serializeCoords(x, y));
+                    }
+                    break;
+                default:
+                    break;
             }
-        }
-    
+        });
     }
 
     processLocalAnimation({x, y, id, isKill}) {
