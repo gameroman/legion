@@ -40,6 +40,9 @@ const eloRangeStart = 50;
 const eloRangeStep = 50; // Increase range by 50 points every interval
 const goldRewardInterval = 15;
 const goldReward = 1;
+const casualModeThresholdTime = 60; // seconds after which redirection probability starts increasing
+const maxWaitTimeForPractice = 300; // maximum wait time after which a player is guaranteed to be redirected
+
 
 // Initialize matchmaking functionality
 function setupMatchmaking() {
@@ -49,15 +52,18 @@ function setupMatchmaking() {
     }, 1000);
 }
 
+function incrementGoldReward(player) {
+    if (player.mode != PlayMode.PRACTICE && player.waitingTime % goldRewardInterval === 0) {
+        player.gold += goldReward; 
+        player.socket.emit("updateGold", { gold: player.gold });
+    }
+}
+
 function increaseEloRange() {
     playersQueue.forEach(player => {
         player.waitingTime += 1;
 
-        if (player.mode != PlayMode.PRACTICE && player.waitingTime % goldRewardInterval === 0) {
-            player.gold += goldReward; 
-            // Send gold increment to the player's socket
-            player.socket.emit("updateGold", { gold: player.gold });
-        }
+        incrementGoldReward(player);
 
         if (player.waitingTime >= eloRangeIncreaseInterval) {
             player.waitingTime = 0;
@@ -66,11 +72,30 @@ function increaseEloRange() {
     });
 }
 
+function switcherooCheck(player, i) {
+    if (player.mode == PlayMode.CASUAL && player.waitingTime > casualModeThresholdTime) {
+        // Calculate the probability of redirecting to a PRACTICE game
+        const waitTimeBeyondThreshold = player.waitingTime - casualModeThresholdTime;
+        const redirectionProbability = Math.min(1, waitTimeBeyondThreshold / (maxWaitTimeForPractice - casualModeThresholdTime));
+
+        if (Math.random() < redirectionProbability) {
+            console.log(`Redirecting ${player.socket.id} to a PRACTICE game due to long wait.`);
+            createGame(player.socket, null, PlayMode.PRACTICE);
+            savePlayerGold(player);
+            playersQueue.splice(i, 1); // Remove player from the queue
+            return true;
+        }
+    }
+    return false;
+}
+
 function tryMatchPlayers() {
     let i = 0;
     while (i < playersQueue.length) {
         let player1 = playersQueue[i];
         let matchFound = false;
+
+        if (switcherooCheck(player1, i)) return;
 
         for (let j = i + 1; j < playersQueue.length; j++) {
             let player2 = playersQueue[j];
@@ -101,7 +126,7 @@ function canBeMatched(player1: Player, player2: Player): boolean {
     return isEloCompatible && isLeagueCompatible;
 }
 
-async function createGame(player1: Socket, player2?: Socket, mode: PlayMode = PlayMode.RANKED) {
+async function createGame(player1: Socket, player2?: Socket, mode: PlayMode = PlayMode.PRACTICE) {
     try {
         const gameId = uuidv4();
         await apiFetch(
