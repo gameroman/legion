@@ -681,7 +681,12 @@ export class Arena extends Phaser.Scene
             .setDepth(3.5 + y/10)
             .play(spell.animation);
         this.playSound(spell.sfx);
-        if (spell.shake) this.cameras.main.shake(2000, 0.002); // 250 0,01
+
+        if (spell.shake && !isKill) {
+            const duration = 250;
+            const intensity = 0.002;
+            this.cameras.main.shake(duration, intensity);
+         } 
     }
 
     processGameEnd({isWinner, xp, gold}) {

@@ -52,7 +52,6 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
   fetchInventoryData = async () => {
     try {
         const data = await apiFetch('inventoryData');
-        console.log(data);
         this.setState({ 
           inventory: {
             consumables: data.inventory.consumables?.sort(),

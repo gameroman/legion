@@ -175,22 +175,33 @@ export class Player extends Phaser.GameObjects.Container {
         this.distance = distance;
     }
 
+    getIdleAnim() {
+        if (this.hp <= 0) return 'die';
+        return this.hp / this.maxHP < this.HURT_THRESHOLD ? 'idle_hurt' : 'idle';
+    }
+
     handleAnimationComplete() {
-        if (this.statuses.frozen) return;
-        let idleAnim = this.hp / this.maxHP < this.HURT_THRESHOLD ? 'idle_hurt' : 'idle';
-        if (this.hp <= 0) idleAnim = 'die';
-        this.playAnim(idleAnim)
+        if (this.statuses.frozen) {
+            return;
+        }
+        this.playAnim(this.getIdleAnim());
     }
 
     playAnim(key: string, revertToIdle = false) {
-        if (this.animationLock) return;
+        if (this.animationLock) {
+            return;
+        }
         this.animationLock = true;
 
         this.sprite.removeListener('animationcomplete', this.handleAnimationComplete);
         this.sprite.anims.stop();
 
-        if (this.statuses.frozen) return;
+        if (this.statuses.frozen) {
+            this.animationLock = false;
+            return;
+        }
 
+        console.log(`Playing ${this.texture}_anim_${key}`);
         this.sprite.play(`${this.texture}_anim_${key}`);
         if (revertToIdle) {
             this.sprite.once('animationcomplete', this.handleAnimationComplete, this);
@@ -573,7 +584,7 @@ export class Player extends Phaser.GameObjects.Container {
             this.cooldownTween?.stop();
         } else {
             this.statuses.frozen = false;
-            this.playAnim('idle');
+            this.playAnim(this.getIdleAnim());
         }   
     }
 }
