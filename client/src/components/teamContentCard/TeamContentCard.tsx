@@ -22,7 +22,7 @@ interface InventoryRequestPayload {
     itemEffects: Effect[];
     refreshCharacter: () => void;
     handleItemEffect: (effects: Effect[], actionType: InventoryActionType) => void;
-
+    updateInventory?: (type: string, action: InventoryActionType, index: number) => void;
 }
 
 class TeamContentCard extends Component<InventoryRequestPayload> {
@@ -220,6 +220,7 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
                     position={this.state.modalPosition} 
                     dialogData={this.state.modalData} 
                     handleClose={this.handleCloseModal} 
+                    updateInventory={this.props.updateInventory}
                 />
             </div>
         );

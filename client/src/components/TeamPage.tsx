@@ -52,6 +52,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
   fetchInventoryData = async () => {
     try {
         const data = await apiFetch('inventoryData');
+        console.log(data);
         this.setState({ 
           inventory: {
             consumables: data.inventory.consumables?.sort(),
@@ -116,6 +117,59 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
     this.setState({item_effect: result_effects});
   }
 
+  inventoryLength = (inventory) => Object.values(inventory)
+    .filter(Array.isArray)
+    .map(arr => arr.length)
+    .reduce((acc, curr) => acc + curr, 0);
+
+  updateInventory(type: string, action: InventoryActionType, index: number) {
+    console.log(`Action type: ${type}, Index: ${index}`);
+
+    switch(type) {
+      case 'consumables':
+        const consumables = this.state.inventory.consumables;
+        if (action === InventoryActionType.EQUIP) {
+          if (this.state.character_sheet_data.inventory.length >= this.state.character_sheet_data.carrying_capacity) {
+            errorToast('Character inventory is full!');
+            return;
+          }
+          consumables.splice(index, 1);
+        } else {
+          console.log(this.inventoryLength(this.state.inventory));
+          if (this.inventoryLength(this.state.inventory) >= this.state.carrying_capacity) {
+            errorToast('Character inventory is full!');
+            return;
+          }
+          consumables.push(index);
+        }
+        this.setState({ inventory: { ...this.state.inventory, consumables } });
+        break;
+      case 'equipment':
+        const equipment = this.state.inventory.equipment;
+        if (action === InventoryActionType.EQUIP) {
+          equipment.splice(index, 1);
+        } else {
+          if (this.inventoryLength(this.state.inventory) >= this.state.carrying_capacity) {
+            errorToast('Character inventory is full!');
+            return;
+          }
+        }
+        this.setState({ inventory: { ...this.state.inventory, equipment } });
+        break;
+      case 'spells':
+        const spells = this.state.inventory.spells;
+        if (action === InventoryActionType.EQUIP) {
+          if (this.state.character_sheet_data.skills.length >= this.state.character_sheet_data.skill_slots) {
+            errorToast('Character spell slots are full!');
+            return;
+          }
+          spells.splice(index, 1);
+        }
+        this.setState({ inventory: { ...this.state.inventory, spells } });
+        break;
+    }
+  }
+
   render() {
 
     return (
@@ -128,6 +182,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
               itemEffects={this.state.item_effect}
               refreshCharacter={this.refreshCharacter} 
               handleItemEffect={this.handleItemEffect}
+              updateInventory={this.updateInventory.bind(this)}
             />
             <Inventory 
               id={this.state.character_id} 
@@ -135,6 +190,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
               carrying_capacity={this.state.carrying_capacity}
               refreshCharacter={this.refreshCharacter} 
               handleItemEffect={this.handleItemEffect}
+              updateInventory={this.updateInventory.bind(this)}
             />
           </div>
         </div>

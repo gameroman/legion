@@ -25,6 +25,7 @@ interface DialogProps {
   };
   handleClose: () => void;
   refreshCharacter?: () => void;
+  updateInventory?: (type: string, action: InventoryActionType, index: number) => void;
 }
 
 class ItemDialog extends Component<DialogProps> {
@@ -39,18 +40,20 @@ class ItemDialog extends Component<DialogProps> {
       action: this.props.actionType
     };
 
+    if(this.props.updateInventory) this.props.updateInventory(type, this.props.actionType, index)
+    this.props.handleClose();
+
     apiFetch('inventoryTransaction', {
       method: 'POST',
       body: payload
     })
       .then((data) => {
         if (data.status == 0) {
-          successToast(this.props.actionType > 0 ? 'Item un-equipped!' : 'Item equipped!');
+          // successToast(this.props.actionType > 0 ? 'Item un-equipped!' : 'Item equipped!');
           
-          this.props.handleClose();
           this.props.refreshCharacter();
-        } else {
-          errorToast('Character inventory is full!');
+        // } else {
+        //   errorToast('Character inventory is full!');
         }
       })
       .catch(error => errorToast(`Error: ${error}`));
