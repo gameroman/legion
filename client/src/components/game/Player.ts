@@ -37,6 +37,7 @@ export class Player extends Phaser.GameObjects.Container {
     inventory: BaseItem[] = [];
     spells: BaseSpell[] = [];
     animationSprite: Phaser.GameObjects.Sprite;
+    statusSprite: Phaser.GameObjects.Sprite;
     pendingSpell: number | null = null;
     pendingItem: number | null = null;
     casting = false;
@@ -122,6 +123,9 @@ export class Player extends Phaser.GameObjects.Container {
         this.animationSprite = scene.add.sprite(0, 20, '').setScale(2).setVisible(false);
         this.animationSprite.on('animationcomplete', () => this.animationSprite.setVisible(false), this);
         this.add(this.animationSprite);
+
+        this.statusSprite = scene.add.sprite(0, -20, 'statuses').setVisible(false);
+        this.add(this.statusSprite);
 
         // Add the container to the scene
         scene.add.existing(this);
@@ -574,6 +578,7 @@ export class Player extends Phaser.GameObjects.Container {
 
     setStatuses(statuses) {
         this.setFrozen(statuses.frozen);
+        this.setParalyzed(statuses.paralyzed);
     }
 
     setFrozen(flag) {
@@ -586,5 +591,20 @@ export class Player extends Phaser.GameObjects.Container {
             this.statuses.frozen = false;
             this.playAnim(this.getIdleAnim());
         }   
+    }
+
+    setParalyzed(flag) {
+        if (flag) {
+            this.statuses.paralyzed = true;
+            this.sprite.anims.stop();
+            this.cooldownTween?.stop();
+            this.statusSprite.setVisible(true);
+            this.statusSprite.anims.play('paralyzed');
+        } else {
+            this.statuses.paralyzed = false;
+            this.statusSprite.anims.stop();
+            this.statusSprite.setVisible(false);
+            this.playAnim(this.getIdleAnim());
+        }
     }
 }

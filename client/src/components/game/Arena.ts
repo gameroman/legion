@@ -61,6 +61,7 @@ export class Arena extends Phaser.Scene
         this.load.spritesheet('thunder', 'animations/bolts.png', { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('ice', 'animations/ice.png', { frameWidth: 96, frameHeight: 96});
 
+        this.load.spritesheet('statuses', 'States.png', { frameWidth: 96, frameHeight: 96});
 
         this.load.audio('click', 'sfx/click_2.wav');
         this.load.audio('slash', 'sfx/swish_2.wav');
@@ -235,7 +236,6 @@ export class Arena extends Phaser.Scene
     }
 
     floatTiles(startX, startY) {
-        // this.localAnimationSprite = this.add.sprite(0, 0, '').setScale(3).setOrigin(0.5, 0.7).setVisible(false);
 
         // Loop over each row
         for (let y = 0; y < this.gridHeight; y++) {
@@ -868,6 +868,13 @@ export class Arena extends Phaser.Scene
             key: `slash`, 
             frames: this.anims.generateFrameNumbers('slash', { frames: [99, 100, 101, 102] }), 
             frameRate: 15, // Number of frames per second
+        });
+
+        this.anims.create({
+            key: `paralyzed`, 
+            frames: this.anims.generateFrameNumbers('statuses', { frames: [56, 57, 58, 59, 60, 61, 62, 63] }), 
+            frameRate: 15,
+            repeat: -1,
         });
 
         this.animationScales = {

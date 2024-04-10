@@ -365,11 +365,11 @@ export class ServerPlayer {
                 }, 3000);
                 break;
             case Terrain.ICE:
-                this.setFrozen();
+                this.addStatusEffect(StatusEffect.FREEZE);
                 break;
             case Terrain.NONE:
                 if (this.isFrozen()) {
-                    this.unFreeze();
+                    this.removeStatusEffect(StatusEffect.FREEZE);
                 }
                 break;
             default:
@@ -382,13 +382,31 @@ export class ServerPlayer {
         return this.statuses.frozen;
     }
 
-    setFrozen() {
-        this.statuses.frozen = true;
+    addStatusEffect(status: StatusEffect) {
+        switch(status) {
+            case StatusEffect.PARALYZE:
+                this.statuses.paralyzed = true;
+                break;
+            case StatusEffect.FREEZE:
+                this.statuses.frozen = true;
+                break;
+            default:
+                break;
+        }
         this.broadcastStatusEffectChange();
     }
 
-    unFreeze() {
-        this.statuses.frozen = false;
+    removeStatusEffect(status: StatusEffect) {
+        switch(status) {
+            case StatusEffect.PARALYZE:
+                this.statuses.paralyzed = false;
+                break;
+            case StatusEffect.FREEZE:
+                this.statuses.frozen = false;
+                break;
+            default:
+                break;
+        }
         this.broadcastStatusEffectChange();
     }
 

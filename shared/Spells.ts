@@ -1,6 +1,6 @@
 
 import { BaseSpell } from "./BaseSpell";
-import { Stat, Target, EffectDirection, Terrain, Rarity } from "./enums";
+import { Stat, Target, EffectDirection, Terrain, Rarity, StatusEffect } from "./enums";
 import { EffectModifier, EffectModifiers } from "./interfaces";
 
 export const spells:BaseSpell[] = [];
@@ -66,6 +66,7 @@ spells[2] = new BaseSpell({
     castTime: 1,
     target: Target.AOE,
     effects: [{stat: Stat.HP, value: -30, modifiers: SPBasedBoostDeboost}],
+    status: StatusEffect.PARALYZE,
     score: 80,
     rarity: Rarity.COMMON,
 });

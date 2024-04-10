@@ -1,4 +1,4 @@
-import { Stat, Target, EffectDirection, EquipmentSlot, Terrain, Rarity } from "./enums";
+import { Stat, Target, EffectDirection, EquipmentSlot, Terrain, Rarity, StatusEffect } from "./enums";
 
 export class EffectModifier {
     stat;
@@ -48,6 +48,7 @@ export interface SpellData {
     yoffset?: number;
     terrain?: Terrain;
     rarity: Rarity;
+    status?: StatusEffect;
 }
 
 export interface ConsumableData {

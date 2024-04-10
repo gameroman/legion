@@ -82,5 +82,5 @@ export enum StatusEffect {
     BURN,
     POISON,
     SLEEP,
-    STUN
+    PARALYZE
 }

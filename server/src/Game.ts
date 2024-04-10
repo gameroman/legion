@@ -424,6 +424,12 @@ export abstract class Game
             const terrainUodates = this.manageTerrain(spell, x, y);
             this.broadcastTerrain(terrainUodates);
         }
+
+        if (spell.status) {
+            targets.forEach(target => {
+                target.addStatusEffect(spell.status);
+            });
+        }
         
         this.broadcast('localanimation', {
             x,
