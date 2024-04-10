@@ -4,6 +4,7 @@ import { h, Component } from 'preact';
 import { PlayerInventory } from '@legion/shared/interfaces';
 import { ShopTabIcons, ShopTabs } from './ShopContent.data';
 import ShopSpellCard from '../shopSpellCard/ShopSpellCard';
+import ShopConsumableCard from '../shopConsumableCard/ShopConsumableCard';
 
 interface ShopContentProps {
     inventoryData: PlayerInventory;
@@ -26,6 +27,8 @@ class ShopContent extends Component<ShopContentProps> {
             switch(this.state.curr_tab) {
                 case ShopTabs.SPELLS:
                     return inventoryData.spells.map((item, index) => <ShopSpellCard key={index} index={item} />)
+                case ShopTabs.CONSUMABLES:
+                    return inventoryData.consumables.map((item, index) => <ShopConsumableCard key={index} index={item} />)
                 default:
                     return null;
             }

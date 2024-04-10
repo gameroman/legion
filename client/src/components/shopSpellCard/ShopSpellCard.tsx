@@ -4,12 +4,12 @@ import { h, Component } from 'preact';
 import { Class, Target } from "@legion/shared/enums";
 import { spells } from '@legion/shared/Spells';
 
-interface SpellCardProps {
+interface ShopCardProps {
   key: number;
   index: number;
 }
 
-class ShopSpellCard extends Component<SpellCardProps> {
+class ShopSpellCard extends Component<ShopCardProps> {
   render() {
     const data = spells[this.props.index];
 

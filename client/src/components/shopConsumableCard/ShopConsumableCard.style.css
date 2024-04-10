@@ -1,0 +1,114 @@
+.shop-card-container {
+    background-image: url('@assets/shop/daily_bg_idle.png');
+    background-size: 100% 100%;
+    padding: 14px;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.shop-card-container:hover {
+    background-image: url('@assets/shop/daily_bg_active.png');
+}
+
+.shop-card-title {
+    padding: 6px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-image: url('@assets/shop/daily_title_bar.png');
+    background-size: 100% 100%;
+    width: 90%;
+}
+
+.consumable-card-info-box {
+    background-image: url('@assets/shop/black_info_bg.png');
+    background-size: 100% 100%;
+    padding: 6px 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+}
+
+.shop-card-title span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #FFFFFF;
+}
+
+.consumable-card-info-box span {
+    font-size: 12px;
+    color: #71deff;
+}
+
+.consumable-card-info-box img {
+    width: 12px;
+    height: 12px;
+}
+
+.consumable-card-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.consumable-card-content img {
+    width: 128px;
+    height: 128px;
+    border-radius: 12px;
+}
+
+.consumable-card-description {
+    text-align: center;
+    font-size: 14px;
+}
+
+.consumable-card-effect-container {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+}
+
+.consumable-card-effect {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background-color: #303540;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.consumable-card-effect img {
+    width: 14px;
+    height: 16px;
+}
+
+.consumable-card-effect span {
+    color: #FFFFFF;
+    font-size: 10px;
+}
+
+.shop-card-price {
+    background-image: url('@assets/shop/daily_button.png');
+    background-size: 100% 100%;
+    padding: 8px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    color: #FFFFFF;
+    font-size: 14px;
+    width: 100%;
+    margin-bottom: 4px;
+}
+
+.shop-card-price img {
+    width: 14px;
+    height: 14px;
+}

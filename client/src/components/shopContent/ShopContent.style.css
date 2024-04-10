@@ -28,6 +28,10 @@
 
 .shop-items-container {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
     gap: 4px;
+    width: 1024px;
+    height: 620px;
 }
+
