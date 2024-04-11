@@ -107,6 +107,11 @@ io.on('connection', async (socket: any) => {
         const game = socketMap.get(socket);
         game?.processAction('attack', data, socket);
       });
+
+      socket.on('obstacleattack', (data: any) => {
+        const game = socketMap.get(socket);
+        game?.processAction('obstacleattack', data, socket);
+      });
   
       socket.on('useitem', (data: any) => {
         const game = socketMap.get(socket);

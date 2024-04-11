@@ -454,9 +454,9 @@ export class Player extends Phaser.GameObjects.Container {
         if (this.arena.selectedPlayer == this) this.arena.deselectPlayer();
     }
 
-    attack(target: Player) {
+    attack(targetX: number) {
         this.playAnim('attack', true);
-        this.sprite.flipX = target.gridX > this.gridX;
+        this.sprite.flipX = targetX > this.gridX;
     }
 
     hurt() {

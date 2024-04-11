@@ -125,6 +125,10 @@ export class Arena extends Phaser.Scene
             this.processAttack(data);
         });
 
+        this.socket.on('obstacleattack', (data) => {
+            this.processObstacleAttack(data);
+        });
+
         this.socket.on('cooldown', (data) => {
             this.processCooldown(data);
         });
@@ -189,6 +193,16 @@ export class Arena extends Phaser.Scene
             target: player.num,
         };
         this.send('attack', data);
+    }
+
+    sendObstacleAttack(x, y) {
+        if (!this.selectedPlayer.canAct()) return;
+        const data = {
+            num: this.selectedPlayer.num,
+            x,
+            y,
+        };
+        this.send('obstacleattack', data);
     }
 
     sendSpell(x: number, y: number, player: Player | null) {
@@ -447,8 +461,13 @@ export class Arena extends Phaser.Scene
         return !this.gridMap.get(serializeCoords(gridX, gridY)) && !this.obstaclesMap.get(serializeCoords(gridX, gridY));
     }
 
+    hasObstacle(gridX, gridY) {
+        return this.obstaclesMap.has(serializeCoords(gridX, gridY));
+    }
+
     handleTileClick(gridX, gridY) {
         console.log(`Clicked tile at grid coordinates (${gridX}, ${gridY})`);
+        if (!this.selectedPlayer.canAct()) return;
         const player = this.gridMap.get(serializeCoords(gridX, gridY));
         const pendingSpell = this.selectedPlayer?.spells[this.selectedPlayer?.pendingSpell];
         const pendingItem = this.selectedPlayer?.inventory[this.selectedPlayer?.pendingItem];
@@ -456,6 +475,8 @@ export class Arena extends Phaser.Scene
             this.sendSpell(gridX, gridY, player);
         } else if (this.selectedPlayer?.pendingItem != null) {
             this.sendUseItem(this.selectedPlayer?.pendingItem, gridX, gridY, player);
+        } else if (this.hasObstacle(gridX, gridY)) {
+            this.sendObstacleAttack(gridX, gridY);
         } else if (this.selectedPlayer && !player) {
             this.handleMove(gridX, gridY);
         } else if (player){ 
@@ -585,9 +606,15 @@ export class Arena extends Phaser.Scene
         const otherTeam = this.getOtherTeam(team);
         const targetPlayer = this.getPlayer(otherTeam, target);
         this.playSound('slash');
-        player.attack(targetPlayer);
+        player.attack(targetPlayer.x);
         targetPlayer.setHP(hp);
         targetPlayer.displaySlash(player);
+    }
+
+    processObstacleAttack({team, num, x, y}) {
+        const player = this.getPlayer(team, num);
+        this.playSound('slash');
+        player.attack(x);
     }
 
     processCooldown({num, cooldown}) {

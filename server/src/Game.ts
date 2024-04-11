@@ -204,6 +204,9 @@ export abstract class Game
             case 'attack':
                 this.processAttack(data, team!);
                 break;
+            case 'obstacleattack':
+                this.processObstacleAttack(data, team!);
+                break;
             case 'useitem':
                 this.processUseItem(data, team!);
                 break;
@@ -322,6 +325,11 @@ export abstract class Game
         const damage = this.calculateDamage(player, opponent);
         opponent.takeDamage(damage);
         player.increaseDamageDealt(damage);
+
+        if (this.hasObstacle(opponent.x, opponent.y)) {
+            const terrainUpdate = this.removeTerrain(opponent.x, opponent.y);
+            this.broadcastTerrain([terrainUpdate]);
+        }
         
         const cooldown = player.getCooldown('attack');
         this.setCooldown(player, cooldown);
@@ -332,6 +340,33 @@ export abstract class Game
             num,
             damage: -damage,
             hp: opponent.getHP(),
+        });
+
+        team.socket?.emit('cooldown', {
+            num,
+            cooldown,
+        });
+    }
+
+    processObstacleAttack({num, x, y}: {num: number, x: number, y: number}, team: Team) {
+        const player = team.getMembers()[num - 1];
+        
+        if (
+            !player.canAct() || 
+            !player.isNextTo(x, y) || 
+            !this.hasObstacle(x, y)
+        ) return;
+
+        const cooldown = player.getCooldown('attack');
+        this.setCooldown(player, cooldown);
+
+        const terrainUpdate = this.removeTerrain(x, y);
+        this.broadcastTerrain([terrainUpdate]);
+
+        this.broadcast('obstacleattack', {
+            team: team.id,
+            num,
+            x, y,
         });
 
         team.socket?.emit('cooldown', {
@@ -421,8 +456,8 @@ export abstract class Game
         player.team!.increaseScoreFromSpell(spell.score);
 
         if (spell.terrain) {
-            const terrainUodates = this.manageTerrain(spell, x, y);
-            this.broadcastTerrain(terrainUodates);
+            const terrainUpdates = this.manageTerrain(spell, x, y);
+            this.broadcastTerrain(terrainUpdates);
         }
 
         if (spell.status) {
@@ -547,6 +582,15 @@ export abstract class Game
             }
         }
         return terrainUpdates;
+    }
+
+    removeTerrain(x: number, y: number) {
+        this.terrainMap.delete(`${x},${y}`);
+        return {
+            x,
+            y,
+            terrain: this.terrainMap.get(`${x},${y}`) || Terrain.NONE,
+        }
     }
 
     broadcastTerrain(terrainUpdates: TerrainUpdate[]) {
