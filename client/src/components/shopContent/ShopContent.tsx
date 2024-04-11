@@ -7,6 +7,7 @@ import ShopSpellCard from '../shopSpellCard/ShopSpellCard';
 import ShopConsumableCard from '../shopConsumableCard/ShopConsumableCard';
 import ShopEquipmentCard from '../shopEquipmentCard/ShopEquipmentCard';
 import ShopCharacterCard from '../shopCharacterCard/shopCharacterCard';
+import { InventoryType } from '@legion/shared/enums';
 
 interface ShopContentProps {
     inventoryData: PlayerInventory;
@@ -26,14 +27,18 @@ class ShopContent extends Component<ShopContentProps> {
             }
         }
 
+        const getItemAmount = (index: number, type: InventoryType) => {
+            return inventoryData[type].filter((item: number) => item == index).length;
+        }
+
         const renderItems = () => {
             switch(this.state.curr_tab) {
                 case ShopTabs.SPELLS:
-                    return inventoryData.spells.map((item, index) => <ShopSpellCard key={index} index={item} />)
+                    return inventoryData.spells.map((item, index) => <ShopSpellCard key={index} index={item} getItemAmount={getItemAmount} />)
                 case ShopTabs.CONSUMABLES:
-                    return inventoryData.consumables.map((item, index) => <ShopConsumableCard key={index} index={item} />)
+                    return inventoryData.consumables.map((item, index) => <ShopConsumableCard key={index} index={item} getItemAmount={getItemAmount} />)
                 case ShopTabs.EQUIPMENTS:
-                    return inventoryData.equipment.map((item, index) => <ShopEquipmentCard key={index} index={item} />)
+                    return inventoryData.equipment.map((item, index) => <ShopEquipmentCard key={index} index={item} getItemAmount={getItemAmount} />)
                 case ShopTabs.CHARACTERS:
                     return characters.map((item, index) => <ShopCharacterCard key={index} data={item} />)
                 default:

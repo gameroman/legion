@@ -1,13 +1,9 @@
 // ShopConsumableCard.tsx
 import './ShopConsumableCard.style.css';
 import { h, Component } from 'preact';
-import { Class, Target } from "@legion/shared/enums";
+import { InventoryType, Target } from "@legion/shared/enums";
 import { items } from '@legion/shared/Items';
-
-interface ShopCardProps {
-  key: number;
-  index: number;
-}
+import { ShopCardProps } from '../shopSpellCard/ShopSpellCard';
 
 enum StatIcons {
   '/inventory/cd_icon.png',
@@ -29,7 +25,7 @@ class ShopConsumableCard extends Component<ShopCardProps> {
           <span>{data.name}</span>
           <div className="consumable-card-info-box">
             <img src="/shop/item_count_icon.png" alt="count icon" />
-            <span>3</span>
+            <span>{this.props.getItemAmount(this.props.index, InventoryType.CONSUMABLES)}</span>
           </div>
         </div>
         <div className="consumable-card-content">

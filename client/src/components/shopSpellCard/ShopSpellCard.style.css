@@ -9,6 +9,10 @@
     gap: 6px;
 }
 
+.spell-card-container:hover {
+    background-image: url('@assets/shop/daily_bg_active.png');
+}
+
 .spell-card-title {
     padding: 6px 8px;
     display: flex;

@@ -1,14 +1,10 @@
 // ShopEquipmentCard.tsx
 import './ShopEquipmentCard.style.css';
 import { h, Component } from 'preact';
-import { Class, Stat } from "@legion/shared/enums";
+import { Class, InventoryType, Stat } from "@legion/shared/enums";
 import { equipments } from '@legion/shared/Equipments';
 import { INFO_BG_COLOR } from '../itemDialog/ItemDialogType';
-
-interface ShopCardProps {
-  key: number;
-  index: number;
-}
+import { ShopCardProps } from '../shopSpellCard/ShopSpellCard';
 
 class ShopEquipmentCard extends Component<ShopCardProps> {
   render() {
@@ -41,7 +37,7 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
             </div>
             <div className="equipment-card-info-box">
               <img src="/shop/item_count_icon.png" alt="count icon" />
-              <span>3</span>
+              <span>{this.props.getItemAmount(this.props.index, InventoryType.EQUIPMENTS)}</span>
             </div>
           </div>
         </div>

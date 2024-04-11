@@ -1,12 +1,13 @@
 // Button.tsx
 import './ShopSpellCard.style.css'
 import { h, Component } from 'preact';
-import { Class, Target } from "@legion/shared/enums";
+import { Class, InventoryType, Target } from "@legion/shared/enums";
 import { spells } from '@legion/shared/Spells';
 
-interface ShopCardProps {
+export interface ShopCardProps {
   key: number;
   index: number;
+  getItemAmount: (index: number, type: InventoryType) => number;
 }
 
 class ShopSpellCard extends Component<ShopCardProps> {
@@ -30,7 +31,7 @@ class ShopSpellCard extends Component<ShopCardProps> {
             </div>
             <div className="spell-card-info-box">
               <img src="/shop/item_count_icon.png" alt="count icon" />
-              <span>3</span>
+              <span>{this.props.getItemAmount(this.props.index, InventoryType.SKILLS)}</span>
             </div>
           </div>
         </div>
