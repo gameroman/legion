@@ -3,12 +3,9 @@ import * as logger from "firebase-functions/logger";
 import admin, {corsMiddleware, getUID} from "./APIsetup";
 import {items} from "@legion/shared/Items";
 import {equipments} from "@legion/shared/Equipments";
-import {InventoryType, InventoryActionType}
+import {InventoryType, InventoryActionType, equipmentFields}
   from "@legion/shared/enums";
 import {Equipment} from "@legion/shared/interfaces";
-
-const equipmentFields = ["weapon", "helmet", "armor", "belt", "gloves",
-  "boots", "left_ring", "right_ring", "necklace"];
 
 export const inventoryData = onRequest((request, response) => {
   logger.info("Fetching inventoryData");

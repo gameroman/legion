@@ -123,10 +123,10 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
             return Array.from({ length: characterData.skill_slots }, (_, i) => (
                 i < characterData.skills.length ? (
                     <div className="team-item" key={i} onClick={(e) => this.handleOpenModal(e, spells[characterData.skills[i]], ItemDialogType.SKILLS, i)}>
-                        <img src={`/spells/${spells[characterData.skills[i]]?.frame}`} alt={spells[characterData.skills[i]].name} />
+                        <img src={`/spells/${spells[characterData.skills[i]]?.frame}`} alt={spells[characterData.skills[i]]?.name} />
                     </div>
                 ) : (
-                    <div className="team-item" key={i} onClick={(e) => this.handleOpenModal(e, spells[characterData.skills[i]], ItemDialogType.SKILLS, i)}>
+                    <div className="team-item" key={i} >
                     </div>
                 )
             ))
@@ -141,7 +141,7 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
                         <img src={`/consumables/${items[characterData.inventory[i]]?.frame}`} alt={items[characterData.inventory[i]].name} />
                     </div>
                 ) : (
-                    <div className="team-item" key={i} onClick={(e) => this.handleOpenModal(e, items[characterData.inventory[i]], ItemDialogType.CONSUMABLES, i)}>
+                    <div className="team-item" key={i} >
                     </div>
                 )
             ))

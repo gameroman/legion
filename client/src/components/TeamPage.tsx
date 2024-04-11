@@ -1,17 +1,17 @@
 // PlayPage.tsx
 import { h, Component } from 'preact';
-import { Router, Route } from 'preact-router';
 
 import Roster from './roster/Roster';
-import Character from './Character';
 import Inventory from './inventory/Inventory';
 
 import { apiFetch } from '../services/apiService';
 import { successToast, errorToast } from './utils';
 import TeamContentCard from './teamContentCard/TeamContentCard';
 import { Effect } from '@legion/shared/interfaces';
-import { EquipmentSlot, InventoryActionType } from '@legion/shared/enums';
+import { EquipmentSlot, InventoryActionType, equipmentFields } from '@legion/shared/enums';
 import { equipments } from '@legion/shared/Equipments';
+import { items } from '@legion/shared/Items';
+import { spells } from '@legion/shared/Spells';
 
 interface TeamPageState {
   inventory: {
@@ -122,8 +122,6 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
     .reduce((acc, curr) => acc + curr, 0);
 
   updateInventory(type: string, action: InventoryActionType, index: number) {
-    console.log(`Action type: ${type}, Index: ${index}`);
-
     switch(type) {
       case 'consumables':
         const consumables = this.state.inventory.consumables;
@@ -132,39 +130,66 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
             errorToast('Character inventory is full!');
             return;
           }
+          const id = items[this.state.inventory.consumables[index]].id;
           consumables.splice(index, 1);
+          this.state.character_sheet_data.inventory.push(id);
         } else {
-          console.log(this.inventoryLength(this.state.inventory));
           if (this.inventoryLength(this.state.inventory) >= this.state.carrying_capacity) {
             errorToast('Character inventory is full!');
             return;
           }
-          consumables.push(index);
+          const id = items[this.state.character_sheet_data.inventory[index]].id;
+          consumables.push(id);
+          consumables.sort();
+          this.state.character_sheet_data.inventory.splice(index, 1);
         }
         this.setState({ inventory: { ...this.state.inventory, consumables } });
         break;
       case 'equipment':
         const equipment = this.state.inventory.equipment;
         if (action === InventoryActionType.EQUIP) {
+          const data = equipments[equipment[index]];
+          const slotNumber = data.slot;
+          const field = equipmentFields[slotNumber];
+          const id = equipment[index];
           equipment.splice(index, 1);
+
+          if (this.state.character_sheet_data.equipment[field] !== -1) {
+            const removed_id = this.state.character_sheet_data.equipment[field];
+            equipment.push(removed_id);
+            equipment.sort();
+          }
+
+          this.state.character_sheet_data.equipment[field] = id;
         } else {
           if (this.inventoryLength(this.state.inventory) >= this.state.carrying_capacity) {
             errorToast('Character inventory is full!');
             return;
           }
+          const field = equipmentFields[index];
+          const id = this.state.character_sheet_data.equipment[field];
+          this.state.character_sheet_data.equipment[field] = -1;
+          equipment.push(id);
+          equipment.sort();
         }
         this.setState({ inventory: { ...this.state.inventory, equipment } });
         break;
       case 'spells':
-        const spells = this.state.inventory.spells;
+        const playerSpells = this.state.inventory.spells;
         if (action === InventoryActionType.EQUIP) {
+          if (this.state.character_sheet_data.skill_slots == 0) {
+            errorToast('Character has no spell slots!');
+            return;
+          }
           if (this.state.character_sheet_data.skills.length >= this.state.character_sheet_data.skill_slots) {
             errorToast('Character spell slots are full!');
             return;
           }
-          spells.splice(index, 1);
+          const id = spells[this.state.inventory.spells[index]].id;
+          playerSpells.splice(index, 1);
+          this.state.character_sheet_data.skills.push(id);
         }
-        this.setState({ inventory: { ...this.state.inventory, spells } });
+        this.setState({ inventory: { ...this.state.inventory, spells: playerSpells } });
         break;
     }
   }

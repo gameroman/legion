@@ -84,3 +84,6 @@ export enum StatusEffect {
     SLEEP,
     PARALYZE
 }
+
+export const equipmentFields = ["weapon", "helmet", "armor", "belt", "gloves",
+  "boots", "left_ring", "right_ring", "necklace"];
