@@ -186,6 +186,11 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
             return;
           }
           const id = spells[this.state.inventory.spells[index]].id;
+          // Check if character already knows the spell
+          if (this.state.character_sheet_data.skills.includes(id)) {
+            errorToast('Character already knows this spell!');
+            return;
+          }
           playerSpells.splice(index, 1);
           this.state.character_sheet_data.skills.push(id);
         }

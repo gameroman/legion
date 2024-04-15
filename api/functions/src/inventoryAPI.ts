@@ -135,6 +135,11 @@ function learnSpell(playerData: any, characterData: any, index: number) {
   }
 
   const item = skills[index];
+  // Check if character already knows the spell
+  if (inventory.includes(item)) {
+    return -1;
+  }
+
   skills.splice(index, 1);
   inventory.push(item);
 
