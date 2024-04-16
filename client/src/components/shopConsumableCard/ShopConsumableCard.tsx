@@ -3,7 +3,7 @@ import './ShopConsumableCard.style.css';
 import { h, Component } from 'preact';
 import { InventoryType, Target } from "@legion/shared/enums";
 import { items } from '@legion/shared/Items';
-import { ShopCardProps } from '../shopSpellCard/ShopSpellCard';
+import { BaseItem } from '@legion/shared/BaseItem';
 
 enum StatIcons {
   '/inventory/cd_icon.png',
@@ -22,9 +22,16 @@ interface modalData {
   price: number;
 }
 
+interface ShopCardProps {
+  key: number;
+  data: BaseItem;
+  getItemAmount: (index: number, type: InventoryType) => number;
+  handleOpenModal: (e: any, modalData: modalData) => void;
+}
+
 class ShopConsumableCard extends Component<ShopCardProps> {
   render() {
-    const data = items[this.props.index];
+    const { data } = this.props;
 
     const modalData: modalData = {
       id: data.id,
@@ -39,7 +46,7 @@ class ShopConsumableCard extends Component<ShopCardProps> {
           <span>{data.name}</span>
           <div className="consumable-card-info-box">
             <img src="/shop/item_count_icon.png" alt="count icon" />
-            <span>{this.props.getItemAmount(this.props.index, InventoryType.CONSUMABLES)}</span>
+            <span>{this.props.getItemAmount(data.id, InventoryType.CONSUMABLES)}</span>
           </div>
         </div>
         <div className="consumable-card-content">

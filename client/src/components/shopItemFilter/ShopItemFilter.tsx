@@ -2,15 +2,13 @@
 import { Class, EquipmentSlot } from '@legion/shared/enums';
 import './ShopItemFilter.style.css'
 import { h, Component } from 'preact';
-import { PlayerInventory } from '@legion/shared/interfaces';
-import { equipments } from '@legion/shared/Equipments';
-import { spells } from '@legion/shared/Spells';
+import { ShopItems } from '@legion/shared/interfaces';
 import { ShopTabs } from '../shopContent/ShopContent.data';
 
 interface ShopItemFilterProps {
     curr_tab: ShopTabs;
-    inventoryData: PlayerInventory;
-    handleInventory: (inventory: PlayerInventory) => void;
+    shopItems: ShopItems;
+    handleInventory: (inventory: ShopItems) => void;
 }
 
 interface ShopItemFilterState {
@@ -26,7 +24,7 @@ class ShopItemFilter extends Component<ShopItemFilterProps, ShopItemFilterState>
         slotCheckbox: new Array(9).fill(false)
     }
     render() {
-        const { curr_tab, inventoryData } = this.props;
+        const { curr_tab, shopItems } = this.props;
 
         if (curr_tab !== 1 && curr_tab !== 2) return; // only accept equipment & spells
 
@@ -37,18 +35,18 @@ class ShopItemFilter extends Component<ShopItemFilterProps, ShopItemFilterState>
             this.setState({ currClass: Class[curr_class] });
 
             if (Class[curr_class] === 4) {
-                this.props.handleInventory(inventoryData);
+                this.props.handleInventory(shopItems);
                 return;
             }
 
             const updatedInventory = curr_tab == 1 ? {
-                consumables: inventoryData.consumables,
-                spells: inventoryData.spells,
-                equipment: inventoryData.equipment.filter(index => equipments[index].classes.includes(Class[curr_class]))
+                consumables: shopItems.consumables,
+                spells: shopItems.spells,
+                equipment: shopItems.equipment.filter(item => item.classes.includes(Class[curr_class]))
             } : {
-                consumables: inventoryData.consumables,
-                spells: inventoryData.spells.filter(index => spells[index].classes.includes(Class[curr_class])),
-                equipment: inventoryData.equipment
+                consumables: shopItems.consumables,
+                spells: shopItems.spells.filter(item => item.classes.includes(Class[curr_class])),
+                equipment: shopItems.equipment
             }
 
             this.props.handleInventory(updatedInventory);
@@ -61,12 +59,12 @@ class ShopItemFilter extends Component<ShopItemFilterProps, ShopItemFilterState>
             updatedCheckboxes[index] = !updatedCheckboxes[index];
             this.setState({ slotCheckbox: updatedCheckboxes });
 
-            const equipmentTemp = inventoryData.equipment;
-            const updatedEquipment = equipmentTemp.filter(index => !!updatedCheckboxes[equipments[index].slot]);
+            const equipmentTemp = shopItems.equipment;
+            const updatedEquipment = equipmentTemp.filter(item => updatedCheckboxes[item.slot]);
 
             this.props.handleInventory({
-                consumables: inventoryData.consumables,
-                spells: inventoryData.spells,
+                consumables: shopItems.consumables,
+                spells: shopItems.spells,
                 equipment: updatedEquipment
             });
         }

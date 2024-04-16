@@ -3,7 +3,7 @@ import './ShopContent.style.css';
 import { h, Component } from 'preact';
 import { apiFetch } from '../../services/apiService';
 import { InventoryType } from '@legion/shared/enums';
-import { PlayerInventory } from '@legion/shared/interfaces';
+import { PlayerInventory, ShopItems } from '@legion/shared/interfaces';
 import { ShopTabIcons, ShopTabs } from './ShopContent.data';
 import { errorToast, successToast } from '../utils';
 import ShopSpellCard from '../shopSpellCard/ShopSpellCard';
@@ -12,10 +12,13 @@ import ShopEquipmentCard from '../shopEquipmentCard/ShopEquipmentCard';
 import ShopCharacterCard from '../shopCharacterCard/shopCharacterCard';
 import PurchaseDialog from '../purchaseDialog/PurchaseDialog';
 import ShopItemFilter from '../shopItemFilter/ShopItemFilter';
+import { spells } from '@legion/shared/Spells';
+import { items } from '@legion/shared/Items';
+import { equipments } from '@legion/shared/Equipments';
 interface ShopContentProps {
     gold: number;
-    inventoryData: PlayerInventory;
     characters: CharacterData[];
+    inventory: PlayerInventory;
     fetchInventoryData: () => void;
 }
 
@@ -32,17 +35,11 @@ class ShopContent extends Component<ShopContentProps> {
         openModal: false,
         position: null,
         modalData: null,
-        inventoryData: null,
-    }
-
-    componentDidUpdate(prevProps: any) {
-        if (prevProps.inventoryData !== this.props.inventoryData) {
-            this.setState({ inventoryData: {
-                consumables: this.props.inventoryData.consumables?.sort(),
-                equipment: this.props.inventoryData.equipment?.sort(), 
-                spells: this.props.inventoryData.spells?.sort(),
-            } });
-        }
+        inventoryData: {
+            consumables: items,
+            equipment: equipments,
+            spells: spells
+        },
     }
 
     handleOpenModal = (e: any, modalData: modalData) => {
@@ -60,7 +57,7 @@ class ShopContent extends Component<ShopContentProps> {
         this.setState({ openModal: false });
     }
 
-    handleInventory = (inventory: PlayerInventory) => {
+    handleInventory = (inventory: ShopItems) => {
         this.setState({inventoryData: inventory});
     }
 
@@ -102,6 +99,12 @@ class ShopContent extends Component<ShopContentProps> {
     render() {
         if(!this.state.inventoryData) return;
 
+        const defaultShopItems = {
+            consumables: items,
+            equipment: equipments,
+            spells: spells
+        };
+
         const { characters } = this.props;
 
         const tabItemStyle = (index: number) => {
@@ -111,17 +114,17 @@ class ShopContent extends Component<ShopContentProps> {
         }
 
         const getItemAmount = (index: number, type: InventoryType) => {
-            return this.state.inventoryData[type].filter((item: number) => item == index).length;
+            return this.props.inventory[type].filter((item: number) => item == index).length;
         }
 
         const renderItems = () => {
             switch (this.state.curr_tab) {
                 case ShopTabs.SPELLS:
-                    return this.state.inventoryData.spells.map((item, index) => <ShopSpellCard key={index} index={item} getItemAmount={getItemAmount} handleOpenModal={this.handleOpenModal} />)
+                    return this.state.inventoryData.spells.map((item, index) => <ShopSpellCard key={index} data={item} getItemAmount={getItemAmount} handleOpenModal={this.handleOpenModal} />)
                 case ShopTabs.CONSUMABLES:
-                    return this.state.inventoryData.consumables.map((item, index) => <ShopConsumableCard key={index} index={item} getItemAmount={getItemAmount} handleOpenModal={this.handleOpenModal} />)
+                    return this.state.inventoryData.consumables.map((item, index) => <ShopConsumableCard key={index} data={item} getItemAmount={getItemAmount} handleOpenModal={this.handleOpenModal} />)
                 case ShopTabs.EQUIPMENTS:
-                    return this.state.inventoryData.equipment.map((item, index) => <ShopEquipmentCard key={index} index={item} getItemAmount={getItemAmount} handleOpenModal={this.handleOpenModal} />)
+                    return this.state.inventoryData.equipment.map((item, index) => <ShopEquipmentCard key={index} data={item} getItemAmount={getItemAmount} handleOpenModal={this.handleOpenModal} />)
                 case ShopTabs.CHARACTERS:
                     return characters.map((item, index) => <ShopCharacterCard key={index} data={item} handleOpenModal={this.handleOpenModal} />)
                 default:
@@ -133,7 +136,7 @@ class ShopContent extends Component<ShopContentProps> {
             <div className='shop-content'>
                 <ShopItemFilter
                  curr_tab={this.state.curr_tab}
-                 inventoryData={this.props.inventoryData}
+                 shopItems={defaultShopItems}
                  handleInventory={this.handleInventory} />
                  
                 <div className='shop-tabs-container'>

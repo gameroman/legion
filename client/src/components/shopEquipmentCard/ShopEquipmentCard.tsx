@@ -4,7 +4,12 @@ import { h, Component } from 'preact';
 import { Class, InventoryType, Stat } from "@legion/shared/enums";
 import { equipments } from '@legion/shared/Equipments';
 import { INFO_BG_COLOR } from '../itemDialog/ItemDialogType';
-import { ShopCardProps } from '../shopSpellCard/ShopSpellCard';
+import { BaseEquipment } from '@legion/shared/BaseEquipment';
+
+enum ClassIcon {
+  '/shop/warrior_icon.png',
+  '/shop/mage_icon.png',
+}
 
 interface modalData {
   id: string | number;
@@ -13,9 +18,16 @@ interface modalData {
   price: number;
 }
 
+interface ShopCardProps {
+  key: number;
+  data: BaseEquipment;
+  getItemAmount: (index: number, type: InventoryType) => number;
+  handleOpenModal: (e: any, modalData: modalData) => void;
+}
+
 class ShopEquipmentCard extends Component<ShopCardProps> {
   render() {
-    const data = equipments[this.props.index];
+    const { data } = this.props;
 
     const classStyle = (classes: Class) => {
       return {
@@ -51,7 +63,7 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
             </div>
             <div className="equipment-card-info-box">
               <img src="/shop/item_count_icon.png" alt="count icon" />
-              <span>{this.props.getItemAmount(this.props.index, InventoryType.EQUIPMENTS)}</span>
+              <span>{this.props.getItemAmount(data.id, InventoryType.EQUIPMENTS)}</span>
             </div>
           </div>
         </div>
@@ -59,7 +71,7 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
           <img src={`/equipment/${data.frame}`} alt="equipment-image" />
           <div className="shop-card-class-container">
             {data.classes.map((classes, index) => <div key={index} className="shop-card-class" style={classStyle(classes)}>
-              <img src="/shop/mage_icon.png" alt="mp" />
+              <img src={classes === Class.WARRIOR ? ClassIcon[0] : ClassIcon[1]} alt="mp" />
             </div>)}
           </div>
           <div className="equipment-card-class-badge">

@@ -1,3 +1,6 @@
+import { BaseEquipment } from "./BaseEquipment";
+import { BaseItem } from "./BaseItem";
+import { BaseSpell } from "./BaseSpell";
 import { Stat, Target, EffectDirection, EquipmentSlot, Terrain, Rarity, Class } from "./enums";
 
 export class EffectModifier {
@@ -118,4 +121,10 @@ export interface PlayerInventory {
     consumables: number[];
     spells: number[];
     equipment: number[];
+}
+
+export interface ShopItems {
+    consumables: BaseItem[];
+    spells: BaseSpell[];
+    equipment: BaseEquipment[];
 }

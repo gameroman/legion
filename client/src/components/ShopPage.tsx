@@ -76,7 +76,7 @@ class ShopPage extends Component<object, State> {
         <div className="shop-container">
           <ShopContent
             gold={this.state.gold}
-            inventoryData={this.state.inventory}
+            inventory={this.state.inventory}
             characters={this.state.characters} 
             fetchInventoryData={this.fetchInventoryData}
           />

@@ -3,11 +3,19 @@ import './ShopSpellCard.style.css'
 import { h, Component } from 'preact';
 import { Class, InventoryType, Target } from "@legion/shared/enums";
 import { spells } from '@legion/shared/Spells';
+import { BaseSpell } from '@legion/shared/BaseSpell';
+import { BaseEquipment } from '@legion/shared/BaseEquipment';
+import { BaseItem } from '@legion/shared/BaseItem';
 
 enum SpellTitleBG {
   'url(/shop/item_title_bg_blue.png)',
   'url(/shop/item_title_bg_green.png)',
   'url(/shop/item_title_bg_purple.png)'
+}
+
+enum ClassIcon {
+  '/shop/warrior_icon.png',
+  '/shop/mage_icon.png',
 }
 
 interface modalData {
@@ -17,25 +25,25 @@ interface modalData {
   price: number;
 }
 
-export interface ShopCardProps {
+interface ShopCardProps {
   key: number;
-  index: number;
+  data: BaseSpell;
   getItemAmount: (index: number, type: InventoryType) => number;
   handleOpenModal: (e: any, modalData: modalData) => void;
 }
 
 class ShopSpellCard extends Component<ShopCardProps> {
   render() {
-    const data = spells[this.props.index];
+    const { data } = this.props;
 
     const classStyle = (classes: Class) => {
       return {
         backgroundImage: `url(/shop/${classes === Class.BLACK_MAGE ? 'purple' : 'white'}_box_bg.png)`
       }
-    } 
+    }
 
     const titleStyle = {
-      backgroundImage: SpellTitleBG[this.props.index % 3]
+      backgroundImage: SpellTitleBG[data.id % 3]
     }
 
     const modalData: modalData = {
@@ -56,15 +64,17 @@ class ShopSpellCard extends Component<ShopCardProps> {
             </div>
             <div className="spell-card-info-box">
               <img src="/shop/item_count_icon.png" alt="count icon" />
-              <span>{this.props.getItemAmount(this.props.index, InventoryType.SKILLS)}</span>
+              <span>{this.props.getItemAmount(data.id, InventoryType.SKILLS)}</span>
             </div>
           </div>
         </div>
         <div className="spell-card-content">
           <img src={`/spells/${data.frame}`} alt="spell-image" />
-          {data.classes.map((classes, index) => <div key={index} className="spell-card-class" style={classStyle(classes)}>
-            <img src="/shop/mage_icon.png" alt="mp" />
-          </div>)}
+          <div className="shop-card-class-container">
+            {data.classes.map((classes, index) => <div key={index} className="spell-card-class" style={classStyle(classes)}>
+              <img src={classes === Class.WARRIOR ? ClassIcon[0] : ClassIcon[1]} alt="mp" />
+            </div>)}
+          </div>
         </div>
         <p className="spell-card-description">{data.description}</p>
         <div className="spell-card-effect-container">
