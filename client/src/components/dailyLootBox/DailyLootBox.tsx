@@ -12,12 +12,29 @@ class DailyLootBox extends Component<DailyLootBoxProps> {
   private timer: NodeJS.Timeout | null = null;
 
   state = {
-    time: this.props.data.bronze.countdown
+    time: 0
   }
 
   componentDidMount(): void {
+    // Get the target end time from localStorage or set it if not present
+    const endTime = localStorage.getItem('countdownEndTime');
+    const targetEndTime = endTime || new Date().getTime() - this.props.data.bronze.countdown * 1000;
+
+    if (!endTime) {
+      localStorage.setItem('countdownEndTime', targetEndTime.toString());
+    }
+
+    this.setState({time: targetEndTime});
+
     this.timer = setInterval(() => {
-      this.setState({time: this.state.time - 1});
+      const currentTime  = new Date().getTime();
+      const remainingTime = Math.max((targetEndTime as number - currentTime) / 1000, 0);
+      this.setState({ time: remainingTime });
+
+      if (remainingTime <= 0) {
+        clearInterval(this.timer);
+        localStorage.removeItem('countdownEndTime');
+      }
     }, 1000);
   }
   
@@ -29,11 +46,20 @@ class DailyLootBox extends Component<DailyLootBoxProps> {
 
   render() {
     const { data } = this.props;
+
     const countDown = {
-      hour: Math.floor(this.state.time / 3600),
+      hour: Math.floor(Math.min(23, this.state.time / 3600)),
       minute: Math.floor((this.state.time % 3600) / 60),
-      second: this.state.time % 60
+      second: Math.floor(this.state.time % 60)
     };
+
+    const handleOpen = () => {
+      console.log('Open box');
+    }
+
+    const handleReward = () => {
+      console.log('Reward box');
+    }
 
     return (
       <div className="dailyLootContainer">
@@ -50,7 +76,7 @@ class DailyLootBox extends Component<DailyLootBoxProps> {
               </span>
             </div>
           </div>
-          <div className="lootBoxContainer">
+          <div className="lootBoxContainer" onClick={handleOpen}>
             <div className="loot-box-title"><span>Silver Chest</span></div>
             <img className="loot-box-image" src="/shop/silver_chest.png" alt="silver" />
             <div className="loot-box-footer">
@@ -58,7 +84,7 @@ class DailyLootBox extends Component<DailyLootBoxProps> {
               <span>0 / 1</span>
             </div>
           </div>
-          <div className="lootBoxContainer">
+          <div className="lootBoxContainer" onClick={handleReward}>
             <div className="loot-box-title"><span>Golden Chest</span></div>
             <img className="loot-box-image" src="/shop/gold_chest.png" alt="gold" />
             <div className="loot-box-footer">
