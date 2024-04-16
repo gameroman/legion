@@ -22,7 +22,7 @@ interface InventoryRequestPayload {
     itemEffects: Effect[];
     refreshCharacter: () => void;
     handleItemEffect: (effects: Effect[], actionType: InventoryActionType) => void;
-
+    updateInventory?: (type: string, action: InventoryActionType, index: number) => void;
 }
 
 class TeamContentCard extends Component<InventoryRequestPayload> {
@@ -36,6 +36,7 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
             top: 0,
             left: 0
         },
+        powerUpActive: false, //this.props.powerUpActive
     }
 
     handleOpenModal = (e: any, modalData: BaseItem | BaseSpell | BaseEquipment | CHARACTER_INFO, modalType: string, index: number) => {
@@ -66,8 +67,11 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
         const renderInfoBars = () => {
             if (!characterData) return;
 
+            const items = Object.entries(characterData.stats).map(
+                    ([key, value]) => ({ key, value: value as number })
+                );
+
             const order = ['hp', 'mp', 'atk', 'def', 'spatk', 'spdef'];
-            const items = Object.entries(characterData.stats).map(([key, value]) => ({ key, value: value as number }));
             const rearrangedItems = order.map(key => items.find(item => item.key === key));
 
             const effectVal = (key: string) => {
@@ -98,7 +102,7 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
             const items = Object.entries(characterData.equipment).map(([key, value]) => ({ key, value: value as number })); // for equipments of right hand
 
             return items.slice(0, 6).map((item, index) => (
-                <div className="equip-item" key={index} onClick={(e) => this.handleUnEquipItem(e, equipments[item.value], ItemDialogType.EQUIPMENTS, item.value)}>
+                <div className="equip-item" key={index} onClick={(e) => this.handleUnEquipItem(e, equipments[item.value], ItemDialogType.EQUIPMENTS, index)}>
                     <img src={item.value < 0 ? `/inventory/${item.key}_icon.png` : `/equipment/${equipments[item.value]?.frame}`} alt={item.key} />
                 </div>
             ))
@@ -106,11 +110,15 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
 
         const renderCharacterItems = useMemo(() => {
             if (!characterData || !characterData.equipment) return;
-
-            const items = Object.entries(characterData.equipment).map(([key, value]) => ({ key, value: value as number })).slice(6, 9);
+            const specialSlotsStart = 6;
+            const items = Object.entries(characterData.equipment).map(([key, value]) => ({ key, value: value as number })).slice(specialSlotsStart, 9);
+            const desiredOrder = ['left_ring', 'right_ring', 'necklace'];
+            items.sort((a, b) => {
+                return desiredOrder.indexOf(a.key) - desiredOrder.indexOf(b.key);
+            });
 
             return items.map((item, index) => (
-                <div className="equip-item sheet-item" key={index} onClick={(e) => this.handleOpenModal(e, equipments[item.value], ItemDialogType.EQUIPMENTS, item.value)}>
+                <div className="equip-item sheet-item" key={index} onClick={(e) => this.handleOpenModal(e, equipments[item.value], ItemDialogType.EQUIPMENTS, specialSlotsStart + index)}>
                     <img style={item.value < 0 && { transform: 'scaleY(0.6)' }} src={item.value > 0 ? `/equipment/${equipments[item.value]?.frame}` : `/inventory/${item.key}_icon.png`} alt={item.key} />
                 </div>
             ))
@@ -123,10 +131,10 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
             return Array.from({ length: characterData.skill_slots }, (_, i) => (
                 i < characterData.skills.length ? (
                     <div className="team-item" key={i} onClick={(e) => this.handleOpenModal(e, spells[characterData.skills[i]], ItemDialogType.SKILLS, i)}>
-                        <img src={`/spells/${spells[characterData.skills[i]]?.frame}`} alt={spells[characterData.skills[i]].name} />
+                        <img src={`/spells/${spells[characterData.skills[i]]?.frame}`} alt={spells[characterData.skills[i]]?.name} />
                     </div>
                 ) : (
-                    <div className="team-item" key={i} onClick={(e) => this.handleOpenModal(e, spells[characterData.skills[i]], ItemDialogType.SKILLS, i)}>
+                    <div className="team-item" key={i} >
                     </div>
                 )
             ))
@@ -135,13 +143,13 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
         const renderConsumableItems = () => {
             if (!characterData) return;
 
-            return Array.from({ length: characterData.carrying_capacity }, (_, i) => (
+            return Array.from({ length: characterData.carrying_capacity + characterData.carrying_capacity_bonus}, (_, i) => (
                 i < characterData.inventory.length ? (
                     <div className="team-item" key={i} onClick={(e) => this.handleOpenModal(e, items[characterData.inventory[i]], ItemDialogType.CONSUMABLES, i)}>
                         <img src={`/consumables/${items[characterData.inventory[i]]?.frame}`} alt={items[characterData.inventory[i]].name} />
                     </div>
                 ) : (
-                    <div className="team-item" key={i} onClick={(e) => this.handleOpenModal(e, items[characterData.inventory[i]], ItemDialogType.CONSUMABLES, i)}>
+                    <div className="team-item" key={i} >
                     </div>
                 )
             ))
@@ -151,6 +159,13 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
 
         const portraitStyle = {
             backgroundImage: `url(/sprites/${characterData?.portrait ?? '1_1'}.png)`,
+            animation: 'animate-sprite 0.7s steps(1) infinite',
+        };
+
+        const overlayStyle = { // Used for "power up" animation
+            backgroundImage: this.state.powerUpActive ? `url(/animations/potion_heal.png)` : 'none',
+            animation: this.state.powerUpActive ? 'power-up-animation 3s steps(16) infinite' : 'none', // Assuming 10 frames in the animation
+            display: this.state.powerUpActive ? 'block' : 'none'
         };
 
         const sliderStyle = {
@@ -183,6 +198,7 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
                     <div className="team-character-info-container">
                         <div className="team-character-container">
                             <div className="team-character" style={portraitStyle}></div>
+                            <div className="team-character-overlay" style={overlayStyle}></div>
                         </div>
                         <div className="team-character-info">
                             {renderInfoBars()}
@@ -220,6 +236,7 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
                     position={this.state.modalPosition} 
                     dialogData={this.state.modalData} 
                     handleClose={this.handleCloseModal} 
+                    updateInventory={this.props.updateInventory}
                 />
             </div>
         );

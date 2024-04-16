@@ -1,7 +1,7 @@
 import { BaseEquipment } from "./BaseEquipment";
 import { BaseItem } from "./BaseItem";
 import { BaseSpell } from "./BaseSpell";
-import { Stat, Target, EffectDirection, EquipmentSlot, Terrain, Rarity, Class } from "./enums";
+import { Stat, Target, EffectDirection, EquipmentSlot, Terrain, Rarity, StatusEffect, Class } from "./enums";
 
 export class EffectModifier {
     stat;
@@ -54,6 +54,7 @@ export interface SpellData {
     price?: number;
     minLevel?: number;
     classes?: Class[];
+    status?: StatusEffectData;
 }
 
 export interface ConsumableData {
@@ -82,6 +83,7 @@ export interface EquipmentData {
     rarity: Rarity;
     minLevel?: number;
     classes?: Class[];
+    beltSize?: number;
 }
 
 export interface CharacterUpdate {
@@ -90,11 +92,12 @@ export interface CharacterUpdate {
     xp: number;
     level: number;
 }
-export interface RewardsData {
+export interface OutcomeData {
     isWinner: boolean;
     xp: number;
     gold: number;
     characters?: CharacterUpdate[];
+    elo: number;
 }
 
 export interface CharacterStats {
@@ -105,6 +108,8 @@ export interface CharacterStats {
     spatk: number;
     spdef: number;
 }
+
+
 export interface Equipment {
     weapon: number;
     armor: number;
@@ -127,4 +132,16 @@ export interface ShopItems {
     consumables: BaseItem[];
     spells: BaseSpell[];
     equipment: BaseEquipment[];
+  }
+
+export interface TerrainUpdate {
+    x: number;
+    y: number;
+    terrain: Terrain;
+}
+
+export interface StatusEffectData {
+    effect: StatusEffect;
+    duration: number;
+    chance: number;
 }

@@ -25,6 +25,7 @@ interface DialogProps {
   };
   handleClose: () => void;
   refreshCharacter?: () => void;
+  updateInventory?: (type: string, action: InventoryActionType, index: number) => void;
 }
 
 class ItemDialog extends Component<DialogProps> {
@@ -39,18 +40,46 @@ class ItemDialog extends Component<DialogProps> {
       action: this.props.actionType
     };
 
+    if(this.props.updateInventory) this.props.updateInventory(type, this.props.actionType, index)
+    this.props.handleClose();
+
     apiFetch('inventoryTransaction', {
       method: 'POST',
       body: payload
     })
       .then((data) => {
         if (data.status == 0) {
-          successToast(this.props.actionType > 0 ? 'Item un-equipped!' : 'Item equipped!');
+          // successToast(this.props.actionType > 0 ? 'Item un-equipped!' : 'Item equipped!');
           
-          this.props.handleClose();
+          this.props.refreshCharacter();
+        // } else {
+        //   errorToast('Character inventory is full!');
+        }
+      })
+      .catch(error => errorToast(`Error: ${error}`));
+  }
+
+  spendSP = (index: number) => {
+    if (!this.props.characterId) return;
+
+    const payload = {
+      index,
+      characterId: this.props.characterId,
+    };
+
+    this.props.handleClose();
+
+    apiFetch('spendSP', {
+      method: 'POST',
+      body: payload
+    })
+      .then((data) => {
+        if (data.status == 0) {
+          successToast('SP spent!');
+          
           this.props.refreshCharacter();
         } else {
-          errorToast('Character inventory is full!');
+          errorToast('Not enough SP!');
         }
       })
       .catch(error => errorToast(`Error: ${error}`));
@@ -172,7 +201,7 @@ class ItemDialog extends Component<DialogProps> {
           <span className='character-info-addition' style={dialogData.effect && Number(dialogData.effect) < 0 ? { color: '#c95a74' } : { color: '#9ed94c' }}>{getInfoVal(dialogData.effect)}</span>
         </p>
         <div className="dialog-button-container">
-          <button className="dialog-accept" onClick={() => console.log('___SP spent___')}><img src="/inventory/confirm_icon.png" alt="confirm" />Accept</button>
+          <button className="dialog-accept" onClick={() => this.spendSP(0)}><img src="/inventory/confirm_icon.png" alt="confirm" />Accept</button>
           <button className="dialog-decline" onClick={handleClose}><img src="/inventory/cancel_icon.png" alt="decline" />Cancel</button>
         </div>
       </div>

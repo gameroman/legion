@@ -3,7 +3,7 @@ export class MusicManager {
     currentSound;
     startinIntensity = 0;
     intensity = 0;
-    scheduledIntensity = null;
+    combatIntensity = 0;
     nbIntensities = 0;
     bridges = [];
     gameOver = false;
@@ -28,59 +28,25 @@ export class MusicManager {
     }
 
     updateMusicIntensity(ratio) {
-        if (this.gameOver) return
-        let intensity = this.computeMusicIntensity(ratio) + this.startinIntensity; 
-        // console.log(`Ratio: ${ratio}, Intensity: ${intensity}`);
-        if (intensity - this.intensity > 1) intensity = this.intensity + 1;
-        if (intensity - this.intensity < -1) intensity = this.intensity - 1;
-        // console.log(`Intensity: ${intensity}`);
-        if (intensity != this.intensity) {
-            this.playLoop(intensity);
+        if (this.gameOver) return;
+        this.combatIntensity = this.computeMusicIntensity(ratio) + this.startinIntensity; 
+        if (this.combatIntensity > this.intensity) {
+            this.intensity++;
         }
+        if (this.intensity > this.nbIntensities) this.intensity = this.nbIntensities;
     }
 
     playBeginning() {
         this.currentSound = this.scene.sound.add('bgm_start');
-        this.currentSound.once('complete', () => this.playLoop(this.intensity + 1), this);
+        this.currentSound.once('complete', () => this.playNext(), this);
         this.currentSound.play();
     }
 
-    playLoop(intensity) {
-        // If trying to switch to the same intensity, do nothing.
-        if (this.intensity == intensity || this.scheduledIntensity) return;
-
-        console.log(`Scheduling intensity ${intensity}`)
-        // If there's a sound already playing, schedule the next one
-        if (this.currentSound && this.currentSound.isPlaying) {
-            this.scheduledIntensity = intensity; // mark the desired intensity
-            this.currentSound.once('complete', this.switchLoop, this); // schedule the switch
-        } else {
-            // No sound is currently playing, so just play the desired intensity
-            this.switchToIntensity(intensity);
-        }
-    }
-
-    switchLoop() {
-        if (this.scheduledIntensity !== null) {
-            this.switchToIntensity(this.scheduledIntensity);
-            this.scheduledIntensity = null; // reset the scheduled intensity
-        } else {
-            this.currentSound.play(); // If nothing is scheduled, replay the loop
-        }
-    }
-
-    switchToIntensity(intensity) {
-        console.log(`Switching to intensity ${intensity}`)
-        this.intensity = intensity;
-        if (this.currentSound && this.currentSound.isPlaying) {
-            this.currentSound.stop();
-        }
-        this.currentSound = this.scene.sound.add(`bgm_loop_${intensity}`);
-        if (this.bridges.includes(intensity)) {
-            this.scheduledIntensity = intensity + 1;
-        }
-        this.currentSound.once('complete', this.switchLoop, this); // This ensures that we're always ready to switch or loop after completion
+    playNext() {
+        this.currentSound = this.scene.sound.add(`bgm_loop_${this.intensity+1}`);
+        this.currentSound.once('complete', () => this.playNext(), this);
         this.currentSound.play();
+        if (this.bridges.includes(this.intensity)) this.intensity++;
     }
 
     playEnd() {

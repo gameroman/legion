@@ -5,10 +5,8 @@ import { Team } from './Team';
 import { Spell } from './Spell';
 import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import {apiFetch} from './API';
-import { Terrain, PlayMode, Target } from '@legion/shared/enums';
-import { RewardsData } from '@legion/shared/interfaces';
-
-
+import { Terrain, PlayMode, Target, StatusEffect } from '@legion/shared/enums';
+import { OutcomeData, TerrainUpdate } from '@legion/shared/interfaces';
 
 export abstract class Game
 {
@@ -68,11 +66,16 @@ export abstract class Game
 
     getPosition(index, flip) {
         const positions = [
-            {x: 16, y: 3},
-            {x: 16, y: 5},
-            {x: 18, y: 4},
-            {x: 18, y: 2},
-            {x: 18, y: 6},
+            {x: 15, y: 3},
+            {x: 15, y: 5},
+            {x: 17, y: 4},
+            {x: 17, y: 2},
+            {x: 17, y: 6},
+            {x: 15, y: 1},
+            {x: 15, y: 7},
+            {x: 19, y: 2},
+            {x: 19, y: 4},
+            {x: 19, y: 6},
         ]
         const position = positions[index];
         if (flip) {
@@ -201,6 +204,9 @@ export abstract class Game
             case 'attack':
                 this.processAttack(data, team!);
                 break;
+            case 'obstacleattack':
+                this.processObstacleAttack(data, team!);
+                break;
             case 'useitem':
                 this.processUseItem(data, team!);
                 break;
@@ -237,7 +243,9 @@ export abstract class Game
 
         this.sockets.forEach(socket => {
             const team = this.socketMap.get(socket);
-            const outcomes = this.computeGameOutcomes(team, winner, this.duration, this.mode);
+            const otherTeam = this.getOtherTeam(team!.id);
+            const outcomes = this.computeGameOutcomes(team, otherTeam, winner, this.duration, this.mode);
+            console.log(`Team ${team!.id} outcomes: ${JSON.stringify(outcomes)}`);
             team.distributeXp(outcomes.xp);
             this.writeOutcomesToDb(team, outcomes);
             socket.emit('gameEnd', outcomes);
@@ -317,6 +325,12 @@ export abstract class Game
         const damage = this.calculateDamage(player, opponent);
         opponent.takeDamage(damage);
         player.increaseDamageDealt(damage);
+
+        if (this.hasObstacle(opponent.x, opponent.y)) {
+            const terrainUpdate = this.removeTerrain(opponent.x, opponent.y);
+            this.broadcastTerrain([terrainUpdate]);
+            opponent.removeStatusEffect(StatusEffect.FREEZE);
+        }
         
         const cooldown = player.getCooldown('attack');
         this.setCooldown(player, cooldown);
@@ -327,6 +341,33 @@ export abstract class Game
             num,
             damage: -damage,
             hp: opponent.getHP(),
+        });
+
+        team.socket?.emit('cooldown', {
+            num,
+            cooldown,
+        });
+    }
+
+    processObstacleAttack({num, x, y}: {num: number, x: number, y: number}, team: Team) {
+        const player = team.getMembers()[num - 1];
+        
+        if (
+            !player.canAct() || 
+            !player.isNextTo(x, y) || 
+            !this.hasObstacle(x, y)
+        ) return;
+
+        const cooldown = player.getCooldown('attack');
+        this.setCooldown(player, cooldown);
+
+        const terrainUpdate = this.removeTerrain(x, y);
+        this.broadcastTerrain([terrainUpdate]);
+
+        this.broadcast('obstacleattack', {
+            team: team.id,
+            num,
+            x, y,
         });
 
         team.socket?.emit('cooldown', {
@@ -400,11 +441,15 @@ export abstract class Game
         spell.applyEffect(player, targets);
         player.setCasting(false);
 
+        let isKill = false;
         targets.forEach(target => {
             if (target.HPHasChanged()) {
                 const delta = target.getHPDelta();
                 player.increaseDamageDealt(delta);
-                if (!target.isAlive()) player.team!.increaseScoreFromKill(player);
+                if (!target.isAlive()){
+                    player.team!.increaseScoreFromKill(player);
+                    isKill = true;
+                }
                 if (delta < 0) player.team!.increaseScoreFromDamage(-delta);
             }
         });            
@@ -412,12 +457,13 @@ export abstract class Game
         player.team!.increaseScoreFromSpell(spell.score);
 
         if (spell.terrain) {
-            this.setUpTerrainEffect(spell, x, y);
-            this.broadcast('terrain', {
-                x,
-                y,
-                size: spell.size,
-                type: spell.terrain,
+            const terrainUpdates = this.manageTerrain(spell, x, y);
+            this.broadcastTerrain(terrainUpdates);
+        }
+
+        if (spell.status) {
+            targets.forEach(target => {
+                target.addStatusEffect(spell.status.effect, spell.status.duration, spell.status.chance);
             });
         }
         
@@ -425,6 +471,7 @@ export abstract class Game
             x,
             y,
             id: spell.id,
+            isKill,
         });
 
         team.socket?.emit('cooldown', {
@@ -497,6 +544,14 @@ export abstract class Game
         });
     }
 
+    broadcastStatusEffectChange(team: Team, num: number, statuses) {
+        this.broadcast('statuseffectchange', {
+            team: team.id,
+            num,
+            statuses,
+        });
+    }
+
     emitMPchange(team: Team, num: number, mp: number) {
         team.socket?.emit('mpchange', {
             num,
@@ -504,15 +559,43 @@ export abstract class Game
         });
     }
 
-    setUpTerrainEffect(spell, x, y) {
+    manageTerrain(spell: Spell, x: number, y: number) {
+        const terrainUpdates: TerrainUpdate[] = [];
         for (let i = x - Math.floor(spell.size/2); i <= x + Math.floor(spell.size/2); i++) {
             for (let j = y - Math.floor(spell.size/2); j <= y + Math.floor(spell.size/2); j++) {
-                this.terrainMap.set(`${i},${j}`, spell.terrain);
-                // Get player at position
+
+                const existingTerrain = this.terrainMap.get(`${i},${j}`);
+                if (existingTerrain && (existingTerrain == Terrain.ICE && spell.terrain == Terrain.FIRE
+                    || existingTerrain == Terrain.FIRE && spell.terrain == Terrain.ICE)) {
+                    this.terrainMap.delete(`${i},${j}`);
+                } else {
+                    this.terrainMap.set(`${i},${j}`, spell.terrain);
+                }
+
+                terrainUpdates.push({
+                    x: i,
+                    y: j,
+                    terrain: this.terrainMap.get(`${i},${j}`) || Terrain.NONE,
+                });
+
                 const player = this.getPlayerAt(i, j);
-                if (player) player.setUpTerrainEffect(spell.terrain);
+                if (player) player.setUpTerrainEffect(this.terrainMap.get(`${player.x},${player.y}`) || Terrain.NONE);
             }
         }
+        return terrainUpdates;
+    }
+
+    removeTerrain(x: number, y: number) {
+        this.terrainMap.delete(`${x},${y}`);
+        return {
+            x,
+            y,
+            terrain: this.terrainMap.get(`${x},${y}`) || Terrain.NONE,
+        }
+    }
+
+    broadcastTerrain(terrainUpdates: TerrainUpdate[]) {
+        this.broadcast('terrain', terrainUpdates);
     }
 
     listAdjacentEnemies(player: ServerPlayer): ServerPlayer[] {
@@ -613,21 +696,37 @@ export abstract class Game
         }
     }
 
-    computeGameOutcomes(team: Team, winnerTeamId: number, duration: number, mode: PlayMode): RewardsData {
-        if (team.id === winnerTeamId) {
-            return {
-                isWinner: true,
-                gold: this.computeTeamGold(team),
-                xp: this.computeTeamXP(team, this.getOtherTeam(team.id), duration, true),
-            }
-        } else {
-            return {
-                isWinner: false,
-                gold: 0,
-                xp: this.computeTeamXP(team, this.getOtherTeam(team.id), duration, false)
-            }
+    computeGameOutcomes(team: Team, otherTeam: Team, winnerTeamId: number, duration: number, mode: PlayMode): OutcomeData {
+        const isWinner = team.id === winnerTeamId;
+        const eloUpdate = mode == PlayMode.RANKED ? this.updateElo(isWinner ? team : otherTeam, isWinner ? otherTeam : team) : {winnerUpdate: 0, loserUpdate: 0};
+        return {
+            isWinner,
+            gold: isWinner ? this.computeTeamGold(team) : 0,
+            xp: this.computeTeamXP(team, otherTeam, duration, false),
+            elo: isWinner ? eloUpdate.winnerUpdate : eloUpdate.loserUpdate,
         }
     }
+
+    updateElo(winningTeam: Team, losingTeam: Team): { winnerUpdate: number, loserUpdate: number } {
+        const K_FACTOR = 30;
+
+        const expectedScoreWinner = 1 / (1 + Math.pow(10, (losingTeam.elo - winningTeam.elo) / 400));
+        const expectedScoreLoser = 1 / (1 + Math.pow(10, (winningTeam.elo - losingTeam.elo) / 400));
+    
+        // Since it's a match, winner's actual score is 1 and loser's actual score is 0
+        const actualScoreWinner = 1;
+        const actualScoreLoser = 0;
+    
+        // Calculate rating updates
+        const winnerUpdate = K_FACTOR * (actualScoreWinner - expectedScoreWinner);
+        const loserUpdate = K_FACTOR * (actualScoreLoser - expectedScoreLoser);
+    
+        // Return the elo update for each team
+        return {
+          winnerUpdate: winnerUpdate,
+          loserUpdate: loserUpdate
+        };
+      }
 
     computeTeamGold(team: Team) {
         return Math.max(Math.ceil(team.score/20), 10);
@@ -663,7 +762,7 @@ export abstract class Game
         return Math.round(xp); // Round to nearest whole number
     }
 
-    async writeOutcomesToDb(team: Team, rewards: RewardsData) {
+    async writeOutcomesToDb(team: Team, rewards: OutcomeData) {
         console.log('Writing rewards to DB');
         try {
             await apiFetch(
@@ -675,6 +774,7 @@ export abstract class Game
                         isWinner: rewards.isWinner,
                         gold: rewards.gold,
                         xp: rewards.xp,
+                        elo: rewards.elo,
                         characters: team.getCharactersDBUpdates(),
                     },
                 }

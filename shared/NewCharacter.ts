@@ -17,9 +17,12 @@ interface CharacterData {
     allTimeSP: number;
     stats: CharacterStats;
     carrying_capacity: number;
+    carrying_capacity_bonus: number;
     skill_slots: number;
     inventory: number[];
     equipment: Equipment;
+    equipment_bonuses: CharacterStats;
+    sp_bonuses: CharacterStats;
     skills: number[];
     onSale?: boolean;
     price?: number;
@@ -32,13 +35,16 @@ export class NewCharacter {
   level: number;
   portrait: string;
   stats: CharacterStats;
+  equipment_bonuses: CharacterStats;
+  sp_bonuses: CharacterStats;
   carrying_capacity: number;
+  carrying_capacity_bonus: number;
   skill_slots: number;
   inventory: number[];
   equipment: Equipment;
   skills: number[];
 
-  constructor(characterClass = Class.RANDOM, level = 1) {
+  constructor(characterClass = Class.RANDOM, level = 1, unicornBonus = false) {
     // console.log(`Creating new character of class ${Class[characterClass]} and level ${level}`);
     const nameOpts = {dictionaries: [adjectives, colors, animals], length: 2};
 
@@ -57,6 +63,7 @@ export class NewCharacter {
     this.xp = 0;
     this.level = level;
     this.carrying_capacity = 3;
+    this.carrying_capacity_bonus = 0;
     this.skill_slots = this.getSkillSlots();
     this.inventory = [];
     this.equipment = {
@@ -72,15 +79,31 @@ export class NewCharacter {
     };
     this.skills = this.getSkills();
     this.stats = {
-      hp: this.getHP(),
-      mp: this.getMP(),
-      atk: this.getAtk(),
-      def: this.getDef(),
-      spatk: this.getSpatk(),
-      spdef: this.getSpdef(),
-    }
+      hp: this.getHP() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
+      mp: this.getMP() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
+      atk: this.getAtk() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
+      def: this.getDef() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
+      spatk: this.getSpatk() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
+      spdef: this.getSpdef() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
+    };
+    this.equipment_bonuses = {
+      hp: 0,
+      mp: 0,
+      atk: 0,
+      def: 0,
+      spatk: 0,
+      spdef: 0,
+    };
+    this.sp_bonuses = {
+      hp: 0,
+      mp: 0,
+      atk: 0,
+      def: 0,
+      spatk: 0,
+      spdef: 0,
+    };
 
-    for (let i = 1; i < level; i++) {
+    for (let i = 1; i < this.level; i++) {
       this.lvlUp();
     }
   }
@@ -246,8 +269,15 @@ export class NewCharacter {
       return [];
   }
 
-  getCharacterData(): CharacterData {
-    return {
+  getPrice(): number {
+    // Returns the sum of all stats
+    const sum = Object.values(this.stats).reduce((a, b) => a + b, 0) * 10;
+    // Add +- 10% random variation
+    return sum + Math.floor(Math.random() * sum * 0.2);
+  }
+
+  getCharacterData(includePrice = false): CharacterData {
+    const data: CharacterData = {
       name: this.name,
       portrait: this.portrait,
       class: this.characterClass,
@@ -257,11 +287,18 @@ export class NewCharacter {
       allTimeSP: 0,
       stats: this.stats,
       carrying_capacity: this.carrying_capacity,
+      carrying_capacity_bonus: this.carrying_capacity_bonus,
       skill_slots: this.skill_slots,
       inventory: this.inventory,
       equipment: this.equipment,
-      skills: this.skills,
+      equipment_bonuses: this.equipment_bonuses,
+      sp_bonuses: this.sp_bonuses,
+      skills: this.skills
     };
+    if (includePrice) {
+      data.price = this.getPrice();
+    }
+    return data;
   }
 }
 

@@ -9,6 +9,8 @@ import {uniqueNamesGenerator, adjectives, colors, animals}
 import {Class} from "@legion/shared/enums";
 import {NewCharacter} from "@legion/shared/NewCharacter";
 
+const NB_START_CHARACTERS = 3;
+
 function generateName() {
   // limit names to length of 16 characters
   const dicts = {dictionaries: [adjectives, colors, animals]};
@@ -49,8 +51,8 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
 
   const classes = [Class.WARRIOR, Class.WHITE_MAGE, Class.BLACK_MAGE];
   const characterDataArray = [];
-  // Repeat 3 times
-  for (let i = 0; i < 3; i++) {
+
+  for (let i = 0; i < NB_START_CHARACTERS; i++) {
     characterDataArray.push(
       new NewCharacter(
         classes[i]
@@ -130,6 +132,43 @@ export const queuingData = onRequest((request, response) => {
     } catch (error) {
       console.error("queuingData error:", error);
       response.status(401).send("Unauthorized");
+    }
+  });
+});
+
+export const saveGoldReward = onRequest((request, response) => {
+  logger.info("Saving gold reward");
+  const db = admin.firestore();
+
+  corsMiddleware(request, response, async () => {
+    try {
+      const uid = request.body.uid;
+      const gold = request.body.gold;
+
+      const playerRef = db.collection("players").doc(uid);
+      const playerDoc = await playerRef.get();
+
+      if (!playerDoc.exists) {
+        throw new Error("Invalid player ID");
+      }
+
+      const playerData = playerDoc.data();
+      if (!playerData) {
+        throw new Error("playerData is null");
+      }
+
+      const newGold = playerData.gold + gold;
+
+      await playerRef.update({
+        gold: newGold,
+      });
+
+      response.send({
+        gold: newGold,
+      });
+    } catch (error) {
+      console.error("saveGoldReward error:", error);
+      response.status(500).send("Error");
     }
   });
 });

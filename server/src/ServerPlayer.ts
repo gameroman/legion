@@ -1,10 +1,11 @@
 import { Team } from './Team';
 import { Item } from './Item';
 import { Spell } from './Spell';
-import { Stat, Terrain } from "@legion/shared/enums";
+import { Stat, Terrain, StatusEffect } from "@legion/shared/enums";
 import { items } from '@legion/shared/Items';
 import { spells } from '@legion/shared/Spells';
 import { getXPThreshold } from '@legion/shared/levelling';
+
 
 export type ActionType = 'move' | 'attack';
 export class ServerPlayer {
@@ -33,12 +34,17 @@ export class ServerPlayer {
     cooldown: number = 0;
     cooldownTimer: NodeJS.Timeout | null = null;
     DoTTimer: NodeJS.Timeout | null = null;
+    statusesTimer: NodeJS.Timeout | null = null;
     inventoryCapacity: number = 3;
     inventory: Item[] = [];
     spells: Spell[] = [];
     isCasting: boolean = false;
     damageDealt: number = 0;
     entranceTime: number = 2.5;
+    statuses: {
+        frozen: number;
+        paralyzed: number;
+    }
 
     constructor(num: number, name: string, frame: string, x: number, y: number) {
         this.num = num;
@@ -47,13 +53,19 @@ export class ServerPlayer {
         this.x = x;
         this.y = y;
         this.distance = 3;
+
+        this.statuses = {
+            frozen: 0,
+            paralyzed: 0,
+        };
         
         this.cooldowns = {
-            'move': 2000,
-            'attack': 4000
+            'move': 200,
+            'attack': 400
         };
         // this.setCooldown(0 + this.entranceTime * 1000);
         this.setCooldown(this.cooldowns.move + this.entranceTime * 1000);
+        this.setStatusesTimer();
     }
 
     getPlacementData(includePersonal = false): playerNetworkData {
@@ -87,8 +99,16 @@ export class ServerPlayer {
         this.isCasting = casting;
     }
 
+    isFrozen() {
+        return this.statuses.frozen;
+    }
+
+    isParalyzed() {
+        return this.statuses.paralyzed || this.isFrozen();
+    }
+
     canAct() {
-        return this.cooldown == 0 && this.isAlive() && !this.isCasting;
+        return this.cooldown == 0 && this.isAlive() && !this.isCasting && !this.isParalyzed();
     }
 
     canMoveTo(x: number, y: number) {
@@ -141,6 +161,10 @@ export class ServerPlayer {
 
     broadcastHPChange() {
         this.team!.game.broadcastHPchange(this.team, this.num, this.hp, this.getHPDelta());
+    }
+
+    broadcastStatusEffectChange() {
+        this.team!.game.broadcastStatusEffectChange(this.team, this.num, this.statuses);
     }
 
     getHPDelta() {
@@ -208,13 +232,18 @@ export class ServerPlayer {
         return this.mp;
     }
 
+    getStatValue(data, stat) {
+        return data.stats[stat] + data.equipment_bonuses[stat] + data.sp_bonuses[stat];
+    }
+
     setUpCharacter(data) {
-        this.setHP(data.stats.hp);
-        this.setMP(data.stats.mp);
-        this.setStat(Stat.ATK, data.stats.atk);
-        this.setStat(Stat.DEF, data.stats.def);
-        this.setStat(Stat.SPATK, data.stats.spatk);
-        this.setStat(Stat.SPDEF, data.stats.spdef);
+        this.setHP(this.getStatValue(data, "hp"));
+        this.setMP(this.getStatValue(data, "mp"));
+        this.setStat(Stat.ATK, this.getStatValue(data, "atk"));
+        this.setStat(Stat.DEF, this.getStatValue(data, "def"));
+        this.setStat(Stat.SPATK, this.getStatValue(data, "spatk"));
+        this.setStat(Stat.SPDEF, this.getStatValue(data, "spdef"));
+        console.log(`Character HP: ${this.maxHP}, MP: ${this.maxMP}, ATK: ${this.atk}, DEF: ${this.def}, SPATK: ${this.spatk}, SPDEF: ${this.spdef}`);
         this.setInventory(data.carrying_capacity, data.inventory);
         this.setSpells(data.skill_slots, data.skills);
         this.level = data.level;
@@ -272,6 +301,12 @@ export class ServerPlayer {
         }, duration);
     }
 
+    setStatusesTimer() {
+        this.statusesTimer = setInterval(() => {
+            this.decrementStatuses();
+        }, 1000);
+    }
+
     setTeam(team: Team) {
         this.team = team;
     }
@@ -323,7 +358,7 @@ export class ServerPlayer {
         this.team?.increaseScoreFromDamage(amount);
     }
 
-
+    // Called when traversing cells with terrain effects
     applyTerrainEffect(terrain: Terrain) {
         switch (terrain) {
             case Terrain.FIRE:
@@ -334,6 +369,7 @@ export class ServerPlayer {
         }
     }
 
+    // Called when the terrain effect is applied for the first time
     setUpTerrainEffect(terrain: Terrain) {
         switch (terrain) {
             case Terrain.FIRE:
@@ -345,11 +381,57 @@ export class ServerPlayer {
                 }, 3000);
                 break;
             case Terrain.ICE:
+                this.addStatusEffect(StatusEffect.FREEZE, -1, 1);
+                break;
+            case Terrain.NONE:
+                if (this.isFrozen()) {
+                    this.removeStatusEffect(StatusEffect.FREEZE);
+                }
                 break;
             default:
                 break;
         }
         
+    }
+
+    addStatusEffect(status: StatusEffect, duration: number, chance: number = 1) {
+        if (Math.random() > chance) return;
+        switch(status) {
+            case StatusEffect.PARALYZE:
+                this.statuses.paralyzed = duration;
+                break;
+            case StatusEffect.FREEZE:
+                this.statuses.frozen = duration;
+                break;
+            default:
+                break;
+        }
+        this.broadcastStatusEffectChange();
+    }
+
+    removeStatusEffect(status: StatusEffect) {
+        switch(status) {
+            case StatusEffect.PARALYZE:
+                this.statuses.paralyzed = 0;
+                break;
+            case StatusEffect.FREEZE:
+                this.statuses.frozen = 0;
+                break;
+            default:
+                break;
+        }
+        this.broadcastStatusEffectChange();
+    }
+
+    decrementStatuses() {
+        let change = false;
+        for (const key in this.statuses) {
+            if (this.statuses[key] > 0) {
+                this.statuses[key]--;
+                change = true;
+            }
+        }
+        if (change) this.broadcastStatusEffectChange();
     }
 
     stopDoT() {
@@ -376,7 +458,6 @@ export class ServerPlayer {
     earnStatsPoints() {
         // Earn 3 + floor(level/10) points + a small chance of 1 extra point
         const reward = (3 + Math.floor(this.level / 10) + (Math.random() < 0.1 ? 1 : 0));
-        console.log(`Player ${this.num} earned ${reward} stats points`);
         this.earnedStatsPoints += reward;
     }
 
@@ -385,7 +466,10 @@ export class ServerPlayer {
             clearTimeout(this.cooldownTimer);
         }
         if (this.DoTTimer) {
-            clearTimeout(this.DoTTimer);
+            clearInterval(this.DoTTimer);
+        }
+        if (this.statusesTimer) {
+            clearInterval(this.statusesTimer);
         }
     }
 }

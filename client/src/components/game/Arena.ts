@@ -10,6 +10,7 @@ import { lineOfSight, serializeCoords } from '@legion/shared/utils';
 import { getFirebaseIdToken } from '../../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain } from "@legion/shared/enums";
+import { TerrainUpdate } from '@legion/shared/interfaces';
 
 export class Arena extends Phaser.Scene
 {
@@ -27,6 +28,7 @@ export class Arena extends Phaser.Scene
     tileSize = 60;
     tilesMap: Map<string, Phaser.GameObjects.Image> = new Map<string, Phaser.GameObjects.Image>();
     obstaclesMap: Map<string, boolean> = new Map<string, boolean>();
+    terrainSpritesMap: Map<string, Phaser.GameObjects.Sprite> = new Map<string, Phaser.GameObjects.Sprite>();
     gridWidth = 20;
     gridHeight = 9;
     server;
@@ -34,6 +36,7 @@ export class Arena extends Phaser.Scene
     SFX;
     overviewReady = false;
     musicManager: MusicManager;
+    sprites: Phaser.GameObjects.Sprite[] = [];
 
     constructor() {
         super({ key: 'Arena' });
@@ -57,7 +60,9 @@ export class Arena extends Phaser.Scene
         this.load.spritesheet('slash', 'animations/slash.png', { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('thunder', 'animations/bolts.png', { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('ice', 'animations/ice.png', { frameWidth: 96, frameHeight: 96});
+        this.load.spritesheet('impact', 'animations/sword_impact.png', { frameWidth: 291, frameHeight: 291});
 
+        this.load.spritesheet('statuses', 'States.png', { frameWidth: 96, frameHeight: 96});
 
         this.load.audio('click', 'sfx/click_2.wav');
         this.load.audio('slash', 'sfx/swish_2.wav');
@@ -66,7 +71,9 @@ export class Arena extends Phaser.Scene
         this.load.audio('heart', 'sfx/heart.wav');
         this.load.audio('cooldown', 'sfx/cooldown.wav');
         this.load.audio('healing', 'sfx/healing.wav');
-        this.load.audio('cast', 'sfx/curse.ogg');
+        this.load.audio('cast', 'sfx/curse.wav');
+        this.load.audio('shatter', 'sfx/shatter.wav');
+        this.load.audio('flames', 'sfx/flame.wav');
 
         this.load.audio('fireball', 'sfx/fireball.wav');
         this.load.audio('thunder', 'sfx/thunder.wav');
@@ -121,6 +128,10 @@ export class Arena extends Phaser.Scene
             this.processAttack(data);
         });
 
+        this.socket.on('obstacleattack', (data) => {
+            this.processObstacleAttack(data);
+        });
+
         this.socket.on('cooldown', (data) => {
             this.processCooldown(data);
         });
@@ -131,6 +142,10 @@ export class Arena extends Phaser.Scene
 
         this.socket.on('hpchange', (data) => {
             this.processHPChange(data);
+        });
+
+        this.socket.on('statuseffectchange', (data) => {
+            this.processStatusChange(data);
         });
 
         this.socket.on('mpchange', (data) => {
@@ -183,6 +198,16 @@ export class Arena extends Phaser.Scene
         this.send('attack', data);
     }
 
+    sendObstacleAttack(x, y) {
+        if (!this.selectedPlayer.canAct()) return;
+        const data = {
+            num: this.selectedPlayer.num,
+            x,
+            y,
+        };
+        this.send('obstacleattack', data);
+    }
+
     sendSpell(x: number, y: number, player: Player | null) {
         if (!this.selectedPlayer || !this.selectedPlayer.canAct()) return;
         const data = {
@@ -228,7 +253,6 @@ export class Arena extends Phaser.Scene
     }
 
     floatTiles(startX, startY) {
-        // this.localAnimationSprite = this.add.sprite(0, 0, '').setScale(3).setOrigin(0.5, 0.7).setVisible(false);
 
         // Loop over each row
         for (let y = 0; y < this.gridHeight; y++) {
@@ -240,14 +264,14 @@ export class Arena extends Phaser.Scene
             }
         }
 
-        for (let x = -5; x < 0; x++) {
-            for (let y = 2; y < 7; y++) {
+        for (let x = -5; x < 1; x++) {
+            for (let y = 1; y < 8; y++) {
                 this.floatOneTile(x, y, startX, startY, true);
             }
         }
 
-        for (let x = 20; x < 26; x++) {
-            for (let y = 2; y < 7; y++) {
+        for (let x = 19; x < 26; x++) {
+            for (let y = 1; y < 8; y++) {
                 this.floatOneTile(x, y, startX, startY, true);
             }
         }
@@ -255,16 +279,14 @@ export class Arena extends Phaser.Scene
 
     floatOneTile(x, y, startX, startY, yoyo = false) {
         const tileWeights = {
-            54: 1,
-            // 53: 15,
-            // 54: 2,
-            // 52: 2,
-            // 51: 2,
-            // 50: 1,
-            // 49: 1,
-            // 48: 1,
-            // 47: 1,
-            // 46: 1,
+            1: 15,
+            2: 1,
+            3: 1,
+            4: 1,
+            5: 1,
+            6: 1,
+            7: 1,
+            8: 1,
         };
         const tiles = [];
         for (const tile in tileWeights) {
@@ -274,7 +296,7 @@ export class Arena extends Phaser.Scene
         }
 
         const tile = tiles[Math.floor(Math.random() * tiles.length)];
-        const tileSprite = this.add.image(startX + x * this.tileSize, startY + y * this.tileSize + this.scale.gameSize.height, 'groundTiles', `element_${tile}`)
+        const tileSprite = this.add.image(startX + x * this.tileSize, startY + y * this.tileSize + this.scale.gameSize.height, 'groundTiles', `tile_${tile}`)
             .setDepth(1)
             .setOrigin(0); 
     
@@ -439,18 +461,25 @@ export class Arena extends Phaser.Scene
     }
 
     isFree(gridX, gridY) {
-        return !this.gridMap[serializeCoords(gridX, gridY)] && !this.obstaclesMap.get(serializeCoords(gridX, gridY));
+        return !this.gridMap.get(serializeCoords(gridX, gridY)) && !this.obstaclesMap.get(serializeCoords(gridX, gridY));
+    }
+
+    hasObstacle(gridX, gridY) {
+        return this.obstaclesMap.has(serializeCoords(gridX, gridY));
     }
 
     handleTileClick(gridX, gridY) {
         console.log(`Clicked tile at grid coordinates (${gridX}, ${gridY})`);
-        const player = this.gridMap[serializeCoords(gridX, gridY)];
+        if (!this.selectedPlayer?.canAct()) return;
+        const player = this.gridMap.get(serializeCoords(gridX, gridY));
         const pendingSpell = this.selectedPlayer?.spells[this.selectedPlayer?.pendingSpell];
         const pendingItem = this.selectedPlayer?.inventory[this.selectedPlayer?.pendingItem];
         if (pendingSpell != null) {
             this.sendSpell(gridX, gridY, player);
         } else if (this.selectedPlayer?.pendingItem != null) {
             this.sendUseItem(this.selectedPlayer?.pendingItem, gridX, gridY, player);
+        } else if (!player && this.hasObstacle(gridX, gridY)) {
+            this.sendObstacleAttack(gridX, gridY);
         } else if (this.selectedPlayer && !player) {
             this.handleMove(gridX, gridY);
         } else if (player){ 
@@ -568,8 +597,8 @@ export class Arena extends Phaser.Scene
     processMove({team, tile, num}) {
         const player = this.getPlayer(team, num);
 
-        this.gridMap[serializeCoords(player.gridX, player.gridY)] = null;
-        this.gridMap[serializeCoords(tile.x, tile.y)] = player;
+        this.gridMap.set(serializeCoords(player.gridX, player.gridY), null);
+        this.gridMap.set(serializeCoords(tile.x, tile.y), player);
 
         player.walkTo(tile.x, tile.y);
         this.playSoundMultipleTimes('steps', 2);
@@ -580,10 +609,21 @@ export class Arena extends Phaser.Scene
         const otherTeam = this.getOtherTeam(team);
         const targetPlayer = this.getPlayer(otherTeam, target);
         this.playSound('slash');
-        player.attack(targetPlayer);
+        player.attack(targetPlayer.x);
         targetPlayer.setHP(hp);
-        targetPlayer.displayDamage(damage);
         targetPlayer.displaySlash(player);
+        const {x: pixelX, y: pixelY} = this.gridToPixelCoords(targetPlayer.gridX, targetPlayer.gridY);
+        this.localAnimationSprite.setPosition(pixelX, pixelY + 30)
+            .setVisible(true)
+            .setDepth(3.5 + targetPlayer.gridY/10)
+            .setScale(0.5)
+            .play('impact');
+    }
+
+    processObstacleAttack({team, num, x, y}) {
+        const player = this.getPlayer(team, num);
+        this.playSound('slash');
+        player.attack(x);
     }
 
     processCooldown({num, cooldown}) {
@@ -601,6 +641,11 @@ export class Arena extends Phaser.Scene
         const player = this.getPlayer(team, num);
         player.setHP(hp);
         if (damage) player.displayDamage(damage);
+    }
+
+    processStatusChange({team, num, statuses}) {
+        const player = this.getPlayer(team, num);
+        player.setStatuses(statuses);
     }
 
     processMPChange({num, mp}) {
@@ -622,47 +667,79 @@ export class Arena extends Phaser.Scene
         if (flag) this.displaySpellArea(location, spell.size, spell.castTime);
     }
 
-    processTerrain({x, y, size, type}) {
-        console.log(`Processing terrain: ${x} ${y} ${size} ${type}`);
-        // Iterate over x - floor(size/2) to x + floor(size/2) and y - floor(size/2) to y + floor(size/2)
-        for (let i = x - Math.floor(size/2); i <= x + Math.floor(size/2); i++) {
-            for (let j = y - Math.floor(size/2); j <= y + Math.floor(size/2); j++) {
-                const {x: pixelX, y: pixelY} = this.gridToPixelCoords(i, j);
-                switch (type) {
-                    case Terrain.FIRE:
-                        const sprite = this.add.sprite(pixelX, pixelY, '')
-                            .setDepth(5).setScale(2).setAlpha(0.9);
-                        sprite.anims.play('ground_flame');
-                        break;
-                    case Terrain.ICE:
-                        this.add.sprite(pixelX, pixelY, 'iceblock')
-                            .setDepth(5).setAlpha(0.9).setOrigin(0.5, 0.35);
-                        const tile = this.tilesMap.get(serializeCoords(i, j));
-                        // @ts-ignore
-                        if (tile.tween) tile.tween.stop();
-                        this.obstaclesMap.set(serializeCoords(i, j), true);
-                        break;
-                    default:
-                        break;
-                }
-                
+    processTerrain(updates: TerrainUpdate[]) {
+        updates.forEach(({x, y, terrain}) => {
+            const {x: pixelX, y: pixelY} = this.gridToPixelCoords(x, y);
+            switch (terrain) {
+                case Terrain.FIRE:
+                    const sprite = this.add.sprite(pixelX, pixelY, '')
+                        .setDepth(3 + y/10).setScale(2).setAlpha(0.9);
+                    sprite.anims.play('ground_flame');
+                    this.sprites.push(sprite);
+                    this.terrainSpritesMap.set(serializeCoords(x, y), sprite);
+                    break;
+                case Terrain.ICE:
+                    const icesprite = this.add.sprite(pixelX, pixelY, 'iceblock')
+                        .setDepth(3 + y/10).setAlpha(0.9).setOrigin(0.5, 0.35);
+                    icesprite.postFX.addShine(0.5, .2, 5);
+                    this.terrainSpritesMap.set(serializeCoords(x, y), icesprite);
+                    
+                    const tile = this.tilesMap.get(serializeCoords(x, y));
+                    // @ts-ignore
+                    if (tile.tween) tile.tween.stop();
+                    this.obstaclesMap.set(serializeCoords(x, y), true);
+                  
+                    break;
+                case Terrain.NONE:
+                    this.obstaclesMap.delete(serializeCoords(x, y));
+                    const terrainsprite = this.terrainSpritesMap.get(serializeCoords(x, y));
+                    if (terrainsprite) {
+                        this.flickerAndDestroy(terrainsprite, 5, 1000);
+                        this.terrainSpritesMap.delete(serializeCoords(x, y));
+                    }
+                    break;
+                default:
+                    break;
             }
-        }
-    
+        });
     }
 
-    processLocalAnimation({x, y, id}) {
+    flickerAndDestroy(sprite, times, duration) {
+        if (!sprite) return;
+    
+        // Create a tween to flicker the sprite
+        this.tweens.add({
+            targets: sprite,
+            alpha: { from: 1, to: 0 },
+            duration: duration / (times * 2),
+            yoyo: true,
+            repeat: times - 1, // Repeat for the number of times - 1 since it starts from 1
+            onComplete: () => {
+                sprite.destroy();
+            }
+        });
+    }    
+
+    processLocalAnimation({x, y, id, isKill}) {
         // Convert x and y in grid coords to pixels
         const {x: pixelX, y: pixelYInitial} = this.gridToPixelCoords(x, y);
         const spell = spells[id];
         let pixelY = pixelYInitial;
         if (spell.yoffset) pixelY += spell.yoffset;
+
+        if (isKill) this.killCam(pixelX, pixelY);
+
         this.localAnimationSprite.setPosition(pixelX, pixelY)
             .setVisible(true)
             .setDepth(3.5 + y/10)
             .play(spell.animation);
         this.playSound(spell.sfx);
-        if (spell.shake) this.cameras.main.shake(250, 0.01); // More intense shake
+
+        if (spell.shake) {
+            const duration = isKill ? 2000 : 250;
+            const intensity = 0.002;
+            this.cameras.main.shake(duration, intensity);
+         } 
     }
 
     processGameEnd({isWinner, xp, gold}) {
@@ -697,6 +774,12 @@ export class Arena extends Phaser.Scene
 
     playSound(name, volume = 1, loop = false) {
         // this.SFX[name].play({volume, loop});
+
+        // const playerPosition = { x: 100, y: 100 };
+        // const audioSourcePosition = { x: 300, y: 100 };
+        // // Calculate panning (left/right balance) based on positions
+        // const pan = 100; // Phaser.Math.Clamp((audioSourcePosition.x - playerPosition.x) / 400, -1, 1);
+
         this.SFX[name].play({delay: 0});
     }
 
@@ -840,6 +923,19 @@ export class Arena extends Phaser.Scene
             frameRate: 15, // Number of frames per second
         });
 
+        this.anims.create({
+            key: `impact`, 
+            frames: this.anims.generateFrameNumbers('impact', { frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] }), 
+            frameRate: 25, 
+        });
+
+        this.anims.create({
+            key: `paralyzed`, 
+            frames: this.anims.generateFrameNumbers('statuses', { frames: [56, 57, 58, 59, 60, 61, 62, 63] }), 
+            frameRate: 15,
+            repeat: -1,
+        });
+
         this.animationScales = {
             slash: 1,
         }
@@ -873,7 +969,7 @@ export class Arena extends Phaser.Scene
                 player.setSpells(character.spells);
             }
 
-            this.gridMap[serializeCoords(character.x, character.y)] = player;
+            this.gridMap.set(serializeCoords(character.x, character.y), player);
 
             team.addMember(player);
         }, this);
@@ -925,9 +1021,8 @@ export class Arena extends Phaser.Scene
 
         this.input.mouse.disableContextMenu();
 
-        this.musicManager = new MusicManager(this, 2, 13, [5, 6]);
+        this.musicManager = new MusicManager(this, 2, 13, [5, 6, 11]);
         this.musicManager.playBeginning();
-
     }
 
     createHUD() {
@@ -1050,6 +1145,54 @@ export class Arena extends Phaser.Scene
         };
         return overview;
     }
+
+    killCam(x, y) {
+        // Save the original zoom and time scale
+        const originalZoom = this.cameras.main.zoom;
+        const originalTimeScale = this.localAnimationSprite.anims.timeScale;
+        const originalSoundRate = this.sound.rate;
+        const originalTweenRate = this.tweens.timeScale;
+
+        const screenWidth = this.cameras.main.width;
+        const screenHeight = this.cameras.main.height;
+    
+        // Define target zoom and slow-motion scale
+        const targetZoom = 2; 
+        const slowMotionScale = 0.2; 
+
+        this.sound.setRate(slowMotionScale);
+        this.localAnimationSprite.anims.timeScale = slowMotionScale;
+        this.tweens.timeScale = slowMotionScale;
+        
+        // For every sprites in this.sprites, set anims.timeScale to slowMotionScale
+        this.sprites.forEach((sprite) => {
+            sprite.anims.timeScale = slowMotionScale;
+        });
+
+        const firstDelay = 0;
+        const secondDelay = firstDelay + 3000;
+        const cameraSpeed = 200;
+
+        this.time.delayedCall(firstDelay, () => {
+            // Move camera to the spell's location and zoom in
+            this.cameras.main.pan(x, y, cameraSpeed, 'Power2');
+            this.cameras.main.zoomTo(targetZoom, cameraSpeed, 'Power2');
+        });
+          
+        this.time.delayedCall(secondDelay, () => {
+            // Return the camera to the original position and zoom level
+            this.cameras.main.pan(screenWidth / 2, screenHeight / 2, cameraSpeed, 'Power2');
+            this.cameras.main.zoomTo(originalZoom, cameraSpeed, 'Power2');
+            this.localAnimationSprite.anims.timeScale = originalTimeScale;
+            this.sound.setRate(originalSoundRate);
+            this.tweens.timeScale = originalTweenRate;
+
+            this.sprites.forEach((sprite) => {
+                sprite.anims.timeScale = originalTimeScale;
+            });
+        });
+    }
+    
 
     // update (time, delta)
     // {

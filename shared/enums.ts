@@ -8,6 +8,8 @@ export enum Stat {
     NONE
 }
 
+export const statFields = ["hp", "mp", "atk", "def", "spatk", "spdef"];
+
 export enum Target {
     SELF,
     AOE,
@@ -76,3 +78,14 @@ export const RarityColor = [
     '#8F2841',
     '#C1770D'
 ]
+
+export enum StatusEffect {
+    FREEZE,
+    BURN,
+    POISON,
+    SLEEP,
+    PARALYZE
+}
+
+export const equipmentFields = ["weapon", "helmet", "armor", "belt", "gloves",
+  "boots", "left_ring", "right_ring", "necklace"];

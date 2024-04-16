@@ -13,6 +13,7 @@ export class Player extends Phaser.GameObjects.Container {
     sprite: Phaser.GameObjects.Sprite;
     numKey: Phaser.GameObjects.Text;
     selectionOval: Phaser.GameObjects.Graphics;
+    glowFx: Phaser.FX.Glow;
     name = 'Player 1';
     isPlayer = false;
     texture: string;
@@ -37,6 +38,7 @@ export class Player extends Phaser.GameObjects.Container {
     inventory: BaseItem[] = [];
     spells: BaseSpell[] = [];
     animationSprite: Phaser.GameObjects.Sprite;
+    statusSprite: Phaser.GameObjects.Sprite;
     pendingSpell: number | null = null;
     pendingItem: number | null = null;
     casting = false;
@@ -44,6 +46,10 @@ export class Player extends Phaser.GameObjects.Container {
     HURT_THRESHOLD = 0.5;
     team: Team;
     animationLock = false;
+    statuses: {
+        frozen: number;
+        paralyzed: number;
+    };
 
     constructor(
         scene: Phaser.Scene, arenaScene: Arena, hudScene: HUD, team: Team, name: string, gridX: number, gridY: number, x: number, y: number,
@@ -64,12 +70,19 @@ export class Player extends Phaser.GameObjects.Container {
         this.hp = hp;
         this.num = num;
 
+        this.statuses = {
+            frozen: 0,
+            paralyzed: 0,
+        };
+
         this.baseSquare = scene.add.graphics().setAlpha(0.6);
         this.add(this.baseSquare);
 
         // Create the sprite using the given key and add it to the container
         this.sprite = scene.add.sprite(0, 0, texture);
         this.add(this.sprite);
+        // @ts-ignore
+        this.scene.sprites.push(this.sprite);
 
         // TODO: refactor as subclass
         if (isPlayer) {
@@ -112,6 +125,9 @@ export class Player extends Phaser.GameObjects.Container {
         this.animationSprite.on('animationcomplete', () => this.animationSprite.setVisible(false), this);
         this.add(this.animationSprite);
 
+        this.statusSprite = scene.add.sprite(0, -20, 'statuses').setOrigin(0.5, 0.1).setVisible(false);
+        this.add(this.statusSprite);
+
         // Add the container to the scene
         scene.add.existing(this);
         this.updatePos(gridX, gridY);
@@ -152,26 +168,45 @@ export class Player extends Phaser.GameObjects.Container {
         return this.hp > 0;
     }
 
+    isParalyzed() {
+        return this.statuses.paralyzed || this.statuses.frozen;
+    }
+
     canAct() {
-        return this.cooldownDuration == 0 && this.isAlive() && !this.casting;
+        return this.cooldownDuration == 0 && this.isAlive() && !this.casting && !this.isParalyzed();
     }
 
     setDistance(distance: number) {
         this.distance = distance;
     }
 
+    getIdleAnim() {
+        if (this.hp <= 0) return 'die';
+        return this.hp / this.maxHP < this.HURT_THRESHOLD ? 'idle_hurt' : 'idle';
+    }
+
     handleAnimationComplete() {
-        let idleAnim = this.hp / this.maxHP < this.HURT_THRESHOLD ? 'idle_hurt' : 'idle';
-        if (this.hp <= 0) idleAnim = 'die';
-        this.playAnim(idleAnim)
+        if (this.statuses.frozen) {
+            return;
+        }
+        this.playAnim(this.getIdleAnim());
     }
 
     playAnim(key: string, revertToIdle = false) {
-        if (this.animationLock) return;
+        if (this.animationLock) {
+            return;
+        }
         this.animationLock = true;
 
         this.sprite.removeListener('animationcomplete', this.handleAnimationComplete);
         this.sprite.anims.stop();
+
+        if (this.statuses.frozen) {
+            this.animationLock = false;
+            return;
+        }
+
+        console.log(`Playing ${this.texture}_anim_${key}`);
         this.sprite.play(`${this.texture}_anim_${key}`);
         if (revertToIdle) {
             this.sprite.once('animationcomplete', this.handleAnimationComplete, this);
@@ -197,6 +232,10 @@ export class Player extends Phaser.GameObjects.Container {
 
     select() {
         this.selectionOval.setVisible(true);
+        if (!this.glowFx) {
+            this.glowFx = this.sprite.preFX.addGlow(0xffffff, 6);
+        }
+        this.glowFx.setActive(true);
         this.displayMovementRange();
         this.selected = true;
 
@@ -207,6 +246,9 @@ export class Player extends Phaser.GameObjects.Container {
         this.selectionOval.setVisible(false);
         this.hideMovementRange();
         this.selected = false;
+        if (this.glowFx) {
+            this.glowFx.setActive(false);
+        }
     }
 
     isSelected() {
@@ -235,16 +277,41 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     onPointerOver() {
-        if(this.isTarget() && this.arena.selectedPlayer.pendingSpell == null) {
+        if (this.isTarget() && this.arena.selectedPlayer.pendingSpell == null) {
             this.hud.toggleCursor(true, 'swords');
         }
+        if (!this.glowFx) { // Initialize the glow effect if it does not exist
+            if (this.isSelected() || this.isPlayer) {
+                // White glow for selected, blue for player hover
+                const glowColor = this.isSelected() ? 0xffffff : (this.isPlayer ? 0x0000ff : 0xff0000);
+                this.glowFx = this.sprite.preFX.addGlow(glowColor, 6);
+            } else {
+                this.glowFx = this.sprite.preFX.addGlow(0xff0000, 4);
+            }
+        }
+        if (this.isPlayer && !this.isSelected()) {
+            this.glowFx.color = 0x00ff00; // Blue glow
+        }
+        this.glowFx.setActive(true);
     }
+    
 
     onPointerOut() {
-        if(!this.isPlayer && this.arena.selectedPlayer?.pendingSpell == null) {
+        if (!this.isPlayer && this.arena.selectedPlayer?.pendingSpell == null) {
             this.hud.toggleCursor(false, 'scroll');
         }
+        if (!this.isSelected()) { // Only deactivate if not selected
+            if (this.glowFx && !this.isPlayer) {
+                this.glowFx.setActive(false);
+            } else if (this.isPlayer) {
+                this.glowFx.color = 0xffffff; // Reset to white if selected, deactivate otherwise
+                if (!this.isSelected()) {
+                    this.glowFx.setActive(false);
+                }
+            }
+        }
     }
+    
 
     onClick() {
         this.arena.playSound('click');
@@ -415,13 +482,14 @@ export class Player extends Phaser.GameObjects.Container {
     die() {
         this.healthBar.setVisible(false);
         this.MPBar?.setVisible(false);
+        this.statusSprite.setVisible(false);
         this.playAnim('die');
         if (this.arena.selectedPlayer == this) this.arena.deselectPlayer();
     }
 
-    attack(target: Player) {
+    attack(targetX: number) {
         this.playAnim('attack', true);
-        this.sprite.flipX = target.gridX > this.gridX;
+        this.sprite.flipX = targetX < this.gridX;
     }
 
     hurt() {
@@ -440,8 +508,8 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     displayOverheadText(text, duration, color) {
-        const randomXOffset = (Math.random() - 0.5) * 30; 
-        const randomYOffset = (Math.random() - 0.5) * 10; 
+        const randomXOffset = 0; //(Math.random() - 0.5) * 30; 
+        const randomYOffset = 0; // (Math.random() - 0.5) * 10; 
 
         const textObject = this.scene.add.text(
             randomXOffset,( -this.sprite.height / 2) + 15 + randomYOffset, `${String(text)}`, 
@@ -508,13 +576,11 @@ export class Player extends Phaser.GameObjects.Container {
             onUpdate: () => {
                 this.cooldownDuration = Math.floor(this.totalCooldownDuration * (1 - this.cooldown.progress));
                 this.cooldown.draw(); // Redraw the circle on each update of the tween
-                // @ts-
                 this.arena.emitEvent('cooldownChange', {num: this.num})
             },
             onComplete: () => {
                 this.cooldown.setVisible(false);
                 this.cooldownDuration = 0;
-                // this.playAnim('idle');
                 if (this.isSelected()) this.displayMovementRange();
                 this.arena.emitEvent('cooldownEnded', {num: this.num})
                 if (this.selected) this.arena.playSound('cooldown');
@@ -542,5 +608,38 @@ export class Player extends Phaser.GameObjects.Container {
 
     victoryDance() {
         if (this.isAlive()) this.playAnim('victory');
+    }
+
+    setStatuses(statuses) {
+        if (!this.isAlive()) return;
+        this.setFrozen(statuses.frozen);
+        this.setParalyzed(statuses.paralyzed);
+    }
+
+    setFrozen(duration) {
+        if (duration != 0) 
+        {
+            this.statuses.frozen = duration;   
+            this.sprite.anims.stop();   
+            this.cooldownTween?.stop();
+        } else {
+            this.statuses.frozen = 0;
+            this.playAnim(this.getIdleAnim());
+        }   
+    }
+
+    setParalyzed(duration) {
+        if (duration != 0) {
+            this.statuses.paralyzed = duration;
+            this.sprite.anims.stop();
+            this.cooldownTween?.stop();
+            this.statusSprite.setVisible(true);
+            this.statusSprite.anims.play('paralyzed');
+        } else {
+            this.statuses.paralyzed = 0;
+            this.statusSprite.anims.stop();
+            this.statusSprite.setVisible(false);
+            this.playAnim(this.getIdleAnim());
+        }
     }
 }

@@ -13,6 +13,7 @@ export class BaseEquipment {
     rarity: Rarity = Rarity.COMMON;
     minLevel: number = 0;
     classes: Class[] = [];
+    beltSize?: number;
 
     constructor(props: EquipmentData) {
         Object.assign(this, props);

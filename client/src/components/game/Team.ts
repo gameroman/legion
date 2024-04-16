@@ -29,6 +29,14 @@ export class Team {
         return this.members;
     }
 
+    calculateHealthRatio(totalHP: number, totalHPMax: number): number {
+        // Ensure that the value does not go below 0 when totalHP is less than totalHPMax / 2
+        const adjustedHP = Math.max(0, totalHP - (totalHPMax / 2));
+        // Adjust the scale so that it maps from 0 to 1 over the range from totalHPMax / 2 to totalHPMax
+        const ratio = (2 * adjustedHP) / totalHPMax;
+        return ratio;
+    }
+
     updateHP() {
         this.totalHP = 0;
         this.members.forEach(member => {
@@ -36,7 +44,7 @@ export class Team {
         });
 
         if (this.isPlayerTeam) {
-            this.scene.updateMusicIntensity(this.totalHP / this.totalHPMax);
+            this.scene.updateMusicIntensity(this.calculateHealthRatio(this.totalHP, this.totalHPMax));
         }
     }
 

@@ -18,6 +18,7 @@ interface ActionItemProps {
   hideHotKey?: boolean;
   refreshCharacter?: () => void;
   handleItemEffect?: (effects: Effect[], actionType: InventoryActionType, index?: number) => void;
+  updateInventory?: (type: string, action: InventoryActionType, index: number) => void;
   onActionClick?: (type: string, letter: string, index: number) => void;
 }
 /* eslint-disable react/prefer-stateless-function */
@@ -92,6 +93,7 @@ class Action extends Component<ActionItemProps> {
           dialogData={this.state.modalData} 
           handleClose={this.handleCloseModal}
           refreshCharacter={this.props.refreshCharacter} 
+          updateInventory={this.props.updateInventory}
         />
       </div>
     );

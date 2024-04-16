@@ -1,5 +1,5 @@
 import { Target, Terrain, Rarity, Class } from "./enums";
-import { Effect, SpellData } from "./interfaces";
+import { Effect, SpellData, StatusEffectData } from "./interfaces";
 
 export class BaseSpell {
     id: number = -1;
@@ -22,6 +22,7 @@ export class BaseSpell {
     price: number = 0;
     minLevel: number = 0;
     classes: Class[] = [];
+    status?: StatusEffectData;
     
     constructor(props: SpellData) {
         Object.assign(this, props);

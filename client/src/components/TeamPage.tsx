@@ -1,17 +1,18 @@
 // PlayPage.tsx
 import { h, Component } from 'preact';
-import { Router, Route } from 'preact-router';
 
 import Roster from './roster/Roster';
-import Character from './Character';
 import Inventory from './inventory/Inventory';
 
 import { apiFetch } from '../services/apiService';
 import { successToast, errorToast } from './utils';
 import TeamContentCard from './teamContentCard/TeamContentCard';
 import { Effect } from '@legion/shared/interfaces';
-import { EquipmentSlot, InventoryActionType } from '@legion/shared/enums';
+import { EquipmentSlot, InventoryActionType, equipmentFields } from '@legion/shared/enums';
 import { equipments } from '@legion/shared/Equipments';
+import { items } from '@legion/shared/Items';
+import { spells } from '@legion/shared/Spells';
+import { inventorySize } from '@legion/shared/utils';
 
 interface TeamPageState {
   inventory: {
@@ -116,6 +117,86 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
     this.setState({item_effect: result_effects});
   }
 
+  
+
+  updateInventory(type: string, action: InventoryActionType, index: number) {
+    switch(type) {
+      case 'consumables':
+        const consumables = this.state.inventory.consumables;
+        if (action === InventoryActionType.EQUIP) {
+          if (this.state.character_sheet_data.inventory.length >= this.state.character_sheet_data.carrying_capacity + this.state.character_sheet_data.carrying_capacity_bonus) {
+            errorToast('Character inventory is full!');
+            return;
+          }
+          const id = items[this.state.inventory.consumables[index]].id;
+          consumables.splice(index, 1);
+          this.state.character_sheet_data.inventory.push(id);
+        } else {
+          if (inventorySize(this.state.inventory) >= this.state.carrying_capacity) {
+            errorToast('Character inventory is full!');
+            return;
+          }
+          const id = items[this.state.character_sheet_data.inventory[index]].id;
+          consumables.push(id);
+          consumables.sort();
+          this.state.character_sheet_data.inventory.splice(index, 1);
+        }
+        this.setState({ inventory: { ...this.state.inventory, consumables } });
+        break;
+      case 'equipment':
+        const equipment = this.state.inventory.equipment;
+        if (action === InventoryActionType.EQUIP) {
+          const data = equipments[equipment[index]];
+          const slotNumber = data.slot;
+          const field = equipmentFields[slotNumber];
+          const id = equipment[index];
+          equipment.splice(index, 1);
+
+          if (this.state.character_sheet_data.equipment[field] !== -1) {
+            const removed_id = this.state.character_sheet_data.equipment[field];
+            equipment.push(removed_id);
+            equipment.sort();
+          }
+
+          this.state.character_sheet_data.equipment[field] = id;
+        } else {
+          if (inventorySize(this.state.inventory) >= this.state.carrying_capacity) {
+            errorToast('Character inventory is full!');
+            return;
+          }
+          const field = equipmentFields[index];
+          const id = this.state.character_sheet_data.equipment[field];
+          this.state.character_sheet_data.equipment[field] = -1;
+          equipment.push(id);
+          equipment.sort();
+        }
+        this.setState({ inventory: { ...this.state.inventory, equipment } });
+        break;
+      case 'spells':
+        const playerSpells = this.state.inventory.spells;
+        if (action === InventoryActionType.EQUIP) {
+          if (this.state.character_sheet_data.skill_slots == 0) {
+            errorToast('Character has no spell slots!');
+            return;
+          }
+          if (this.state.character_sheet_data.skills.length >= this.state.character_sheet_data.skill_slots) {
+            errorToast('Character spell slots are full!');
+            return;
+          }
+          const id = spells[this.state.inventory.spells[index]].id;
+          // Check if character already knows the spell
+          if (this.state.character_sheet_data.skills.includes(id)) {
+            errorToast('Character already knows this spell!');
+            return;
+          }
+          playerSpells.splice(index, 1);
+          this.state.character_sheet_data.skills.push(id);
+        }
+        this.setState({ inventory: { ...this.state.inventory, spells: playerSpells } });
+        break;
+    }
+  }
+
   render() {
 
     return (
@@ -128,6 +209,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
               itemEffects={this.state.item_effect}
               refreshCharacter={this.refreshCharacter} 
               handleItemEffect={this.handleItemEffect}
+              updateInventory={this.updateInventory.bind(this)}
             />
             <Inventory 
               id={this.state.character_id} 
@@ -135,6 +217,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
               carrying_capacity={this.state.carrying_capacity}
               refreshCharacter={this.refreshCharacter} 
               handleItemEffect={this.handleItemEffect}
+              updateInventory={this.updateInventory.bind(this)}
             />
           </div>
         </div>

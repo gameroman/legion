@@ -1,10 +1,10 @@
 import {onRequest} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import admin, {corsMiddleware, getUID} from "./APIsetup";
-
+import {getSPIncrement} from "@legion/shared/levelling";
 import {NewCharacter} from "@legion/shared/NewCharacter";
-import {Class} from "@legion/shared/enums";
-import {RewardsData} from "@legion/shared/interfaces";
+import {Class, statFields, Stat} from "@legion/shared/enums";
+import {OutcomeData} from "@legion/shared/interfaces";
 
 export const rosterData = onRequest((request, response) => {
   logger.info("Fetching rosterData");
@@ -89,7 +89,9 @@ export const rewardsUpdate = onRequest((request, response) => {
   corsMiddleware(request, response, async () => {
     try {
       const uid = await getUID(request);
-      const {isWinner, xp, gold, characters} = request.body as RewardsData;
+      const {isWinner, xp, gold, characters, elo} = request.body as OutcomeData;
+      console.log(`Updating rewards for ${uid} with ${xp} XP and ${gold} gold 
+      and elo ${elo}`);
 
       await db.runTransaction(async (transaction) => {
         const playerRef = db.collection("players").doc(uid);
@@ -105,10 +107,10 @@ export const rewardsUpdate = onRequest((request, response) => {
           throw new Error("Data does not exist");
         }
 
-        // Increase player xp and number of wins or losses
         transaction.update(playerRef, {
           xp: admin.firestore.FieldValue.increment(xp),
           gold: admin.firestore.FieldValue.increment(gold),
+          elo: admin.firestore.FieldValue.increment(elo),
         });
         if (isWinner) {
           transaction.update(playerRef, {
@@ -123,13 +125,12 @@ export const rewardsUpdate = onRequest((request, response) => {
         // Iterate over the player's characters and increase their XP
         // Update XP for each character directly using their references
         if (playerData.characters) {
-          console.log("Iterating over characters...");
           playerData.characters.forEach(
             (characterRef: admin.firestore.DocumentReference) => {
               if (characterRef instanceof admin.firestore.DocumentReference) {
                 // Find the corresponding CharacterRewards object
                 const characterRewards =
-                  characters!.find((c) => c.id === characterRef.id);
+                  characters!.find((c: any) => c.id === characterRef.id);
 
                 if (characterRewards) {
                   const sp = characterRewards.points;
@@ -159,42 +160,59 @@ export const rewardsUpdate = onRequest((request, response) => {
   });
 });
 
-async function createCharacterForSale(db: FirebaseFirestore.Firestore) {
-  const level = Math.floor(Math.random() * 100);
-  const price = level * 1000;
-  const character =
-        new NewCharacter(Class.RANDOM, level).getCharacterData();
+async function createCharacterForSale(
+  db: FirebaseFirestore.Firestore,
+  classType: Class = Class.RANDOM
+) {
+  // const level = 1; // Math.floor(Math.random() * 100);
+  const character = new NewCharacter(classType, 1, true).getCharacterData(true);
   character.onSale = true;
-  character.price = price;
   // Add the character to the collection
   await db.collection("characters").add(character);
+}
+
+async function monitorCharactersOnSale(db: any) {
+  const querySnapshot = await db.collection("characters")
+    .where("onSale", "==", true)
+    .get();
+  let onSaleCount = querySnapshot.size;
+  const TARGET_COUNT = 10 + Math.floor(Math.random() * 4) - 2;
+  // Check that the list of on sale characters contains at least one
+  // character of each class
+  const classCounts = new Array(3).fill(0);
+  querySnapshot.docs.forEach((doc: any) => {
+    const characterData = doc.data();
+    classCounts[characterData.class]++;
+  });
+
+  // Create characters for sale if necessary
+  for (let i = 0; i < classCounts.length; i++) {
+    if (classCounts[i] === 0) {
+      await createCharacterForSale(db, i);
+      onSaleCount++;
+    }
+  }
+
+  while (onSaleCount < TARGET_COUNT) {
+    await createCharacterForSale(db);
+    onSaleCount++;
+  }
 }
 
 export const generateOnSaleCharacters = onRequest((request, response) => {
   logger.info("Generating on sale characters");
   const db = admin.firestore();
-  const TARGET_COUNT = 10;
 
   corsMiddleware(request, response, async () => {
     try {
       // Count how many characters have the `onSale` flag set to true
       // in the collection
-      const querySnapshot = await db.collection("characters")
-        .where("onSale", "==", true)
-        .get();
-      let onSaleCount = querySnapshot.size;
-      let delta = 0;
-      console.log(`Number of on sale characters: ${onSaleCount}`);
-      while (onSaleCount < TARGET_COUNT) {
-        await createCharacterForSale(db);
-        // Increment the on sale count
-        onSaleCount++;
-        delta++;
-      }
+      const delta = 0;
+      monitorCharactersOnSale(db);
       response.send({delta});
     } catch (error) {
       console.error("Error generating on sale characters:", error);
-      response.status(401).send("Unauthorized");
+      response.status(500).send("Errir");
     }
   });
 });
@@ -287,6 +305,11 @@ export const purchaseCharacter = onRequest((request, response) => {
           throw new Error("Player does not have enough gold");
         }
 
+        // Check if player has less than 10 characters
+        if (playerData.characters.length >= 10) {
+          throw new Error("Player has too many characters");
+        }
+
         // Subtract gold from player
         transaction.update(playerRef, {
           gold: admin.firestore.FieldValue.increment(-price),
@@ -305,11 +328,73 @@ export const purchaseCharacter = onRequest((request, response) => {
         });
       });
       console.log("Transaction successfully committed!");
-      createCharacterForSale(db);
+      monitorCharactersOnSale(db);
 
       response.send({status: 0});
     } catch (error) {
       console.error("Error purchasing character:", error);
+      response.status(401).send("Unauthorized");
+    }
+  });
+});
+
+export const spendSP = onRequest((request, response) => {
+  logger.info("Spending skill points");
+  const db = admin.firestore();
+
+  corsMiddleware(request, response, async () => {
+    try {
+      const uid = await getUID(request);
+      const characterId = request.body.characterId as string;
+      // const amount = request.body.amount;
+      const amount = 1;
+      const index = request.body.index as number;
+
+      await db.runTransaction(async (transaction) => {
+        const playerRef = db.collection("players").doc(uid);
+        const characterRef = db.collection("characters").doc(characterId);
+
+        const playerDoc = await transaction.get(playerRef);
+        const characterDoc = await transaction.get(characterRef);
+
+        if (!playerDoc.exists || !characterDoc.exists) {
+          throw new Error("Documents do not exist");
+        }
+
+        const playerData = playerDoc.data();
+        const characterData = characterDoc.data();
+
+        if (!playerData || !characterData) {
+          throw new Error("Data does not exist");
+        }
+
+        // Check that character is owned by player
+        const characters =
+            playerData.characters as admin.firestore.DocumentReference[];
+        const characterIds = characters.map((character) => character.id);
+        if (!characterIds.includes(characterId)) {
+          throw new Error("Character not owned by player");
+        }
+
+        // Check that character has enough skill points
+        if (characterData.sp < amount) {
+          throw new Error("Character does not have enough skill points");
+        }
+
+        const stat = statFields[index];
+        const spBonuses = characterData.sp_bonuses;
+        spBonuses[stat] += getSPIncrement(index) * amount;
+
+        transaction.update(characterRef, {
+          sp: admin.firestore.FieldValue.increment(-amount),
+          sp_bonuses: spBonuses,
+        });
+      });
+      console.log("Transaction successfully committed!");
+
+      response.send({status: 0});
+    } catch (error) {
+      console.error("Error spending skill points:", error);
       response.status(401).send("Unauthorized");
     }
   });
