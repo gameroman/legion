@@ -98,17 +98,17 @@ export class Team {
     }
 
     registerChestsData(chestsData: ChestsData) {
-        for(const key in chestTypes) {
+        for(const key of chestTypes) {
             const chest = chestsData[key] as ChestData;
             if (chest.hasKey) continue;
-            const timeLeft = chest.time - (Date.now() / 1000);
-            if (timeLeft <= 0) {
+            if (chest.countdown <= 0) {
                 this.chestKeys[key] = true;
                 return; // Only one key unlocked per game
             }
         }
     }
 
+    
     getChestsRewards() {
         return this.chestKeys;
     }

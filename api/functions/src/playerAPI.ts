@@ -55,7 +55,7 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
         time: now + (24*60*60),
         hasKey: false,
       },
-    } as ChestsData,
+    },
   };
 
   // Start a batch to ensure atomicity

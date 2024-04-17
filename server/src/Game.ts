@@ -39,16 +39,20 @@ export abstract class Game
     }
 
     addPlayer(socket: Socket, elo: number, chests: ChestsData) {
-        if (this.sockets.length === 2) return;
-        this.sockets.push(socket);
-        socket.join(this.id);
-        const index = this.sockets.indexOf(socket);
-        console.log(`Adding player ${index + 1} to game ${this.id}`);
-        const team = this.teams.get(index + 1);
-        this.socketMap.set(socket, team);
-        team.setSocket(socket);
-        team.setElo(elo);
-        if (this.mode != PlayMode.PRACTICE) team.registerChestsData(chests);
+        try {
+            if (this.sockets.length === 2) return;
+            this.sockets.push(socket);
+            socket.join(this.id);
+            const index = this.sockets.indexOf(socket);
+            console.log(`Adding player ${index + 1} to game ${this.id}`);
+            const team = this.teams.get(index + 1);
+            this.socketMap.set(socket, team);
+            team.setSocket(socket);
+            team.setElo(elo);
+            if (this.mode != PlayMode.PRACTICE) team.registerChestsData(chests);
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     abstract populateTeams(): void;
@@ -705,7 +709,7 @@ export abstract class Game
             gold: isWinner ? this.computeTeamGold(team) : 0,
             xp: this.computeTeamXP(team, otherTeam, duration, false),
             elo: isWinner ? eloUpdate.winnerUpdate : eloUpdate.loserUpdate,
-            chestsRewards: mode == PlayMode.CASUAL ? null : team.getChestsRewards() as ChestsKeysData,
+            chestsRewards: mode == PlayMode.PRACTICE ? null : team.getChestsRewards() as ChestsKeysData,
         }
     }
 
@@ -778,8 +782,8 @@ export abstract class Game
                         xp: rewards.xp,
                         elo: rewards.elo,
                         characters: team.getCharactersDBUpdates(),
-                        chests: rewards.chestsRewards,
-                    },
+                        chestsRewards: rewards.chestsRewards,
+                    } as OutcomeData,
                 }
             );
         } catch (error) {

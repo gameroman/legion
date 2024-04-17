@@ -14,6 +14,8 @@ const AI_VS_AI = false;
 const FREEZE = true;
 
 export class AIGame extends Game {
+    nbExpectedPlayers = 2;
+
     constructor(id: string, mode: PlayMode, io: Server) {
         super(id, mode, io);
     }
@@ -67,12 +69,13 @@ export class AIGame extends Game {
 
     async addPlayer(socket: Socket, elo: number, chests: ChestsData) {
         super.addPlayer(socket, elo, chests);
-        if (this.sockets.length === 1) {
+        if (this.sockets.length === this.nbExpectedPlayers) {
             this.start();
         }
     }
 
     async start() {
+        if (this.teams.size !== this.nbExpectedPlayers) return;
         super.start();
         this.tickTimer = setInterval(this.AItick.bind(this), TICK);
     }

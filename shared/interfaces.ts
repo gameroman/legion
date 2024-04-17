@@ -127,6 +127,17 @@ export interface StatusEffectData {
     chance: number;
 }
 
+export interface ChestsTimeData {
+    bronze: ChestTimeData;
+    silver: ChestTimeData;
+    gold: ChestTimeData;
+}
+
+export interface ChestTimeData {
+    hasKey: boolean;
+    time: number;
+}
+
 export interface ChestsData {
     bronze: ChestData;
     silver: ChestData;
@@ -135,7 +146,7 @@ export interface ChestsData {
 
 export interface ChestData {
     hasKey: boolean;
-    time: number;
+    countdown: number;
 }
 
 export interface ChestsKeysData {

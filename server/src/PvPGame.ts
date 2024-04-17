@@ -8,6 +8,8 @@ import { ChestsData } from '@legion/shared/interfaces';
 
 
 export class PvPGame extends Game {
+    nbExpectedPlayers = 2;
+
     constructor(id: string, mode: PlayMode, io: Server) {
         super(id, mode, io);
     }
@@ -28,8 +30,13 @@ export class PvPGame extends Game {
 
     async addPlayer(socket: Socket, elo: number, chests: ChestsData) {
         super.addPlayer(socket, elo, chests);
-        if (this.sockets.length === 2) {
+        if (this.sockets.length === this.nbExpectedPlayers) {
             this.start();
         }
+    }
+
+    async start() {
+        if (this.teams.size !== this.nbExpectedPlayers) return;
+        super.start();
     }
 }
