@@ -1,10 +1,11 @@
 // ShopEquipmentCard.tsx
 import './ShopEquipmentCard.style.css';
 import { h, Component } from 'preact';
-import { Class, InventoryType, Stat } from "@legion/shared/enums";
+import { Class, InventoryType, Stat, equipmentFields } from "@legion/shared/enums";
 import { equipments } from '@legion/shared/Equipments';
 import { INFO_BG_COLOR } from '../itemDialog/ItemDialogType';
 import { BaseEquipment } from '@legion/shared/BaseEquipment';
+import { StatIcons } from '../shopConsumableCard/ShopConsumableCard';
 
 enum ClassIcon {
   '/shop/warrior_icon.png',
@@ -31,7 +32,7 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
 
     const classStyle = (classes: Class) => {
       return {
-        backgroundImage: `url(/shop/${classes === Class.BLACK_MAGE ? 'purple' : 'white'}_box_bg.png)`
+        backgroundImage: `url(/shop/${classes === Class.BLACK_MAGE ? 'purple' : 'white'}_box_bg.png)`,
       }
     }
 
@@ -52,6 +53,8 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
       price: data.price
     }
 
+    console.log('_______', data);
+
     return (
       <div className="shop-card-container" key={this.props.key} onClick={(e) => this.props.handleOpenModal(e, modalData)}>
         <div className="shop-card-title">
@@ -71,18 +74,18 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
           <img src={`/equipment/${data.frame}`} alt="equipment-image" />
           <div className="shop-card-class-container">
             {data.classes.map((classes, index) => <div key={index} className="shop-card-class" style={classStyle(classes)}>
-              <img src={classes === Class.WARRIOR ? ClassIcon[0] : ClassIcon[1]} alt="mp" />
+              <img src={classes === Class.WARRIOR ? ClassIcon[0] : ClassIcon[1]} style={classes === Class.WARRIOR ? 'transform: scaleX(1.5)' : ''} alt="mp" />
             </div>)}
           </div>
           <div className="equipment-card-class-badge">
-            <img src="/shop/helmet_icon.png" alt="" />
+            <img src={`/inventory/${equipmentFields[data.slot]}_icon.png`} alt="" />
           </div>
         </div>
         <p className="equipment-card-description">{data.description}</p>
-        <div className="shop-card-effect-container">
-          {data.effects.map((effect, index) => <div key={index} className="shop-card-effect">
-            <div className="shop-card-effect-stat" style={statColor(effect.stat)}><span>{Stat[effect.stat]}</span></div>
-            <div className="shop-card-effect-value" style={effect.value > 0 ? { color: '#9ed94c' } : { color: '#c95a74' }}><span>{statValue(effect.value)}</span></div>
+        <div className="consumable-card-effect-container">
+          {data.effects.map((effect, index) => <div key={index} className="consumable-card-effect">
+            <img src={StatIcons[effect.stat]} alt="" />
+            <span>{effect.value > 0 ? `+${effect.value}` : effect.value}</span>
           </div>)}
         </div>
         <div className="shop-card-price">

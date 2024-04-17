@@ -84,12 +84,6 @@ class PurchaseDialog extends Component<PurchaseDialogProps, PurchaseDialogState>
       color: '#f73b00',
     } : {};
 
-    const countContainerStyle = isCharacter ? {
-      pointerEvents: 'none',
-      cursor: 'not-allowed',
-      opacity: 0.5
-    } : {};
-
     const buyBtnStyle = !hasEnoughGold ? {
       opacity: 0.5,
       border: '1px solid #71deff',
@@ -105,13 +99,13 @@ class PurchaseDialog extends Component<PurchaseDialogProps, PurchaseDialogState>
 
           <div className="purchase-dialog-frame" style={spriteStyle}></div>
 
-          <div className="purchase-count-container" style={countContainerStyle}>
+          {!isCharacter && <div className="purchase-count-container">
             <div className="purchase-count-button" onClick={() => this.handleCount(false)}><span>-</span></div>
             <div className="purchase-count">
               <span>{this.state.count > 9 ? this.state.count : `0${this.state.count}`}</span>
             </div>
             <div className="purchase-count-button" onClick={() => this.handleCount(true)}><span>+</span></div>
-          </div>
+          </div>}
 
           <div className="purchase-dialog-price">
             <img src="/gold_icon.png" alt="cost" />

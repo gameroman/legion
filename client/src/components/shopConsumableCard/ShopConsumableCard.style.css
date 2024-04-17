@@ -2,11 +2,12 @@
     background-image: url('@assets/shop/daily_bg_idle.png');
     background-size: 100% 100%;
     padding: 14px;
-    min-width: 200px;
+    min-width: 196px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
+    cursor: pointer;
 }
 
 .shop-card-container:hover {
@@ -72,8 +73,10 @@
 .consumable-card-effect-container {
     display: flex;
     gap: 4px;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    min-height: 40px;
+    width: 94%;
 }
 
 .consumable-card-effect {

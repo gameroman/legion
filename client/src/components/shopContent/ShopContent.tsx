@@ -97,6 +97,7 @@ class ShopContent extends Component<ShopContentProps> {
     }
 
     render() {
+        if (!this.props.characters) return;
         if(!this.state.inventoryData) return;
 
         const defaultShopItems = {
@@ -126,7 +127,7 @@ class ShopContent extends Component<ShopContentProps> {
                 case ShopTabs.EQUIPMENTS:
                     return this.state.inventoryData.equipment.map((item, index) => <ShopEquipmentCard key={index} data={item} getItemAmount={getItemAmount} handleOpenModal={this.handleOpenModal} />)
                 case ShopTabs.CHARACTERS:
-                    return characters.map((item, index) => <ShopCharacterCard key={index} data={item} handleOpenModal={this.handleOpenModal} />)
+                    return characters?.map((item, index) => <ShopCharacterCard key={index} data={item} handleOpenModal={this.handleOpenModal} />)
                 default:
                     return null;
             }

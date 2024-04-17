@@ -4,7 +4,7 @@ import { h, Component } from 'preact';
 import { InventoryType, Target } from "@legion/shared/enums";
 import { BaseItem } from '@legion/shared/BaseItem';
 
-enum StatIcons {
+export enum StatIcons {
   '/shop/hp_icon.png',
   '/inventory/mp_icon.png',
   '/shop/attack_icon.png',

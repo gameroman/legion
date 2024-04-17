@@ -2,11 +2,12 @@
     background-image: url('@assets/shop/daily_bg_idle.png');
     background-size: 100% 100%;
     padding: 14px;
-    min-width: 200px;
+    min-width: 196px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
+    cursor: pointer;
 }
 
 .shop-card-container:hover {
@@ -80,7 +81,6 @@
 .equipment-card-content img {
     width: 128px;
     height: 128px;
-    border-radius: 12px;
     transform: scale(0.75);
 }
 
@@ -100,7 +100,7 @@
 
 .equipment-card-class-badge img {
     width: 72%;
-    height: 80%;
+    height: 72%;
 }
 
 .equipment-card-description {

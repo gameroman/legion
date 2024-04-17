@@ -1,3 +1,5 @@
+import { PlayerInventory } from "./interfaces";
+
 function specialRound(num: number): number {
     if (num >= 0) {
         return Math.round(num);
@@ -63,7 +65,7 @@ export function listCellsOnTheWay(startX: number, startY: number, endX: number, 
     return cells;
 }
 
-export function inventorySize(inventory) {
+export function inventorySize(inventory: PlayerInventory) {
     return Object.values(inventory)
     .filter(Array.isArray)
     .map(arr => arr.length)
