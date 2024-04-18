@@ -30,11 +30,84 @@ class RankPage extends Component {
   };
 
   async componentDidMount() {
-    const response = await axios.get(`${process.env.API_URL}/fetchLeaderboard`);
-    if (response.data) {
-      // eslint-disable-next-line react/no-did-mount-set-state
-      this.setState({ leaderboardData: response.data });
-    }
+    // const response = await axios.get(`${process.env.API_URL}/fetchLeaderboard`);
+    // if (response.data) {
+    //   // eslint-disable-next-line react/no-did-mount-set-state
+    //   this.setState({ leaderboardData: response.data });
+    // }
+    const data = {
+      seasonEnd: 604000, // Number of seconds until end of season for countdown
+      playerRanking: { // To display in the box at the top left
+        rank: 1,
+        player: "legal_pink_iguan",
+        elo: 100,
+      },
+      highlights: [ // For the box at the top right
+        {
+          player: "legal_pink_iguan",
+          avatar: "...",
+          title: "Most kills",
+          description: "Lorem ipsum blabla"
+        },
+        {
+          player: "legal_pink_iguan",
+          avatar: "...",
+          title: "Highest audience score",
+          description: "Lorem ipsum blabla"
+        },
+        {
+          player: "legal_pink_iguan",
+          avatar: "...",
+          title: "Most wins",
+          description: "Lorem ipsum blabla"
+        }
+      ],
+      promotionRows: 5, // means, show green promotion arrows for the first 5 rows
+      demotionRows: 4, // red demotion arros for last 4
+      ranking: [ // Data for the rows in leaderboard
+      {
+        "rank": 1,
+        "player": "legal_pink_iguan",
+        "elo": 100,
+        "wins": 4,
+        "losses": 10,
+        "winsRatio": "29%"
+      },
+      {
+        "rank": 2,
+        "player": "representative_s",
+        "elo": 100,
+        "wins": 5,
+        "losses": 30,
+        "winsRatio": "14%"
+      },
+      {
+        "rank": 3,
+        "player": "Me", // Row of the player viewing the leaderboard
+        "elo": 100,
+        "wins": 5,
+        "losses": 30,
+        "winsRatio": "14%"
+      },
+      {
+        "rank": 4,
+        "player": "representative_s",
+        "elo": 100,
+        "wins": 5,
+        "losses": 30,
+        "winsRatio": "14%"
+      },
+      {
+        "rank": 5,
+        "player": "representative_s",
+        "elo": 100,
+        "wins": 5,
+        "losses": 30,
+        "winsRatio": "14%",
+        "isFriend": true // When true, use the green highlight for the row
+      }],
+    };
+    this.setState({ leaderboardData: data });
   }
 
   render() {
