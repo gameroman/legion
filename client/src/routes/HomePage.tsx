@@ -2,6 +2,7 @@
 import { h, Component } from 'preact';
 import { Router, Route } from 'preact-router';
 import AuthContext from '../contexts/AuthContext';
+import { PlayerContext } from '../contexts/PlayerContext';
 
 import firebase from 'firebase/compat/app'
 import * as firebaseui from 'firebaseui'
@@ -16,12 +17,8 @@ import Navbar from '../components/navbar/Navbar';
 import QueuePage from '../components/QueuePage';
 import withAuth from '../components/withAuth';
 
-import { apiFetch } from '../services/apiService';
-import { successToast, errorToast, PlayerData } from '../components/utils';
-
 interface State {
     showFirebaseUI: boolean;
-    playerData?: PlayerData;
 }
 
 class HomePage extends Component<object, State> {
@@ -75,59 +72,38 @@ class HomePage extends Component<object, State> {
         this.setState({ showFirebaseUI: false });
     }
 
-    componentDidMount() {
-        this.fetchPlayerData();
-    }
-    
-    async fetchPlayerData() {
-        try {
-            const data = await apiFetch('playerData');
-            console.log(data);
-            this.setState({ 
-                playerData: {
-                    name: data.name,
-                    lvl: data.lvl,
-                    gold: data.gold,
-                    elo: data.elo
-                }
-            });
-        } catch (error) {
-            errorToast(`Error: ${error}`);
-        }
-    }
-
     render() {
         const { showFirebaseUI } = this.state;
         const { user } = this.context;
 
         return (
-            <div className="homePage">
-
-                <Navbar user={user} playerData={this.state.playerData} initFirebaseUI={this.initFirebaseUI} logout={this.logout}/>
-
-                <div className="content">
-
-                <div className="mainContent">
-                    <Router onChange={this.handleRouteChange}>
-                        <Route default path="/play" component={PlayPage} />
-                        <Route path="/queue/:mode" component={QueuePage} />
-                        <Route path="/team/:id?" component={withAuth(TeamPage)} />
-                        <Route path="/shop/:id?" component={ShopPage} />
-                        <Route path="/rank" component={RankPage} />
-                    </Router>
-                </div>
-                </div>
-
-                <div className={`dialog login-dialog ${!showFirebaseUI ? 'hidden' : ''}`}>
-                    <div className="shop-item-card-header" >
-                        <div className="shop-item-card-name">Sign up or sign in</div>
-                        <div className="shop-item-card-name-shadow">Sign up or sign in</div>
+            <PlayerContext.Consumer> 
+                {({ player }) => (
+                    <div className="homePage">
+                        <Navbar user={user} playerData={player} initFirebaseUI={this.initFirebaseUI} logout={this.logout} />
+                        <div className="content">
+                            <div className="mainContent">
+                                <Router onChange={this.handleRouteChange}>
+                                    <Route default path="/play" component={PlayPage} />
+                                    <Route path="/queue/:mode" component={QueuePage} />
+                                    <Route path="/team/:id?" component={withAuth(TeamPage)} />
+                                    <Route path="/shop/:id?" component={ShopPage} />
+                                    <Route path="/rank" component={RankPage} />
+                                </Router>
+                            </div>
+                        </div>
+                        <div className={`dialog login-dialog ${!showFirebaseUI ? 'hidden' : ''}`}>
+                            <div className="shop-item-card-header" >
+                                <div className="shop-item-card-name">Sign up or sign in</div>
+                                <div className="shop-item-card-name-shadow">Sign up or sign in</div>
+                            </div>
+                            <div className="shop-item-card-content" id="firebaseui-auth-container">
+                                <i className="fa-solid fa-circle-xmark closebtn" onClick={this.hideFirebaseUI} />
+                            </div>
+                        </div>
                     </div>
-                    <div className="shop-item-card-content" id="firebaseui-auth-container">
-                        <i className="fa-solid fa-circle-xmark closebtn" onClick={this.hideFirebaseUI} />
-                    </div>
-                </div>
-            </div>
+                )}
+            </PlayerContext.Consumer>
         );
     }
 }

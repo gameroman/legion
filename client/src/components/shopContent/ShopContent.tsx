@@ -1,6 +1,7 @@
 // ShopContent.tsx
 import './ShopContent.style.css';
 import { h, Component } from 'preact';
+import { PlayerContext } from '../../contexts/PlayerContext';
 import { apiFetch } from '../../services/apiService';
 import { InventoryType, ShopTabs } from '@legion/shared/enums';
 import { PlayerInventory, ShopItems } from '@legion/shared/interfaces';
@@ -34,6 +35,8 @@ interface modalData {
 }
 
 class ShopContent extends Component<ShopContentProps> {
+    static contextType = PlayerContext; 
+    
     state = {
         curr_tab: ShopTabs.CONSUMABLES,
         openModal: false,
@@ -73,7 +76,7 @@ class ShopContent extends Component<ShopContentProps> {
         return this.props.gold >= this.state.modalData.price * quantity;
     }
 
-    purchase = (id: string | number, quantity: number) => {
+    purchase = (id: string | number, quantity: number, price: number) => {
         if (!id && id != 0) {
             errorToast('No article selected!');
             return;
@@ -91,6 +94,9 @@ class ShopContent extends Component<ShopContentProps> {
         };
         console.log(payload);
 
+        this.props.updateInventory(id.toString(), quantity, this.state.curr_tab);
+        this.context.setPlayerInfo({ gold: this.props.gold - price * quantity });
+
         apiFetch(this.state.curr_tab == ShopTabs.CHARACTERS ? 'purchaseCharacter' : 'purchaseItem', {
             method: 'POST',
             body: payload
@@ -100,7 +106,6 @@ class ShopContent extends Component<ShopContentProps> {
                 if (this.state.curr_tab == ShopTabs.CHARACTERS) {
                     this.props.fetchCharactersOnSale();
                 } else {
-                    this.props.updateInventory(id.toString(), quantity, this.state.curr_tab);
                     this.props.fetchInventoryData();
                 }
                 successToast('Purchase successful!');

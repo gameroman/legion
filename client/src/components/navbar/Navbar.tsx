@@ -5,7 +5,7 @@ import { h, Component } from 'preact';
 import { Link, useRouter } from 'preact-router';
 import firebase from 'firebase/compat/app'
 import UserInfoBar from '../userInfoBar/UserInfoBar';
-import { PlayerData } from '../utils';
+import { PlayerContextData } from 'src/contexts/PlayerContext';
 
 import legionLogo from '@assets/logo.png';
 import playIcon from '@assets/play_btn_idle.png';
@@ -37,7 +37,7 @@ interface Props {
     initFirebaseUI: () => void;
     logout: () => void;
     user: firebase.User | null;
-    playerData: PlayerData;
+    playerData: PlayerContextData;
 }
 
 interface State {

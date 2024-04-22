@@ -18,7 +18,7 @@ interface PurchaseDialogProps {
     left: number
   };
   handleClose: () => void;
-  purchase: (id: string | number, quantity: number) => void;
+  purchase: (id: string | number, quantity: number, price: number) => void;
 }
 
 interface PurchaseDialogState {
@@ -113,7 +113,7 @@ class PurchaseDialog extends Component<PurchaseDialogProps, PurchaseDialogState>
           </div>
 
           <div className="purchase-dialog-button-container">
-            <button className="purchase-dialog-accept" onClick={() => this.props.purchase(dialogData.id, this.state.count)} style={buyBtnStyle} disabled={!hasEnoughGold}><img src="/inventory/confirm_icon.png" alt="confirm" />Buy</button>
+            <button className="purchase-dialog-accept" onClick={() => this.props.purchase(dialogData.id, this.state.count, dialogData.price)} style={buyBtnStyle} disabled={!hasEnoughGold}><img src="/inventory/confirm_icon.png" alt="confirm" />Buy</button>
             <button className="purchase-dialog-decline" onClick={this.handleCloseDialog}><img src="/inventory/cancel_icon.png" alt="decline" />Cancel</button>
           </div>
         </div>
