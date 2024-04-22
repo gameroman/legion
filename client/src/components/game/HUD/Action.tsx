@@ -69,13 +69,32 @@ class Action extends Component<ActionItemProps> {
       return <div className={`${actionType}`} />;
     }
 
+    const spriteSheetsMap = {
+      [InventoryType.CONSUMABLES]: 'consumables',
+      [InventoryType.SKILLS]: 'spells',
+      [InventoryType.EQUIPMENTS]: 'equipment'
+    }
+    const spritesheet = spriteSheetsMap[actionType];
+
+    function mapFrameToCoordinates(frame: number) {
+      const width = 10;
+      return {
+        x: (frame % width) * 32,
+        y: Math.floor(frame / width) * 32
+      }
+    }
+
     return (
       <div 
         className={`${actionType} ${index === clickedIndex ? 'flash-effect' : ''}`} 
         onClick={handleOnClickAction}>
         {action.id > -1 && <div 
           className={!canAct ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}
-          style={{backgroundImage: `url(/${actionType}/${action.frame})`, cursor: 'pointer'}}
+          style={{
+            backgroundImage: `url(/${spritesheet}.png)`,
+            backgroundPosition: `-${mapFrameToCoordinates(action.frame).x}px -${mapFrameToCoordinates(action.frame).y}px`,
+            cursor: 'pointer',
+          }}
           />}
         {!hideHotKey && <span className="key-binding">{keyBinding}</span>}
         {/* {action.id > -1 && <div className="info-box box">

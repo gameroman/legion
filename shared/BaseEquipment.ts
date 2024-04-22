@@ -6,7 +6,7 @@ export class BaseEquipment {
     id: number = -1;
     name: string = '';
     description: string = '';
-    frame: string = '';
+    frame: number = 0;
     slot: EquipmentSlot = EquipmentSlot.WEAPON;
     effects: Effect[] = [];
     price: number = 0;

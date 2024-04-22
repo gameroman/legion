@@ -6,7 +6,7 @@ export class BaseItem {
     id: number = -1;
     name: string = '';
     description: string = '';
-    frame: string = '';
+    frame: number = 0;
     effects: Effect[] = [];
     target: Target = Target.SINGLE;
     cooldown: number = 0;

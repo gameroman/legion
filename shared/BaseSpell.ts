@@ -8,7 +8,7 @@ export class BaseSpell {
     cost: number = 0;
     target: Target = Target.SINGLE;
     effects: Effect[] = [];
-    frame: string = '';
+    frame: number = 0;
     animation: string = '';
     size: number = 0;
     cooldown: number = 0;

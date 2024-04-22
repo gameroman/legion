@@ -37,7 +37,7 @@ export interface SpellData {
     id: number;
     name: string;
     description: string;
-    frame: string;
+    frame: number;
     sfx: string;
     animation: string;
     cooldown: number;
@@ -61,7 +61,7 @@ export interface ConsumableData {
     id: number;
     name: string;
     description: string;
-    frame: string;
+    frame: number;
     sfx: string;
     animation: string;
     cooldown: number;
@@ -76,7 +76,7 @@ export interface EquipmentData {
     id: number;
     name: string;
     description: string;
-    frame: string;
+    frame: number;
     effects: Effect[];
     slot: EquipmentSlot,
     price: number;

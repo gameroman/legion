@@ -226,11 +226,11 @@ canvas {
 } */
 
 .skill-item-image {
-    width: 36px;
-    height: 36px; 
-    background-size: contain;
+    width: 32px;
+    height: 32px; 
     background-repeat: no-repeat;
     border-radius: 6px;
+    /* background-position: -40px -40px; */
 }
 
 .skill-item-image-off {
