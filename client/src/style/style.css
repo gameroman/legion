@@ -735,6 +735,13 @@ canvas {
   justify-content: space-around;
 }
 
+.rank-tab-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
 .leaderboard-table {
   border-collapse: separate;
   border-spacing: 0;

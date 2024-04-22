@@ -9,7 +9,8 @@ class RankPage extends Component {
   state = {
     leaderboardData: null,
     sortColumn: 'elo',
-    sortAscending: false
+    sortAscending: false,
+    curr_tab: 0
   };
 
   handleSort = (column) => {
@@ -115,6 +116,17 @@ class RankPage extends Component {
   render() {
     if (!this.state.leaderboardData) return;
     const columns = ['rank', 'player', 'elo', 'wins', 'losses', 'winsRatio'];
+    const tabs = ['apex', 'zenith', 'gold', 'silver', 'bronze', 'alltime'];
+
+    const getRankTabStyle = (index: number) => {
+      return {
+        backgroundImage: `url(/shop/tabs_${index === this.state.curr_tab ? 'active' : 'idle'}.png)`,
+        backgroundSize: '100% 100%',
+        width: '64px',
+        height: '64px',
+        padding: '6px'
+      }
+    }
 
     return (
       <div className="rank-content">
@@ -124,7 +136,11 @@ class RankPage extends Component {
         </div>
 
         <div className="flexContainer">
-          <div>tabs</div>
+          <div className="rank-tab-container">
+            {tabs.map((tab, i) => <div key={i} style={getRankTabStyle(i)} onClick={() => this.setState({curr_tab: i})}>
+              <img src={`/icons/${tab}_rank.png`} alt="" style={{width: '100%', height: '100%', objectFit: 'contain'}} />
+            </div>)}
+          </div>
           <LeaderboardTable data={this.state.leaderboardData.ranking} columns={columns} handleSort={this.handleSort} camelCaseToNormal={this.camelCaseToNormal} />
         </div>
       </div>
