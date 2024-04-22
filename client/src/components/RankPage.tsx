@@ -3,6 +3,7 @@ import { h, Component } from 'preact';
 import axios from 'axios';
 import LeaderboardTable from './leaderboardTable/LeaderboardTable';
 import SeasonCard from './seasonCard/SeasonCard';
+import AwardedPlayer from './awardedPlayer/AwardedPlayer';
 
 class RankPage extends Component {
   state = {
@@ -117,9 +118,9 @@ class RankPage extends Component {
 
     return (
       <div className="rank-content">
-        <div className="flexContainer">
+        <div className="flexContainer" style={{alignItems: 'flex-end'}}>
           <SeasonCard playerRanking={this.state.leaderboardData?.playerRanking} seasonEnd={this.state.leaderboardData?.seasonEnd} />
-          <div>Awarded Players</div>
+          <AwardedPlayer players={this.state.leaderboardData.highlights}/>
         </div>
 
         <div className="flexContainer">
