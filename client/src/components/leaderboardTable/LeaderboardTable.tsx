@@ -48,11 +48,17 @@ class LeaderboardTable extends Component<LeaderboardTableProps> {
         isAscending: Array(4).fill(false)
     }
 
-    componentDidMount(): void {
-        this.setState({tableData: this.props.data});
+    async componentDidMount() {
+        this.setState({ tableData: this.props.data });
     }
 
-    handleSort (column: string, index: number) {
+    async componentDidUpdate(prevProps) {
+        if (prevProps.data !== this.props.data) {
+            this.setState({ tableData: this.props.data });
+        }
+    }
+
+    handleSort(column: string, index: number) {
         if (index < 2 || index > 5) return;
 
         const sortedData = this.state.tableData.sort((a, b) => {
@@ -60,7 +66,7 @@ class LeaderboardTable extends Component<LeaderboardTableProps> {
                 const aTemp = parseFloat(a[column].match(/\d+(\.\d+)?/)[0]);
                 const bTemp = parseFloat(b[column].match(/\d+(\.\d+)?/)[0]);
 
-                return this.state.isAscending[index - 2] ? aTemp - bTemp : bTemp - aTemp;               
+                return this.state.isAscending[index - 2] ? aTemp - bTemp : bTemp - aTemp;
             } else {
                 return this.state.isAscending[index - 2] ? a[column] - b[column] : b[column] - a[column];
             }
