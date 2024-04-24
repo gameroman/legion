@@ -6,6 +6,7 @@ import { spells } from '@legion/shared/Spells';
 import { BaseSpell } from '@legion/shared/BaseSpell';
 import { BaseEquipment } from '@legion/shared/BaseEquipment';
 import { BaseItem } from '@legion/shared/BaseItem';
+import { Tooltip as ReactTooltip } from "react-tooltip";
 
 export enum SpellTitleBG {
   'url(/shop/item_title_bg_blue.png)',
@@ -76,7 +77,7 @@ class ShopSpellCard extends Component<ShopCardProps> {
             </div>)}
           </div>
         </div>
-        <p className="spell-card-description">{data.description}</p>
+        <p data-tooltip-id={`spell-desc-tooltip-${data.id}`} className="spell-card-description">{data.description}</p>
         <div className="spell-card-effect-container">
           <div className="spell-card-effect">
             <img src="/inventory/mp_icon.png" alt="cost" />
@@ -95,6 +96,14 @@ class ShopSpellCard extends Component<ShopCardProps> {
           <img src="/gold_icon.png" alt="gold" />
           {data.price}
         </div>
+
+        <ReactTooltip
+          id={`spell-desc-tooltip-${data.id}`}
+          place="top-start"
+          variant="light"
+          content={data.description}
+          style={{maxWidth: '120px'}}
+        />
       </div>
     );
   }

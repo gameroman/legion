@@ -7,6 +7,7 @@ import { INFO_BG_COLOR } from '../itemDialog/ItemDialogType';
 import { BaseEquipment } from '@legion/shared/BaseEquipment';
 import { StatIcons } from '../shopConsumableCard/ShopConsumableCard';
 import { SpellTitleBG } from '../shopSpellCard/ShopSpellCard';
+import { Tooltip as ReactTooltip } from "react-tooltip";
 
 enum ClassIcon {
   '/shop/warrior_icon.png',
@@ -84,7 +85,7 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
             <img src={`/inventory/${equipmentFields[data.slot]}_icon.png`} alt="" />
           </div>
         </div>
-        <p className="equipment-card-description">{data.description}</p>
+        <p data-tooltip-id={`equipment-desc-tooltip-${data.id}`} className="equipment-card-description">{data.description}</p>
         <div className="consumable-card-effect-container">
           {data.effects.map((effect, index) => <div key={index} className="consumable-card-effect">
             <img src={StatIcons[effect.stat]} alt="" />
@@ -95,6 +96,14 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
           <img src="/gold_icon.png" alt="gold" />
           {data.price}
         </div>
+
+        <ReactTooltip
+          id={`equipment-desc-tooltip-${data.id}`}
+          place="top-start"
+          variant="light"
+          content={data.description}
+          style={{maxWidth: '120px'}}
+        />
       </div>
     );
   }
