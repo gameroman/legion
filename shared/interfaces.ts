@@ -50,11 +50,10 @@ export interface SpellData {
     score: number;
     yoffset?: number;
     terrain?: Terrain;
-    rarity: Rarity;
-    price?: number;
     minLevel?: number;
     classes?: Class[];
     status?: StatusEffectData;
+    effort: number;
 }
 
 export interface ConsumableData {
@@ -68,8 +67,7 @@ export interface ConsumableData {
     target: Target;
     size: number;
     effects: Effect[];
-    price: number;
-    rarity: Rarity;
+    effort: number;
 }
 
 export interface EquipmentData {
@@ -79,11 +77,10 @@ export interface EquipmentData {
     frame: number;
     effects: Effect[];
     slot: EquipmentSlot,
-    price: number;
-    rarity: Rarity;
     minLevel?: number;
     classes?: Class[];
     beltSize?: number;
+    effort: number;
 }
 
 export interface CharacterUpdate {

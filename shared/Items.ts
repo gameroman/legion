@@ -1,6 +1,5 @@
 import { BaseItem } from "./BaseItem";
-import { Rarity, Stat, Target } from ".";
-import { getPrice } from "./economy";
+import { Stat, Target } from ".";
 
 export const items: BaseItem[] = [];
 
@@ -15,8 +14,7 @@ items[0] = new BaseItem({
     cooldown: 2,
     target: Target.SELF,
     effects: [{stat: Stat.HP, value: 50}],
-    price: getPrice(1),
-    rarity: Rarity.COMMON,
+    effort: 1,
 });
 
 items[1] = new BaseItem({
@@ -30,8 +28,7 @@ items[1] = new BaseItem({
     cooldown: 3,
     target: Target.SELF,
     effects: [{stat: Stat.MP, value: 10}],
-    price: getPrice(1.5),
-    rarity: Rarity.COMMON,
+    effort: 1.5,
 });
 
 items[2] = new BaseItem({
@@ -45,8 +42,7 @@ items[2] = new BaseItem({
     cooldown: 4,
     target: Target.SELF,
     effects: [{stat: Stat.HP, value: 250}],
-    price: getPrice(3),
-    rarity: Rarity.RARE,
+    effort: 3,
 });
 
 items[3] = new BaseItem({
@@ -60,8 +56,7 @@ items[3] = new BaseItem({
     cooldown: 6,
     target: Target.SELF,
     effects: [{stat: Stat.MP, value: 50}],
-    price: getPrice(4),
-    rarity: Rarity.RARE,
+    effort: 4,
 });
 
 items[4] = new BaseItem({
@@ -75,8 +70,7 @@ items[4] = new BaseItem({
     cooldown: 8,
     target: Target.SELF,
     effects: [{stat: Stat.HP, value: 1000}],
-    price: getPrice(10),
-    rarity: Rarity.EPIC,
+    effort: 10,
 });
 
 items[5] = new BaseItem({
@@ -90,8 +84,7 @@ items[5] = new BaseItem({
     cooldown: 12,
     target: Target.SELF,
     effects: [{stat: Stat.MP, value: 200}],
-    price: getPrice(12),
-    rarity: Rarity.EPIC,
+    effort: 12,
 
 });
 
@@ -106,8 +99,7 @@ items[6] = new BaseItem({
     cooldown: 12,
     target: Target.SELF,
     effects: [{stat: Stat.HP, value: 250}, {stat: Stat.MP, value: 50}],
-    price: getPrice(9),
-    rarity: Rarity.EPIC,
+    effort: 9,
 
 });
 
@@ -122,8 +114,7 @@ items[7] = new BaseItem({
     cooldown: 22,
     target: Target.SELF,
     effects: [{stat: Stat.HP, value: 1000}, {stat: Stat.MP, value: 200}],
-    price: getPrice(18),
-    rarity: Rarity.EPIC,
+    effort: 18,
 });
 
 items[8] = new BaseItem({
@@ -137,8 +128,7 @@ items[8] = new BaseItem({
     cooldown: 10,
     target: Target.SINGLE,
     effects: [{stat: Stat.HP, value: 10, onKO: true}],
-    price: getPrice(10),
-    rarity: Rarity.RARE,
+    effort: 10,
 });
 
 items[9] = new BaseItem({
@@ -152,6 +142,5 @@ items[9] = new BaseItem({
     cooldown: 40,
     target: Target.SELF,
     effects: [{stat: Stat.HP, value: -1}, {stat: Stat.MP, value: -1}],
-    price: getPrice(20),
-    rarity: Rarity.LEGENDARY,
+    effort: 20,
 });

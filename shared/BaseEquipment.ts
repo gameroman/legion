@@ -1,5 +1,6 @@
 import { Effect, EquipmentData } from "./interfaces";
 import { EquipmentSlot, Rarity, Class } from "./enums";
+import { getPrice, getRarity } from "./economy";
 
 
 export class BaseEquipment {
@@ -17,5 +18,7 @@ export class BaseEquipment {
 
     constructor(props: EquipmentData) {
         Object.assign(this, props);
+        this.price = getPrice(props.effort);
+        this.rarity = getRarity(props.effort);
     }
 }

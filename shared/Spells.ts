@@ -32,8 +32,7 @@ spells[0] = new BaseSpell({
     effects: [{stat: Stat.HP, value: -300, modifiers: SPBasedBoostDeboost}],
     score: 100,
     terrain: Terrain.FIRE,
-    rarity: Rarity.EPIC,
-    price: getPrice(50),
+    effort: 50,
     minLevel: 2,
     classes: [Class.BLACK_MAGE],
 });
@@ -53,8 +52,7 @@ spells[1] = new BaseSpell({
     target: Target.SINGLE,
     effects: [{stat: Stat.HP, value: 50, modifiers: SPBasedBoost}],
     score: 10,
-    rarity: Rarity.COMMON,
-    price: getPrice(30),
+    effort: 30,
     minLevel: 3,
     classes: [Class.WHITE_MAGE],
 });
@@ -75,8 +73,7 @@ spells[2] = new BaseSpell({
     effects: [{stat: Stat.HP, value: -3, modifiers: SPBasedBoostDeboost}],
     status: {effect: StatusEffect.PARALYZE, chance: 1, duration: 60},
     score: 80,
-    rarity: Rarity.COMMON,
-    price: getPrice(20),
+    effort: 20,
     minLevel: 1,
     classes: [Class.BLACK_MAGE],
 });
@@ -98,8 +95,7 @@ spells[3] = new BaseSpell({
     score: 60,
     yoffset: 30,
     terrain: Terrain.ICE,
-    rarity: Rarity.COMMON,
-    price: getPrice(30),
+    effort: 30,
     minLevel: 1,
     classes: [Class.BLACK_MAGE, Class.WHITE_MAGE],
 });

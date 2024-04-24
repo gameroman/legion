@@ -1,5 +1,6 @@
 import { Target, Terrain, Rarity, Class } from "./enums";
 import { Effect, SpellData, StatusEffectData } from "./interfaces";
+import { getPrice, getRarity } from "./economy";
 
 export class BaseSpell {
     id: number = -1;
@@ -26,5 +27,7 @@ export class BaseSpell {
     
     constructor(props: SpellData) {
         Object.assign(this, props);
+        this.price = getPrice(props.effort);
+        this.rarity = getRarity(props.effort);
     }
 }

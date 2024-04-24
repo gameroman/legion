@@ -11,8 +11,7 @@ equipments[0] = new BaseEquipment({
     frame: 0,
     effects: [{stat: Stat.ATK, value: 5}],
     slot: EquipmentSlot.WEAPON,
-    price: getPrice(10),
-    rarity: Rarity.COMMON,
+    effort: 10,
     minLevel: 1,
     classes: [Class.WARRIOR],
 });
@@ -25,8 +24,7 @@ equipments[1] = new BaseEquipment({
     frame: 20,
     effects: [{stat: Stat.SPATK, value: 5}],
     slot: EquipmentSlot.WEAPON,
-    price: getPrice(12),
-    rarity: Rarity.COMMON,
+    effort: 12,
     minLevel: 1,
     classes: [Class.BLACK_MAGE, Class.WHITE_MAGE],
 });
@@ -39,8 +37,7 @@ equipments[2] = new BaseEquipment({
     frame: 40,
     effects: [{stat: Stat.DEF, value: 3}],
     slot: EquipmentSlot.LEFT_RING,
-    price: getPrice(11),
-    rarity: Rarity.COMMON,
+    effort: 11,
     minLevel: 1,
     classes: [Class.WARRIOR, Class.BLACK_MAGE, Class.WHITE_MAGE],
 });
@@ -52,8 +49,7 @@ equipments[3] = new BaseEquipment({
     frame: 60,
     effects: [],
     slot: EquipmentSlot.BELT,
-    price: getPrice(30),
-    rarity: Rarity.RARE,
+    effort: 30,
     beltSize: 1,
 });
 
@@ -64,7 +60,6 @@ equipments[4] = new BaseEquipment({
     frame: 61,
     effects: [],
     slot: EquipmentSlot.BELT,
-    price: getPrice(70),
-    rarity: Rarity.EPIC,
+    effort: 70,
     beltSize: 2,
 });

@@ -1,6 +1,6 @@
 import { Target, Rarity } from "./enums";
 import { Effect, ConsumableData } from "./interfaces";
-
+import { getPrice, getRarity } from "./economy";
 
 export class BaseItem {
     id: number = -1;
@@ -18,5 +18,7 @@ export class BaseItem {
 
     constructor(props: ConsumableData) {
         Object.assign(this, props);
+        this.price = getPrice(props.effort);
+        this.rarity = getRarity(props.effort);
     }
 }
