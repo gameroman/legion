@@ -1102,7 +1102,7 @@ canvas {
 }
 
 .shop-item-card-price {
-  background: url('../../public/gold2.png') no-repeat left center;
+  background: url('@assets/gold2.png') no-repeat left center;
   background-size: contain;
   color: white;
   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
@@ -1116,7 +1116,7 @@ canvas {
 }
 
 .shop-item-card-owned {
-  background: url('../../public/backpacks.png') no-repeat left center;
+  background: url('@assets/backpacks.png') no-repeat left center;
   background-size: contain;
   color: white;
   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
