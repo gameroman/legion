@@ -21,31 +21,47 @@ class SeasonCard extends Component<SeasonCardProps> {
     }
 
     componentDidMount(): void {
-        // Get the target end time from localStorage or set it if not present
-        const endTime = localStorage.getItem('seasonEndtime');
-        const targetEndTime = endTime || new Date().getTime() + this.props.seasonEnd * 1000;
+        this.seasonTimer();
+    }
 
-        if (!endTime) {
-            localStorage.setItem('seasonEndtime', targetEndTime.toString());
+    componentDidUpdate(previousProps: Readonly<SeasonCardProps>, previousState: Readonly<{}>, snapshot: any): void {
+        if (this.props.currTab !== previousProps.currTab) {
+            clearInterval(this.timer);
+            this.seasonTimer();
         }
-
-        this.timer = setInterval(() => {
-            const currentTime = new Date().getTime();
-            const remainingTime = Math.max((targetEndTime as number - currentTime) / 1000, 0);
-
-            this.setState({ time: remainingTime });
-
-            if (remainingTime <= 0) {
-                clearInterval(this.timer);
-                localStorage.removeItem('seasonEndtime');
-            }
-        }, 1000);
     }
 
     componentWillUnmount(): void {
         if (this.timer) {
             clearInterval(this.timer);
         }
+    }
+
+    seasonTimer(): void {
+        if (this.props.seasonEnd === -1) {
+            this.setState({ time: -1 });
+        } else {
+            // Get the target end time from localStorage or set it if not present
+            const endTime = localStorage.getItem(`seasonEndtime_${this.props.currTab}`);
+            const targetEndTime = endTime || new Date().getTime() + this.props.seasonEnd * 1000;
+
+            if (!endTime) {
+                localStorage.setItem(`seasonEndtime_${this.props.currTab}`, targetEndTime.toString());
+            }
+
+            this.timer = setInterval(() => {
+                const currentTime = new Date().getTime();
+                const remainingTime = Math.max((targetEndTime as number - currentTime) / 1000, 0);
+
+                this.setState({ time: remainingTime });
+
+                if (remainingTime <= 0) {
+                    clearInterval(this.timer);
+                    localStorage.removeItem(`seasonEndtime_${this.props.currTab}`);
+                }
+            }, 1000);
+        }
+
     }
 
     render() {
@@ -57,8 +73,8 @@ class SeasonCard extends Component<SeasonCardProps> {
         const seasonBGStyle = {
             backgroundImage: 'url(/rank/recap_blue_bar.png)',
             width: '80%',
-            bottom: `${this.state.time > 0 ? '36px' : '20px'}`,
-            padding: `${this.state.time > 0 ? '4px 8px' : '10px 8px'}`
+            bottom: `${this.state.time === -1 ? '20px' : '36px'}`,
+            padding: `${this.state.time === -1 ? '10px 8px' : '4px 8px'}`
         }
 
         const countDown = {
@@ -89,8 +105,8 @@ class SeasonCard extends Component<SeasonCardProps> {
                         <p className="season-recap-title">SEASON</p>
                         <p className="season-recap-label">ENDS IN</p>
                         <div className="recap-season-bg" style={seasonBGStyle}>
-                            {this.state.time > 0 ? (
-                                <div style={{width: '100%'}}>
+                            {this.state.time === -1 ? <img src="/rank/infinity_icon.png" alt="infinity" /> : (
+                                <div style={{ width: '100%' }}>
                                     <div className="recap-season-timer-label">
                                         <span>D</span>
                                         <span>H</span>
@@ -104,12 +120,12 @@ class SeasonCard extends Component<SeasonCardProps> {
                                         <span>{`${countDown.second}`.padStart(2, "0")}</span>
                                     </div>
                                 </div>
-                            ) : <img src="/rank/infinity_icon.png" alt="infinity" />}
+                            )}
                         </div>
-                        {this.state.time > 0 && <img src="/inventory/cd_icon.png" alt="timer" className="season-timer-icon" />}
+                        {this.state.time !== -1 && <img src="/inventory/cd_icon.png" alt="timer" className="season-timer-icon" />}
                     </div>
                 </div>
-                <div className="season-share-button" onClick={() => {}}>
+                <div className="season-share-button" onClick={() => { }}>
                     <img src="/rank/share_icon.png" alt="" />
                     <span>SHARE</span>
                 </div>
