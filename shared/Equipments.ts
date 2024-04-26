@@ -7,12 +7,12 @@ export const equipments:BaseEquipment[] = [];
 equipments[0] = new BaseEquipment({
     id: 0,
     name: "Jagged Sword",
-    description: "Increases ATK by 5",
+    description: "",
     frame: 0,
-    effects: [{stat: Stat.ATK, value: 5}],
+    effects: [{stat: Stat.ATK, value: 10}],
     slot: EquipmentSlot.WEAPON,
-    effort: 10,
-    minLevel: 1,
+    effort: 15,
+    minLevel: 5,
     classes: [Class.WARRIOR],
 });
 
@@ -20,7 +20,7 @@ equipments[0] = new BaseEquipment({
 equipments[1] = new BaseEquipment({
     id: 1,
     name: "Basic staff",
-    description: "Increases SPATK by 5",
+    description: "",
     frame: 20,
     effects: [{stat: Stat.SPATK, value: 5}],
     slot: EquipmentSlot.WEAPON,
@@ -33,7 +33,7 @@ equipments[1] = new BaseEquipment({
 equipments[2] = new BaseEquipment({
     id: 2,
     name: "Ring of defense",
-    description: "Increases DEF by 3",
+    description: "",
     frame: 40,
     effects: [{stat: Stat.DEF, value: 3}],
     slot: EquipmentSlot.LEFT_RING,
@@ -62,4 +62,16 @@ equipments[4] = new BaseEquipment({
     slot: EquipmentSlot.BELT,
     effort: 70,
     beltSize: 2,
+});
+
+equipments[5] = new BaseEquipment({
+    id: 5,
+    name: "Dagger",
+    description: "",
+    frame: 1,
+    effects: [{stat: Stat.ATK, value: 3}],
+    slot: EquipmentSlot.WEAPON,
+    effort: 3,
+    minLevel: 1,
+    classes: [Class.WARRIOR],
 });
