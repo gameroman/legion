@@ -4,11 +4,13 @@ import { h, Component } from 'preact';
 
 interface SeasonCardProps {
     seasonEnd: number;
+    currTab: string;
     playerRanking: {
         rank: number;
         elo: number;
         player: string;
     };
+    rankRowNumberStyle: (index: number) => {};
 }
 
 class SeasonCard extends Component<SeasonCardProps> {
