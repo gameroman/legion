@@ -223,6 +223,10 @@ export class ServerPlayer {
         return this.hp;
     } 
 
+    getLevel() {
+        return this.level;
+    }
+
     setMP(mp: number) {
         this.maxMP = mp;
         this.mp = this.maxMP;
@@ -440,9 +444,9 @@ export class ServerPlayer {
     }
 
     gainXP(amount: number) {
-        console.log(`Player ${this.num} gained ${amount} XP`)
+        // console.log(`Player ${this.num} gained ${amount} XP`)
         this.xp += amount;
-        console.log(`${this.xp} / ${getXPThreshold(this.level)}`)
+        // console.log(`${this.xp} / ${getXPThreshold(this.level)}`)
         while (this.xp >= getXPThreshold(this.level)) {
             this.levelUp();
         }

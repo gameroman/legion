@@ -21,6 +21,7 @@ export class Team {
     elo: number = 0;
     chestKeys: ChestsKeysData;
     hpTotal: number = 0;
+    levelTotal: number = 0;
     healedAmount: number = 0;
     offensiveActions: number = 0;
 
@@ -38,6 +39,7 @@ export class Team {
         this.members.push(player);
         player.setTeam(this);
         this.hpTotal += player.getHP();
+        this.levelTotal += player.getLevel();
     }
 
     getMembers(): ServerPlayer[] {
@@ -158,6 +160,10 @@ export class Team {
 
     getTotalHP() {
         return this.hpTotal;
+    }
+
+    getTotalLevel() {
+        return this.levelTotal;
     }
 
     getHPLeft() {

@@ -496,7 +496,7 @@ export abstract class Game
     }
 
     processMagic({num, x, y, index, targetTeam, target}: {num: number, x: number, y: number, index: number, targetTeam: number, target: number}, team: Team ) {
-        console.log(`Processing magic for team ${team.id}, player ${num}, spell ${index}, target team ${targetTeam}, target ${target}`);
+        // console.log(`Processing magic for team ${team.id}, player ${num}, spell ${index}, target team ${targetTeam}, target ${target}`);
         const player = team.getMembers()[num - 1];
         if (!player.canAct()) {
             console.log('cannot act');
@@ -707,7 +707,7 @@ export abstract class Game
         const isWinner = team.id === winnerTeamId;
         const eloUpdate = mode == PlayMode.RANKED ? this.updateElo(isWinner ? team : otherTeam, isWinner ? otherTeam : team) : {winnerUpdate: 0, loserUpdate: 0};
         const grade = this.computeGrade(team, otherTeam);
-        console.log(`Game grade for team ${team.id}: ${grade}`);
+        console.log(`Game grade for team ${team.id}: ${grade}, ${this.computeLetterGrade(grade)}`);
         return {
             isWinner,
             gold: isWinner ? this.computeTeamGold(team) : 0,
@@ -718,10 +718,43 @@ export abstract class Game
     }
 
     computeGrade(team: Team, otherTeam: Team) {
-        const score = 0;
         const hpFactor = team.getHPLeft() / team.getTotalHP();
-        const healingFactor = -(team.getHealedAmount() / (team.getHealedAmount() + otherTeam.getHealedAmount()));
-        const offenseFactor = -(team.getOffensiveActions() / (team.getOffensiveActions() + otherTeam.getOffensiveActions()));
+        const healingFactor = 1 - ((team.getHealedAmount() / (team.getHealedAmount() + otherTeam.getHealedAmount())) || 0);
+
+        // Adjusting the offensive actions calculation
+        const teamOffensiveActions = team.getOffensiveActions();
+        const otherTeamOffensiveActions = otherTeam.getOffensiveActions();
+        let offenseFactor;
+        
+        // Check for one-shot victories
+        if (teamOffensiveActions === 1 && otherTeamOffensiveActions === 0) {
+            // Maximum score for one-shot victory
+            offenseFactor = 1.0;
+        } else {
+            // Normal calculation when not a one-shot
+            offenseFactor = 1 - (teamOffensiveActions / (teamOffensiveActions + otherTeamOffensiveActions));
+        }
+
+        const levelFactor = 1 - (team.getTotalLevel() / (team.getTotalLevel() + otherTeam.getTotalLevel()));
+        console.log(`HP: ${hpFactor}, Healing: ${healingFactor}, Offense: ${offenseFactor}, Level: ${levelFactor}`);
+
+        const hpCoefficient = 1;
+        const healingCoefficient = 1;
+        const offenseCoefficient = 1;
+        const levelCoefficient = 0.5;
+        const totalWeight = hpCoefficient + healingCoefficient + offenseCoefficient + levelCoefficient;
+
+        return (hpFactor * hpCoefficient + healingFactor * healingCoefficient + offenseFactor * offenseCoefficient + levelFactor * levelCoefficient)/totalWeight;
+    }
+
+    computeLetterGrade(grade: number) {
+        if (grade >= 0.95) return 'S+';
+        if (grade >= 0.9) return 'S';
+        if (grade >= 0.8) return 'A';
+        if (grade >= 0.6) return 'B';
+        if (grade >= 0.4) return 'C';
+        if (grade >= 0.2) return 'D';
+        return 'E';
     }
 
     updateElo(winningTeam: Team, losingTeam: Team): { winnerUpdate: number, loserUpdate: number } {
@@ -780,7 +813,6 @@ export abstract class Game
     }
 
     async writeOutcomesToDb(team: Team, rewards: OutcomeData) {
-        console.log('Writing rewards to DB');
         try {
             await apiFetch(
                 'rewardsUpdate',
