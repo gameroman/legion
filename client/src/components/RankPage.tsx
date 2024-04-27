@@ -41,7 +41,7 @@ const data = {
   ranking: [ // Data for the rows in leaderboard
     {
       "rank": 1,
-      "player": "legal_pink_iguan",
+      "player": "Me",
       "elo": 90,
       "wins": 4,
       "losses": 10,
@@ -57,7 +57,7 @@ const data = {
     },
     {
       "rank": 3,
-      "player": "Me", // Row of the player viewing the leaderboard
+      "player": "representative_s", // Row of the player viewing the leaderboard
       "elo": 92,
       "wins": 6,
       "losses": 13,
@@ -166,7 +166,7 @@ const data = {
 const data1 = {
   seasonEnd: 604000, // Number of seconds until end of season for countdown
   playerRanking: { // To display in the box at the top left
-    rank: 1,
+    rank: 2,
     player: "legal_pink_iguan",
     elo: 100,
   },
@@ -203,7 +203,7 @@ const data1 = {
     },
     {
       "rank": 2,
-      "player": "representative_s",
+      "player": "Me",
       "elo": 91,
       "wins": 5,
       "losses": 12,
@@ -211,7 +211,7 @@ const data1 = {
     },
     {
       "rank": 3,
-      "player": "Me", // Row of the player viewing the leaderboard
+      "player": "legal_pink_iguan", // Row of the player viewing the leaderboard
       "elo": 92,
       "wins": 6,
       "losses": 13,
@@ -240,7 +240,7 @@ const data1 = {
 const data2 = {
   seasonEnd: 604000, // Number of seconds until end of season for countdown
   playerRanking: { // To display in the box at the top left
-    rank: 1,
+    rank: 3,
     player: "legal_pink_iguan",
     elo: 100,
   },
@@ -330,7 +330,7 @@ const data2 = {
 const data3 = {
   seasonEnd: 600, // Number of seconds until end of season for countdown
   playerRanking: { // To display in the box at the top left
-    rank: 1,
+    rank: 4,
     player: "legal_pink_iguan",
     elo: 100,
   },
@@ -375,7 +375,7 @@ const data3 = {
     },
     {
       "rank": 3,
-      "player": "Me", // Row of the player viewing the leaderboard
+      "player": "representative_s", // Row of the player viewing the leaderboard
       "elo": 92,
       "wins": 6,
       "losses": 13,
@@ -383,7 +383,7 @@ const data3 = {
     },
     {
       "rank": 4,
-      "player": "representative_s",
+      "player": "Me",
       "elo": 93,
       "wins": 7,
       "losses": 14,
@@ -436,7 +436,7 @@ const data3 = {
 const data4 = {
   seasonEnd: 3000, // Number of seconds until end of season for countdown
   playerRanking: { // To display in the box at the top left
-    rank: 1,
+    rank: 5,
     player: "legal_pink_iguan",
     elo: 100,
   },
@@ -481,7 +481,7 @@ const data4 = {
     },
     {
       "rank": 3,
-      "player": "Me", // Row of the player viewing the leaderboard
+      "player": "representative_s", // Row of the player viewing the leaderboard
       "elo": 92,
       "wins": 6,
       "losses": 13,
@@ -497,7 +497,7 @@ const data4 = {
     },
     {
       "rank": 5,
-      "player": "representative_s",
+      "player": "Me",
       "elo": 94,
       "wins": 8,
       "losses": 15,
@@ -558,7 +558,7 @@ const data4 = {
 const data5 = {
   seasonEnd: -1, // Number of seconds until end of season for countdown
   playerRanking: { // To display in the box at the top left
-    rank: 1,
+    rank: 3,
     player: "legal_pink_iguan",
     elo: 100,
   },

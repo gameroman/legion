@@ -90,7 +90,7 @@ class SeasonCard extends Component<SeasonCardProps> {
                     <div className="season-recap">
                         <p className="season-recap-title">CURRENT</p>
                         <p className="season-recap-label">RANK</p>
-                        <div className="season-recap-img">
+                        <div className="season-recap-img" style={this.props.rankRowNumberStyle(this.props.playerRanking.rank)}>
                             <span>{this.props.playerRanking.rank}</span>
                         </div>
                     </div>
