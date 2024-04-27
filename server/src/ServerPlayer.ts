@@ -60,8 +60,8 @@ export class ServerPlayer {
         };
         
         this.cooldowns = {
-            'move': 200,
-            'attack': 400
+            'move': 4000,
+            'attack': 8000
         };
         // this.setCooldown(0 + this.entranceTime * 1000);
         this.setCooldown(this.cooldowns.move + this.entranceTime * 1000);
