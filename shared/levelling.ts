@@ -39,8 +39,11 @@ export function increaseStat(stat: Stat, currentValue: number, level: number, ch
     return currentValue + increment;
 }
 
+export const XP_PER_LEVEL = 50;
+
+// Returns the XP needed to reach the next level, `level` being the current level
 export function getXPThreshold(level: number) {
-    return 100 + (level - 1) * 20;
+    return 100 + (level - 1) * XP_PER_LEVEL;
 }
 
 export function getSPIncrement(stat: number) {

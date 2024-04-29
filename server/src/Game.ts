@@ -7,6 +7,7 @@ import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import {apiFetch} from './API';
 import { Terrain, PlayMode, Target, StatusEffect } from '@legion/shared/enums';
 import { OutcomeData, TerrainUpdate, ChestsData, ChestsKeysData } from '@legion/shared/interfaces';
+import { XP_PER_LEVEL } from '@legion/shared/levelling';
 
 export abstract class Game
 {
@@ -710,8 +711,9 @@ export abstract class Game
         console.log(`Game grade for team ${team.id}: ${grade}, ${this.computeLetterGrade(grade)}`);
         return {
             isWinner,
+            grade: this.computeLetterGrade(grade),
             gold: isWinner ? this.computeTeamGold(team) : 0,
-            xp: this.computeTeamXP(team, otherTeam, duration, false),
+            xp: this.computeTeamXP(team, otherTeam, grade, mode),
             elo: isWinner ? eloUpdate.winnerUpdate : eloUpdate.loserUpdate,
             chestsRewards: mode == PlayMode.PRACTICE ? null : team.getChestsRewards() as ChestsKeysData,
         }
@@ -738,7 +740,7 @@ export abstract class Game
         const levelFactor = 1 - (team.getTotalLevel() / (team.getTotalLevel() + otherTeam.getTotalLevel()));
         console.log(`HP: ${hpFactor}, Healing: ${healingFactor}, Offense: ${offenseFactor}, Level: ${levelFactor}`);
 
-        const hpCoefficient = 1;
+        const hpCoefficient = 1.5;
         const healingCoefficient = 1;
         const offenseCoefficient = 1;
         const levelCoefficient = 0.5;
@@ -788,26 +790,13 @@ export abstract class Game
         return teamLevel - otherTeamLevel;
     }
 
-    computeTeamXP(team: Team, otherTeam: Team, gameDuration: number, isWinner: boolean) {
-        const baseXP = 100;
-        const winningCoefficient = 1.2;
-        const losingCoefficient = 0.8;
-        const levelDifferenceConstant = 10; // At what level differnce does the level coefficient become 2
-        const actionsConstant = 50;
-        const minDuration = 120;
-        const teamLevelDifference = this.computeLevelDifference(team, otherTeam);
-        const totalActions = team.actions; 
-
-        // Calculate factors
-        const levelFactor = Math.max(1 + (teamLevelDifference / levelDifferenceConstant), 0.1);
-        const actionFactor = 1 + (totalActions / actionsConstant);
-        const durationFactor = gameDuration < minDuration ? gameDuration / minDuration : 1;
-
-        // Calculate base XP
-        let xp = baseXP * levelFactor * actionFactor * durationFactor;
-
-        // Apply winning or losing coefficient
-        xp *= isWinner ? winningCoefficient : losingCoefficient;
+    computeTeamXP(team: Team, otherTeam: Team, grade: number, mode: PlayMode) {
+        let xp = otherTeam.getTotalLevel() * XP_PER_LEVEL * (grade + 0.3);
+        console.log(`Base XP: ${xp}: ${otherTeam.getTotalLevel()} * ${XP_PER_LEVEL} * (${grade} + 0.3)`);
+        if (mode == PlayMode.PRACTICE) xp *= 0.1;
+        if (mode == PlayMode.RANKED) xp *= 1.2;
+        // Add +- 5% random factor
+        xp *= 0.95 + Math.random() * 0.1;
 
         return Math.round(xp); // Round to nearest whole number
     }

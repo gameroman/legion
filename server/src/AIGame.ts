@@ -11,7 +11,7 @@ import { ChestsData } from '@legion/shared/interfaces';
 
 const TICK = 100;
 const AI_VS_AI = false;
-const FREEZE = false;
+const FREEZE = true;
 
 export class AIGame extends Game {
     nbExpectedPlayers = 1;

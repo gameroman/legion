@@ -91,6 +91,7 @@ export interface CharacterUpdate {
 }
 export interface OutcomeData {
     isWinner: boolean;
+    grade: string;
     xp: number;
     gold: number;
     characters?: CharacterUpdate[];

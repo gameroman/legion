@@ -27,7 +27,7 @@ spells[0] = new BaseSpell({
     shake: true,
     cost: 5,
     cooldown: 1,
-    castTime: 4,
+    castTime: 1,
     target: Target.AOE,
     effects: [{stat: Stat.HP, value: -300, modifiers: SPBasedBoostDeboost}],
     score: 100,

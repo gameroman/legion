@@ -1,5 +1,4 @@
 // LeaderboardTable.tsx
-import { rankNoImage } from '@legion/shared/enums';
 import './LeaderboardTable.style.css';
 import { h, Component } from 'preact';
 
