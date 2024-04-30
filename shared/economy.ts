@@ -1,9 +1,9 @@
 import { Rarity } from "./enums";
 
-export const averageRewardPerGame = 100; 
+export const AVERAGE_REWARD_PER_GAME = 100; 
 
 export function getPrice(effort: number): number {
-    return Math.floor(effort * averageRewardPerGame);
+    return Math.floor(effort * AVERAGE_REWARD_PER_GAME);
 }
 
 export function getRarity(effort: number): Rarity {

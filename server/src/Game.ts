@@ -8,6 +8,7 @@ import {apiFetch} from './API';
 import { Terrain, PlayMode, Target, StatusEffect } from '@legion/shared/enums';
 import { OutcomeData, TerrainUpdate, ChestsData, ChestsKeysData } from '@legion/shared/interfaces';
 import { XP_PER_LEVEL } from '@legion/shared/levelling';
+import { AVERAGE_REWARD_PER_GAME } from '@legion/shared/economy';
 
 export abstract class Game
 {
@@ -732,7 +733,7 @@ export abstract class Game
         return {
             isWinner,
             grade: this.computeLetterGrade(grade),
-            gold: isWinner ? this.computeTeamGold(team) : 0,
+            gold: this.computeTeamGold(grade, mode),
             xp: this.computeTeamXP(team, otherTeam, grade, mode),
             elo: isWinner ? eloUpdate.winnerUpdate : eloUpdate.loserUpdate,
             chestsRewards: mode == PlayMode.PRACTICE ? null : team.getChestsRewards() as ChestsKeysData,
@@ -800,8 +801,13 @@ export abstract class Game
         };
       }
 
-    computeTeamGold(team: Team) {
-        return Math.max(Math.ceil(team.score/20), 10);
+    computeTeamGold(grade: number, mode: PlayMode) {
+        let gold = AVERAGE_REWARD_PER_GAME * (grade + 0.3);
+        if (mode == PlayMode.PRACTICE) gold *= 0.1; // TODO: make 0
+        if (mode == PlayMode.RANKED) gold *= 1.5;
+        // Add +- 5% random factor
+        gold *= 0.95 + Math.random() * 0.1;
+        return gold;
     }
 
     computeLevelDifference(team: Team, otherTeam: Team) {
