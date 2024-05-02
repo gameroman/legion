@@ -54,4 +54,8 @@ export class Item extends BaseItem {
     isHealing() {
         return this.effects.some(effect => effect.stat === Stat.HP && effect.value > 0);
     }
+
+    isReviving() {
+        return this.effects.some(effect => effect.stat === Stat.HP && effect.onKO);
+    }
 }

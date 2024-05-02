@@ -9,6 +9,11 @@ import { chestTypes } from '@legion/shared/enums';
 const MULTIHIT_SCORE_BASE = 6;
 const KILL_SCORE_BONUS = 1000;
 const HEAL_SCORE_BONUS = 200;
+const REVIVE_SCORE_BONUS = 500;
+const STATUS_EFFECT_SCORE_BONUS = 100;
+const TERRAIN_SCORE_BONUS = 100;
+const DOT_SCORE_BONUS = 5;
+const FIRST_BLOOD_BONUS = 300;
 
 export class Team {
     id: number;
@@ -85,8 +90,32 @@ export class Team {
         this.score += HEAL_SCORE_BONUS * (1 + (1 - player.getPreviousHPRatio()));
     }
 
+    increaseScoreFromRevive(nb = 1) {
+        this.score += nb * REVIVE_SCORE_BONUS;
+    }
+
+    increaseScoreFromStatusEffect() {
+        this.score += STATUS_EFFECT_SCORE_BONUS;
+    }
+
+    increaseScoreFromTerrain() {
+        this.score += TERRAIN_SCORE_BONUS;
+    }
+
+    increaseScoreFromDot() {
+        this.score += DOT_SCORE_BONUS;
+    }
+
+    increaseScoreFromFirstBlood() {
+        this.score += FIRST_BLOOD_BONUS
+    }
+
     incrementHealing(amount: number) {
         this.healedAmount += amount;
+    }
+
+    incrementScore(amount: number) {
+        this.score += amount;
     }
 
     snapshotScore() {

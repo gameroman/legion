@@ -6,6 +6,9 @@ import { items } from '@legion/shared/Items';
 import { spells } from '@legion/shared/Spells';
 import { getXPThreshold } from '@legion/shared/levelling';
 
+const terrainDot = {
+    [Terrain.FIRE]: 10,
+}
 
 export type ActionType = 'move' | 'attack';
 export class ServerPlayer {
@@ -140,6 +143,7 @@ export class ServerPlayer {
 
     takeDamage(damage: number) {
         this.updateHP(damage);
+        this.team!.game.checkFirstBlood(this.team);
     }
 
     heal(amount: number) {
@@ -362,11 +366,16 @@ export class ServerPlayer {
     applyTerrainEffect(terrain: Terrain) {
         switch (terrain) {
             case Terrain.FIRE:
-                this.takeDamage(10);
+                this.takeDamage(terrainDot[terrain]);
                 break;
             default:
                 break;
         }
+    }
+
+    applyDoT(damage: number) {
+        this.takeDamage(damage);
+        this.team!.game.getOtherTeam(this.team.id).increaseScoreFromDot();
     }
 
     // Called when the terrain effect is applied for the first time
@@ -377,7 +386,7 @@ export class ServerPlayer {
                     clearTimeout(this.DoTTimer);
                 }
                 this.DoTTimer = setInterval(() => {
-                    this.applyTerrainEffect(terrain);
+                    this.applyDoT(terrainDot[terrain]);
                 }, 3000);
                 break;
             case Terrain.ICE:
@@ -395,7 +404,7 @@ export class ServerPlayer {
     }
 
     addStatusEffect(status: StatusEffect, duration: number, chance: number = 1) {
-        if (Math.random() > chance) return;
+        if (Math.random() > chance) return false;
         switch(status) {
             case StatusEffect.PARALYZE:
                 this.statuses.paralyzed = duration;
@@ -407,6 +416,7 @@ export class ServerPlayer {
                 break;
         }
         this.broadcastStatusEffectChange();
+        return true;
     }
 
     removeStatusEffect(status: StatusEffect) {

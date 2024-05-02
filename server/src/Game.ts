@@ -19,13 +19,14 @@ export abstract class Game
     terrainMap = new Map<string, Terrain>();
     io: Server;
     sockets: Socket[] = [];
-    tickTimer: NodeJS.Timeout | null = null;
     socketMap = new Map<Socket, Team>();
     startTime: number = Date.now();
     duration: number = 0;
     gameStarted: boolean = false;
+    firstBlood: boolean = false;
     gameOver: boolean = false;
     cooldownCoef: number = 1;
+    audienceTimer: NodeJS.Timeout | null = null;
 
     gridWidth: number = 20;
     gridHeight: number = 10;
@@ -123,6 +124,11 @@ export abstract class Game
             const teamId = this.socketMap.get(socket)?.id!;
             socket.emit('gameStart', this.getPlacementData(teamId));
         });
+        this.audienceTimer = setInterval(() => {
+            this.teams.forEach(team => {
+                team.incrementScore(10);
+            });
+        }, 30 * 1000);
     }
 
     broadcast(event: string, data: any) {
@@ -414,8 +420,6 @@ export abstract class Game
             }
         }
         const targets = targetPlayer ? [targetPlayer] : item.getTargets(this, player, x, y);
-        // Add all targets to the list of interacted targets
-        targets.forEach(target => player.addInteractedTarget(target));
 
         // Only check if the item is applicable if there is a single target
         if (targets.length == 1 && !item.effectsAreApplicable(targets[0])) {
@@ -423,7 +427,16 @@ export abstract class Game
             return;
         };
 
+        // Add all targets to the list of interacted targets
+        targets.forEach(target => player.addInteractedTarget(target));
+
+        const deadTargets_ = targets.filter(target => !target.isAlive()).length;
         item.applyEffect(targets);
+        const deadTargets = targets.filter(target => !target.isAlive()).length;
+
+        if (deadTargets < deadTargets_) {
+            player.team!.increaseScoreFromRevive(deadTargets_ - deadTargets);
+        }
 
         const cooldown = item?.cooldown * 1000;
         this.setCooldown(player, cooldown);
@@ -468,6 +481,7 @@ export abstract class Game
 
         let isKill = false;
         targets.forEach(target => {
+            const wasDead = !target.isAlive();
             if (target.HPHasChanged()) {
                 const delta = target.getHPDelta();
                 player.increaseDamageDealt(delta);
@@ -476,7 +490,13 @@ export abstract class Game
                     isKill = true;
                 }
                 // if (delta < 0) player.team!.increaseScoreFromDamage(-delta);
-                if (delta > 0) player.team!.incrementHealing(delta);
+                if (delta > 0) {
+                    player.team!.increaseScoreFromHeal(player);
+                    player.team!.incrementHealing(delta);
+                }
+                if (wasDead && target.isAlive()) {
+                    target.team!.increaseScoreFromRevive();
+                }
             }
             player.addInteractedTarget(target);
         });            
@@ -487,11 +507,18 @@ export abstract class Game
         if (spell.terrain) {
             const terrainUpdates = this.manageTerrain(spell, x, y);
             this.broadcastTerrain(terrainUpdates);
+            // If any terrain update is not NONE
+            if (terrainUpdates.some(update => update.terrain !== Terrain.NONE)) {
+                player.team!.increaseScoreFromTerrain();
+            }
         }
 
         if (spell.status) {
             targets.forEach(target => {
-                target.addStatusEffect(spell.status.effect, spell.status.duration, spell.status.chance);
+                const success = target.addStatusEffect(spell.status.effect, spell.status.duration, spell.status.chance);
+                if (success) {
+                    player.team!.increaseScoreFromStatusEffect();
+                }
             });
         }
         
@@ -865,6 +892,13 @@ export abstract class Game
             );
         } catch (error) {
             console.error(error);
+        }
+    }
+
+    checkFirstBlood(team) {
+        if (!this.firstBlood) {
+            this.firstBlood = true;
+            this.getOtherTeam(team.id).increaseScoreFromFirstBlood();
         }
     }
 }

@@ -15,6 +15,8 @@ const FREEZE = true;
 
 export class AIGame extends Game {
     nbExpectedPlayers = 1;
+    tickTimer: NodeJS.Timeout | null = null;
+
 
     constructor(id: string, mode: PlayMode, io: Server) {
         super(id, mode, io);
@@ -80,6 +82,11 @@ export class AIGame extends Game {
         if (this.teams.size < this.nbExpectedPlayers) return;
         super.start();
         this.tickTimer = setInterval(this.AItick.bind(this), TICK);
+    }
+
+    endGame(winner: number) {
+        clearInterval(this.tickTimer!);
+        super.endGame(winner);
     }
 
     AItick() {
