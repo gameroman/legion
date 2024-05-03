@@ -23,10 +23,11 @@ spells.push(new BaseSpell({
     animation: "explosion_1",
     sfx: "fireball",
     shake: false,
+    yoffset: 30,
 
     size: 1,
     target: Target.AOE,
-    effects: [{stat: Stat.HP, value: -50, modifiers: SPBasedBoostDeboost}],
+    effects: [{stat: Stat.HP, value: -15, modifiers: SPBasedBoostDeboost}],
     terrain: Terrain.FIRE,
     effort: 7,
 
@@ -43,11 +44,11 @@ spells.push(new BaseSpell({
     animation: "explosion_2",
     sfx: "fireball",
     shake: false,
-    yoffset: 20,
+    yoffset: 35,
 
     size: 2,
     target: Target.AOE,
-    effects: [{stat: Stat.HP, value: -100, modifiers: SPBasedBoostDeboost}],
+    effects: [{stat: Stat.HP, value: -25, modifiers: SPBasedBoostDeboost}],
     terrain: Terrain.FIRE,
     effort: 25,
 
@@ -66,7 +67,7 @@ spells.push(new BaseSpell({
 
     size: 3,
     target: Target.AOE,
-    effects: [{stat: Stat.HP, value: -200, modifiers: SPBasedBoostDeboost}],
+    effects: [{stat: Stat.HP, value: -60, modifiers: SPBasedBoostDeboost}],
     terrain: Terrain.FIRE,
     effort: 50,
 

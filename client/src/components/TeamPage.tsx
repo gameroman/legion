@@ -86,7 +86,6 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
   }
 
   handleItemEffect = (effects: Effect[], actionType: InventoryActionType,  index?: number) => {
-    console.log(`Handling item effect`);
     // get slot name from action.slot field e.g. `weapon`
     const slot = EquipmentSlot[index]?.toLowerCase();
 
@@ -98,8 +97,6 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
 
     let result_effects = real_effects;
     
-    console.log(`Current effects: ${curr_effects}, Real effects: ${real_effects}`);
-
     if(curr_effects) {
       // we need to remove current equipped item, so its effect value display minus
       curr_effects = curr_effects.map(item => ({stat: item.stat, value: -item.value}));

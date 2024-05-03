@@ -454,7 +454,7 @@ export class Arena extends Phaser.Scene
                 // Convert the key code to a number (for numpad keys)
                 number = event.keyCode - Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO;
             } 
-            this.teamsMap.get(this.playerTeamId).getMember(number)?.onClick();
+            this.teamsMap.get(this.playerTeamId)?.getMember(number)?.onClick();
         } else {
             const isLetterKey = (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.A && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.Z);
             if (isLetterKey) {
@@ -739,9 +739,12 @@ export class Arena extends Phaser.Scene
     }
 
     processLocalAnimation({x, y, id, isKill}) {
-        // Convert x and y in grid coords to pixels
-        const {x: pixelX, y: pixelYInitial} = this.gridToPixelCoords(x, y);
         const spell = getSpellById(id);
+        if (spell.size % 2 === 0) {
+            x += 0.5;
+            y += 0.5;
+        }
+        const {x: pixelX, y: pixelYInitial} = this.gridToPixelCoords(x, y);
         let pixelY = pixelYInitial;
         if (spell.yoffset) pixelY += spell.yoffset;
 
@@ -1067,6 +1070,10 @@ export class Arena extends Phaser.Scene
     }
 
     displaySpellArea(location, size, delay) {
+        if (size % 2 === 0) {
+            location.x += 0.5;
+            location.y += 0.5;
+        }
         const {x, y} = this.gridToPixelCoords(location.x, location.y);
         const spellAreaImage = this.add.image(x + 2, y + 42, 'killzone')
             .setDepth(1)

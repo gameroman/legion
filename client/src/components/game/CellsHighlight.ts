@@ -28,7 +28,7 @@ export class CellsHighlight extends Phaser.GameObjects.Graphics {
     }
 
     setTargetMode(size: number, refresh?: boolean) {
-        this.size = Math.floor(size/2);
+        this.size = size;
         this.color = 0xff0000;
         if (refresh) this.move(this.lastX, this.lastY);
     }
@@ -42,9 +42,11 @@ export class CellsHighlight extends Phaser.GameObjects.Graphics {
     move(gridX, gridY) {
         // Clear the previous highlight
         this.clear();
-        // console.log(`gridX: ${gridX}, gridY: ${gridY}`);
-        for(let x = gridX - this.size; x <= gridX + this.size; x++) {
-            for(let y = gridY - this.size; y <= gridY + this.size; y++) {
+        const leftOffset = this.size % 2 === 0 ? (this.size / 2) - 1 : Math.floor(this.size / 2);
+        const rightOffset = Math.floor(this.size / 2);
+
+        for(let x = gridX - leftOffset; x <= gridX + rightOffset; x++) {
+            for(let y = gridY - leftOffset; y <= gridY + rightOffset; y++) {
                 if (x >= 0 && x < this.gridWidth && y >= 0 && y < this.gridHeight) {
                     // @ts-ignore
                     if (this.scene.isSkip(x, y)) continue;

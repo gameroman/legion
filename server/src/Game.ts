@@ -617,8 +617,10 @@ export abstract class Game
 
     manageTerrain(spell: Spell, x: number, y: number) {
         const terrainUpdates: TerrainUpdate[] = [];
-        for (let i = x - Math.floor(spell.size/2); i <= x + Math.floor(spell.size/2); i++) {
-            for (let j = y - Math.floor(spell.size/2); j <= y + Math.floor(spell.size/2); j++) {
+        const leftOffset = spell.size % 2 === 0 ? (spell.size / 2) - 1 : Math.floor(spell.size / 2);
+        const rightOffset = Math.floor(spell.size / 2);
+        for (let i = x - leftOffset; i <= x + rightOffset; i++) {
+            for (let j = y - leftOffset; j <= y + rightOffset; j++) {
 
                 const existingTerrain = this.terrainMap.get(`${i},${j}`);
                 if (existingTerrain && (existingTerrain == Terrain.ICE && spell.terrain == Terrain.FIRE

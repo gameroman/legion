@@ -105,19 +105,19 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
         const renderEquipmentItems = (itemCategory) => {
             if (!characterData || !characterData.equipment) return;
             
-            let items, specialSlotsStart, desiredOrder, backgroundImageUrl, isSpecialEquip;
-        
+            let items, desiredOrder, backgroundImageUrl, isSpecialEquip;
+            const specialSlotsStart = 6;
+
             // Configure based on the category of items to render
             switch (itemCategory) {
                 case 'standardEquip':
                     items = Object.entries(characterData.equipment)
                                 .map(([key, value]) => ({ key, value }))
-                                .slice(0, 6); // Standard equipment slots
+                                .slice(0, specialSlotsStart); // Standard equipment slots
                     backgroundImageUrl = 'equipment.png';
                     isSpecialEquip = false;
                     break;
                 case 'specialEquip':
-                    specialSlotsStart = 6;
                     items = Object.entries(characterData.equipment)
                                 .map(([key, value]) => ({ key, value }))
                                 .slice(specialSlotsStart, 9); // Special equipment slots
@@ -131,6 +131,7 @@ class TeamContentCard extends Component<InventoryRequestPayload> {
             }
         
             return items.map((item, index) => {
+                if (isSpecialEquip) index += specialSlotsStart;
                 let content;
                 const itemData = getEquipmentById(item.value);
                 if (item.value < 0) {
