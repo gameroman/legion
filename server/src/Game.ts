@@ -41,13 +41,18 @@ export abstract class Game
         console.log(`Created game ${this.id}`);
     }
 
+    addSocket(socket: Socket) {
+        this.sockets.push(socket);
+        socket.join(this.id);
+    }
+
     addPlayer(socket: Socket, elo: number, chests: ChestsData) {
         try {
             if (this.sockets.length === 2) return;
-            this.sockets.push(socket);
-            socket.join(this.id);
+            this.addSocket(socket);
             const index = this.sockets.indexOf(socket);
             console.log(`Adding player ${index + 1} to game ${this.id}`);
+
             const team = this.teams.get(index + 1);
             this.socketMap.set(socket, team);
             team.setSocket(socket);
@@ -58,6 +63,25 @@ export abstract class Game
         }
     }
 
+    handleDisconnect(socket: Socket) {
+        const disconnectingTeam = this.socketMap.get(socket);
+        disconnectingTeam.unsetSocket();
+        // Slice the player from the game
+        this.sockets = this.sockets.filter(s => s !== socket);
+        // if (!this.gameOver) {
+        //     this.endGame(this.getOtherTeam(disconnectingTeam.id).id);
+        // }
+    }
+
+    reconnectPlayer(socket: Socket) {
+        this.addSocket(socket);
+        // Find which team has socket set to null
+        const team = this.teams.get(1).socket ? this.teams.get(2) : this.teams.get(1);
+        this.socketMap.set(socket, team);
+        team?.setSocket(socket);
+        this.sendGameStatus(socket);
+    }
+
     abstract populateTeams(): void;
 
     async start() {
@@ -65,7 +89,7 @@ export abstract class Game
         try {
             await this.populateTeams();
             this.populateGrid();
-            this.sendGameStart();
+            this.startGame();
         } catch (error) {
             this.endGame(-1);
             console.error(error);
@@ -117,18 +141,21 @@ export abstract class Game
         }, this);
     }
 
-    sendGameStart() {
+    startGame() {
         this.startTime = Date.now();
         this.gameStarted = true;
-        this.sockets.forEach(socket => {
-            const teamId = this.socketMap.get(socket)?.id!;
-            socket.emit('gameStart', this.getPlacementData(teamId));
-        });
+        this.sockets.forEach(this.sendGameStatus.bind(this));
         this.audienceTimer = setInterval(() => {
             this.teams.forEach(team => {
                 team.incrementScore(10);
+                team!.sendScore();
             });
         }, 30 * 1000);
+    }
+
+    sendGameStatus(socket: Socket) {
+        const teamId = this.socketMap.get(socket)?.id!;
+        socket.emit('gameStart', this.getPlacementData(teamId));
     }
 
     broadcast(event: string, data: any) {
@@ -241,13 +268,6 @@ export abstract class Game
         console.log(`Team 1 defeated: ${this.teams.get(1)!.isDefeated()}, Team 2 defeated: ${this.teams.get(2)!.isDefeated()}`);
         if (this.teams.get(1)!.isDefeated() || this.teams.get(2)!.isDefeated()) {
             this.endGame(this.teams.get(1).isDefeated() ? 2 : 1);
-        }
-    }
-
-    handleDisconnect(socket: Socket) {
-        const disconnectingTeam = this.socketMap.get(socket);
-        if (!this.gameOver) {
-            this.endGame(this.getOtherTeam(disconnectingTeam.id).id);
         }
     }
 

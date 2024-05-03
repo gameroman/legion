@@ -223,4 +223,8 @@ export class Team {
         }
         return total;
     }
+
+    unsetSocket() {
+        this.socket = null;
+    }
 }

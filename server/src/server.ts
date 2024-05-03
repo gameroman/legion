@@ -80,12 +80,17 @@ io.on('connection', async (socket: any) => {
       }
       game = gamesMap.get(gameId)!;
 
-      const playerData = await apiFetch(
-        `playerData?id=${gameId}`,
-        socket.firebaseToken,
-      );
+      if (game.gameStarted) { // Reconnecting player
+        game.reconnectPlayer(socket);
+      } else {
+        const playerData = await apiFetch(
+          `playerData?id=${gameId}`,
+          socket.firebaseToken,
+        );
+  
+        game.addPlayer(socket, playerData.elo, playerData.chests);
+      }
 
-      game.addPlayer(socket, playerData.elo, playerData.chests);
       socketMap.set(socket, game);
   
       socket.on('disconnect', () => {

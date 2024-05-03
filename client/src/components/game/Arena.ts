@@ -755,7 +755,6 @@ export class Arena extends Phaser.Scene
             .setDepth(3.5 + y/10)
             .setScale(LOCAL_ANIMATION_SCALE)
             .play(spell.animation);
-        console.log(this.localAnimationSprite.scaleX, this.localAnimationSprite.scaleY);
         this.playSound(spell.sfx);
 
         if (spell.shake) {
@@ -780,6 +779,7 @@ export class Arena extends Phaser.Scene
     processScoreUpdate({teamId, score}) {
         const team = this.teamsMap.get(teamId);
         team.setScore(score);
+        console.log(`Team ${teamId} score: ${score}`);
         this.emitEvent('overviewChange');
     }
 
