@@ -128,7 +128,10 @@ export const playerData = onRequest((request, response) => {
           elo: playerData.elo,
           lvl: playerData.lvl,
           name: playerData.name,
+          teamName: "teamName",
+          avatar: "avatar",
           league: playerData.league,
+          rank: 1,
           chests: playerData.chests,
         });
       } else {

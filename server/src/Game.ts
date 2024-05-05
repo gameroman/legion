@@ -167,14 +167,29 @@ export abstract class Game
         const data = {
             general: {
                 reconnect,
-                tutorial: false,
+                tutorial: true,
+                specator: true,
             },
             player: {
                 teamId: playerTeamId,
+                player: {
+                    teamName: 'TeamName',
+                    playerName: 'PlayerName',
+                    playerLevel: 1,
+                    playerRank: 1,
+                    playerAvatar: 'avatar',
+                },
                 team: this.teams.get(playerTeamId)?.getMembers().map(player => player.getPlacementData(true))
             },
             opponent: {
                 teamId: otherTeamId,
+                player: {
+                    teamName: 'TeamName',
+                    playerName: 'PlayerName',
+                    playerLevel: 1,
+                    playerRank: 1,
+                    playerAvatar: 'avatar',
+                },
                 team: this.teams.get(otherTeamId)?.getMembers().map(player => player.getPlacementData())
             }
         }

@@ -39,6 +39,7 @@ export class Arena extends Phaser.Scene
     musicManager: MusicManager;
     sprites: Phaser.GameObjects.Sprite[] = [];
     environmentalAudioSources;
+    gameSettings;
 
     constructor() {
         super({ key: 'Arena' });
@@ -1061,6 +1062,11 @@ export class Arena extends Phaser.Scene
         this.environmentalAudioSources = {
             flames: 0,
         }
+
+        this.gameSettings = {
+            tutorial: false,
+            specator: false,
+        }
     }
 
     createHUD() {
@@ -1104,8 +1110,11 @@ export class Arena extends Phaser.Scene
             console.error('Player team id is undefined');
         }
 
-        this.teamsMap.set(data.player.teamId, new Team(this, data.player.teamId, true));
-        this.teamsMap.set(data.opponent.teamId, new Team(this, data.opponent.teamId, false));
+        this.gameSettings.tutorial = data.general.tutorial;
+        this.gameSettings.spectator = data.general.spectator;
+
+        this.teamsMap.set(data.player.teamId, new Team(this, data.player.teamId, true, data.player.player));
+        this.teamsMap.set(data.opponent.teamId, new Team(this, data.opponent.teamId, false, data.opponent.player));
 
         this.placeCharacters(data.player.team, true, this.teamsMap.get(data.player.teamId));
         this.placeCharacters(data.opponent.team, false, this.teamsMap.get(data.opponent.teamId));

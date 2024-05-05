@@ -8,12 +8,22 @@ export class Team {
     totalHPMax = 0;
     totalHP = 0;
     isPlayerTeam = false;
+    teamName: string;
+    playerName: string;
+    playerAvatar: string;
+    playerLevel: number;
+    playerRank: number;
     score = 0;
 
-    constructor(scene, number: number, isPlayerTeam: boolean) {
+    constructor(scene, number: number, isPlayerTeam: boolean, teamData: any) {
         this.scene = scene;
         this.id = number;
         this.isPlayerTeam = isPlayerTeam;
+        this.teamName = teamData.name;
+        this.playerName = teamData.playerName;
+        this.playerAvatar = teamData.playerAvatar;
+        this.playerLevel = teamData.playerLevel;
+        this.playerRank = teamData.playerRank;
     }   
 
     addMember(player: Player) {
@@ -72,6 +82,12 @@ export class Team {
 
         return {
             members,
+            player: {
+                name: this.playerName,
+                avatar: this.playerAvatar,
+                level: this.playerLevel,
+                rank: this.playerRank
+            },
             score: this.score
         };
     }
