@@ -20,6 +20,8 @@ interface State {
   gameOver: boolean;
   xpReward: number;
   goldReward: number;
+  isTutorial: boolean;
+  isSpectator: boolean;
 }
 
 const events = new EventEmitter();
@@ -33,6 +35,8 @@ class GameHUD extends Component<object, State> {
     team1: null,
     team2: null,
     gameOver: false,
+    isTutorial: false,
+    isSpectator: false,
     xpReward: 0,
     goldReward: 0,
   }
@@ -47,6 +51,7 @@ class GameHUD extends Component<object, State> {
 
   componentWillUnmount() {
     events.off('showPlayer', this.showPlayerBox);
+    events.off
   }
 
   showPlayerBox = (playerData: any) => {
@@ -57,9 +62,9 @@ class GameHUD extends Component<object, State> {
     this.setState({ playerVisible: false, player: null });
   }
 
-  updateOverview = (team1: Team, team2: Team) => {
+  updateOverview = (team1: Team, team2: Team, general: any) => {
     this.setState({ team1, team2 });
-    // console.log(`team1: `, team1);
+    this.setState({ isTutorial: general.isTutorial, isSpectator: general.isSpectator })
   }
 
   endGame = (xp, gold) => {
@@ -75,7 +80,7 @@ class GameHUD extends Component<object, State> {
   }
 
   render() {
-    const { playerVisible, player, team1, team2 } = this.state;
+    const { playerVisible, player, team1, team2, isTutorial, isSpectator } = this.state;
     console.log(team1);
     return (
       <div>

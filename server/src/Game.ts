@@ -168,7 +168,7 @@ export abstract class Game
             general: {
                 reconnect,
                 tutorial: true,
-                specator: true,
+                spectator: true,
             },
             player: {
                 teamId: playerTeamId,

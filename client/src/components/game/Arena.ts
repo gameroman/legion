@@ -517,8 +517,8 @@ export class Arena extends Phaser.Scene
     }
     
     refreshOverview() {
-        const { team1, team2 } = this.getOverview();
-        if (this.overviewReady) events.emit('updateOverview', team1, team2);
+        const { team1, team2, general } = this.getOverview();
+        if (this.overviewReady) events.emit('updateOverview', team1, team2, general);
     }
 
     showEndgameScreen({isWinner, xp, gold}) {
@@ -1065,7 +1065,7 @@ export class Arena extends Phaser.Scene
 
         this.gameSettings = {
             tutorial: false,
-            specator: false,
+            spectator: false,
         }
     }
 
@@ -1197,6 +1197,7 @@ export class Arena extends Phaser.Scene
         const overview =  {
             team1: this.teamsMap.get(1).getOverview(),
             team2: this.teamsMap.get(2).getOverview(),
+            general: this.gameSettings,
         };
         return overview;
     }
