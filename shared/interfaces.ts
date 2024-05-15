@@ -39,7 +39,7 @@ export interface SpellData {
     description: string;
     frame: number;
     sfx: string;
-    animation: string;
+    vfx: string;
     cooldown?: number;
     castTime?: number;
     cost?: number;
@@ -49,6 +49,7 @@ export interface SpellData {
     shake: boolean;
     score: number;
     yoffset?: number;
+    scale?: number;
     terrain?: Terrain;
     minLevel?: number;
     classes?: Class[];

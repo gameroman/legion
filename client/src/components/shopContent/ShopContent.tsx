@@ -33,6 +33,7 @@ interface ShopContentProps {
 interface modalData {
     id: string;
     name: string;
+    frame: number;
     url: string;
     price: number;
 }

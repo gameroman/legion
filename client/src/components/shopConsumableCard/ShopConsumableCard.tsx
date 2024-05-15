@@ -19,6 +19,7 @@ export enum StatIcons {
 interface modalData {
   id: string | number;
   name: string;
+  frame: number;
   url: string;
   price: number;
 }
@@ -37,7 +38,8 @@ class ShopConsumableCard extends Component<ShopCardProps> {
     const modalData: modalData = {
       id: data.id,
       name: data.name,
-      url: `/consumables/${data.frame}`,
+      url: `consumables.png`,
+      frame: data.frame,
       price: data.price
     }
 

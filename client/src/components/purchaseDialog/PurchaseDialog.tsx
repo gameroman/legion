@@ -2,6 +2,7 @@
 import './PurchaseDialog.style.css';
 import Modal from 'react-modal';
 import { h, Component } from 'preact';
+import { mapFrameToCoordinates } from '../utils';
 
 Modal.setAppElement('#root');
 interface PurchaseDialogProps {
@@ -9,6 +10,7 @@ interface PurchaseDialogProps {
   dialogOpen: boolean;
   dialogData: {
     id: string | number;
+    frame: number
     name: string;
     url: string;
     price: number;
@@ -67,6 +69,8 @@ class PurchaseDialog extends Component<PurchaseDialogProps, PurchaseDialogState>
       }
     };
 
+    const coordinates = mapFrameToCoordinates(dialogData.frame);
+
     const spriteStyle = isCharacter ? {
       backgroundImage: `url(${dialogData.url})`,
       width: '68px',
@@ -77,7 +81,10 @@ class PurchaseDialog extends Component<PurchaseDialogProps, PurchaseDialogState>
       transform: 'scale(.75)',
     } : {
       backgroundImage: `url(${dialogData.url})`,
-      backgroundSize: '100% 100%',
+      backgroundPosition: `-${coordinates.x}px -${coordinates.y}px`,
+      backgroundRepeat: 'no-repeat',
+      width: '32px',
+      height: '32px',
     };
 
     const countStyle = !hasEnoughGold ? {

@@ -16,6 +16,7 @@ enum ClassIcon {
 interface modalData {
   id: string | number;
   name: string;
+  frame: number;
   url: string;
   price: number;
 }
@@ -40,7 +41,8 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
     const modalData: modalData = {
       id: data.id,
       name: data.name,
-      url: `/equipment/${data.frame}`,
+      frame: data.frame,
+      url: `equipment.png`,
       price: data.price
     }
 

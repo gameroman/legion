@@ -59,6 +59,7 @@ export class Arena extends Phaser.Scene
         });
         this.load.spritesheet('potion_heal', 'vfx/potion_heal.png', { frameWidth: 48, frameHeight: 64});
         this.load.spritesheet('explosions', 'vfx/explosions.png', { frameWidth: 96, frameHeight: 96});
+        this.load.spritesheet('thunder2', 'vfx/thunder.png', { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('cast', 'vfx/cast.png', { frameWidth: 48, frameHeight: 64});
         this.load.spritesheet('slash', 'vfx/slash.png', { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('thunder', 'vfx/bolts.png', { frameWidth: 96, frameHeight: 96});
@@ -751,11 +752,12 @@ export class Arena extends Phaser.Scene
 
         if (isKill) this.killCam(pixelX, pixelY);
 
+        const scale = spell.scale > 1 ? spell.scale : LOCAL_ANIMATION_SCALE;
         this.localAnimationSprite.setPosition(pixelX, pixelY)
             .setVisible(true)
             .setDepth(3.5 + y/10)
-            .setScale(LOCAL_ANIMATION_SCALE)
-            .play(spell.animation);
+            .setScale(scale)
+            .play(spell.vfx);
         this.playSound(spell.sfx);
 
         if (spell.shake) {
@@ -929,6 +931,12 @@ export class Arena extends Phaser.Scene
         this.anims.create({
             key: `thunder`, 
             frames: this.anims.generateFrameNumbers('thunder', { start: 36, end: 47 }), 
+            frameRate: 15, // Number of frames per second
+        });
+
+        this.anims.create({
+            key: `thunder+`, 
+            frames: this.anims.generateFrameNumbers('thunder2', { start: 15, end: 29 }), 
             frameRate: 15, // Number of frames per second
         });
 

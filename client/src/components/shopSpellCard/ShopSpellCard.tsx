@@ -21,6 +21,7 @@ interface modalData {
   id: string | number;
   name: string;
   url: string;
+  frame: number;
   price: number;
 }
 
@@ -48,7 +49,8 @@ class ShopSpellCard extends Component<ShopCardProps> {
     const modalData: modalData = {
       id: data.id,
       name: data.name,
-      url: `/spells/${data.frame}`,
+      frame: data.frame,
+      url: `spells.png`,
       price: data.price
     }
 

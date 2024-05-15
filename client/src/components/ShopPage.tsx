@@ -76,6 +76,8 @@ class ShopPage extends Component<ShopPageProps, State> {
         case ShopTabs.SPELLS:
             inventoryField = 'spells';
             break;
+        default:
+            return;
     }
     for(let i = 0; i < quantity; i++) {
         inventory[inventoryField].push(articleId);

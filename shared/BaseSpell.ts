@@ -10,7 +10,7 @@ export class BaseSpell {
     target: Target = Target.SINGLE;
     effects: Effect[] = [];
     frame: number = 0;
-    animation: string = '';
+    vfx: string = '';
     size: number = 0;
     cooldown: number = 0;
     castTime: number = 0;
@@ -18,6 +18,7 @@ export class BaseSpell {
     sfx: string = '';
     score: number= 0;
     yoffset: number = 0;
+    scale: number = 1;
     terrain: Terrain = Terrain.NONE;
     rarity: Rarity = Rarity.COMMON;
     price: number = 0;
