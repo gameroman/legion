@@ -60,6 +60,12 @@ export enum Rarity {
     LEGENDARY
 }
 
+export enum ChestType {
+    BRONZE,
+    SILVER,
+    GOLD
+}
+
 export enum InventoryType {
     CONSUMABLES = 'consumables',
     EQUIPMENTS = 'equipment',

@@ -4,10 +4,11 @@ import admin, {corsMiddleware, getUID} from "./APIsetup";
 import {getConsumableById} from "@legion/shared/Items";
 import {getSpellById} from "@legion/shared/Spells";
 import {getEquipmentById} from "@legion/shared/Equipments";
-import {InventoryType, InventoryActionType, equipmentFields, EquipmentSlot, ShopTabs}
+import {InventoryType, InventoryActionType, equipmentFields, EquipmentSlot, ShopTabs, ChestType}
   from "@legion/shared/enums";
 import {Equipment} from "@legion/shared/interfaces";
 import {inventorySize} from "@legion/shared/utils";
+import {getChestContent} from "@legion/shared/economy";
 
 export const inventoryData = onRequest((request, response) => {
   logger.info("Fetching inventoryData");
@@ -490,6 +491,32 @@ export const inventorySave = onRequest((request, response) => {
       response.send({status: 0});
     } catch (error) {
       console.error("inventorySave error:", error);
+      response.status(500).send("Error");
+    }
+  });
+});
+
+function chestTypeFromString(value: string): ChestType {
+  const key = value.toUpperCase() as keyof typeof ChestType;
+  if (ChestType[key] === undefined) {
+      throw new Error(`Invalid ChestType: ${value}`);
+  }
+  return ChestType[key];
+}
+
+export const getReward = onRequest((request, response) => {
+  logger.info("Getting reward");
+
+  corsMiddleware(request, response, async () => {
+    try {
+      const reward = chestTypeFromString(request.query.chestType as string);
+      const content = getChestContent(reward);
+
+      response.send({
+        content,
+      });
+    } catch (error) {
+      console.error("getReward error:", error);
       response.status(500).send("Error");
     }
   });
