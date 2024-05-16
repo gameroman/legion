@@ -145,6 +145,11 @@ items[9] = new BaseItem({
     effort: 20,
 });
 
-export function getConsumableById(id: number): BaseItem {
+export function getConsumableById(id: number): BaseItem | undefined {
     return items.find(item => item.id === id);
+}
+
+export function getRandomConsumableByRarity(rarity: number): BaseItem {
+    const filtered = items.filter(item => item.rarity === rarity);
+    return filtered[Math.floor(Math.random() * filtered.length)];
 }

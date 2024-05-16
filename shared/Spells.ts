@@ -221,6 +221,11 @@ export function getStarterSpells(characterClass: Class):number[] {
     return spells.filter(spell => spell.minLevel === 1 && spell.classes.includes(characterClass)).map(spell => spell.id);
 }
 
-export function getSpellById(spellId: number):BaseSpell {
+export function getSpellById(spellId: number): BaseSpell | undefined {
     return spells.find(spell => spell.id === spellId)!;
 }
+
+// export function getRandomSpellByRarity(rarity: number): BaseSpell {
+//     const filtered = spells.filter(item => item.rarity === rarity);
+//     return filtered[Math.floor(Math.random() * filtered.length)];
+// }

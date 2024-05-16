@@ -8,7 +8,7 @@ import {InventoryType, InventoryActionType, equipmentFields, EquipmentSlot, Shop
   from "@legion/shared/enums";
 import {Equipment} from "@legion/shared/interfaces";
 import {inventorySize} from "@legion/shared/utils";
-import {getChestContent} from "@legion/shared/economy";
+import {getChestContent} from "@legion/shared/chests";
 
 export const inventoryData = onRequest((request, response) => {
   logger.info("Fetching inventoryData");
@@ -52,13 +52,13 @@ export const purchaseItem = onRequest((request, response) => {
         let itemPrice = 0;
         switch (inventoryType) {
           case ShopTabs.CONSUMABLES:
-            itemPrice = getConsumableById(itemId).price;
+            itemPrice = getConsumableById(itemId)?.price || 0;
             break;
           case ShopTabs.SPELLS:
-            itemPrice = getSpellById(itemId).price;
+            itemPrice = getSpellById(itemId)?.price || 0;
             break;
           case ShopTabs.EQUIPMENTS:
-            itemPrice = getEquipmentById(itemId).price;
+            itemPrice = getEquipmentById(itemId)?.price || 0;
             break;
           default:
             response.status(500).send("Invalid inventory type");
@@ -215,6 +215,10 @@ function equipEquipment(playerData: any, characterData: any, index: number) {
   equipment.splice(index, 1);
 
   const data = getEquipmentById(item);
+  if (!data) {
+    console.error("Invalid equipment ID");
+    return -1;
+  }
 
   let slotNumber: number = data.slot;
   if (slotNumber == EquipmentSlot.LEFT_RING) {
@@ -312,6 +316,10 @@ function applyEquipmentBonuses(equipped: Equipment) {
     const item = equipped[field as keyof Equipment];
     if (item !== -1) {
       const data = getEquipmentById(item);
+      if (!data) {
+        console.error("Invalid equipment ID");
+        return bonuses;
+      }
       data.effects.forEach((effect) => {
         switch (effect.stat) {
         case 0:

@@ -76,6 +76,11 @@ equipments[5] = new BaseEquipment({
     classes: [Class.WARRIOR],
 });
 
-export function getEquipmentById(id:number):BaseEquipment {
+export function getEquipmentById(id:number): BaseEquipment | undefined {
     return equipments.find(e => e.id === id);
+}
+
+export function getRandomEquipmentByRarity(rarity: number): BaseEquipment {
+    const filtered = equipments.filter(item => item.rarity === rarity);
+    return filtered[Math.floor(Math.random() * filtered.length)];
 }

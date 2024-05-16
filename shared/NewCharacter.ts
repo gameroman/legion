@@ -256,7 +256,7 @@ export class NewCharacter {
     return 5;
   }
 
-  getSpells(unicornBonus): number[] {
+  getSpells(unicornBonus: boolean): number[] {
     switch (this.characterClass) {
       case Class.WARRIOR:
         return [];
