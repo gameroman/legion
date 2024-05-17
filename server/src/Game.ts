@@ -46,7 +46,7 @@ export abstract class Game
         socket.join(this.id);
     }
 
-    addPlayer(socket: Socket, elo: number, chests: ChestsData) {
+    addPlayer(socket: Socket, playerData: any) {
         try {
             if (this.sockets.length === 2) return;
             this.addSocket(socket);
@@ -56,8 +56,7 @@ export abstract class Game
             const team = this.teams.get(index + 1);
             this.socketMap.set(socket, team);
             team.setSocket(socket);
-            team.setElo(elo);
-            if (this.mode != PlayMode.PRACTICE) team.registerChestsData(chests);
+            team.setPlayerData(playerData, this.mode);
         } catch (error) {
             console.error(error);
         }
@@ -866,8 +865,8 @@ export abstract class Game
     updateElo(winningTeam: Team, losingTeam: Team): { winnerUpdate: number, loserUpdate: number } {
         const K_FACTOR = 30;
 
-        const expectedScoreWinner = 1 / (1 + Math.pow(10, (losingTeam.elo - winningTeam.elo) / 400));
-        const expectedScoreLoser = 1 / (1 + Math.pow(10, (winningTeam.elo - losingTeam.elo) / 400));
+        const expectedScoreWinner = 1 / (1 + Math.pow(10, (losingTeam.getElo() - winningTeam.getElo()) / 400));
+        const expectedScoreLoser = 1 / (1 + Math.pow(10, (winningTeam.getElo() - losingTeam.getElo()) / 400));
     
         // Since it's a match, winner's actual score is 1 and loser's actual score is 0
         const actualScoreWinner = 1;

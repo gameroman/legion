@@ -3,7 +3,7 @@ import { Socket } from "socket.io";
 import { ServerPlayer } from "./ServerPlayer";
 import { Game } from "./Game";
 import { CharacterUpdate, ChestData, ChestsData, ChestsKeysData } from '@legion/shared/interfaces';
-import { chestTypes } from '@legion/shared/enums';
+import { chestTypes, PlayMode } from '@legion/shared/enums';
 
 
 const MULTIHIT_SCORE_BASE = 6;
@@ -23,20 +23,21 @@ export class Team {
     actions: number = 0;
     game: Game;
     socket: Socket | null = null;
-    elo: number = 0;
-    chestKeys: ChestsKeysData;
     hpTotal: number = 0;
     levelTotal: number = 0;
     healedAmount: number = 0;
     offensiveActions: number = 0;
+    teamData: any;
 
     constructor(number: number, game: Game) {
         this.id = number;
         this.game = game;
-        this.chestKeys = {
-            bronze: false,
-            silver: false,
-            gold: false,
+        this.teamData = {
+            chestKeys: {
+                bronze: false,
+                silver: false,
+                gold: false,
+            }
         }
     }   
 
@@ -132,8 +133,16 @@ export class Team {
         this.socket = socket;
     }
 
-    setElo(elo: number) {
-        this.elo = elo;
+
+    setPlayerData(playerData: any, mode: PlayMode) {
+        this.teamData.elo = playerData.elo;
+        this.teamData.lvl = playerData.lvl;
+        this.teamData.playerName = playerData.name;
+        this.teamData.teamName = playerData.teamName;
+        this.teamData.avatar = playerData.avatar;
+        this.teamData.league = playerData.league;
+        this.teamData.rank = playerData.rank;
+        if (mode != PlayMode.PRACTICE) this.registerChestsData(playerData.chests)
     }
 
     registerChestsData(chestsData: ChestsData) {
@@ -141,7 +150,7 @@ export class Team {
             const chest = chestsData[key] as ChestData;
             if (chest.hasKey) continue;
             if (chest.countdown <= 0) {
-                this.chestKeys[key] = true;
+                this.teamData.chestKeys[key] = true;
                 return; // Only one key unlocked per game
             }
         }
@@ -149,7 +158,11 @@ export class Team {
 
     
     getChestsKeys() {
-        return this.chestKeys;
+        return this.teamData.chestKeys;
+    }
+
+    getElo() {
+        return this.teamData.elo;
     }
 
     getSocket() {

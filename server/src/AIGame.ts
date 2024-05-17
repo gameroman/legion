@@ -69,8 +69,8 @@ export class AIGame extends Game {
         this.createAITeam(aiTeam!, nb, levels);
     }
 
-    async addPlayer(socket: Socket, elo: number, chests: ChestsData) {
-        super.addPlayer(socket, elo, chests);
+    async addPlayer(socket: Socket, playerData: any) {
+        super.addPlayer(socket, playerData);
         if (this.sockets.length === this.nbExpectedPlayers) {
             this.start();
         } else {

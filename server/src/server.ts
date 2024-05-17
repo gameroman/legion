@@ -88,7 +88,8 @@ io.on('connection', async (socket: any) => {
           socket.firebaseToken,
         );
   
-        game.addPlayer(socket, playerData.elo, playerData.chests);
+        // game.addPlayer(socket, playerData.elo, playerData.chests);
+        game.addPlayer(socket, playerData);
       }
 
       socketMap.set(socket, game);

@@ -76,6 +76,8 @@ export class Arena extends Phaser.Scene
         this.load.audio('cooldown', 'sfx/cooldown.wav');
         this.load.audio('shatter', 'sfx/shatter.wav');
         this.load.audio('flames', 'sfx/flame.wav');
+        this.load.audio('crowd', 'sfx/crowd.wav');
+        this.load.audio('cheer', 'sfx/cheer.wav');
 
         this.load.audio('cast', 'sfx/spells/cast.wav');
         this.load.audio('fireball', 'sfx/spells/fire_3.wav');
@@ -791,7 +793,7 @@ export class Arena extends Phaser.Scene
 
     createSounds() {
         this.SFX = {};
-        const sounds = ['click', 'slash', 'steps', 'nope', 'heart', 'cooldown', 'fireball','healing', 'cast', 'thunder', 'ice', 'shatter', 'flames']
+        const sounds = ['click', 'slash', 'steps', 'nope', 'heart', 'cooldown', 'fireball','healing', 'cast', 'thunder', 'ice', 'shatter', 'flames', 'crowd', 'cheer']
         sounds.forEach((sound) => {
             this.SFX[sound] = this.sound.add(sound);
         })
@@ -1066,6 +1068,7 @@ export class Arena extends Phaser.Scene
 
         this.musicManager = new MusicManager(this, 2, 13, [5, 6, 11]);
         this.musicManager.playBeginning();
+        this.playSound('crowd', 0.5, true);
 
         this.environmentalAudioSources = {
             flames: 0,
