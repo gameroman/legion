@@ -21,12 +21,15 @@ function getRandomItem(rarityDistribution: { [key in Rarity]?: number[] }, Rewar
     let cumulativeProbability = 0;
     let chosenRarity: Rarity | null = null;
 
-    for (const rarity in rarityDistribution) {
-        cumulativeProbability += rarityDistribution[rarity as keyof Rarity].reduce((a, b) => a + b, 0);
-        if (rarityRoll < cumulativeProbability) {
-            // @ts-ignore
-            chosenRarity = rarity as Rarity;
-            break;
+    for (const rarityKey in rarityDistribution) {
+        const rarity = parseInt(rarityKey, 10) as Rarity; // Convert string key to Rarity enum
+        const probabilities = rarityDistribution[rarity];
+        if (probabilities) {
+            cumulativeProbability += probabilities.reduce((a, b) => a + b, 0);
+            if (rarityRoll < cumulativeProbability) {
+                chosenRarity = rarity;
+                break;
+            }
         }
     }
 

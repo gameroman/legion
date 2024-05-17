@@ -90,7 +90,7 @@ class Overview extends Component<Props, State> {
       <div className="overview">
           {members.map((member, memberIndex) => {
             const portraitStyle = {
-              backgroundImage: `url(assets/sprites/${member.texture}.png)`,
+              backgroundImage: `url(/sprites/${member.texture}.png)`,
               backgroundPosition: '-45px -45px',
               backgroundRepeat: 'no-repeat',
               filter: member.isAlive ? 'none' : 'grayscale(100%)',
@@ -98,7 +98,7 @@ class Overview extends Component<Props, State> {
             };
             const cooldown = cooldowns[cooldownIndex++];
             return (
-              <div key={memberIndex} className={`box member ${position === 'left' ? 'member-left' : 'member-right'}`}>
+              <div key={memberIndex} className={`box member ${position === 'left' ? 'member-left' : 'member-right'}`} style={{minWidth: '200px'}}>
                 <div style={portraitStyle} className={`member-portrait ${blinking[memberIndex] ? 'blink' : ''}`} >
                 {member.isPlayer && <span className="member-index">{memberIndex + 1}</span>}
                 </div>

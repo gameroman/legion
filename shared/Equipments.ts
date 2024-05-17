@@ -76,6 +76,6 @@ equipments[5] = new BaseEquipment({
     classes: [Class.WARRIOR],
 });
 
-export function getEquipmentById(id:number):BaseEquipment {
+export function getEquipmentById(id:number):BaseEquipment | undefined {
     return equipments.find(e => e.id === id);
 }

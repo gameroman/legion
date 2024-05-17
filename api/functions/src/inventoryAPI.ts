@@ -52,13 +52,13 @@ export const purchaseItem = onRequest((request, response) => {
         let itemPrice = 0;
         switch (inventoryType) {
           case ShopTabs.CONSUMABLES:
-            itemPrice = getConsumableById(itemId).price;
+            itemPrice = getConsumableById(itemId)?.price ?? 0;
             break;
           case ShopTabs.SPELLS:
             itemPrice = getSpellById(itemId).price;
             break;
           case ShopTabs.EQUIPMENTS:
-            itemPrice = getEquipmentById(itemId).price;
+            itemPrice = getEquipmentById(itemId)?.price ?? 0;
             break;
           default:
             response.status(500).send("Invalid inventory type");
@@ -216,7 +216,7 @@ function equipEquipment(playerData: any, characterData: any, index: number) {
 
   const data = getEquipmentById(item);
 
-  let slotNumber: number = data.slot;
+  let slotNumber: number = data?.slot ?? 0;
   if (slotNumber == EquipmentSlot.LEFT_RING) {
     if (equipped.left_ring !== -1) {
       slotNumber = EquipmentSlot.RIGHT_RING;
@@ -231,7 +231,7 @@ function equipEquipment(playerData: any, characterData: any, index: number) {
   equipped[field as keyof Equipment] = item;
 
   if (slotNumber == EquipmentSlot.BELT) {
-    carrying_capacity_bonus = data.beltSize;
+    carrying_capacity_bonus = data?.beltSize ?? 0;
 
     while (inventory.length >
       characterData.carrying_capacity + carrying_capacity_bonus) {
@@ -312,7 +312,7 @@ function applyEquipmentBonuses(equipped: Equipment) {
     const item = equipped[field as keyof Equipment];
     if (item !== -1) {
       const data = getEquipmentById(item);
-      data.effects.forEach((effect) => {
+      data?.effects.forEach((effect) => {
         switch (effect.stat) {
         case 0:
           bonuses.hp += effect.value;

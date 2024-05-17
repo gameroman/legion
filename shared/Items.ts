@@ -145,6 +145,6 @@ items[9] = new BaseItem({
     effort: 20,
 });
 
-export function getConsumableById(id: number): BaseItem {
+export function getConsumableById(id: number): BaseItem | undefined {
     return items.find(item => item.id === id);
 }
