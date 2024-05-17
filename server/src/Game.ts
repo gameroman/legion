@@ -282,9 +282,7 @@ export abstract class Game
     }
 
     checkEndGame() {
-        console.log(`Checking end game`);
         if (this.gameOver) return;
-        console.log(`Team 1 defeated: ${this.teams.get(1)!.isDefeated()}, Team 2 defeated: ${this.teams.get(2)!.isDefeated()}`);
         if (this.teams.get(1)!.isDefeated() || this.teams.get(2)!.isDefeated()) {
             this.endGame(this.teams.get(1).isDefeated() ? 2 : 1);
         }

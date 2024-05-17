@@ -36,13 +36,13 @@ export class BaseSpell {
         this.cooldown = 2;
         this.castTime = 1;
         this.minLevel = 1;
-        if (props.target === Target.AOE) {
+        if (props.target == Target.AOE) {
             this.cost *= props.size * 3;
             this.cooldown *= props.size;
             this.castTime *= props.size;
             this.minLevel *= props.size;
         }
-        if (props.terrain !== Terrain.NONE) {
+        if (props.terrain != Terrain.NONE) {
             this.cost *= 1.5;
             this.cooldown *= 1.1;
             this.castTime *= 1.2;

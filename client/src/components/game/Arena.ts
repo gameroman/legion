@@ -1082,7 +1082,7 @@ export class Arena extends Phaser.Scene
         this.HUD = this.scene.get('HUD');
     }
 
-    displaySpellArea(location, size, delay) {
+    displaySpellArea(location, size, duration) {
         if (size % 2 === 0) {
             location.x += 0.5;
             location.y += 0.5;
@@ -1095,14 +1095,16 @@ export class Arena extends Phaser.Scene
             .setAlpha(0.5);
             // .setTint(0xff0000);
 
-        const duration = 100;
-        const repeat = Math.floor((delay * 1000) / (duration * 2)) - 1;
+        const blinkDuration = 100;
+        const totalDuration = duration * 1000; // Convert to milliseconds
+        const repeatCount = Math.floor(totalDuration / blinkDuration / 2);
+    
         this.tweens.add({
             targets: spellAreaImage,
             alpha: { from: 1, to: 0.5 }, // From fully visible to invisible
-            duration,             // Duration for each blink
-            yoyo: true,                // Go back and forth between visible and invisible
-            repeat,                 // Number of blinks (or -1 for infinite)
+            duration: blinkDuration,    // Duration for each blink
+            yoyo: true,                 // Go back and forth between visible and invisible
+            repeat: repeatCount - 1,    // Number of blinks (or -1 for infinite)
             onComplete: () => {
                 spellAreaImage.destroy(); // Destroy the image at the end
             }
