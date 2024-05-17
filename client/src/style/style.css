@@ -289,14 +289,13 @@ canvas {
 
 .overview {
     position: relative;
-    margin-top: 10px;
-    margin-right: 10px;
+    margin: 10px;
     z-index: 2;
-    width: 100px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;  
     align-items: center;
+    gap: 4px;
 }
 
 /* .member::before {
@@ -329,7 +328,6 @@ canvas {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 10px 0;
     font-family: 'Kim', sans-serif;
     text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
     color: white;
