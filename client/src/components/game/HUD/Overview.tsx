@@ -96,7 +96,7 @@ class Overview extends Component<Props, State> {
 
     return (
       <div className="overview">
-        <PlayerInfo player={player} />
+        <PlayerInfo player={player} position={this.props.position} />
         {members.map((member, memberIndex) => {
           const portraitStyle = {
             backgroundImage: `url(/sprites/${member.texture}.png)`,

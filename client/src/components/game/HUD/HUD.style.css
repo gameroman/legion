@@ -211,6 +211,22 @@
     gap: 8px;
     position: relative;
     padding: 8px 16px 12px 36px;
+    cursor: pointer;
+}
+
+.player_info_container_right {
+    flex-direction: row-reverse;
+    margin-right: 20px;
+}
+
+.player_info_container_right .player_info_team {
+    transform: scaleX(-1);
+    margin-right: -8px;
+}
+
+.player_info_container_right .player_info_team span {
+    display: inline-block;
+    transform: scaleX(-1);
 }
 
 .player_info_lv {
@@ -225,6 +241,11 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.player_info_lv_right {
+    left: auto;
+    right: -20px;
 }
 
 .player_info_lv span {

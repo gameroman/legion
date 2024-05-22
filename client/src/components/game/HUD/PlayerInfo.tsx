@@ -5,14 +5,16 @@ import { Player } from './GameHUD';
 
 interface Props {
     player: Player;
+    position: string;
 }
 
 class PlayerInfo extends Component<Props> {
-
   render() {
+  const {position} = this.props;
+
     return (
-      <div className="player_info_container" onClick={() => {}}>
-        <div className="player_info_lv">
+      <div className={`player_info_container ${position === 'right' && 'player_info_container_right'}`} onClick={() => {}}>
+        <div className={`player_info_lv ${position === 'right' && 'player_info_lv_right'}`}>
             <span>Lv</span>
             <span className="player_info_lvalue">{this.props.player.level}</span>
         </div>
@@ -23,7 +25,7 @@ class PlayerInfo extends Component<Props> {
                 <img src="/icons/gold_rank.png" alt="" />
                 <span>RANK {this.props.player.rank}</span>
             </div>
-            <div className="player_info_team">TEAM</div>
+            <div className="player_info_team"><span>TEAM</span></div>
         </div>
       </div>
     );
