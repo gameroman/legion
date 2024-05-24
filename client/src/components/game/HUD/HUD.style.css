@@ -690,3 +690,34 @@
 .skip_tutorial:hover {
     opacity: 0.9;
 }
+
+.game_leave_dialog {
+    background-image: url('@assets/leaderboard/recap_bg.png');
+    background-size: 100% 100%;
+    width: 350px;
+    height: 140px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: #FFFFFF;
+}
+
+.game_leave_btn {
+    background-image: url('@assets/HUD/button_bg_idle.png');
+    background-size: 100% 100%;
+    width: 50%;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #FFFFFF;
+    cursor: pointer;
+}
+
+.game_leave_btn:hover {
+    background-image: url('@assets/HUD/button_bg_active.png');
+}
