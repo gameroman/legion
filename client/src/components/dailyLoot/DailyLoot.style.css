@@ -67,10 +67,16 @@
 .loot-box-footer img {
     width: 16px;
     height: 16px;
+    vertical-align: middle;
 }
 
 .loot-box-countdown {
     color: #a0d937;
+    margin-left: 3px;
+}
+
+.loot-box-key {
+    margin-left: 8px;
 }
 
 .loot-box-footer .loot-box-open {

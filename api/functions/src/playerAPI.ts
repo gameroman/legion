@@ -121,6 +121,7 @@ export const getPlayerData = onRequest((request, response) => {
         for (const color of Object.values(ChestColor)) {
           const chest = playerData.dailyloot[color];
           const timeLeft = chest.time - now;
+          // console.log(`timeLeft: ${timeLeft} (${chest.time} - ${now})`);
           chest.countdown = timeLeft > 0 ? timeLeft : 0;
           delete chest.time;
           playerData.dailyloot[color] = chest;

@@ -1,4 +1,5 @@
 import { createContext } from 'preact';
+import { DailyLootAllData } from '@legion/shared/interfaces';
 
 export interface PlayerContextData {
   name: string;
@@ -6,6 +7,7 @@ export interface PlayerContextData {
   gold: number;
   elo: number;
   ranking: number;
+  dailyloot: DailyLootAllData;
 }
 
 export interface PlayerContextState {
@@ -21,7 +23,8 @@ export const PlayerContext = createContext<{
     lvl: 0,
     gold: 0,
     elo: 0,
-    ranking: 0
+    ranking: 0,
+    dailyloot: null,
   },
   setPlayerInfo: () => {}
 });

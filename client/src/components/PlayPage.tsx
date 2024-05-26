@@ -4,14 +4,14 @@ import Roster from './roster/Roster';
 import PlayModes from './playModes/PlayModes';
 import OnGoingArena from './onGoingArena/OnGoingArena';
 import DailyQuest from './dailyQuest/DailyQuest';
-import DailyLootBox from './dailyLootBox/DailyLootBox';
+import DailyLoot from './dailyLoot/DailyLoot';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css'
+import { PlayerContext } from '../contexts/PlayerContext';
 
 /* eslint-disable react/prefer-stateless-function */
 class PlayPage extends Component {
   render() {
-
     const data = {
       dailyQuests: [
         {
@@ -73,36 +73,26 @@ class PlayPage extends Component {
           spectators: 5,
           duration: 621, // seconds
         }
-      ],
-      chests: {
-        bronze: {
-          countdown: 86400,
-          hasKey: false,
-        },
-        silver: {
-          countdown: 0,
-          hasKey: false,
-        },
-        gold: {
-          countdown: 0,
-          hasKey: true,
-        },
-      }
+      ]
     }
 
     return (
-      <div className="play-content">
-        <Roster />
-        {data ? <PlayModes /> : <Skeleton
-          height={50}
-          count={2}
-          highlightColor='#0000004d'
-          baseColor='#0f1421'
-          style={{ margin: '2px 146px', width: '1024px'}} />}
-        <DailyLootBox data={data.chests} />
-        <DailyQuest questData={data.dailyQuests} />
-        <OnGoingArena ongoingGameData={data.ongoingGames} />
-      </div>
+      <PlayerContext.Consumer> 
+        {({ player }) => (
+          <div className="play-content">
+            <Roster />
+            {data ? <PlayModes /> : <Skeleton
+              height={50}
+              count={2}
+              highlightColor='#0000004d'
+              baseColor='#0f1421'
+              style={{ margin: '2px 146px', width: '1024px'}} />}
+            <DailyLoot data={player.dailyloot} />
+            <DailyQuest questData={data.dailyQuests} />
+            <OnGoingArena ongoingGameData={data.ongoingGames} />
+          </div>
+        )}
+      </PlayerContext.Consumer> 
     );
   }
 }

@@ -2,6 +2,7 @@ import { Component, h } from 'preact';
 import { PlayerContextState, PlayerContextData, PlayerContext } from '../contexts/PlayerContext';
 import { apiFetch } from '../services/apiService';
 import { successToast, errorToast } from '../components/utils';
+import { APIPlayerData } from '@legion/shared/interfaces';
 
 
 class PlayerProvider extends Component<{}, PlayerContextState> {
@@ -13,7 +14,8 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           lvl: 0,
           gold: 0,
           elo: 0,
-          ranking: 0
+          ranking: 0,
+          dailyloot: null,
         }
       };
     }
@@ -24,7 +26,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
     
     async fetchPlayerData() {
         try {
-            const data = await apiFetch('getPlayerData');
+            const data = await apiFetch('getPlayerData') as APIPlayerData;
             console.log(data);
             this.setState({ 
                 player: {
@@ -32,7 +34,8 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
                     lvl: data.lvl,
                     gold: data.gold,
                     elo: data.elo,
-                    ranking: data.ranking
+                    ranking: data.rank,
+                    dailyloot: data.dailyloot
                 }
             });
         } catch (error) {
