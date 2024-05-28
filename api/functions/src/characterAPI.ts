@@ -5,7 +5,7 @@ import * as logger from "firebase-functions/logger";
 import admin, {corsMiddleware, getUID} from "./APIsetup";
 import {getSPIncrement} from "@legion/shared/levelling";
 import {NewCharacter} from "@legion/shared/NewCharacter";
-import {Class, statFields} from "@legion/shared/enums";
+import {Class, statFields, MAX_CHARACTERS} from "@legion/shared/enums";
 import {OutcomeData, DailyLootAllData, CharacterUpdate, APICharacterData} from "@legion/shared/interfaces";
 import {ChestReward} from "@legion/shared/chests";
 
@@ -366,8 +366,8 @@ export const purchaseCharacter = onRequest((request, response) => {
           throw new Error("Player does not have enough gold");
         }
 
-        // Check if player has less than 10 characters
-        if (playerData.characters.length >= 10) {
+        // Check if player has less than MAX_CHARACTERS characters
+        if (playerData.characters.length >= MAX_CHARACTERS) {
           throw new Error("Player has too many characters");
         }
 

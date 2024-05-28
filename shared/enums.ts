@@ -109,3 +109,5 @@ export enum rankNoImage {
     'silver_rankno',
     'bronze_rankno'
 }
+
+export const MAX_CHARACTERS = 10;

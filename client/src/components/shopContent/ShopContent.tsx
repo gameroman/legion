@@ -6,7 +6,7 @@ import Skeleton from 'react-loading-skeleton';
 import { h, Component } from 'preact';
 import { PlayerContext } from '../../contexts/PlayerContext';
 import { apiFetch } from '../../services/apiService';
-import { InventoryType, ShopTabs } from '@legion/shared/enums';
+import { InventoryType, ShopTabs, MAX_CHARACTERS } from '@legion/shared/enums';
 import { PlayerInventory, ShopItems, DBCharacterData } from '@legion/shared/interfaces';
 import { ShopTabIcons } from './ShopContent.data';
 import { errorToast, successToast, playSoundEffect } from '../utils';
@@ -19,12 +19,16 @@ import ShopItemFilter from '../shopItemFilter/ShopItemFilter';
 import { spells } from '@legion/shared/Spells';
 import { items } from '@legion/shared/Items';
 import { equipments } from '@legion/shared/Equipments';
+import { inventorySize } from '@legion/shared/utils';
 import { Link } from 'preact-router';
+
 interface ShopContentProps {
     gold: number;
     requireTab: number;
     characters: DBCharacterData[];
     inventory: PlayerInventory;
+    carrying_capacity: number;
+    nb_characters: number;
     fetchInventoryData: () => void;
     updateInventory: (articleId: string, quantity: number, shoptab: ShopTabs) => void;
     fetchCharactersOnSale: () => void;
@@ -98,24 +102,37 @@ class ShopContent extends Component<ShopContentProps> {
             return;
         }
 
+        const purchasingCharacter = this.state.curr_tab == ShopTabs.CHARACTERS;
+
+        if (purchasingCharacter) {
+            if (this.props.nb_characters >= MAX_CHARACTERS) {
+                errorToast('Character limit reached!');
+                return;
+            }
+        } else {
+            if (inventorySize(this.props.inventory) >= this.props.carrying_capacity) {
+                errorToast('Inventory full!');
+                return;
+            }
+        }
+
         const payload = {
             articleId: id,
             quantity,
             inventoryType: this.state.curr_tab
         };
-        console.log(payload);
 
         this.props.updateInventory(id.toString(), quantity, this.state.curr_tab);
         this.context.setPlayerInfo({ gold: this.props.gold - price * quantity });
         playSoundEffect('sfx/purchase.wav');
 
-        apiFetch(this.state.curr_tab == ShopTabs.CHARACTERS ? 'purchaseCharacter' : 'purchaseItem', {
+        apiFetch(purchasingCharacter ? 'purchaseCharacter' : 'purchaseItem', {
             method: 'POST',
             body: payload
         })
             .then(data => {
                 console.log(data);
-                if (this.state.curr_tab == ShopTabs.CHARACTERS) {
+                if (purchasingCharacter) {
                     this.props.fetchCharactersOnSale();
                 } else {
                     this.props.fetchInventoryData();

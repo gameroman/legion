@@ -15,7 +15,9 @@ enum DialogType {
 interface State {
   gold: number;
   inventory: PlayerInventory;
-  characters: DBCharacterData[];
+  carrying_capacity: number;
+  nb_characters: number;
+  characters: DBCharacterData[]; // Characters on sale
   openDialog: DialogType;
   quantity: number;
 }
@@ -35,6 +37,8 @@ class ShopPage extends Component<ShopPageProps, State> {
       equipment: [],
       spells: [],
     },
+    carrying_capacity: 0,
+    nb_characters: 0,
     characters: [],
     openDialog: DialogType.NONE,
     quantity: 1,
@@ -55,6 +59,8 @@ class ShopPage extends Component<ShopPageProps, State> {
               equipment: data.inventory.equipment?.sort(), 
               spells: data.inventory.spells?.sort(),
             },
+            carrying_capacity: data.carrying_capacity,
+            nb_characters: data.nb_characters,
         });
     } catch (error) {
         errorToast(`Error: ${error}`);
@@ -107,6 +113,8 @@ class ShopPage extends Component<ShopPageProps, State> {
         <div className="shop-container">
           <ShopContent
             gold={this.state.gold}
+            carrying_capacity={this.state.carrying_capacity}
+            nb_characters={this.state.nb_characters}
             requireTab={ShopTabs[this.props.matches.id?.toUpperCase()]}
             inventory={this.state.inventory}
             characters={this.state.characters} 

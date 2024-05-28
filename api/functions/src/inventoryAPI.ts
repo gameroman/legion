@@ -24,6 +24,7 @@ export const inventoryData = onRequest((request, response) => {
           gold: docSnap.data()?.gold,
           inventory: docSnap.data()?.inventory,
           carrying_capacity: docSnap.data()?.carrying_capacity,
+          nb_characters: docSnap.data()?.characters.length,
         });
       } else {
         response.status(404).send("Not Found: Invalid player ID");
@@ -49,6 +50,13 @@ export const purchaseItem = onRequest((request, response) => {
         const inventoryType = request.body.inventoryType as ShopTabs;
         console.log(`itemId: ${itemId}, nb: ${nb}, inventoryType: ${inventoryType}`);
 
+        // Check that the player has enough space in their inventory
+        const inventory = docSnap.data()?.inventory;
+        if (inventorySize(inventory) + nb > docSnap.data()?.carrying_capacity) {
+          response.status(500).send("Inventory full");
+          return;
+        }
+
         let itemPrice = 0;
         switch (inventoryType) {
           case ShopTabs.CONSUMABLES:
@@ -69,13 +77,6 @@ export const purchaseItem = onRequest((request, response) => {
         let gold = docSnap.data()?.gold;
         if (gold < totalPrice) {
           response.status(500).send("Insufficient gold");
-          return;
-        }
-
-        // Check that the player has enough space in their inventory
-        const inventory = docSnap.data()?.inventory;
-        if (inventorySize(inventory) + nb > docSnap.data()?.carrying_capacity) {
-          response.status(500).send("Inventory full");
           return;
         }
 
