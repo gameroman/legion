@@ -731,8 +731,9 @@
 }
 
 .defeat_title {
-    background: linear-gradient(0.25turn, #2e3f4c, #242529, #2e3f4c);
-    height: 24px;
+    background-image: url('@assets/HUD/combat_begins_bg.png');
+    background-size: 100% 100%;
+    height: 54px;
     width: 80%;
     margin: 0 auto;
     display: flex;
@@ -740,14 +741,25 @@
     align-items: center;
     margin-top: 116px;
     margin-bottom: 30px;
+    position: relative;
 }
 
 .defeat_title p {
     font-size: 86px;
     font-weight: 900;
-    color: #FFA600;
     text-shadow: #147fa6 0px 8px;
     text-align: center;
+    margin-top: -12px;
+}
+
+.victory_title_effect {
+    position: absolute;
+    top: -46px;
+    right: 98px;
+    font-size: 172px;
+    font-weight: bolder;
+    color: #FFFFFF;
+    text-shadow: #afafaf 0px 4px;
 }
 
 .endgame_score_bg {
@@ -757,6 +769,7 @@
     padding: 4px 8px;
     width: 260px;
     height: 46px;
+    margin-top: -24px;
 
     display: flex;
     justify-content: space-around;
@@ -891,5 +904,79 @@
     align-items: center;
 
     margin-top: 120px;
+    cursor: pointer;
+}
+
+.light_streak_container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(28, 31, 37, 0.8);
+}
+
+.light_streak_chest {
+    background-image: url('@assets/HUD/light_glow.png');
+    background-size: 100% 100%;
+    position: absolute;
+    width: 800px;
+    height: 800px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.streak_gold_list_container {
+    display: flex;
+    gap: 8px;
+    position: absolute;
+    bottom: 248px;
+}
+
+.streak_gold_list {
+    width: 68px;
+    height: 68px;
+    background-color: #1c1f25;
+    border: 1px solid #147fa6;
+    border-radius: 4px;
+}
+
+.light_streak {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.streak_cofirm_container {
+    background-image: url('@assets/HUD/reward_footer_ornament.png');
+    background-size: 100% 100%;
+    width: 100%;
+    height: 64px;
+    
+    display: flex;
+    justify-content: center;
+
+    position: absolute;
+    bottom: 164px;
+}
+
+.streak_confirm_btn {
+    background-image: url('@assets/HUD/confirm_btn_bg.png');
+    background-size: 100% 100%;
+    width: 168px;
+    height: 64px;
+
+    font-size: 16px;
+    font-weight: 600;
+    color: #FFFFFF;
+    text-transform: uppercase;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     cursor: pointer;
 }
