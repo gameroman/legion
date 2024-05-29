@@ -76,6 +76,8 @@ class PlayPage extends Component {
       ]
     }
 
+    const SHOW_QUESTS = false;
+
     return (
       <PlayerContext.Consumer> 
         {({ player }) => (
@@ -88,7 +90,7 @@ class PlayPage extends Component {
               baseColor='#0f1421'
               style={{ margin: '2px 146px', width: '1024px'}} />}
             <DailyLoot data={player.dailyloot} />
-            <DailyQuest questData={data.dailyQuests} />
+            {SHOW_QUESTS && <DailyQuest questData={data.dailyQuests} />}
             <OnGoingArena ongoingGameData={data.ongoingGames} />
           </div>
         )}
