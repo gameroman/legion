@@ -370,8 +370,9 @@ export class Arena extends Phaser.Scene
         const gameWidth = this.scale.gameSize.width;
         const gameHeight = this.scale.gameSize.height;
 
+        const verticalOffset = 80;
         const startX = (gameWidth - totalWidth) / 2;
-        const startY = (gameHeight - totalHeight) / 2 + 150;
+        const startY = (gameHeight - totalHeight) / 2 + verticalOffset;
 
         this.floatTiles(startX, startY);
 
