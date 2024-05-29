@@ -34,6 +34,11 @@
     width: 50%;
 }
 
+.max_w_lg {
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
 .height_full {
     height: 100vh;
 }
@@ -755,7 +760,7 @@
 .victory_title_effect {
     position: absolute;
     top: -46px;
-    right: 98px;
+    left: calc(50% + 234px);
     font-size: 172px;
     font-weight: bolder;
     color: #FFFFFF;

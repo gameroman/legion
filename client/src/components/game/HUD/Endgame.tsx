@@ -82,7 +82,7 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
                         <span>500</span>
                     </div>
                 </div>
-                <div className="flex flex_wrap gap_16 justify_center items_center" style={{ padding: '36px 48px' }}>
+                <div className="flex flex_wrap gap_16 justify_center items_center max_w_lg" style={{ padding: '36px 48px' }}>
                     {Array.from({ length: 10 }, (_, idx) => (
                         <div className="endgame_character">
                             <div className="endgame_character_lvl">
