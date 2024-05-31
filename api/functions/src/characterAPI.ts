@@ -5,7 +5,8 @@ import * as logger from "firebase-functions/logger";
 import admin, {corsMiddleware, getUID} from "./APIsetup";
 import {getSPIncrement} from "@legion/shared/levelling";
 import {NewCharacter} from "@legion/shared/NewCharacter";
-import {Class, statFields, MAX_CHARACTERS} from "@legion/shared/enums";
+import {Class, statFields} from "@legion/shared/enums";
+import {MAX_CHARACTERS} from "@legion/shared/config";
 import {OutcomeData, DailyLootAllData, CharacterUpdate, APICharacterData} from "@legion/shared/interfaces";
 import {ChestReward} from "@legion/shared/chests";
 

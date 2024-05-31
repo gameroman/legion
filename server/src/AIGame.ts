@@ -8,10 +8,11 @@ import { Class, PlayMode } from "@legion/shared/enums";
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {Team} from "./Team";
 import { APIPlayerData } from '@legion/shared/interfaces';
+import {FREEZE_AI} from "@legion/shared/config";
+
 
 const TICK = 100;
 const AI_VS_AI = false;
-const FREEZE = true;
 
 export class AIGame extends Game {
     nbExpectedPlayers = 1;
@@ -99,7 +100,7 @@ export class AIGame extends Game {
 
         AIteams.forEach(teamNum => {
             (this.teams.get(teamNum)?.getMembers() as AIServerPlayer[]).forEach(player => {
-                if (!FREEZE) player.takeAction();
+                if (!FREEZE_AI) player.takeAction();
             }, this);
         });
     }
