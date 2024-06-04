@@ -27,7 +27,6 @@ export abstract class Game
     gameStarted: boolean = false;
     firstBlood: boolean = false;
     gameOver: boolean = false;
-    cooldownCoef: number = 1;
     audienceTimer: NodeJS.Timeout | null = null;
 
     gridWidth: number = 20;
@@ -313,7 +312,7 @@ export abstract class Game
     }
 
     setCooldown(player: ServerPlayer, cooldown: number) {
-        player.setCooldown(cooldown * this.cooldownCoef);
+        player.setCooldown(cooldown);
     }
 
     processMove({tile, num}: {tile: Tile, num: number}, team: Team) {
@@ -322,6 +321,7 @@ export abstract class Game
             console.log(`Invalid move from ${player.x},${player.y} to ${tile.x},${tile.y}!`);
             return;
         }
+        console.log(`Remaining cooldown: ${player.cooldown}`);
         if (!player.canAct() || !player.canMoveTo(tile.x, tile.y)) {
             console.log(`Player ${num} cannot move to ${tile.x},${tile.y}!`);
             return;
@@ -349,7 +349,7 @@ export abstract class Game
 
         team.socket?.emit('cooldown', {
             num,
-            cooldown,
+            cooldown: player.cooldown,
         });
 
         return 0;
@@ -409,7 +409,7 @@ export abstract class Game
 
         team.socket?.emit('cooldown', {
             num,
-            cooldown,
+            cooldown: player.cooldown,
         });
 
         return 0;
@@ -438,7 +438,7 @@ export abstract class Game
 
         team.socket?.emit('cooldown', {
             num,
-            cooldown,
+            cooldown: player.cooldown,
         });
 
         return 0;
@@ -504,7 +504,7 @@ export abstract class Game
 
         team.socket?.emit('cooldown', {
             num,
-            cooldown,
+            cooldown: player.cooldown,
         });
 
         team.socket?.emit('inventory', {
@@ -562,6 +562,8 @@ export abstract class Game
                 }
             });
         }
+
+        this.setCooldown(player, spell.cooldown * 1000);
         
         this.broadcast('localanimation', {
             x,
@@ -572,7 +574,7 @@ export abstract class Game
 
         team.socket?.emit('cooldown', {
             num: player.num,
-            cooldown: spell.cooldown * 1000,
+            cooldown: player.cooldown,
         });
 
         this.broadcast('endcast', {
@@ -596,9 +598,6 @@ export abstract class Game
 
         if (spell.cost > player.getMP()) return;
         const mp = player.consumeMP(spell.cost);
-
-        const cooldown = spell?.cooldown * 1000;
-        this.setCooldown(player, cooldown);
 
         let targetPlayer: ServerPlayer | null = null;
         if (spell.target === Target.SINGLE) {
