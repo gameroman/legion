@@ -1019,3 +1019,11 @@
 
     cursor: pointer;
 }
+
+.exit_game_menu {
+    background-color: #252b36;
+    border: 1px solid #4583d0;
+    border-radius: 4px;
+    padding: 6px 8px;
+    cursor: pointer;
+}

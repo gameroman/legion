@@ -12,16 +12,54 @@ interface Props {
 class PlayerInfo extends Component<Props> {
   state = {
     modalOpen: false,
+    modalOpen1: false,
+    modalPos: null
   }
 
+  handleOpenModal = (e: any, isExit: boolean) => {
+    if (isExit) {
+      this.setState({modalOpen: false, modalOpen1: true});
+      return;
+    }
+
+    const elementRect = e.currentTarget.getBoundingClientRect();
+
+    const modalPosition = {
+        top: elementRect.top + elementRect.height,
+        left: elementRect.left - 56,
+    };
+
+    this.setState({ modalOpen: true, modalPos: modalPosition });
+}
+
   handleCloseModal = () => {
-    this.setState({modalOpen: false});
+    this.setState({
+      modalOpen: false,
+      modalOpen1: false
+    });
   }
 
   render() {
   const {position, isSpectator} = this.props;
 
   const customStyles = {
+    content: {
+      top: this.state.modalPos?.top,
+      left: this.state.modalPos?.left,
+      right: 'auto',
+      bottom: 'auto',
+      padding: 0,
+      border: 'none',
+      background: 'transparent',
+      overflow: 'visible'
+    },
+    overlay: {
+      zIndex: 10,
+      backgroundColor: 'transparent',
+    }
+  };
+
+  const customStyles1 = {
     content: {
       top: '50%',
       left: '50%',
@@ -61,11 +99,16 @@ class PlayerInfo extends Component<Props> {
           <div onClick={() => {}}>
             <img src="/HUD/donate_icon.png" alt="" />
           </div>
-          <div onClick={() => this.setState({modalOpen: true})}>
+          <div onClick={(e) => this.handleOpenModal(e, false)}>
             <img src="/HUD/settings_icon.png" alt="" />
           </div>
         </div>}
-        <Modal isOpen={this.state.modalOpen}  onRequestClose={this.handleCloseModal} style={customStyles}>
+        <Modal isOpen={this.state.modalOpen} style={customStyles} onRequestClose={this.handleCloseModal}>
+          <div className="exit_game_menu" onClick={(e) => this.handleOpenModal(e, true)}>
+            <p>Exit Game!</p>
+          </div>
+        </Modal>
+        <Modal isOpen={this.state.modalOpen1}  onRequestClose={this.handleCloseModal} style={customStyles1}>
           <div className="flex flex_col gap_4">
             <div className="game_leave_dialog">Are you sure want to leave?</div>
             <div className="flex gap_4">
