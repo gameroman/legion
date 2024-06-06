@@ -303,7 +303,7 @@ export abstract class Game
         this.sockets.forEach(socket => {
             const team = this.socketMap.get(socket);
             const otherTeam = this.getOtherTeam(team!.id);
-            const outcomes = this.computeGameOutcomes(team, otherTeam, winner, this.duration, this.mode);
+            const outcomes = this.computeGameOutcomes(team, otherTeam, winner, this.duration, this.mode) as OutcomeData;
             console.log(`Team ${team!.id} outcomes: ${JSON.stringify(outcomes)}`);
             team.distributeXp(outcomes.xp);
             this.writeOutcomesToDb(team, outcomes);
