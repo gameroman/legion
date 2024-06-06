@@ -1,7 +1,7 @@
 // Overview.tsx
 import { h, Component } from 'preact';
-import { Player } from './GameHUD';
 import PlayerInfo from './PlayerInfo';
+import { Player } from './GameHUD';
 
 interface Member {
   texture: string;
@@ -18,7 +18,7 @@ interface Member {
 
 interface Props {
   members: Member[];
-  player: Player;
+  selectedPlayer: Player;
   score: number;
   position: string;
   isSpectator: boolean;
@@ -28,7 +28,6 @@ interface State {
   cooldowns: number[];
   previousHPs: number[];
   blinking: boolean[];
-  hovered: number;
   selected: number;
 }
 
@@ -47,7 +46,6 @@ class Overview extends Component<Props, State> {
       blinking: props.members
         ? props.members.map(() => false)
         : [],
-      hovered: null,
       selected: null
     };
   }
@@ -89,13 +87,13 @@ class Overview extends Component<Props, State> {
     }));
   }
 
-  render({ members, score, position, player, isSpectator }: Props, { cooldowns, blinking }: State) {
+  render({ members, score, position, selectedPlayer, isSpectator }: Props, { cooldowns, blinking }: State) {
     if (!members || !blinking.length) {
       return <div />;
     }
     let cooldownIndex = 0;
 
-    const selectedPlayer: Player = {
+    const playerTabData: any = {
       avatar: members[this.state.selected]?.texture ?? '1_1',
       level: 1,
       rank: this.state.selected,
@@ -104,39 +102,43 @@ class Overview extends Component<Props, State> {
 
     return (
       <div className={`overview ${position === 'right' && 'overview_right'}`}>
-        <PlayerInfo player={selectedPlayer} position={this.props.position} isSpectator={isSpectator} />
+        <PlayerInfo player={playerTabData} position={this.props.position} isSpectator={isSpectator} />
         {members.map((member, memberIndex) => {
+          const cooldown = cooldowns[cooldownIndex++];
+
           const portraitStyle = {
             backgroundImage: `url(/sprites/${member.texture}.png)`,
           };
 
           const charProfileStyle = (idx: number) => {
-            if (this.state.selected === idx) {
+            const isSelected = this.props.selectedPlayer?.number === idx + 1 && position === 'right';
+
+            if (cooldown === 0 && member.hp > 0) {
               return {
-                backgroundImage: `url(/HUD/char_profile_ready.png)`,
+                backgroundImage: 'url(/HUD/char_profile_ready.png)',
                 transform: 'scale(1.1)'
               }
             }
+
             return {
-              backgroundImage: `url(/HUD/char_profile_${this.state.hovered === idx ? 'active' : 'idle'}.png)`
+              backgroundImage: `url(/HUD/char_profile_${isSelected ? 'active' : 'idle'}.png)`,
+              filter: `grayscale(${member.hp > 0 ? '0' : '1'})`
             }
           }
 
           const charStatStyle = (idx: number) => {
+            const isSelected = this.props.selectedPlayer?.number === idx + 1 && position === 'right';
+
             return {
-              backgroundImage: `url(/HUD/char_stats_bg${this.state.hovered === idx ? '_Active' : ''}.png)`,
+              backgroundImage: `url(/HUD/char_stats_bg${isSelected ? '_Active' : ''}.png)`,
             }
           }
-
-          const cooldown = cooldowns[cooldownIndex++];
 
           return (
             <div
               key={memberIndex}
               className={`member char_stats_container ${position === 'right' && 'flex_row_reverse'}`}
-              onMouseEnter={() => this.setState({ hovered: memberIndex })}
-              onMouseLeave={() => this.setState({ hovered: null })}
-              onClick={() => this.setState({ selected: memberIndex })}>
+            >
               <div className='char_profile_container' style={charProfileStyle(memberIndex)}>
                 <div className="char_portrait" style={portraitStyle} />
               </div>

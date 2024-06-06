@@ -5,12 +5,22 @@ import Overview from './Overview';
 import { Endgame } from './Endgame';
 import { EventEmitter } from 'eventemitter3';
 import SpectatorFooter from './SpectatorFooter';
+import { BaseSpell } from '@legion/shared/BaseSpell';
+import { BaseItem } from '@legion/shared/BaseItem';
 
 export interface Player {
-  avatar: string;
+  hp: number;
+  maxHp: number;
+  mp: number;
+  maxMp: number;
+  cooldown: number;
+  maxCooldown: number;
+  casting: boolean;
+  portrait: string;
+  number: number;
   name: string;
-  level: number;
-  rank: number;
+  spells: BaseSpell[];
+  items: BaseItem[];
 }
 
 interface Team {
@@ -94,12 +104,12 @@ class GameHUD extends Component<object, State> {
     return (
       <div className="height_full flex flex_col justify_between padding_bottom_16">
         <div className="hud-container">
-          <Overview position="left" isSpectator={isSpectator} {...team2} />
+          <Overview position="left" isSpectator={isSpectator} selectedPlayer={player} {...team2} />
           {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
-          <Overview position="right" isSpectator={isSpectator} {...team1} />
+          <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} {...team1} />
         </div>
         {team1 && <SpectatorFooter />}
-        {this.state.gameOver && <Endgame xpReward={this.state.xpReward} goldReward={this.state.goldReward} />}
+        {/* {this.state.gameOver && <Endgame xpReward={this.state.xpReward} goldReward={this.state.goldReward} />} */}
       </div>
     );
   }

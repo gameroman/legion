@@ -234,6 +234,10 @@
     position: absolute;
     left: 36px;
     top: 60px;
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .char_stats_cooldown {

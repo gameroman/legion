@@ -1,11 +1,10 @@
 // PlayerInfo.tsx
 import { h, Component } from 'preact';
 import { route } from 'preact-router';
-import { Player } from './GameHUD';
 import Modal from 'react-modal';
 
 interface Props {
-    player: Player;
+    player: any;
     position: string;
     isSpectator: boolean;
 }

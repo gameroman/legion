@@ -2,25 +2,7 @@ import { h, Component } from 'preact';
 import ActionItem from './Action';
 import { InventoryType } from '@legion/shared/enums';
 import TabBar from './TabBar';
-import { BaseItem } from "@legion/shared/BaseItem";
-import { BaseSpell } from "@legion/shared/BaseSpell";
-import { items } from '@legion/shared/Items';
-import { spells } from '@legion/shared/Spells';
-
-interface Player {
-  hp: number;
-  maxHp: number;
-  mp: number;
-  maxMp: number;
-  cooldown: number;
-  maxCooldown: number;
-  casting: boolean;
-  portrait: string;
-  number: number;
-  name: string;
-  spells: BaseSpell[];
-  items: BaseItem[];
-}
+import { Player } from './GameHUD';
 
 interface Props {
   player: Player;
