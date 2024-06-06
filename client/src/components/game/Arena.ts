@@ -10,7 +10,7 @@ import { lineOfSight, serializeCoords } from '@legion/shared/utils';
 import { getFirebaseIdToken } from '../../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain } from "@legion/shared/enums";
-import { TerrainUpdate, GameData } from '@legion/shared/interfaces';
+import { TerrainUpdate, GameData, OutcomeData } from '@legion/shared/interfaces';
 
 const LOCAL_ANIMATION_SCALE = 3;
 export class Arena extends Phaser.Scene
@@ -532,7 +532,7 @@ export class Arena extends Phaser.Scene
     }
 
     showEndgameScreen({isWinner, xp, gold}) {
-        if (this.overviewReady) events.emit('gameEnd', xp, gold);
+        if (this.overviewReady) events.emit('gameEnd', isWinner, xp, gold);
     }
 
     emitEvent(event, data?) {
@@ -776,7 +776,7 @@ export class Arena extends Phaser.Scene
          } 
     }
 
-    processGameEnd({isWinner, xp, gold}) {
+    processGameEnd({isWinner, xp, gold}: OutcomeData) {
         // TODO: handle winner = -1 for errors
         this.musicManager.playEnd();
         const winningTeam = isWinner ? this.teamsMap.get(this.playerTeamId) : this.teamsMap.get(this.getOtherTeam(this.playerTeamId));

@@ -18,6 +18,7 @@ interface State {
   team1: Team;
   team2: Team;
   gameOver: boolean;
+  isWinner: boolean;
   xpReward: number;
   goldReward: number;
   isTutorial: boolean;
@@ -34,6 +35,7 @@ class GameHUD extends Component<object, State> {
     clickedSpell: -1,
     team1: null,
     team2: null,
+    isWinner: false,
     gameOver: false,
     isTutorial: false,
     isSpectator: false,
@@ -67,9 +69,10 @@ class GameHUD extends Component<object, State> {
     this.setState({ isTutorial: general.isTutorial, isSpectator: general.isSpectator })
   }
 
-  endGame = (xp, gold) => {
+  endGame = (isWinner, xp, gold) => {
     this.setState({ 
       gameOver: true,
+      isWinner,
       xpReward: xp,
       goldReward: gold,
     });
