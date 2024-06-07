@@ -75,7 +75,7 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
                 </div>
                 <div className="endgame_score_bg">
                     <div className="flex items_center gap_4">
-                        <img src="/HUD/xp1.png" alt="XP" />
+                        <img src="/game_end/XP_icon.png" alt="XP" />
                         <span><CountUp end={this.state.finalXp} decimal=',' decimals={3} duration={5} /></span>
                     </div>
                     <div className="flex items_center gap_4">
@@ -121,6 +121,9 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
                         />
                         <div className="light_streak_chest">
                             <img src="/shop/gold_chest.png" alt="" />
+                        </div>
+                        <div className="light_shining_bg">
+                            <img src="/game_end/shine_bg.png" alt="" />
                         </div>
                         <div className="streak_gold_list_container">
                             {Array.from({ length: 6 }, (_, idx) => (
