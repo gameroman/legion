@@ -1172,8 +1172,8 @@ export class Arena extends Phaser.Scene
             setTimeout(this.updateOverview.bind(this), delay + 1000);
         }
 
-        events.on('itemClick', (letter) => {
-            this.selectedPlayer?.onLetterKey(letter);
+        events.on('itemClick', (index) => {
+            this.selectedPlayer?.onKey(index);
         });
     }
 

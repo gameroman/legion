@@ -48,8 +48,14 @@ class PlayerTab extends Component<Props, State> {
     }))
   }
 
-  actionClick(type: string, letter: string, index: number) {
-    this.events.emit('itemClick', letter);
+  actionClick(type: string, index: number) {
+    this.events.emit('itemClick', index);
+
+    if (type == 'item') {
+      console.log(this.state.player.items[index].name);
+    } else {
+      console.log(this.state.player.spells[index].name);
+    }
 
     const stateField = type == 'item' ? 'clickedItem' : 'clickedSpell';
     this.setState({ [stateField]: index });
@@ -133,14 +139,15 @@ class PlayerTab extends Component<Props, State> {
             <p className="hud_actions_title">Items</p>
             <div className="grid player_hud_action_container gap_4 padding_y_4">
               {Array.from({ length: 6 }, (_, idx) => (
-                <div className="player_hud_skills flex items_center justify_center relative" key={idx}>
+                <div className="player_hud_skills flex items_center justify_center relative" key={idx}
+                onClick={() => this.actionClick('item', idx)}>
                   <ActionItem
                     action={player.items[idx]}
                     index={idx}
                     clickedIndex={this.state.clickedSpell}
                     canAct={canAct}
                     actionType={InventoryType.CONSUMABLES}
-                    onActionClick={this.actionClick.bind(this)}
+                    onActionClick={() => {}}
                     key={idx}
                   />
                 </div>
@@ -154,7 +161,7 @@ class PlayerTab extends Component<Props, State> {
                 <div
                   className="player_hud_skills flex items_center justify_center relative"
                   key={idx}
-                  onClick={this.actionClick.bind(this)}>
+                  onClick={() => this.actionClick('spell', idx)}>
                   <ActionItem
                     action={player.spells[idx]}
                     index={idx}

@@ -329,8 +329,13 @@ export class Player extends Phaser.GameObjects.Container {
         // console.log(`Pressed ${keyCode}`);
         this.arena.playSound('click');
         const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
-        const itemsIndex = keyboardLayout.indexOf('Z');
         const index = keyboardLayout.indexOf(keyCode);
+        this.onKey(index);
+    }
+
+    onKey(index) {
+        const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+        const itemsIndex = keyboardLayout.indexOf('Z');
         if (index >= itemsIndex) {
             this.useItem(index - itemsIndex);
         } else {
@@ -393,7 +398,7 @@ export class Player extends Phaser.GameObjects.Container {
     useSkill(index) {
         const spell = this.spells[index];
         if (!spell) {
-            console.error(`No skill at slot ${index}`);
+            console.error(`No spell at slot ${index}`);
             return;
         }
         if (this.pendingSpell == index) {
