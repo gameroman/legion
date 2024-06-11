@@ -7,9 +7,10 @@ import { mapFrameToCoordinates } from '../utils';
 import { Tooltip as ReactTooltip } from "react-tooltip";
 
 export enum SpellTitleBG {
+  'url(/shop/item_title_bg_white.png)',
   'url(/shop/item_title_bg_blue.png)',
-  'url(/shop/item_title_bg_green.png)',
-  'url(/shop/item_title_bg_purple.png)'
+  'url(/shop/item_title_bg_purple.png)',
+  'url(/shop/item_title_bg_green.png)'
 }
 
 enum ClassIcon {
