@@ -94,6 +94,11 @@ export class Arena extends Phaser.Scene
 
         this.load.atlas('groundTiles', 'tiles2.png', 'tiles2.json');
 
+        const GEN = ['gen_bg', 'begins', 'blood', 'blue_bang', 'combat', 'first', 'orange_bang'];
+        GEN.forEach((name) => {
+            this.load.image(name, `GEN/${name}.png`);
+        });
+
     }
 
     extractGameIdFromUrl() {
@@ -1172,7 +1177,8 @@ export class Arena extends Phaser.Scene
             this.updateOverview();
         } else {
             const delay = 3000;
-            setTimeout(this.startAnimation.bind(this), delay);
+            // setTimeout(this.startAnimation.bind(this), delay);
+            setTimeout(this.displayGEN.bind(this), delay);
             setTimeout(this.updateOverview.bind(this), delay + 1000);
         }
 
@@ -1233,6 +1239,57 @@ export class Arena extends Phaser.Scene
                     }
                 });
             }
+        });
+    }
+
+    displayGEN() {
+        const textTweenDuration = 600;
+        const textDelay = 400;
+
+        let genBg = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY / 2, 'gen_bg');
+        genBg.setAlpha(0).setDepth(10);
+        this.tweens.add({
+            targets: genBg,
+            alpha: 0.7,
+            duration: 200,
+            ease: 'Power2',
+        });
+
+        let combat = this.add.image(-300, this.cameras.main.centerY - 200, 'combat').setDepth(10);
+        this.tweens.add({
+            targets: combat,
+            x: this.cameras.main.centerX,
+            duration: textTweenDuration,
+            ease: 'Power2',
+            delay: textDelay, 
+        });
+
+        let begins = this.add.image(this.cameras.main.width + 100, this.cameras.main.centerY - 200, 'begins').setDepth(10);
+        this.tweens.add({
+            targets: begins,
+            x: this.cameras.main.centerX,
+            duration: textTweenDuration,
+            ease: 'Power2',
+            delay: textDelay,
+        });
+
+        let blueBang = this.add.image(this.cameras.main.width + 100, this.cameras.main.centerY - 200, 'blue_bang').setDepth(10);
+        this.tweens.add({
+            targets: blueBang,
+            x: this.cameras.main.centerX,
+            duration: textTweenDuration,
+            ease: 'Power2',
+            delay: textDelay,
+        });
+
+        // Fade out all images after a few seconds
+        this.time.delayedCall(2000, () => {
+            this.tweens.add({
+                targets: [genBg, combat, begins, blueBang],
+                alpha: 0,
+                duration: 200,
+                ease: 'Power2',
+            });
         });
     }
      
