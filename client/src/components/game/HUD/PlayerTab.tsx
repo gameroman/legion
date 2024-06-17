@@ -5,14 +5,15 @@ import TabBar from './TabBar';
 import { Player } from './GameHUD';
 import { mapFrameToCoordinates } from '../../utils';
 import { BaseSpell } from '@legion/shared/BaseSpell';
+import { PlayerProps } from '@legion/shared/interfaces';
 
 interface Props {
-  player: Player;
+  player: PlayerProps;
   eventEmitter: any;
 }
 
 interface State {
-  player: Player;
+  player: PlayerProps;
   clickedItem: number;
   clickedSpell: number;
   poisonCounter: number;
@@ -71,7 +72,7 @@ class PlayerTab extends Component<Props, State> {
       coordinates.x = -coordinates.x + 0;
       coordinates.y = -coordinates.y + 0;
       const backgroundPosition = `${coordinates.x}px ${coordinates.y}px`;
-      this.setState({ backgroundPosition, selectedSpell: this.props.player.spells[index]});
+      this.setState({ backgroundPosition, selectedSpell: this.props.player.spells[index] });
     }
 
     setTimeout(() => {
@@ -126,18 +127,11 @@ class PlayerTab extends Component<Props, State> {
                   <TabBar title="HP" value={player.mp} maxValue={player.maxMp} barClass="char_stats_mp" />
                 </div>
                 <div className="player_content_statuses">
-                  <div>
-                    <img src="/HUD/poison_icon.png" alt="" />
-                    <span>{this.state.poisonCounter}</span>
+                  {Object.keys(player.statuses).map((status: string) => player?.statuses[status] !== 0 && <div>
+                    <img key={status} src={`/HUD/${status}_icon.png`} alt="" />
+                    <span>{player.statuses[status]}</span>
                   </div>
-                  <div>
-                    <img src="/HUD/frozen_icon.png" alt="" />
-                    <span>{this.state.frozenCounter}</span>
-                  </div>
-                  <div style={{ fontSize: '18px', lineHeight: '10px' }}>
-                    <img src="/HUD/burning_icon.png" alt="" />
-                    <span>&infin;</span>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -199,19 +193,19 @@ class PlayerTab extends Component<Props, State> {
               backgroundPosition: this.state.backgroundPosition,
             }} />
             <div className="dialog-spell-info-container">
-            <div className="dialog-spell-info">
-              <img src={'/inventory/mp_icon.png'} alt="mp" />
-              <span>{this.state.selectedSpell?.cost}</span>
+              <div className="dialog-spell-info">
+                <img src={'/inventory/mp_icon.png'} alt="mp" />
+                <span>{this.state.selectedSpell?.cost}</span>
+              </div>
+              <div className="dialog-spell-info">
+                <img src={'/inventory/cd_icon.png'} alt="cd" />
+                <span>{this.state.selectedSpell?.cooldown}s</span>
+              </div>
+              <div className="dialog-spell-info">
+                <img src={'/inventory/target_icon.png'} alt="target" />
+                <span>{Target[this.state.selectedSpell?.target]}</span>
+              </div>
             </div>
-            <div className="dialog-spell-info">
-              <img src={'/inventory/cd_icon.png'} alt="cd" />
-              <span>{this.state.selectedSpell?.cooldown}s</span>
-            </div>
-            <div className="dialog-spell-info">
-              <img src={'/inventory/target_icon.png'} alt="target" />
-              <span>{Target[this.state.selectedSpell?.target]}</span>
-            </div>
-          </div>
           </div>
         </div>}
       </div>

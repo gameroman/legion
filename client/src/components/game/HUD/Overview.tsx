@@ -2,6 +2,7 @@
 import { h, Component } from 'preact';
 import PlayerInfo from './PlayerInfo';
 import { Player } from './GameHUD';
+import { StatusEffects } from '@legion/shared/interfaces';
 
 interface Member {
   texture: string;
@@ -14,6 +15,7 @@ interface Member {
   isPlayer: boolean;
   cooldown: number;
   totalCooldown: number;
+  statuses: StatusEffects;
 }
 
 interface Props {
@@ -149,7 +151,7 @@ class Overview extends Component<Props, State> {
                   </div>
                   <p>{member.name}</p>
                 </div>
-                <div className="char_stats_bar">
+                <div className="char_stats_bar" style={position === 'left' && {justifyContent: 'flex-start'}}>
                   <div className="char_stats_hp" style={{ width: `${(member.hp / member.maxHP) * 100}%` }}></div>
                 </div>
                 {position === 'right' && <div className="char_stats_bar">
@@ -160,9 +162,9 @@ class Overview extends Component<Props, State> {
                 <div className="char_stats_cooldown" style={{ width: `${(1 - (cooldown / member.totalCooldown)) * 100}%` }}></div>
               </div>}
               <div className={`char_statuses ${position === 'right' && 'char_statuses_right'}`}>
-                <img src="/HUD/poison_icon.png" alt="" />
-                <img src="/HUD/frozen_icon.png" alt="" />
-                <img src="/HUD/burning_icon.png" alt="" />
+                {Object.keys(member?.statuses).map((status: string) => {
+                    return member.statuses[status] !== 0 && <img key={`${memberIndex}-${status}`} src={`/HUD/${status}_icon.png`} alt="" />
+                })}
               </div>
             </div>
           );

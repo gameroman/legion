@@ -3,6 +3,7 @@ import { route } from 'preact-router';
 import Confetti from 'react-confetti'
 import { useWindowSize } from '@react-hook/window-size';
 import CountUp from 'react-countup';
+import { CharacterUpdate } from '@legion/shared/interfaces';
 
 /* eslint-disable react/prefer-stateless-function */
 interface EndgameState {
@@ -16,6 +17,8 @@ interface EndgameProps {
     xpReward: number;
     goldReward: number;
     isWinner: boolean;
+    characters: CharacterUpdate[];
+    members: any[];
 }
 export class Endgame extends Component<EndgameProps, EndgameState> {
     constructor(props) {
@@ -67,6 +70,8 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
 
     render() {
         const [width, height] = useWindowSize()
+        const { members, characters } = this.props;
+        console.log(this.props.members, this.props.characters);
 
         return (
             <div className="endgame">
@@ -85,30 +90,37 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
                     </div>
                 </div>
                 <div className="flex flex_wrap gap_16 justify_center items_center max_w_lg" style={{ padding: '36px 48px' }}>
-                    {Array.from({ length: 10 }, (_, idx) => (
+                    {characters.map((character, idx) => (
                         <div className="endgame_character">
-                            <div className="endgame_character_lvl">
-                                <span className="lvl">Lv</span>
-                                <span>10</span>
-                            </div>
-                            {idx === 6 && <div className="endgame_character_lvlup">
-                                <span>LVL UP!</span>
-                            </div>}
-                            <div className="endgame_character_profile"></div>
-                            <div className="endgame_character_info">
-                                <p className="endgame_character_name">Character 01</p>
-                                <p className="endgame_character_class">Warrior</p>
-                                <div className="flex flex_col gap_4 width_full padding_top_8">
-                                    <div className="flex justify_between width_full">
-                                        <span className="endgame_character_exp">EXP</span>
-                                        <span className="endgame_character_expVal">+92.230</span>
-                                    </div>
-                                    <div className="endgame_character_exp_bg">
-                                        <div></div>
-                                    </div>
+                        <div className="endgame_character_lvl">
+                            <span className="lvl">Lv</span>
+                            <span>{character.level}</span>
+                        </div>
+                        {idx === 1 && <div className="endgame_character_lvlup">
+                            <span>LVL UP!</span>
+                        </div>}
+                        <div className="endgame_character_profile">
+                            <div className="char_portrait" style={{
+                                backgroundImage: `url(/sprites/${members[character.num - 1].texture}.png)`,
+                                marginLeft: 0,
+                            }} />
+                        </div>
+                        <div className="endgame_character_info">
+                            <p className="endgame_character_name">{members[character.num - 1].name}</p>
+                            <p className="endgame_character_class">Warrior</p>
+                            <div className="flex flex_col gap_4 width_full padding_top_8">
+                                <div className="flex justify_between width_full">
+                                    <span className="endgame_character_exp">EXP</span>
+                                    <span className="endgame_character_expVal">
+                                        +<CountUp end={members[character.num - 1].xp} decimals={3} duration={1} />
+                                    </span>
+                                </div>
+                                <div className="endgame_character_exp_bg">
+                                    <div></div>
                                 </div>
                             </div>
                         </div>
+                    </div>
                     ))}
                 </div>
                 {!this.props.isWinner && <div className="endgame_leave" onClick={this.closeGame}>

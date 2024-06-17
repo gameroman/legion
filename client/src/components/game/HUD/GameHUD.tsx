@@ -22,7 +22,7 @@ export interface Player {
   spells: BaseSpell[];
   items: BaseItem[];
 }
-import { OutcomeData, PlayerProps } from "@legion/shared/interfaces";
+import { CharacterUpdate, OutcomeData, PlayerProps } from "@legion/shared/interfaces";
 
 interface Team {
   members: any[];
@@ -41,6 +41,7 @@ interface State {
   isWinner: boolean;
   xpReward: number;
   goldReward: number;
+  characters: CharacterUpdate[];
   isTutorial: boolean;
   isSpectator: boolean;
 }
@@ -61,6 +62,7 @@ class GameHUD extends Component<object, State> {
     isSpectator: false,
     xpReward: 0,
     goldReward: 0,
+    characters: [],
   }
 
   componentDidMount() {
@@ -90,12 +92,13 @@ class GameHUD extends Component<object, State> {
   }
 
   endGame = (data: OutcomeData) => {
-    const {isWinner, xp, gold} = data;
+    const {isWinner, xp, gold, characters} = data;
     this.setState({ 
       gameOver: true,
       isWinner,
       xpReward: xp,
       goldReward: gold,
+      characters: characters,
     });
   }
 
@@ -106,6 +109,8 @@ class GameHUD extends Component<object, State> {
   render() {
     const { playerVisible, player, team1, team2, isTutorial, isSpectator } = this.state;
 
+    const members = team1?.members[0].isPlayer ? team1?.members : team2?.members;
+
     return (
       <div className="height_full flex flex_col justify_between padding_bottom_16">
         <div className="hud-container">
@@ -114,7 +119,13 @@ class GameHUD extends Component<object, State> {
           <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} {...team1} />
         </div>
         {team1 && <SpectatorFooter />}
-        {this.state.gameOver && <Endgame isWinner={this.state.isWinner} xpReward={this.state.xpReward} goldReward={this.state.goldReward} />}
+        {this.state.gameOver && <Endgame 
+          isWinner={this.state.isWinner} 
+          xpReward={this.state.xpReward} 
+          goldReward={this.state.goldReward} 
+          members={members} 
+          characters={this.state.characters} 
+        />}
       </div>
     );
   }
