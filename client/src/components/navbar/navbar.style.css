@@ -56,9 +56,9 @@
 .userInfo span {
   font-size: 14px;
   font-weight: 300;
-  max-width: 112px;
+  max-width: 140px;
   overflow: hidden;
-  text-overflow: ellipsis;
+  /* text-overflow: ellipsis; */
   white-space: nowrap;
   color: #fff;
 }

@@ -1,17 +1,22 @@
 import {Class, Stat} from "./enums";
 import { CharacterStats, Equipment, DBCharacterData } from "./interfaces";
-import {warriorSprites, whiteMageSprites, blackMageSprites, thiefSprites}
+import {warriorSprites, whiteMageSprites, blackMageSprites, thiefSprites, femaleSprites}
   from "./sprites";
-import {uniqueNamesGenerator, adjectives, colors, animals}
-  from "unique-names-generator";
+import { male_names, female_names } from "./names";
 import {selectStatToLevelUp, increaseStat} from "./levelling";
 import { getPrice } from "./economy";
 import { getStarterSpells } from "./Spells";
 import { getStarterConsumables } from "./Items";
+
+enum Gender {
+  M,
+  F
+}
 export class NewCharacter {
   name: string;
+  gender: Gender;
   characterClass: Class;
-  xp: number
+  xp: number;
   level: number;
   portrait: string;
   stats: CharacterStats;
@@ -26,9 +31,6 @@ export class NewCharacter {
 
   constructor(characterClass = Class.RANDOM, level = 1, unicornBonus = false, isAI = false) {
     // console.log(`Creating new character of class ${Class[characterClass]} and level ${level}`);
-    const nameOpts = {dictionaries: [adjectives, colors, animals], length: 2};
-
-    this.name = uniqueNamesGenerator(nameOpts);
     if (characterClass === Class.RANDOM) {
       const candidates = [Class.WARRIOR, Class.WHITE_MAGE, Class.BLACK_MAGE];
       // Get random value from candidates
@@ -40,6 +42,8 @@ export class NewCharacter {
     }
 
     this.portrait = this.getFrame();
+    this.gender = this.determineGender();
+    this.name = this.getName();
     this.xp = 0;
     this.level = level;
     this.carrying_capacity = 3;
@@ -133,6 +137,23 @@ export class NewCharacter {
       return 0;
   }
 
+  determineGender(): Gender {
+    if (femaleSprites.includes(this.portrait)) {
+      return Gender.F;
+    } else {
+      return Gender.M;
+    }
+  }
+
+  getName(): string {
+    if (this.gender == Gender.M) {
+      // Pick a random element of male_names
+      return male_names[Math.floor(Math.random() * male_names.length)];
+    } else {
+      return female_names[Math.floor(Math.random() * female_names.length)];
+    }
+  }
+  
   getFrame(): string {
     switch (this.characterClass) {
       case Class.WARRIOR:
