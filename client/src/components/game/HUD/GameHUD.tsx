@@ -4,39 +4,16 @@ import PlayerTab from './PlayerTab';
 import Overview from './Overview';
 import { Endgame } from './Endgame';
 import { EventEmitter } from 'eventemitter3';
+import { CharacterUpdate, OutcomeData, PlayerProps, TeamOverview } from "@legion/shared/interfaces";
 import SpectatorFooter from './SpectatorFooter';
-import { BaseSpell } from '@legion/shared/BaseSpell';
-import { BaseItem } from '@legion/shared/BaseItem';
-
-export interface Player {
-  hp: number;
-  maxHp: number;
-  mp: number;
-  maxMp: number;
-  cooldown: number;
-  maxCooldown: number;
-  casting: boolean;
-  portrait: string;
-  number: number;
-  name: string;
-  spells: BaseSpell[];
-  items: BaseItem[];
-}
-import { CharacterUpdate, OutcomeData, PlayerProps } from "@legion/shared/interfaces";
-
-interface Team {
-  members: any[];
-  player: Player;
-  score: number;
-}
 
 interface State {
   playerVisible: boolean;
   player: PlayerProps;
   clickedItem: number;
   clickedSpell: number;
-  team1: Team;
-  team2: Team;
+  team1: TeamOverview;
+  team2: TeamOverview;
   gameOver: boolean;
   isWinner: boolean;
   xpReward: number;
@@ -86,7 +63,7 @@ class GameHUD extends Component<object, State> {
     this.setState({ playerVisible: false, player: null });
   }
 
-  updateOverview = (team1: Team, team2: Team, general: any) => {
+  updateOverview = (team1: TeamOverview, team2: TeamOverview, general: any) => {
     this.setState({ team1, team2 });
     this.setState({ isTutorial: general.isTutorial, isSpectator: general.isSpectator })
   }
@@ -111,6 +88,7 @@ class GameHUD extends Component<object, State> {
 
     const members = team1?.members[0].isPlayer ? team1?.members : team2?.members;
 
+    console.log(team1);
     return (
       <div className="height_full flex flex_col justify_between padding_bottom_16">
         <div className="hud-container">

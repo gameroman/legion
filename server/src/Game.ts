@@ -7,9 +7,8 @@ import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import {apiFetch} from './API';
 import { Terrain, PlayMode, Target, StatusEffect, ChestColor } from '@legion/shared/enums';
 import { OutcomeData, TerrainUpdate, APIPlayerData, GameOutcomeReward, GameData } from '@legion/shared/interfaces';
-import { XP_PER_LEVEL } from '@legion/shared/levelling';
-import { AVERAGE_REWARD_PER_GAME } from '@legion/shared/economy';
 import { getChestContent } from '@legion/shared/chests';
+import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL } from '@legion/shared/config';
 
 
 export abstract class Game
@@ -191,7 +190,11 @@ export abstract class Game
                     playerAvatar: 'avatar',
                 },
                 team: this.teams.get(otherTeamId)?.getMembers().map(player => player.getPlacementData())
-            }
+            },
+            terrain: Array.from(this.terrainMap).map(([key, value]) => {
+                const [x, y] = key.split(',').map(Number);
+                return {x, y, terrain: value};
+            }),
         }
         return data;
     }
@@ -322,7 +325,6 @@ export abstract class Game
             console.log(`Invalid move from ${player.x},${player.y} to ${tile.x},${tile.y}!`);
             return;
         }
-        console.log(`Remaining cooldown: ${player.cooldown}`);
         if (!player.canAct() || !player.canMoveTo(tile.x, tile.y)) {
             console.log(`Player ${num} cannot move to ${tile.x},${tile.y}!`);
             return;
@@ -896,7 +898,7 @@ export abstract class Game
       }
 
     computeTeamGold(grade: number, mode: PlayMode) {
-        let gold = AVERAGE_REWARD_PER_GAME * (grade + 0.3);
+        let gold = AVERAGE_GOLD_REWARD_PER_GAME * (grade + 0.3);
         if (mode == PlayMode.PRACTICE) gold *= 0.1; // TODO: make 0
         if (mode == PlayMode.RANKED) gold *= 1.5;
         // Add +- 5% random factor
@@ -945,7 +947,6 @@ export abstract class Game
     }
 
     async saveInventoryToDb(token: string, characterId: string, inventory: number[]) {
-        console.log('Saving inventory to DB');
         try {
             await apiFetch(
                 'inventorySave',

@@ -2,7 +2,6 @@ import { h, Component } from 'preact';
 import ActionItem from './Action';
 import { InventoryType, Target } from '@legion/shared/enums';
 import TabBar from './TabBar';
-import { Player } from './GameHUD';
 import { mapFrameToCoordinates } from '../../utils';
 import { BaseSpell } from '@legion/shared/BaseSpell';
 import { PlayerProps } from '@legion/shared/interfaces';
@@ -80,7 +79,7 @@ class PlayerTab extends Component<Props, State> {
     }, 1000);
   }
 
-  getCooldownRatio(player: Player): number {
+  getCooldownRatio(player: PlayerProps): number {
     return (player.maxCooldown - player.cooldown) / player.maxCooldown;
   }
 

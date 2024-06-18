@@ -32,11 +32,11 @@
 }
 
 .shop-character-card-title-name span {
-    max-width: 82px;
+    max-width: 100px;
     font-size: 14px;
     text-transform: capitalize;
     overflow: hidden;
-    text-overflow: ellipsis;
+    /* text-overflow: ellipsis; */
     white-space: nowrap;
 }
 

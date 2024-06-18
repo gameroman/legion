@@ -11,6 +11,8 @@ import {APIPlayerData, DailyLootAllData, DBPlayerData} from "@legion/shared/inte
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {getChestContent, ChestReward} from "@legion/shared/chests";
 import {processChestRewards} from "./characterAPI";
+import {STARTING_CONSUMABLES, STARTING_GOLD, BASE_INVENTORY_SIZE} from "@legion/shared/config";
+
 
 const NB_START_CHARACTERS = 3;
 
@@ -20,10 +22,18 @@ const chestsDelays = {
   [ChestColor.GOLD]: 24*60*60,
 };
 
+function selectRandomAvatar() {
+  // Return a random value betweem 1 and 31 included
+  return Math.floor(Math.random() * 31) + 1;
+}
+
 function generateName() {
   // limit names to length of 16 characters
-  const dicts = {dictionaries: [adjectives, colors, animals]};
-  const base = uniqueNamesGenerator(dicts);
+  const options = {
+    dictionaries: [adjectives, colors, animals],
+    length: 2,
+  };
+  const base = uniqueNamesGenerator(options);
   return base.length > 16 ? base.slice(0, 16) : base;
 }
 
@@ -36,12 +46,13 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
   // Define the character data structure
   const playerData = {
     name: generateName(),
-    gold: 120,
-    carrying_capacity: 40,
+    avatar: selectRandomAvatar(),
+    gold: STARTING_GOLD,
+    carrying_capacity: BASE_INVENTORY_SIZE,
     inventory: {
-      consumables: [0, 0, 0, 1, 1, 2, 3, 3],
-      equipment: [0, 1, 2],
-      spells: [0, 1, 2],
+      consumables: STARTING_CONSUMABLES,
+      equipment: [],
+      spells: [],
     },
     characters: [],
     elo: 100,
@@ -137,7 +148,7 @@ export const getPlayerData = onRequest((request, response) => {
           lvl: playerData.lvl,
           name: playerData.name,
           teamName: "teamName",
-          avatar: "avatar",
+          avatar: playerData.avatar,
           league: playerData.league,
           rank: 1,
           dailyloot: playerData.dailyloot,

@@ -34,13 +34,15 @@
   display: flex;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.4);
+  margin-left: 20px;
 }
 
 .avatar {
   border-left: 2px solid #cd853f;
   border-right: 2px solid #cd853f;
-  width: 64px;
+  width: 48px;
   background-color: rgba(0, 0, 0, 0.5);
+  background-size: cover;
 }
 
 .userInfo {
@@ -56,9 +58,9 @@
 .userInfo span {
   font-size: 14px;
   font-weight: 300;
-  max-width: 112px;
+  max-width: 140px;
   overflow: hidden;
-  text-overflow: ellipsis;
+  /* text-overflow: ellipsis; */
   white-space: nowrap;
   color: #fff;
 }

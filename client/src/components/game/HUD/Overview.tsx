@@ -1,29 +1,14 @@
 // Overview.tsx
 import { h, Component } from 'preact';
+import { PlayerProps, TeamMember } from "@legion/shared/interfaces";
 import PlayerInfo from './PlayerInfo';
-import { Player } from './GameHUD';
-import { StatusEffects } from '@legion/shared/interfaces';
-
-interface Member {
-  texture: string;
-  name: string;
-  hp: number;
-  maxHP: number;
-  mp: number;
-  maxMP: number;
-  isAlive: boolean;
-  isPlayer: boolean;
-  cooldown: number;
-  totalCooldown: number;
-  statuses: StatusEffects;
-}
 
 interface Props {
-  members: Member[];
-  selectedPlayer: Player;
+  members: TeamMember[];
   score: number;
   position: string;
   isSpectator: boolean;
+  selectedPlayer: PlayerProps;
 }
 
 interface State {
@@ -89,7 +74,7 @@ class Overview extends Component<Props, State> {
     }));
   }
 
-  render({ members, score, position, selectedPlayer, isSpectator }: Props, { cooldowns, blinking }: State) {
+  render({ members, position, selectedPlayer, isSpectator }: Props, { cooldowns, blinking }: State) {
     if (!members || !blinking.length) {
       return <div />;
     }

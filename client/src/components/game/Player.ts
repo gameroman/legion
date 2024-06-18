@@ -5,7 +5,7 @@ import { BaseItem } from "@legion/shared/BaseItem";
 import { BaseSpell } from "@legion/shared/BaseSpell";
 import { getConsumableById } from '@legion/shared/Items';
 import { getSpellById } from '@legion/shared/Spells';
-import { Target, StatusEffect } from "@legion/shared/enums";
+import { Target, StatusEffect, Class } from "@legion/shared/enums";
 import { Arena } from "./Arena";
 import { HUD } from "./HUD";
 import { PlayerProps, StatusEffects } from "@legion/shared/interfaces";
@@ -54,11 +54,14 @@ export class Player extends Phaser.GameObjects.Container {
     team: Team;
     animationLock = false;
     statuses: StatusEffects;
+    class: Class;
+    xp: number;
+    level: number;
 
     constructor(
         scene: Phaser.Scene, arenaScene: Arena, hudScene: HUD, team: Team, name: string, gridX: number, gridY: number, x: number, y: number,
-        num: number, texture: string, isPlayer: boolean,
-        hp: number, mp: number
+        num: number, texture: string, isPlayer: boolean, characterClass: Class,
+        hp: number, maxHP: number, mp: number, maxMP: number, level: number, xp: number,
         ) {
         super(scene, x, y);
         this.scene = scene;
@@ -70,9 +73,12 @@ export class Player extends Phaser.GameObjects.Container {
         this.name = name;
         this.isPlayer = isPlayer;
         this.distance = 2;
-        this.maxHP = hp;
+        this.maxHP = maxHP;
         this.hp = hp;
         this.num = num;
+        this.class = characterClass;
+        this.xp = xp;
+        this.level = level;
 
         this.statuses = {
             [StatusEffect.FREEZE]: 0,
@@ -110,17 +116,18 @@ export class Player extends Phaser.GameObjects.Container {
 
             this.MPBar = new HealthBar(scene, 0, -40, 0x0099ff);
             this.add(this.MPBar);
-            this.maxMP = mp;
+            this.maxMP = maxMP;
             this.mp = mp;
 
             this.moveTo(this.numKey, 3);
             this.moveTo(this.sprite, 2);
 
+            this.setMP(mp);
         } else {
             this.baseSquare.lineStyle(4, 0xff0000); // red color
         }
 
-        if (this.x < this.arena.gridWidth/2) this.sprite.flipX = true;
+        if (gridX < this.arena.gridWidth/2) this.sprite.flipX = true;
 
         this.healthBar = new HealthBar(scene, 0, -50, 0x00ff08);
         this.add(this.healthBar);
@@ -148,10 +155,11 @@ export class Player extends Phaser.GameObjects.Container {
         this.sprite.on('pointerover', this.onPointerOver, this);
         this.sprite.on('pointerout', this.onPointerOut, this);
 
-        // Delay by X seconds
-        scene.time.delayedCall(750, this.makeEntrance, [], this);
+        this.setHP(hp);
     }
 
+    // Returns the fields needed to display the top screen Player box in-game.
+    // For the fields needed for the team overviews on each side, see Team.ts:getOverview()
     getProps(): PlayerProps {
         return {
             name: this.name,

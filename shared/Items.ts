@@ -153,3 +153,7 @@ export function getRandomConsumableByRarity(rarity: number): BaseItem {
     const filtered = items.filter(item => item.rarity === rarity);
     return filtered[Math.floor(Math.random() * filtered.length)];
 }
+
+export function getStarterConsumables(effort: number):number[] {
+    return items.filter(item => item.effort <= effort).map(item => item.id);
+}

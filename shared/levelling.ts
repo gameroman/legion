@@ -1,4 +1,5 @@
 import { Class, Stat } from "./enums";
+import { XP_PER_LEVEL } from "./config";
 
 type StatWeights = {
     [key in Stat]?: number;
@@ -39,7 +40,6 @@ export function increaseStat(stat: Stat, currentValue: number, level: number, ch
     return currentValue + increment;
 }
 
-export const XP_PER_LEVEL = 50;
 
 // Returns the XP needed to reach the next level, `level` being the current level
 export function getXPThreshold(level: number) {
