@@ -109,3 +109,11 @@ export enum rankNoImage {
     'silver_rankno',
     'bronze_rankno'
 }
+
+export enum League {
+    BRONZE,
+    SILVER,
+    GOLD,
+    ZENITH,
+    APEX,
+}

@@ -6,7 +6,7 @@ import {inventoryData, purchaseItem, inventoryTransaction, inventorySave, getRew
   from "./inventoryAPI";
 import {rosterData, characterData, rewardsUpdate,
   generateOnSaleCharacters, listOnSaleCharacters,
-  deleteOnSaleCharacters, purchaseCharacter, spendSP} from "./characterAPI";
+  deleteOnSaleCharacters, purchaseCharacter, spendSP, updateRanksOnEloChange} from "./characterAPI";
 import {createPlayer, getPlayerData, queuingData,
   saveGoldReward, claimChest} from "./playerAPI";
 import {createGame, gameData} from "./gameAPI";
@@ -17,7 +17,7 @@ export {
   generateOnSaleCharacters, listOnSaleCharacters, deleteOnSaleCharacters,
   purchaseCharacter, leaguesUpdate, getPlayerData, queuingData, createGame,
   gameData, inventorySave, inventoryTransaction, saveGoldReward, spendSP,
-  getReward, claimChest,
+  getReward, claimChest, updateRanksOnEloChange,
 };
 
 export const helloWorld = onRequest((request, response) => {

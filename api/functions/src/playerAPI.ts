@@ -6,7 +6,7 @@ import admin, {corsMiddleware, getUID} from "./APIsetup";
 import {uniqueNamesGenerator, adjectives, colors, animals}
   from "unique-names-generator";
 
-import {Class, ChestColor} from "@legion/shared/enums";
+import {Class, ChestColor, League} from "@legion/shared/enums";
 import {APIPlayerData, DailyLootAllData, DBPlayerData} from "@legion/shared/interfaces";
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {getChestContent, ChestReward} from "@legion/shared/chests";
@@ -56,7 +56,7 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
     },
     characters: [],
     elo: 100,
-    league: 0,
+    league: League.BRONZE,
     wins: 0,
     losses: 0,
     xp: 0,
@@ -150,7 +150,7 @@ export const getPlayerData = onRequest((request, response) => {
           teamName: "teamName",
           avatar: playerData.avatar,
           league: playerData.league,
-          rank: 1,
+          rank: playerData.rank,
           dailyloot: playerData.dailyloot,
         } as APIPlayerData);
       } else {

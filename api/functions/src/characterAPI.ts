@@ -1,3 +1,4 @@
+import * as functions from "firebase-functions";
 import {Transaction} from "firebase-admin/firestore";
 
 import {onRequest} from "firebase-functions/v2/https";
@@ -5,7 +6,7 @@ import * as logger from "firebase-functions/logger";
 import admin, {corsMiddleware, getUID} from "./APIsetup";
 import {getSPIncrement} from "@legion/shared/levelling";
 import {NewCharacter} from "@legion/shared/NewCharacter";
-import {Class, statFields} from "@legion/shared/enums";
+import {Class, statFields, League} from "@legion/shared/enums";
 import {MAX_CHARACTERS} from "@legion/shared/config";
 import {OutcomeData, DailyLootAllData, CharacterUpdate, APICharacterData} from "@legion/shared/interfaces";
 import {ChestReward} from "@legion/shared/chests";
@@ -461,3 +462,38 @@ export const spendSP = onRequest((request, response) => {
     }
   });
 });
+
+export const updateRanksOnEloChange = functions.firestore
+    .document("players/{playerId}")
+    .onUpdate((change, context) => {
+        console.log("Updating ranks on ELO change");
+        const newValue = change.after.data();
+        const previousValue = change.before.data();
+
+        // Check if ELO has changed
+        if (newValue.elo !== previousValue.elo) {
+            const league = newValue.league;
+            return updateRanksForLeague(league);
+        }
+        return null;
+});
+
+async function updateRanksForLeague(league: League) {
+    console.log(`Updating ranks for league ${league}`);
+    const db = admin.firestore();
+    const playersSnapshot = await db.collection("players")
+        .where("league", "==", league)
+        .orderBy("elo", "desc")
+        .get();
+
+    const batch = db.batch();
+    let rank = 1;
+
+    playersSnapshot.forEach((doc) => {
+        const playerRef = db.collection("players").doc(doc.id);
+        batch.update(playerRef, {rank: rank});
+        rank++;
+    });
+
+    return batch.commit();
+}

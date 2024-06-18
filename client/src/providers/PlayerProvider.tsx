@@ -3,7 +3,7 @@ import { PlayerContextState, PlayerContextData, PlayerContext } from '../context
 import { apiFetch } from '../services/apiService';
 import { successToast, errorToast } from '../components/utils';
 import { APIPlayerData } from '@legion/shared/interfaces';
-
+import {League} from "@legion/shared/enums";
 
 class PlayerProvider extends Component<{}, PlayerContextState> {
     constructor(props: {}) {
@@ -17,6 +17,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           elo: 0,
           ranking: 0,
           dailyloot: null,
+          league: League.BRONZE,
         }
       };
 
@@ -41,7 +42,8 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
                   gold: data.gold,
                   elo: data.elo,
                   ranking: data.rank,
-                  dailyloot: data.dailyloot
+                  dailyloot: data.dailyloot,
+                  league: data.league,
               }
           });
       } catch (error) {
