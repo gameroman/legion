@@ -478,6 +478,16 @@ export const updateRanksOnEloChange = functions.firestore
         return null;
 });
 
+export const updateRanksOnPlayerCreation = functions.firestore
+    .document("players/{playerId}")
+    .onCreate((snap, context) => {
+        console.log("New player created, updating ranks");
+        const newValue = snap.data();
+        const league = newValue.league;
+        return updateRanksForLeague(league);
+});
+
+
 async function updateRanksForLeague(league: League) {
     console.log(`Updating ranks for league ${league}`);
     const db = admin.firestore();

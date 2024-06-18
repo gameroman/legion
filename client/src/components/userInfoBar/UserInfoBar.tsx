@@ -30,7 +30,7 @@ class UserInfoBar extends Component<BarProps> {
     return (
       <div className="userInfoBar">
         <div className="barLogo">
-          {this.props.elo ? <img src={`icons/${leagueIcon}_rank.png`} alt="rank_icon" title={`${leagueName} league`} /> : <img src={GoldIcon} alt="gold_icon" />}
+          {this.props.elo ? <img src={`icons/${leagueIcon}_rank.png`} alt="rank_icon" title={`${leagueName} league`} /> : <img src={GoldIcon} alt="gold_icon" title="Gold" />}
         </div>
         <div className="userInfoLabel">
           <span className="labelSpan">{this.props.label}</span>
