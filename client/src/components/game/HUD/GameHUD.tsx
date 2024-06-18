@@ -85,10 +85,8 @@ class GameHUD extends Component<object, State> {
 
   render() {
     const { playerVisible, player, team1, team2, isTutorial, isSpectator } = this.state;
-
     const members = team1?.members[0].isPlayer ? team1?.members : team2?.members;
 
-    console.log(team1);
     return (
       <div className="height_full flex flex_col justify_between padding_bottom_16">
         <div className="hud-container">
