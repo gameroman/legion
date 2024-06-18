@@ -11,6 +11,8 @@ import {APIPlayerData, DailyLootAllData, DBPlayerData} from "@legion/shared/inte
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {getChestContent, ChestReward} from "@legion/shared/chests";
 import {processChestRewards} from "./characterAPI";
+import {STARTING_CONSUMABLES, STARTING_GOLD, BASE_INVENTORY_SIZE} from "@legion/shared/config";
+
 
 const NB_START_CHARACTERS = 3;
 
@@ -45,12 +47,12 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
   const playerData = {
     name: generateName(),
     avatar: selectRandomAvatar(),
-    gold: 120,
-    carrying_capacity: 40,
+    gold: STARTING_GOLD,
+    carrying_capacity: BASE_INVENTORY_SIZE,
     inventory: {
-      consumables: [0, 0, 0, 1, 1, 2, 3, 3],
-      equipment: [0, 1, 2],
-      spells: [0, 1, 2],
+      consumables: STARTING_CONSUMABLES,
+      equipment: [],
+      spells: [],
     },
     characters: [],
     elo: 100,

@@ -2,7 +2,7 @@ import { Rarity, ChestColor } from "./enums";
 import { items } from "./Items";
 import { spells } from "./Spells";
 import { equipments } from "./Equipments";
-import { AVERAGE_REWARD_PER_GAME } from "./economy";
+import { AVERAGE_GOLD_REWARD_PER_GAME } from "./config";
 
 enum RewardType {
     CONSUMABLES = 'consumable',
@@ -145,7 +145,7 @@ export function getChestContent(type: ChestColor): ChestReward[] {
     }
 
     return Array.from({ length: numberOfItems }, () => {
-        const item = getRandomItem(rarityDistribution, rewardTypeDistribution, 0.1, AVERAGE_REWARD_PER_GAME * goldCoefficient, allowGold);
+        const item = getRandomItem(rarityDistribution, rewardTypeDistribution, 0.1, AVERAGE_GOLD_REWARD_PER_GAME * goldCoefficient, allowGold);
         if (item.type == RewardType.GOLD) {
             allowGold = false;
         }
