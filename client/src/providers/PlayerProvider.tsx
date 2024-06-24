@@ -15,7 +15,8 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           lvl: 0,
           gold: 0,
           elo: 0,
-          ranking: 0,
+          rank: 0,
+          allTimeRank: 0,
           dailyloot: null,
           league: League.BRONZE,
         }
@@ -41,7 +42,8 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
                   lvl: data.lvl,
                   gold: data.gold,
                   elo: data.elo,
-                  ranking: data.rank,
+                  rank: data.rank,
+                  allTimeRank: data.allTimeRank,
                   dailyloot: data.dailyloot,
                   league: data.league,
               }
