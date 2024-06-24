@@ -7,7 +7,7 @@ import {uniqueNamesGenerator, adjectives, colors, animals}
   from "unique-names-generator";
 
 import {Class, ChestColor, League} from "@legion/shared/enums";
-import {APIPlayerData, DailyLootAllData, DBPlayerData} from "@legion/shared/interfaces";
+import {APIPlayerData, DailyLootAllDBData, DailyLootAllAPIData, DBPlayerData} from "@legion/shared/interfaces";
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {getChestContent, ChestReward} from "@legion/shared/chests";
 import {processChestRewards} from "./characterAPI";
@@ -74,7 +74,7 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
         time: now + chestsDelays.gold,
         hasKey: false,
       },
-    } as DailyLootAllData,
+    } as DailyLootAllDBData,
   } as DBPlayerData;
 
   // Start a batch to ensure atomicity
@@ -110,16 +110,22 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
     });
 });
 
-const transformDailyLoot = (dailyloot: DailyLootAllData) => {
+const transformDailyLoot = (dailyloot: DailyLootAllDBData): DailyLootAllAPIData => {
   const now = Date.now() / 1000;
+  const transformedChests: DailyLootAllAPIData = {
+    [ChestColor.BRONZE]: {hasKey: false, countdown: 0},
+    [ChestColor.SILVER]: {hasKey: false, countdown: 0},
+    [ChestColor.GOLD]: {hasKey: false, countdown: 0},
+  };
   for (const color of Object.values(ChestColor)) {
     const chest = dailyloot[color];
-    const timeLeft = chest.time! - now;
-    chest.countdown = timeLeft > 0 ? timeLeft : 0;
-    delete chest.time;
-    dailyloot[color] = chest;
+    const timeLeft = chest.time - now;
+    transformedChests[color] = {
+      hasKey: chest.hasKey,
+      countdown: timeLeft > 0 ? timeLeft : 0,
+    };
   }
-  return dailyloot;
+  return transformedChests;
 };
 
 
@@ -254,42 +260,46 @@ export const claimChest = onRequest((request, response) => {
           throw new Error("playerData is null");
         }
 
-        const chest = playerData.dailyloot[chestType as keyof DailyLootAllData];
+        const chest = playerData.dailyloot[chestType as keyof DailyLootAllDBData];
         if (!chest) {
           throw new Error("Invalid chest type");
         }
 
         const now = Date.now() / 1000;
-        if (chest.hasKey && chest.time <= now) {
-          playerData.dailyloot[chestType as keyof DailyLootAllData] = {
-            time: now + chestsDelays[chestType as keyof DailyLootAllData],
-            hasKey: false,
-          };
-
-          transaction.update(playerRef, {
-            dailyloot: playerData.dailyloot,
-          });
-
-          const content: ChestReward[] = getChestContent(chestType as ChestColor);
-          logger.info(`Chest content: ${JSON.stringify(content)}`);
-
-          const inventory = playerDoc.data()?.inventory || {};
-          const consumables = inventory.consumables || [];
-          const spells = inventory.spells || [];
-          const equipment = inventory.equipment || [];
-
-          await processChestRewards(transaction, playerRef, content, consumables, spells, equipment);
-
-          const dailyLootResponse = transformDailyLoot(playerData.dailyloot);
-
-          response.send({
-            content,
-            dailyloot: dailyLootResponse,
-          });
-        } else {
-          response.status(400).send("Chest not ready");
+        if (!chest.hasKey) {
+          response.status(400).send("Key for chest not owned!");
           return;
         }
+        if (chest.time > now) {
+          response.status(400).send("Chest is still locked!");
+          return;
+        }
+
+        playerData.dailyloot[chestType as keyof DailyLootAllDBData] = {
+          time: now + chestsDelays[chestType as keyof DailyLootAllDBData],
+          hasKey: false,
+        };
+
+        transaction.update(playerRef, {
+          dailyloot: playerData.dailyloot,
+        });
+
+        const content: ChestReward[] = getChestContent(chestType as ChestColor);
+        logger.info(`Chest content: ${JSON.stringify(content)}`);
+
+        const inventory = playerDoc.data()?.inventory || {};
+        const consumables = inventory.consumables || [];
+        const spells = inventory.spells || [];
+        const equipment = inventory.equipment || [];
+
+        await processChestRewards(transaction, playerRef, content, consumables, spells, equipment);
+
+        const dailyLootResponse = transformDailyLoot(playerData.dailyloot);
+
+        response.send({
+          content,
+          dailyloot: dailyLootResponse,
+        });
       });
     } catch (error) {
       console.error("claimChest error:", error);

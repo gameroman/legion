@@ -1,5 +1,5 @@
 import { createContext } from 'preact';
-import { DailyLootAllData } from '@legion/shared/interfaces';
+import { DailyLootAllAPIData } from '@legion/shared/interfaces';
 import {League} from "@legion/shared/enums";
 
 export interface PlayerContextData {
@@ -10,7 +10,7 @@ export interface PlayerContextData {
   elo: number;
   rank: number;
   allTimeRank: number;
-  dailyloot: DailyLootAllData;
+  dailyloot: DailyLootAllAPIData;
   league: League;
 }
 

@@ -81,7 +81,6 @@ class GameHUD extends Component<object, State> {
 
   render() {
     const { playerVisible, player, team1, team2, isTutorial, isSpectator } = this.state;
-    console.log(team1);
     return (
       <div>
         <div className="hud-container">

@@ -473,10 +473,8 @@ export class ServerPlayer {
     }
 
     gainXP(amount: number) {
-        // console.log(`Player ${this.num} gained ${amount} XP`)
         this.xp += amount;
         this.earnedXP += amount;
-        // console.log(`${this.xp} / ${getXPThreshold(this.level)}`)
         while (this.xp >= getXPThreshold(this.level)) {
             this.levelUp();
         }

@@ -29,6 +29,7 @@ export abstract class Game
     firstBlood: boolean = false;
     gameOver: boolean = false;
     audienceTimer: NodeJS.Timeout | null = null;
+    checkEndTimer: NodeJS.Timeout | null = null;
 
     gridWidth: number = 20;
     gridHeight: number = 10;
@@ -41,7 +42,7 @@ export abstract class Game
 
         this.teams.set(1, new Team(1, this));
         this.teams.set(2, new Team(2, this));
-        console.log(`Created game ${this.id}`);
+        console.log(`[Game] Created game ${this.id}`);
     }
 
     addSocket(socket: Socket) {
@@ -54,7 +55,7 @@ export abstract class Game
             if (this.sockets.length === 2) return;
             this.addSocket(socket);
             const index = this.sockets.indexOf(socket);
-            console.log(`Adding player ${index + 1} to game ${this.id}`);
+            console.log(`[Game:addPlayer] Adding player ${index + 1} to game ${this.id}`);
 
             const team = this.teams.get(index + 1);
             this.socketMap.set(socket, team);
@@ -76,6 +77,7 @@ export abstract class Game
     }
 
     reconnectPlayer(socket: Socket) {
+        console.log(`Reconnecting player to game ${this.id} ...`)
         this.addSocket(socket);
         // Find which team has socket set to null
         const team = this.teams.get(1).socket ? this.teams.get(2) : this.teams.get(1);
@@ -87,7 +89,7 @@ export abstract class Game
     abstract populateTeams(): void;
 
     async start() {
-        console.log(`Starting game ${this.id}`);
+        console.log(`[Game:start]`);
         try {
             await this.populateTeams();
             this.populateGrid();
@@ -144,18 +146,30 @@ export abstract class Game
     }
 
     startGame() {
+        console.log(`[Game:startGame]`)
         this.startTime = Date.now();
         this.gameStarted = true;
-        this.sockets.forEach(this.sendGameStatus.bind(this));
+        this.sockets.forEach(socket => this.sendGameStatus(socket));
+        
         this.audienceTimer = setInterval(() => {
             this.teams.forEach(team => {
                 team.incrementScore(10);
                 team!.sendScore();
             });
         }, 30 * 1000);
+
+        this.checkEndTimer = setInterval(() => {
+            this.checkEndGame();
+        }, 1000);
     }
 
     sendGameStatus(socket: Socket, reconnect: boolean = false) {
+        if (reconnect) {
+            console.log(`[Game:sendGameStatus] Reconnect`);
+        }
+        if (reconnect && !this.gameStarted) {
+            console.error(`[Game:sendGameStatus] Reconnect flag set to true for game not started`);
+        }
         const teamId = this.socketMap.get(socket)?.id!;
         socket.emit('gameStatus', this.getGameData(teamId, reconnect));
     }
@@ -250,7 +264,6 @@ export abstract class Game
     }
 
     processAction(action: string, data: any, socket: Socket | null = null) {
-        // console.log(`Processing action ${action} with data ${JSON.stringify(data)}`);
         if (this.gameOver || !this.gameStarted) return;
 
         let team;
@@ -263,29 +276,23 @@ export abstract class Game
         team!.incrementActions();
         team!.snapshotScore();
 
-        let delay;
         switch (action) {
             case 'move':
-                delay = this.processMove(data, team!);
+                this.processMove(data, team!);
                 break;
             case 'attack':
-                delay = this.processAttack(data, team!);
+                this.processAttack(data, team!);
                 break;
             case 'obstacleattack':
-                delay = this.processObstacleAttack(data, team!);
+                this.processObstacleAttack(data, team!);
                 break;
             case 'useitem':
-                delay = this.processUseItem(data, team!);
+                this.processUseItem(data, team!);
                 break;
             case 'spell':
-                delay = this.processMagic(data, team!);
+                this.processMagic(data, team!);
                 break;
         }
-
-        setTimeout(() => {
-            team!.sendScore();
-            this.checkEndGame();
-        }, delay);
     }
 
     checkEndGame() {
@@ -298,10 +305,11 @@ export abstract class Game
     }
 
     endGame(winnerTeamID: number) {
-        console.log(`Team ${winnerTeamID} wins!`);
         this.duration = Date.now() - this.startTime;
         this.gameOver = true;
 
+        clearTimeout(this.audienceTimer!);
+        clearTimeout(this.checkEndTimer!);
         this.teams.forEach(team => {
             team.clearAllTimers();
         }, this);
@@ -315,7 +323,7 @@ export abstract class Game
             team.distributeXp(outcomes.xp);
             outcomes.characters = team.getCharactersDBUpdates();
             this.writeOutcomesToDb(team, outcomes);
-            console.log(`Team ${team!.id} outcomes: ${JSON.stringify(outcomes)}`);
+            console.log(`[Game:endGame] Team ${team!.id} outcomes: ${JSON.stringify(outcomes)}`);
             socket.emit('gameEnd', outcomes);
 
             results[team.teamData.playerUID] = {

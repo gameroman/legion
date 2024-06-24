@@ -58,7 +58,7 @@ io.on('connection', async (socket: any) => {
         socket.disconnect();
         return;
       }
-      console.log(`User ${shortToken(socket.uid)} connecting to game ${gameId}`);
+      console.log(`[server:connection] User ${shortToken(socket.uid)} connecting to game ${gameId}`);
 
       const gameData = await apiFetch(
         `gameData?id=${gameId}`,
@@ -74,6 +74,7 @@ io.on('connection', async (socket: any) => {
 
       let game: Game;
       if (!gamesMap.has(gameId)) {
+        console.log(`[server:connection] Creating game ${gameId}`);
         const gameType = gameData.mode === PlayMode.PRACTICE ? AIGame : PvPGame;
         game = new gameType(gameId, gameData.mode, gameData.league, io);
         gamesMap.set(gameId, game);
@@ -81,6 +82,7 @@ io.on('connection', async (socket: any) => {
       game = gamesMap.get(gameId)!;
 
       if (game.gameStarted) { // Reconnecting player
+        console.log(`Reconnecting player ${shortToken(socket.uid)} to game ${gameId}`);
         game.reconnectPlayer(socket);
       } else {
         const playerData = await apiFetch(

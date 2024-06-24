@@ -90,6 +90,7 @@ export interface CharacterUpdate {
     num: number;
     points: number;
     xp: number;
+    earnedXP: number;
     level: number;
 }
 export interface OutcomeData {
@@ -150,16 +151,26 @@ export interface StatusEffectData {
     chance: number;
 }
 
-export interface DailyLootAllData {
-    [ChestColor.BRONZE]: DailyLootData;
-    [ChestColor.SILVER]: DailyLootData;
-    [ChestColor.GOLD]: DailyLootData;
+export interface DailyLootAllAPIData {
+    [ChestColor.BRONZE]: DailyLootAPIData;
+    [ChestColor.SILVER]: DailyLootAPIData;
+    [ChestColor.GOLD]: DailyLootAPIData;
 }
 
-export interface DailyLootData {
+export interface DailyLootAPIData {
     hasKey: boolean;
-    countdown?: number;
-    time?: number;
+    countdown: number;
+}
+
+export interface DailyLootAllDBData {
+    [ChestColor.BRONZE]: DailyLootDBData;
+    [ChestColor.SILVER]: DailyLootDBData;
+    [ChestColor.GOLD]: DailyLootDBData;
+}
+
+export interface DailyLootDBData {
+    hasKey: boolean;
+    time: number;
 }
 
 export interface APIPlayerData {
@@ -173,7 +184,7 @@ export interface APIPlayerData {
     avatar: string;
     rank: number;
     allTimeRank: number;
-    dailyloot: DailyLootAllData;
+    dailyloot: DailyLootAllAPIData;
 }
 
 export interface DBPlayerData {
@@ -185,7 +196,7 @@ export interface DBPlayerData {
     elo: number;
     league: number;
     lvl: number;
-    dailyloot: DailyLootAllData;
+    dailyloot: DailyLootAllDBData;
     wins: number;
     losses: number;
     xp: number;
@@ -200,7 +211,7 @@ export interface TeamData {
     avatar: string;
     league: number;
     rank: number;
-    dailyloot: DailyLootAllData;
+    dailyloot: DailyLootAllAPIData;
 }
 
 export interface GameOutcomeReward {

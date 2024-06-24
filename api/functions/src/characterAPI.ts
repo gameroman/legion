@@ -7,7 +7,7 @@ import {getSPIncrement} from "@legion/shared/levelling";
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {Class, statFields} from "@legion/shared/enums";
 import {MAX_CHARACTERS} from "@legion/shared/config";
-import {OutcomeData, DailyLootAllData, CharacterUpdate, APICharacterData} from "@legion/shared/interfaces";
+import {OutcomeData, DailyLootAllDBData, CharacterUpdate, APICharacterData} from "@legion/shared/interfaces";
 import {ChestReward} from "@legion/shared/chests";
 
 export const rosterData = onRequest((request, response) => {
@@ -143,7 +143,7 @@ export const rewardsUpdate = onRequest((request, response) => {
           throw new Error("Data does not exist");
         }
 
-        const dailyLoot = playerData.dailyloot as DailyLootAllData;
+        const dailyLoot = playerData.dailyloot as DailyLootAllDBData;
         if (key) {
           dailyLoot[key].hasKey = true;
         }
@@ -185,7 +185,7 @@ export const rewardsUpdate = onRequest((request, response) => {
                 if (characterRewards) {
                   const sp = characterRewards.points;
                   transaction.update(characterRef, {
-                    xp: admin.firestore.FieldValue.increment(characterRewards.xp),
+                    xp: characterRewards.xp,
                     level: admin.firestore.FieldValue.increment(characterRewards.level),
                     sp: admin.firestore.FieldValue.increment(sp),
                     allTimeSP: admin.firestore.FieldValue.increment(sp),
