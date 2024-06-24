@@ -3,15 +3,15 @@ import { Socket, Server } from 'socket.io';
 import { Game } from './Game';
 import {apiFetch} from './API';
 import { ServerPlayer } from './ServerPlayer';
-import { PlayMode } from "@legion/shared/enums";
+import { PlayMode, League } from "@legion/shared/enums";
 import { APIPlayerData } from '@legion/shared/interfaces';
 
 
 export class PvPGame extends Game {
     nbExpectedPlayers = 2;
 
-    constructor(id: string, mode: PlayMode, io: Server) {
-        super(id, mode, io);
+    constructor(id: string, mode: PlayMode, league: League, io: Server) {
+        super(id, mode, league, io);
     }
 
     async populateTeams() {

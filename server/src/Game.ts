@@ -5,7 +5,7 @@ import { Team } from './Team';
 import { Spell } from './Spell';
 import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import {apiFetch} from './API';
-import { Terrain, PlayMode, Target, StatusEffect, ChestColor } from '@legion/shared/enums';
+import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League } from '@legion/shared/enums';
 import { OutcomeData, TerrainUpdate, APIPlayerData, GameOutcomeReward, GameData, EndGameDataResults } from '@legion/shared/interfaces';
 import { XP_PER_LEVEL } from '@legion/shared/config';
 import { AVERAGE_GOLD_REWARD_PER_GAME } from '@legion/shared/config';
@@ -16,6 +16,7 @@ export abstract class Game
 {
     id: string;
     mode: PlayMode;
+    league: League;
     teams: Map<number, Team> = new Map<number, Team>();
     gridMap: Map<string, ServerPlayer> = new Map<string, ServerPlayer>();
     terrainMap = new Map<string, Terrain>();
@@ -32,9 +33,10 @@ export abstract class Game
     gridWidth: number = 20;
     gridHeight: number = 10;
 
-    constructor(id: string, mode: PlayMode, io: Server) {
+    constructor(id: string, mode: PlayMode, league: League, io: Server) {
         this.id = id;
         this.mode = mode;
+        this.league = league;
         this.io = io;
 
         this.teams.set(1, new Team(1, this));
@@ -309,7 +311,7 @@ export abstract class Game
         this.sockets.forEach(socket => {
             const team = this.socketMap.get(socket);
             const otherTeam = this.getOtherTeam(team!.id);
-            const outcomes = this.computeGameOutcomes(team, otherTeam, winnerTeamID, this.duration, this.mode) as OutcomeData;
+            const outcomes = this.computeGameOutcomes(team, otherTeam, winnerTeamID) as OutcomeData;
             team.distributeXp(outcomes.xp);
             outcomes.characters = team.getCharactersDBUpdates();
             this.writeOutcomesToDb(team, outcomes);
@@ -815,37 +817,44 @@ export abstract class Game
         }
     }
 
-    computeGameOutcomes(team: Team, otherTeam: Team, winnerTeamId: number, duration: number, mode: PlayMode): OutcomeData {
+    computeGameOutcomes(team: Team, otherTeam: Team, winnerTeamId: number): OutcomeData {
         const isWinner = team.id === winnerTeamId;
-        const eloUpdate = mode == PlayMode.RANKED ? this.updateElo(isWinner ? team : otherTeam, isWinner ? otherTeam : team) : {winnerUpdate: 0, loserUpdate: 0};
+        const eloUpdate = this.mode == PlayMode.RANKED ? this.updateElo(isWinner ? team : otherTeam, isWinner ? otherTeam : team) : {winnerUpdate: 0, loserUpdate: 0};
         const grade = this.computeGrade(team, otherTeam);
         console.log(`Game grade for team ${team.id}: ${grade}, ${this.computeLetterGrade(grade)}`);
         return {
             isWinner,
             rawGrade: grade,
             grade: this.computeLetterGrade(grade),
-            gold: this.computeTeamGold(grade, mode),
-            xp: this.computeTeamXP(team, otherTeam, grade, mode),
+            gold: this.computeTeamGold(grade, this.mode),
+            xp: this.computeTeamXP(team, otherTeam, grade, this.mode),
             elo: isWinner ? eloUpdate.winnerUpdate : eloUpdate.loserUpdate,
-            key: mode == PlayMode.PRACTICE ? null : team.getChestKey() as ChestColor,
-            chests: this.computeChests(team.score, mode),
+            key: this.mode == PlayMode.PRACTICE ? null : team.getChestKey() as ChestColor,
+            chests: this.computeChests(team.score, this.mode),
         }
     }
 
     computeChests(score: number, mode: PlayMode): GameOutcomeReward[] {
         const chests: GameOutcomeReward[] = [];
-        // if (mode != PlayMode.PRACTICE) this.computeAudienceRewards(score, chests);
-        this.computeAudienceRewards(score, chests);
+        if (mode != PlayMode.PRACTICE) this.computeAudienceRewards(score, chests);
         return chests;
     }
+    
+    computeAudienceRewards(score: number, chests: Array<GameOutcomeReward>): void {
+        const leagueRewards = {
+            [League.BRONZE]: [ChestColor.BRONZE, ChestColor.BRONZE, ChestColor.BRONZE],
+            [League.SILVER]: [ChestColor.BRONZE, ChestColor.BRONZE, ChestColor.SILVER],
+            [League.GOLD]: [ChestColor.BRONZE, ChestColor.SILVER, ChestColor.GOLD],
+            [League.ZENITH]: [ChestColor.SILVER, ChestColor.GOLD, ChestColor.GOLD],
+            [League.APEX]: [ChestColor.GOLD, ChestColor.GOLD, ChestColor.GOLD],
+        };
 
-    computeAudienceRewards(score, chests): void {
-        if (score == 1500) {
-            chests.push({color: ChestColor.GOLD, content: getChestContent(ChestColor.GOLD)} as GameOutcomeReward);
-        } else if (score >= 1000) {
-            chests.push({color: ChestColor.SILVER, content: getChestContent(ChestColor.SILVER)} as GameOutcomeReward);
-        } else if (score >= 500) {
-            chests.push({color: ChestColor.BRONZE, content: getChestContent(ChestColor.BRONZE)} as GameOutcomeReward);
+        const rewards = leagueRewards[this.league];
+        const numberOfChests = Math.floor(score / 500);
+    
+        for (let i = 0; i < numberOfChests && i < rewards.length; i++) {
+            const chestColor = rewards[i];
+            chests.push({color: chestColor, content: getChestContent(chestColor)} as GameOutcomeReward);
         }
     }
 
@@ -900,8 +909,8 @@ export abstract class Game
         const actualScoreLoser = 0;
     
         // Calculate rating updates
-        const winnerUpdate = K_FACTOR * (actualScoreWinner - expectedScoreWinner);
-        const loserUpdate = K_FACTOR * (actualScoreLoser - expectedScoreLoser);
+        const winnerUpdate = Math.round(K_FACTOR * (actualScoreWinner - expectedScoreWinner));
+        const loserUpdate = Math.round(K_FACTOR * (actualScoreLoser - expectedScoreLoser));
     
         // Return the elo update for each team
         return {

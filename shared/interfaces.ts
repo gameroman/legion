@@ -172,6 +172,7 @@ export interface APIPlayerData {
     teamName: string;
     avatar: string;
     rank: number;
+    allTimeRank: number;
     dailyloot: DailyLootAllData;
 }
 

@@ -152,6 +152,7 @@ export const getPlayerData = onRequest((request, response) => {
           avatar: playerData.avatar,
           league: playerData.league,
           rank: playerData.rank,
+          allTimeRank: playerData.allTimeRank,
           dailyloot: playerData.dailyloot,
         } as APIPlayerData);
       } else {

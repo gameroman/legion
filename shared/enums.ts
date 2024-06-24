@@ -117,6 +117,9 @@ export enum League {
     ZENITH,
     APEX,
 }
+
+export const LeaguesNames = ['Bronze', 'Silver', 'Gold', 'Zenith', 'Apex', 'All Time'];
+
 export enum GameStatus {
     ONGOING,
     COMPLETED,

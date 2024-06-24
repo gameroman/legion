@@ -13,12 +13,14 @@ export const createGame = onRequest((request, response) => {
       const gameId = request.body.gameId;
       const players = request.body.players;
       const mode = request.body.mode;
+      const league = request.body.league;
 
       const gameData = {
         date: new Date(),
         gameId,
         players,
         mode,
+        league,
         status: GameStatus.ONGOING,
       };
 

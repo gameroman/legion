@@ -4,7 +4,7 @@ import { Game } from './Game';
 import { ServerPlayer } from './ServerPlayer';
 import { AIServerPlayer } from './AIServerPlayer';
 import {apiFetch} from './API';
-import { Class, PlayMode } from "@legion/shared/enums";
+import { Class, PlayMode, League } from "@legion/shared/enums";
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {Team} from "./Team";
 import { APIPlayerData } from '@legion/shared/interfaces';
@@ -19,8 +19,8 @@ export class AIGame extends Game {
     tickTimer: NodeJS.Timeout | null = null;
 
 
-    constructor(id: string, mode: PlayMode, io: Server) {
-        super(id, mode, io);
+    constructor(id: string, mode: PlayMode, league: League, io: Server) {
+        super(id, mode, league, io);
     }
 
     createAITeam(team: Team, nb: number, levels?: number[]) {

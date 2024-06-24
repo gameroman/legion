@@ -5,13 +5,11 @@ import dotenv from 'dotenv';
 import * as admin from "firebase-admin";
 import {
     Client,
-    Events,
     GatewayIntentBits,
-    TextChannel,
   } from 'discord.js';
 
 import { apiFetch } from "./API";
-import { PlayMode } from '@legion/shared/enums';
+import { PlayMode, League } from '@legion/shared/enums';
 import firebaseConfig from '@legion/shared/firebaseConfig';
 
 dotenv.config();
@@ -37,7 +35,7 @@ interface Player {
     elo: number;
     range: number;
     mode: number;
-    league?: string;
+    league?: League;
     waitingTime: number;
     gold: number;
 }
@@ -96,7 +94,7 @@ function switcherooCheck(player, i) {
 
         if (Math.random() < redirectionProbability) {
             console.log(`Redirecting ${player.socket.id} to a PRACTICE game due to long wait.`);
-            createGame(player.socket, null, PlayMode.PRACTICE);
+            createGame(player.socket, null, PlayMode.PRACTICE, null);
             savePlayerGold(player);
             playersQueue.splice(i, 1); // Remove player from the queue
             return true;
@@ -118,7 +116,7 @@ function tryMatchPlayers() {
             if (player1.mode === player2.mode && canBeMatched(player1, player2)) {
                 console.log(`Match found between ${player1.socket.id} and ${player2.socket.id}`);
                 // Start a game for these two players
-                const success = createGame(player1.socket, player2.socket, player1.mode);
+                const success = createGame(player1.socket, player2.socket, player1.mode, player1.league);
                 if (success) {
                     savePlayerGold(player1); 
                     savePlayerGold(player2);
@@ -142,7 +140,7 @@ function canBeMatched(player1: Player, player2: Player): boolean {
     return isEloCompatible && isLeagueCompatible;
 }
 
-async function createGame(player1: Socket, player2?: Socket, mode: PlayMode = PlayMode.PRACTICE) {
+async function createGame(player1: Socket, player2?: Socket, mode: PlayMode = PlayMode.PRACTICE, league: League | null = null) {
     try {
         const gameId = uuidv4();
         await apiFetch(
@@ -155,6 +153,7 @@ async function createGame(player1: Socket, player2?: Socket, mode: PlayMode = Pl
                     // @ts-ignore
                     players: [player1.uid, player2?.uid],
                     mode,
+                    league,
                 }
             }
         );
@@ -185,7 +184,7 @@ async function addToQueue(socket: any, mode: PlayMode) {
             elo: queuingData.elo,
             range: eloRangeStart,
             mode,
-            league: queuingData.league,
+            league: queuingData.league as League,
             waitingTime: 0,
             gold: 0,
         };

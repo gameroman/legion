@@ -1,13 +1,14 @@
 import {onRequest} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
-import admin, {corsMiddleware} from "./APIsetup";
+import admin, {corsMiddleware, getUID} from "./APIsetup";
 import * as functions from "firebase-functions";
-import {League, GameStatus} from "@legion/shared/enums";
+import {League, GameStatus, ChestColor} from "@legion/shared/enums";
 
 interface APILeaderboardResponse {
   seasonEnd: number;
   promotionRows: number;
   demotionRows: number;
+  highlights: any[];
   ranking: LeaderboardRow[];
 }
 interface LeaderboardRow {
@@ -17,6 +18,40 @@ interface LeaderboardRow {
   wins: number;
   losses: number;
   winsRatio: string;
+  isPlayer: boolean;
+  chestColor: ChestColor | null;
+}
+interface Player {
+  id: string;
+  wins: number;
+  losses: number;
+  elo: number;
+  rank: number;
+  allTimeRank: number;
+  name: string;
+  avatar: string;
+  league: number;
+}
+
+function getSecondsUntilEndOfWeek(): number {
+  const now = new Date();
+
+  // Create a new Date object for the upcoming Sunday at midnight
+  const endOfWeek = new Date(now);
+  const dayOfWeek = now.getDay();
+  const daysUntilSunday = 7 - dayOfWeek; // Days remaining until the next Sunday
+
+  // Set endOfWeek to the upcoming Sunday at midnight
+  endOfWeek.setDate(now.getDate() + daysUntilSunday);
+  endOfWeek.setHours(23, 59, 59, 0); // Set to midnight
+
+  // Calculate the difference in milliseconds
+  const millisecondsUntilEndOfWeek = endOfWeek.getTime() - now.getTime();
+
+  // Convert milliseconds to seconds
+  const secondsUntilEndOfWeek = Math.floor(millisecondsUntilEndOfWeek / 1000);
+
+  return secondsUntilEndOfWeek;
 }
 
 export const fetchLeaderboard = onRequest((request, response) => {
@@ -25,8 +60,10 @@ export const fetchLeaderboard = onRequest((request, response) => {
 
   corsMiddleware(request, response, async () => {
     try {
+      const uid = await getUID(request);
+      console.log(`Fetching leaderboard for ${uid}`);
       const tabId = parseInt(request.query.tab as string);
-      console.log(`Fetching leaderboard for tab ${tabId}`);
+
       if (typeof tabId !== "number" || isNaN(tabId)) {
         throw new Error("Invalid tab ID");
       }
@@ -37,32 +74,76 @@ export const fetchLeaderboard = onRequest((request, response) => {
       let demotionRows = 0;
 
       if (!isAllTime) {
-        // Compute number of seconds until end of the week
-        const now = new Date();
-        const endOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (7 - now.getDay()), 23, 59, 59);
-        seasonEnd = Math.floor(endOfWeek.getTime() / 1000);
+        seasonEnd = getSecondsUntilEndOfWeek();
+      }
+
+      let query = isAllTime ? db.collection("players") : db.collection("players").where("league", "==", tabId);
+      query = query.orderBy(isAllTime ? "allTimeRank" : "rank", "asc");
+
+      const docSnap = await query.get();
+      const players: Player[] = docSnap.docs.map((doc) => ({id: doc.id, ...doc.data()})) as Player[];
+      console.log(`Fetched ${players.length} players`);
+
+      let goldElo = -1;
+      let silverElo = -1;
+      let bronzeElo = -1;
+
+      if (!isAllTime) {
+        const initialPromotionRows = Math.ceil(players.length * 0.2);
+        const initialDemotionRows = Math.floor(players.length * 0.2);
+
+        // Calculate promotion rows considering ties
+        if (players.length > 0) {
+          promotionRows = initialPromotionRows;
+          const promotionElo = players[initialPromotionRows - 1].elo;
+          for (let i = initialPromotionRows; i < players.length; i++) {
+            if (players[i].elo === promotionElo) {
+              promotionRows++;
+            } else {
+              break;
+            }
+          }
+
+          // Calculate demotion rows considering ties
+          demotionRows = initialDemotionRows;
+          const demotionElo = players[players.length - initialDemotionRows].elo;
+          for (let i = players.length - initialDemotionRows - 1; i >= 0; i--) {
+            if (players[i].elo === demotionElo) {
+              demotionRows++;
+            } else {
+              break;
+            }
+          }
+        }
+
+        if (players.length > 0) {
+          goldElo = players[0].elo;
+          for (let i = 1; i < players.length; i++) {
+            if (players[i].elo < goldElo) {
+              silverElo = players[i].elo;
+              break;
+            }
+          }
+          if (silverElo !== -1) {
+            for (let i = 1; i < players.length; i++) {
+              if (players[i].elo < silverElo) {
+                bronzeElo = players[i].elo;
+                break;
+              }
+            }
+          }
+        }
       }
 
       const leaderboard: APILeaderboardResponse = {
         seasonEnd,
         promotionRows,
         demotionRows,
+        highlights: [],
         ranking: [],
       };
 
-      const query = isAllTime ? db.collection("players") : db.collection("players").where("league", "==", tabId);
-
-      const docSnap = await query.get();
-      const players = docSnap.docs.map((doc) => doc.data());
-
-      if (!isAllTime) {
-        promotionRows = Math.ceil(players.length * 0.2);
-        demotionRows = Math.floor(players.length * 0.2);
-      }
-
-      const sortedPlayers = players.sort((a, b) => b.elo - a.elo);
-
-      leaderboard.ranking = sortedPlayers.map((player, index) => {
+      leaderboard.ranking = players.map((player, index) => {
         const denominator = player.wins + player.losses;
         let winsRatio = 0;
         if (denominator === 0) {
@@ -70,14 +151,29 @@ export const fetchLeaderboard = onRequest((request, response) => {
         } else {
           winsRatio = Math.round((player.wins/denominator)*100);
         }
+
+        let chest = null;
+        if (!isAllTime) {
+          if (player.elo === goldElo) {
+            chest = ChestColor.GOLD;
+          } else if (player.elo === silverElo) {
+            chest = ChestColor.SILVER;
+          } else if (player.elo === bronzeElo) {
+            chest = ChestColor.BRONZE;
+          }
+        }
+
         return {
-          rank: isAllTime ? index + 1 : player.rank,
+          rank: isAllTime ? player.allTimeRank : player.rank,
           player: player.name,
           elo: player.elo,
           wins: player.wins,
           losses: player.losses,
           winsRatio: winsRatio + "%",
-        };
+          avatar: player.avatar,
+          isPlayer: player.id === uid,
+          chestColor: chest,
+        } as LeaderboardRow;
       });
       response.send(leaderboard);
     } catch (error) {
@@ -133,7 +229,7 @@ export const updateRanksOnEloChange = functions.firestore
       // Check if ELO has changed
       if (newValue.elo !== previousValue.elo) {
           const league = newValue.league;
-          return updateRanksForLeague(league);
+          return updateRanks(league);
       }
       return null;
 });
@@ -144,19 +240,20 @@ export const updateRanksOnPlayerCreation = functions.firestore
       console.log("New player created, updating ranks");
       const newValue = snap.data();
       const league = newValue.league;
-      return updateRanksForLeague(league);
+      return updateRanks(league);
 });
 
 
-async function updateRanksForLeague(league: League) {
+async function updateRanks(league: League) {
   console.log(`Updating ranks for league ${league}`);
   const db = admin.firestore();
+  const batch = db.batch();
+
   const playersSnapshot = await db.collection("players")
       .where("league", "==", league)
       .orderBy("elo", "desc")
       .get();
 
-  const batch = db.batch();
   let rank = 1;
 
   playersSnapshot.forEach((doc) => {
@@ -165,18 +262,42 @@ async function updateRanksForLeague(league: League) {
       rank++;
   });
 
+  const allTimeplayersSnapshot = await db.collection("players")
+      .orderBy("elo", "desc")
+      .get();
+
+  rank = 1;
+
+  allTimeplayersSnapshot.forEach((doc) => {
+      const playerRef = db.collection("players").doc(doc.id);
+      batch.update(playerRef, {allTimeRank: rank});
+      rank++;
+  });
+
   return batch.commit();
 }
 
-export const updateHighlights = functions.firestore
-  .document("games/{gameId}")
-  .onUpdate((change, context) => {
-      const newValue = change.after.data();
-      const previousValue = change.before.data();
+// export const updateHighlights = functions.firestore
+//   .document("games/{gameId}")
+//   .onUpdate((change, context) => {
+//       const db = admin.firestore();
+//       const newValue = change.after.data();
+//       // const previousValue = change.before.data();
 
-      // Check if ELO has changed
-      if (newValue.status == GameStatus.COMPLETED) {
-          // ...
-      }
-      return null;
-});
+//       if (newValue.status == GameStatus.COMPLETED) {
+//         const league = newValue.league;
+//         // Find in the collection 'leagues' if a document where 'league' is equal to the game's league exists,
+//         // if not create it
+//         const leagueSnap = await db.collection("leagues").where("league", "==", league).get();
+//         if (leagueSnap.empty) {
+//           db.collection("leagues").add({
+//             league,
+//             bestAudience: "",
+//             bestScore: "",
+//           });
+//         }
+
+
+//       }
+//       return null;
+// });
