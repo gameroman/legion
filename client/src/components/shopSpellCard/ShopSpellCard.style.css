@@ -15,11 +15,12 @@
 }
 
 .spell-card-title {
-    padding: 6px 8px;
+    padding: 4px 6px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     background-size: 100% 100%;
+    background-image: url('@assets/shop/daily_title_bar.png');
     width: 94%;
     margin: 0 8px;
 }
@@ -33,7 +34,7 @@
 .spell-card-info-box {
     background-image: url('@assets/shop/black_info_bg.png');
     background-size: 100% 100%;
-    padding: 6px 10px;
+    padding: 4px;
     display: flex;
     justify-content: center;
     align-items: center;

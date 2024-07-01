@@ -1,7 +1,7 @@
 // Button.tsx
 import './ShopSpellCard.style.css'
 import { h, Component } from 'preact';
-import { Class, InventoryType, Target } from "@legion/shared/enums";
+import { Class, InventoryType, RarityColor, Target } from "@legion/shared/enums";
 import { BaseSpell } from '@legion/shared/BaseSpell';
 import { mapFrameToCoordinates } from '../utils';
 import { Tooltip as ReactTooltip } from "react-tooltip";
@@ -44,7 +44,8 @@ class ShopSpellCard extends Component<ShopCardProps> {
     }
 
     const titleStyle = {
-      backgroundImage: SpellTitleBG[data.rarity]
+      border: `1px solid ${RarityColor[data.rarity]}`,
+      borderRadius: '4px',
     }
 
     const modalData: modalData = {
@@ -87,7 +88,7 @@ class ShopSpellCard extends Component<ShopCardProps> {
         <div className="spell-card-effect-container">
           <div className="spell-card-effect">
             <img src="/inventory/mp_icon.png" alt="cost" />
-            <span>+ {data.cost}</span>
+            <span>{data.cost}</span>
           </div>
           <div className="spell-card-effect">
             <img src="/inventory/cd_icon.png" alt="cost" />

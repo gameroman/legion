@@ -1,12 +1,13 @@
 // ShopEquipmentCard.tsx
 import './ShopEquipmentCard.style.css';
 import { h, Component } from 'preact';
-import { Class, InventoryType, equipmentFields } from "@legion/shared/enums";
+import { Class, InventoryType, RarityColor, equipmentFields } from "@legion/shared/enums";
 import { mapFrameToCoordinates } from '../utils';
 import { BaseEquipment } from '@legion/shared/BaseEquipment';
 import { StatIcons } from '../shopConsumableCard/ShopConsumableCard';
 import { SpellTitleBG } from '../shopSpellCard/ShopSpellCard';
 import { Tooltip as ReactTooltip } from "react-tooltip";
+import { Effect } from '@legion/shared/interfaces';
 
 enum ClassIcon {
   '/shop/warrior_icon.png',
@@ -47,10 +48,15 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
     }
 
     const titleStyle = {
-      backgroundImage: SpellTitleBG[data.rarity]
+      border: `1px solid ${RarityColor[data.rarity]}`,
+      borderRadius: '4px',
     }
 
     const coordinates = mapFrameToCoordinates(data.frame);
+
+    const getEffectValue = (effect: Effect) => {
+      return effect.value > 0 && effect.stat !== 1 ? `+${effect.value}` : effect.value;
+    }
 
     return (
       <div className="shop-card-container" key={this.props.key} onClick={(e) => this.props.handleOpenModal(e, modalData)}>
@@ -85,7 +91,7 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
         <div className="consumable-card-effect-container">
           {data.effects.map((effect, index) => <div key={index} className="consumable-card-effect">
             <img src={StatIcons[effect.stat]} alt="" />
-            <span>{effect.value > 0 ? `+${effect.value}` : effect.value}</span>
+            <span>{getEffectValue(effect)}</span>
           </div>)}
         </div>
         <div className="shop-card-price">

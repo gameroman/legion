@@ -1,7 +1,7 @@
 .shop-character-card-container {
     background-image: url('@assets/shop/daily_bg_idle.png');
     background-size: 100% 100%;
-    padding: 12px;
+    padding: 18px 12px;
     min-width: 196px;
     display: flex;
     flex-direction: column;
@@ -55,7 +55,7 @@
 .shop-character-card-info-box {
     background-image: url('@assets/shop/black_info_bg.png');
     background-size: 100% 100%;
-    padding: 6px 10px;
+    padding: 4px;
     display: flex;
     justify-content: center;
     align-items: center;

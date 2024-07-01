@@ -15,7 +15,7 @@
 }
 
 .shop-card-title {
-    padding: 8px;
+    padding: 4px 6px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -27,7 +27,7 @@
 .consumable-card-info-box {
     background-image: url('@assets/shop/black_info_bg.png');
     background-size: 100% 100%;
-    padding: 6px 10px;
+    padding: 4px;
     display: flex;
     justify-content: center;
     align-items: center;

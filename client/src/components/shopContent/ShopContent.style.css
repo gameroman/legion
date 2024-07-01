@@ -28,12 +28,10 @@
 }
 
 .shop-items-container {
-    display: flex;
-    align-items: flex-start;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, 4fr);
     gap: 4px;
     width: 1024px;
-    height: 628px;
     overflow-y: auto;
     margin-top: 36px;
 }
