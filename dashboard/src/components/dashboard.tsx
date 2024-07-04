@@ -3,7 +3,7 @@ import { VictoryChart, VictoryLine, VictoryAxis, VictoryTheme, VictoryTooltip, V
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import firebaseConfig from '@legion/shared/firebaseConfig';
-import { DashboardData, GamesPerModePerDay } from '@legion/shared/dashboardInterfaces';
+import { DashboardData } from '@legion/shared/dashboardInterfaces';
 
 import { apiFetch } from '../services/apiService';
 import './dashboard.css';
@@ -57,6 +57,13 @@ const Dashboard: React.FC = () => {
     : [];
   console.log(gamesPerModeData);
 
+  // Define colors for each mode
+  const modeColors = {
+    "0": "blue",
+    "1": "green",
+    "2": "red",
+  };
+
   return (
     <div className="dashboard-container">
       <div className="chart-container">
@@ -101,9 +108,9 @@ const Dashboard: React.FC = () => {
             orientation="horizontal"
             gutter={20}
             data={[
-              { name: "Mode1", symbol: { fill: "blue" } },
-              { name: "Mode2", symbol: { fill: "green" } },
-              { name: "Mode3", symbol: { fill: "red" } },
+              { name: "Mode 0", symbol: { fill: modeColors["0"] } },
+              { name: "Mode 1", symbol: { fill: modeColors["1"] } },
+              { name: "Mode 2", symbol: { fill: modeColors["2"] } },
             ]}
           />
           <VictoryAxis tickFormat={(x) => new Date(x).toLocaleDateString()} />
@@ -111,16 +118,22 @@ const Dashboard: React.FC = () => {
           {["0", "1", "2"].map(mode => (
             <VictoryLine
               key={mode}
-              data={gamesPerModeData.filter(d => d.mode === mode)}
+              data={gamesPerModeData.filter(d => d.mode === mode).map(d => ({
+                date: new Date(d.date).toISOString(),
+                count: d.count,
+              }))}
               x="date"
               y="count"
               labels={({ datum }) => `${datum.count}`}
               labelComponent={<VictoryTooltip />}
+              style={{
+                // @ts-ignore
+                data: { stroke: modeColors[mode] }
+              }}
             />
           ))}
         </VictoryChart>
       </div>
-      <b>Total players: {dashboardData?.totalPlayers}</b>
       <div className="retention-container">
         <h3>Day 1 Retention</h3>
         <p>Returning Players: {dashboardData?.day1retention.returningPlayers || 0}</p>

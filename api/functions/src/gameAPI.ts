@@ -3,6 +3,7 @@ import * as logger from "firebase-functions/logger";
 import admin, {corsMiddleware} from "./APIsetup";
 import {EndGameData} from "@legion/shared/interfaces";
 import {GameStatus} from "@legion/shared/enums";
+import {logPlayerAction} from "./dashboardAPI";
 
 export const createGame = onRequest((request, response) => {
   logger.info("Creating game");
@@ -79,6 +80,16 @@ export const completeGame = onRequest((request, response) => {
       const gameData = gameDoc.data();
       if (!gameData) {
         throw new Error("gameData is null");
+      }
+
+      for (const player of gameData.players) {
+        logPlayerAction(player, "gameComplete", {
+          gameId,
+          winner: winnerUID == player,
+          results: results[player as keyof EndGameData],
+          league: gameData.league,
+          mode: gameData.mode,
+        });
       }
 
       const newGameData = {

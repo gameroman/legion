@@ -24,6 +24,17 @@ export async function updateDAU(userId: string) {
     });
 }
 
+export async function logPlayerAction(playerId: string, actionType: string, details: any) {
+    const db = admin.firestore();
+    const actionRef = db.collection('players').doc(playerId).collection('actions').doc();
+    await actionRef.set({
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        actionType,
+        details,
+    });
+}
+
+
 export const getDashboardData = onRequest(async (request, response) => {
     const db = admin.firestore();
 

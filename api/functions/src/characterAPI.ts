@@ -9,6 +9,7 @@ import {Class, statFields} from "@legion/shared/enums";
 import {MAX_CHARACTERS} from "@legion/shared/config";
 import {OutcomeData, DailyLootAllDBData, CharacterUpdate, APICharacterData} from "@legion/shared/interfaces";
 import {ChestReward} from "@legion/shared/chests";
+import {logPlayerAction} from "./dashboardAPI";
 
 export const rosterData = onRequest((request, response) => {
   logger.info("Fetching rosterData");
@@ -128,6 +129,8 @@ export const rewardsUpdate = onRequest((request, response) => {
       const uid = await getUID(request);
       const {isWinner, xp, gold, characters, elo, key, chests} =
         request.body as OutcomeData;
+
+      logPlayerAction(uid, "reward", {xp, gold, key, chests, elo});
 
       await db.runTransaction(async (transaction) => {
         const playerRef = db.collection("players").doc(uid);
