@@ -11,7 +11,12 @@ import { XP_PER_LEVEL } from '@legion/shared/config';
 import { AVERAGE_GOLD_REWARD_PER_GAME } from '@legion/shared/config';
 import { getChestContent } from '@legion/shared/chests';
 
-
+enum GameAction {
+    SPELL_USE,
+    ITEM_USE,
+    MOVE,
+    ATTACK
+}
 export abstract class Game
 {
     id: string;
@@ -266,7 +271,7 @@ export abstract class Game
     processAction(action: string, data: any, socket: Socket | null = null) {
         if (this.gameOver || !this.gameStarted) return;
 
-        let team;
+        let team: Team;
         if (socket) {
             team = this.socketMap.get(socket);
         } else {
@@ -279,18 +284,22 @@ export abstract class Game
         switch (action) {
             case 'move':
                 this.processMove(data, team!);
+                this.saveGameAction(team.teamData.playerUID, GameAction.MOVE, data);
                 break;
             case 'attack':
                 this.processAttack(data, team!);
+                this.saveGameAction(team.teamData.playerUID, GameAction.ATTACK, data);
                 break;
             case 'obstacleattack':
                 this.processObstacleAttack(data, team!);
                 break;
             case 'useitem':
                 this.processUseItem(data, team!);
+                this.saveGameAction(team.teamData.playerUID, GameAction.ITEM_USE, data);
                 break;
             case 'spell':
                 this.processMagic(data, team!);
+                this.saveGameAction(team.teamData.playerUID, GameAction.SPELL_USE, data);
                 break;
         }
     }
@@ -1005,6 +1014,26 @@ export abstract class Game
                     body: {
                         characterId,
                         inventory,
+                    },
+                }
+            );
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async saveGameAction(playerId: string, action: GameAction, details: any) {
+        try {
+            await apiFetch(
+                'insertGameAction',
+                '',
+                {
+                    method: 'POST',
+                    body: {
+                        gameId: this.id,
+                        playerId,
+                        actionType: action,
+                        details,
                     },
                 }
             );

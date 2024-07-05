@@ -48,6 +48,7 @@ export async function updateDAU(userId: string) {
 }
 
 export async function logPlayerAction(playerId: string, actionType: string, details: any) {
+    if (playerId == null) return;
     console.log(`Logging player action: ${playerId}, ${actionType}, ${details}`);
     const db = admin.firestore();
     const actionRef = db.collection('players').doc(playerId).collection('actions').doc();
@@ -58,9 +59,38 @@ export async function logPlayerAction(playerId: string, actionType: string, deta
     });
 }
 
+export async function logGameAction(gameId: string, playerId: string, actionType: string, details: any) {
+    console.log(`Logging game action: ${gameId}, ${playerId}, ${actionType}, ${details}`);
+    const db = admin.firestore();
+
+    // Query for the document where the field gameId matches the provided gameId
+    const gameQuerySnapshot = await db.collection('games').where('gameId', '==', gameId).limit(1).get();
+
+    if (gameQuerySnapshot.empty) {
+        console.error(`No game found with gameId: ${gameId}`);
+        return;
+    }
+
+    const gameDoc = gameQuerySnapshot.docs[0];
+    const actionRef = gameDoc.ref.collection('actions').doc();
+
+    await actionRef.set({
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        playerId,
+        actionType,
+        details,
+    });
+}
+
 export const logQueuingActivity = onRequest(async (request, response) => {
     const { playerId, actionType, details } = request.body;
     await logPlayerAction(playerId, actionType, details);
+    response.send({status: 0});
+});
+
+export const insertGameAction = onRequest(async (request, response) => {
+    const { gameId, playerId, actionType, details } = request.body;
+    await logGameAction(gameId, playerId, actionType, details);
     response.send({status: 0});
 });
 
@@ -196,6 +226,42 @@ export const getActionLog = onRequest(async (request, response) => {
             response.send(data);
         } catch (error) {
             console.error("getActionLog error:", error);
+            response.status(500).send("Error");
+        }
+    });
+});
+
+export const getGameLog = onRequest(async (request, response) => {
+    const db = admin.firestore();
+
+    corsMiddleware(request, response, async () => {
+        try {
+            const gameId = request.query.gameId;
+            if (!gameId) {
+                response.status(400).send("Bad Request: Missing game ID");
+                return;
+            }
+
+            // Query for the document where the field gameId matches the provided gameId
+            const gameQuerySnapshot = await db.collection('games').where('gameId', '==', gameId.toString()).limit(1).get();
+
+            if (gameQuerySnapshot.empty) {
+                response.status(404).send("Not Found: No game found with the provided game ID");
+                return;
+            }
+
+            const gameDoc = gameQuerySnapshot.docs[0];
+            const snapshot = await gameDoc.ref.collection("actions")
+                .orderBy("timestamp", "asc").limit(100).get();
+
+            const data = snapshot.docs.map((doc) => ({
+                ...doc.data(),
+                id: doc.id,
+            }));
+
+            response.send(data);
+        } catch (error) {
+            console.error("getGameLog error:", error);
             response.status(500).send("Error");
         }
     });

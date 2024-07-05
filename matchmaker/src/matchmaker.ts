@@ -135,9 +135,10 @@ function tryMatchPlayers() {
 }
 
 function canBeMatched(player1: Player, player2: Player): boolean {
+    const isDifferentPlayers = player1.socket.uid !== player2.socket.uid;
     const isEloCompatible = Math.abs(player1.elo - player2.elo) <= player1.range && Math.abs(player1.elo - player2.elo) <= player2.range;
     const isLeagueCompatible = player1.mode !== PlayMode.RANKED || player1.league === player2.league;
-    return isEloCompatible && isLeagueCompatible;
+    return isDifferentPlayers && isEloCompatible && isLeagueCompatible;
 }
 
 async function createGame(player1: Socket, player2?: Socket, mode: PlayMode = PlayMode.PRACTICE, league: League | null = null) {

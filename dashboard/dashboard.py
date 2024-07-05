@@ -103,6 +103,7 @@ def plot_dau_and_new_players():
     
     # Prepare DAU data with interpolated dates
     dau_data = data.prepare_dau_data()
+    print(dau_data)
     dau_dates = [datetime.strptime(entry['date'], '%Y-%m-%d') for entry in dau_data]
     dau_user_counts = [entry['userCount'] for entry in dau_data]
     
@@ -217,6 +218,25 @@ def get_action_log(player_id):
 
 def pretty_print_action_log(action_log):
     for entry in action_log:
+        timestamp = datetime.fromtimestamp(entry['timestamp']['_seconds']).strftime('%m-%d %H:%M:%S')
+        action_type = entry['actionType']
+        details = entry['details']
+        print(f"{Fore.CYAN}{timestamp} - {Fore.GREEN}{action_type} - {Style.RESET_ALL}")
+        pp.pprint(details)
+        print(Style.RESET_ALL)
+
+def get_game_log(game_id):
+    endpoint = f"{API_URL}/getGameLog?gameId={game_id}"
+    try:
+        response = requests.get(endpoint)
+        response.raise_for_status()  # Raise an HTTPError for bad responses
+        data = response.json()
+        pretty_print_game_log(data)
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching game log for game {game_id}: {e}")
+
+def pretty_print_game_log(game_log):
+    for entry in game_log:
         timestamp = datetime.fromtimestamp(entry['timestamp']['_seconds']).strftime('%m-%d %H:%M:%S')
         action_type = entry['actionType']
         details = entry['details']
