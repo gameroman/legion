@@ -11,7 +11,7 @@ import {rosterData, characterData, rewardsUpdate,
 import {createPlayer, getPlayerData, queuingData,
   saveGoldReward, claimChest} from "./playerAPI";
 import {createGame, gameData, completeGame} from "./gameAPI";
-import {getDashboardData} from "./dashboardAPI";
+import {getDashboardData, getActionLog} from "./dashboardAPI";
 export {
   fetchLeaderboard, inventoryData, purchaseItem,
   createPlayer, rosterData, characterData, rewardsUpdate,
@@ -19,7 +19,7 @@ export {
   purchaseCharacter, leaguesUpdate, getPlayerData, queuingData, createGame,
   gameData, inventorySave, inventoryTransaction, saveGoldReward, spendSP,
   getReward, claimChest, updateRanksOnEloChange, updateRanksOnPlayerCreation,
-  completeGame, getDashboardData,
+  completeGame, getDashboardData, getActionLog,
 };
 
 export const helloWorld = onRequest((request, response) => {

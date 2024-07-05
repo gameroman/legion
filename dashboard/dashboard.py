@@ -7,11 +7,14 @@ import matplotlib.dates as mdates
 from IPython.display import display
 from datetime import datetime, timedelta
 from matplotlib.ticker import MaxNLocator
+from colorama import Fore, Style
+import pprint
 
 load_dotenv()
 
 API_URL = os.getenv('API_URL')
 plt.style.use('dark_background')
+pp = pprint.PrettyPrinter(indent=4)
 class DashboardData:
     _instance = None
     _data = None
@@ -38,6 +41,7 @@ class DashboardData:
     def fetch_data(cls):
         response = requests.get(f"{API_URL}/getDashboardData")
         return response.json()
+    
     
     def generate_date_range(self, start_date, end_date):
         start = datetime.strptime(start_date, '%Y-%m-%d')
@@ -99,12 +103,12 @@ def plot_dau_and_new_players():
     
     # Prepare DAU data with interpolated dates
     dau_data = data.prepare_dau_data()
-    dau_dates = [entry['date'] for entry in dau_data]
+    dau_dates = [datetime.strptime(entry['date'], '%Y-%m-%d') for entry in dau_data]
     dau_user_counts = [entry['userCount'] for entry in dau_data]
     
     # Prepare new players data with interpolated dates
     new_players_data = data.prepare_new_players_data()
-    new_players_dates = [entry['date'] for entry in new_players_data]
+    new_players_dates = [datetime.strptime(entry['date'], '%Y-%m-%d') for entry in new_players_data]
     new_players_counts = [entry['newPlayers'] for entry in new_players_data]
     
     # Create subplots
@@ -117,6 +121,7 @@ def plot_dau_and_new_players():
     axes[0].set_ylabel('User Count')
     axes[0].tick_params(axis='x', rotation=45)
     axes[0].yaxis.set_major_locator(MaxNLocator(integer=True))
+    axes[0].xaxis.set_major_formatter(mdates.DateFormatter('%d-%m'))
     axes[0].legend()
     
     # Plot New Players Per Day
@@ -128,6 +133,7 @@ def plot_dau_and_new_players():
     axes[1].set_ylim(0, max(new_players_counts) + 1)
     axes[1].set_yticks(range(0, max(new_players_counts) + 2))
     axes[1].yaxis.set_major_locator(MaxNLocator(integer=True))
+    axes[1].xaxis.set_major_formatter(mdates.DateFormatter('%d-%m'))
     axes[1].legend()
     
     plt.tight_layout()
@@ -145,7 +151,7 @@ def plot_games_per_mode():
     mode_labels = {'0': 'Practice', '1': 'Casual', '2': 'Ranked'}
     mode_colors = {'0': 'blue', '1': 'green', '2': 'red'}
     
-    plt.figure(figsize=(5, 3))
+    plt.figure(figsize=(6, 3))
     for mode in modes:
         mode_data = df[df['mode'] == mode]
         plt.plot(mode_data['date'], mode_data['count'], label=mode_labels.get(mode, f'Mode {mode}'), color=mode_colors.get(mode, 'black'))
@@ -155,10 +161,9 @@ def plot_games_per_mode():
     plt.ylabel('Games Count')
     plt.xticks(rotation=45)
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d-%m'))
     plt.legend()
     plt.show()
-
 
 def display_retention_table():
     data = DashboardData()
@@ -198,3 +203,22 @@ def print_additional_info():
     print(f"Total Players: {data.total_players}")
     print(f"ATH of DAU: {ath_dau}")
     print(f"Yesterday's DAU: {yesterday_dau} ({percentage_of_ath:.2f}% of ATH)")
+
+def get_action_log(player_id):
+    endpoint = f"{API_URL}/getActionLog?playerId={player_id}"
+    try:
+        response = requests.get(endpoint)
+        response.raise_for_status()  # Raise an HTTPError for bad responses
+        data = response.json()
+        pretty_print_action_log(data)
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching action log for player {player_id}: {e}")
+
+def pretty_print_action_log(action_log):
+    for entry in action_log:
+        timestamp = datetime.fromtimestamp(entry['timestamp']['_seconds']).strftime('%m-%d %H:%M:%S')
+        action_type = entry['actionType']
+        details = entry['details']
+        print(f"{Fore.CYAN}{timestamp} - {Fore.GREEN}{action_type} - {Style.RESET_ALL}")
+        pp.pprint(details)
+        print(Style.RESET_ALL)

@@ -167,3 +167,29 @@ export const getDashboardData = onRequest(async (request, response) => {
         }
     });
 });
+
+export const getActionLog = onRequest(async (request, response) => {
+    const db = admin.firestore();
+
+    corsMiddleware(request, response, async () => {
+        try {
+            const playerId = request.query.playerId;
+            if (!playerId) {
+                response.status(400).send("Bad Request: Missing player ID");
+                return;
+            }
+
+            const snapshot = await db.collection("players")
+                .doc(playerId.toString()).collection("actions")
+                .orderBy("timestamp", "asc").limit(100).get();
+            const data = snapshot.docs.map((doc) => ({
+                ...doc.data(),
+                id: doc.id,
+            }));
+            response.send(data);
+        } catch (error) {
+            console.error("getActionLog error:", error);
+            response.status(500).send("Error");
+        }
+    });
+});
