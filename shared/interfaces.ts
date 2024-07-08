@@ -102,7 +102,8 @@ export interface OutcomeData {
     characters?: CharacterUpdate[];
     elo: number;
     key: ChestColor;
-    chests: GameOutcomeReward[] ;
+    chests: GameOutcomeReward[];
+    score: number;
 }
 
 export interface CharacterStats {
@@ -189,6 +190,7 @@ export interface APIPlayerData {
 
 export interface DBPlayerData {
     name: string;
+    avatar: string;
     gold: number;
     carrying_capacity: number;
     inventory: PlayerInventory;
@@ -197,9 +199,20 @@ export interface DBPlayerData {
     league: number;
     lvl: number;
     dailyloot: DailyLootAllDBData;
+    xp: number;
+    leagueStats: LeagueStats;
+    allTimeStats: LeagueStats;
+}
+
+interface LeagueStats {
     wins: number;
     losses: number;
-    xp: number;
+    rank: number;
+    winStreak: number;
+    lossesStreak: number;
+    nbGames: number;
+    avgAudienceScore: number;
+    avgGrade: number;
 }
 
 export interface TeamData {

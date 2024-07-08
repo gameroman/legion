@@ -88,7 +88,6 @@ class SeasonCard extends Component<SeasonCardProps> {
     }
 
     render() {
-        console.log(this.props.currTab);
         const eloBGStyle = {
             backgroundImage: 'url(/rank/elo_rating_bg.png)',
             transform: 'scale(1.2)',

@@ -29,15 +29,15 @@ class RankPage extends Component {
     const isCorrectLeague = this.context.player.league === this.state.curr_tab;
     const isAllTime = this.state.curr_tab === 5;
     return {
-      rank: isCorrectLeague ? (isAllTime ? this.context.player.allTimeRank : this.context.player.rank) : "-",
-      elo: isCorrectLeague ? this.context.player.elo : "-",
+      rank: isAllTime ? this.context.player.allTimeRank : (isCorrectLeague ? this.context.player.rank : "-"),
+      elo: this.context.player.elo,
     }
   };
 
   async fetchLeaderboard() {
     const data = await apiFetch(`fetchLeaderboard?tab=${this.state.curr_tab}`);
     if (data) {
-      console.log(data);
+      console.log(`Ldb data: ${JSON.stringify(data)}`);
       this.setState({ leaderboardData: data });
     }
   }

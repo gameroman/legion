@@ -848,6 +848,7 @@ export abstract class Game
             elo: isWinner ? eloUpdate.winnerUpdate : eloUpdate.loserUpdate,
             key: this.mode == PlayMode.PRACTICE ? null : team.getChestKey() as ChestColor,
             chests: this.computeChests(team.score, this.mode),
+            score: team.score,
         }
     }
 
@@ -965,7 +966,7 @@ export abstract class Game
     async writeOutcomesToDb(team: Team, rewards: OutcomeData) {
         try {
             await apiFetch(
-                'rewardsUpdate',
+                'postGameUpdate',
                 team.getFirebaseToken(),
                 {
                     method: 'POST',

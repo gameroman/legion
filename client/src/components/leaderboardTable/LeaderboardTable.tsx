@@ -85,7 +85,7 @@ class LeaderboardTable extends Component<LeaderboardTableProps> {
                 backgroundImage: `url(/leaderboard/promote_icon.png)`,
             }
 
-            if (index > this.state.tableData.length - demotionRows) return {
+            if (demotionRows && index > this.state.tableData.length - demotionRows) return {
                 backgroundImage: `url(/leaderboard/demote_icon.png)`,
             }
 

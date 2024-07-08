@@ -4,6 +4,7 @@ import admin, {corsMiddleware, getUID} from "./APIsetup";
 import * as functions from "firebase-functions";
 import {League, ChestColor} from "@legion/shared/enums";
 import {logPlayerAction} from "./dashboardAPI";
+import {DBPlayerData} from "@legion/shared/interfaces";
 
 interface APILeaderboardResponse {
   seasonEnd: number;
@@ -22,16 +23,8 @@ interface LeaderboardRow {
   isPlayer: boolean;
   chestColor: ChestColor | null;
 }
-interface Player {
+interface Player extends DBPlayerData{
   id: string;
-  wins: number;
-  losses: number;
-  elo: number;
-  rank: number;
-  allTimeRank: number;
-  name: string;
-  avatar: string;
-  league: number;
 }
 
 function getSecondsUntilEndOfWeek(): number {
@@ -79,7 +72,7 @@ export const fetchLeaderboard = onRequest((request, response) => {
       }
 
       let query = isAllTime ? db.collection("players") : db.collection("players").where("league", "==", tabId);
-      query = query.orderBy(isAllTime ? "allTimeRank" : "rank", "asc");
+      query = query.orderBy(isAllTime ? "allTimeStats.rank" : "leagueStats.rank", "asc");
 
       const docSnap = await query.get();
       const players: Player[] = docSnap.docs.map((doc) => ({id: doc.id, ...doc.data()})) as Player[];
@@ -91,7 +84,8 @@ export const fetchLeaderboard = onRequest((request, response) => {
 
       if (!isAllTime) {
         const initialPromotionRows = Math.ceil(players.length * 0.2);
-        const initialDemotionRows = Math.floor(players.length * 0.2);
+        const initialDemotionRows = tabId == 0 ? 0 : Math.floor(players.length * 0.2);
+        console.log(`[fetchLeaderboard] Initial promotion rows: ${initialPromotionRows}, initial demotion rows: ${initialDemotionRows}`);
 
         // Calculate promotion rows considering ties
         if (players.length > 0) {
@@ -107,12 +101,14 @@ export const fetchLeaderboard = onRequest((request, response) => {
 
           // Calculate demotion rows considering ties
           demotionRows = initialDemotionRows;
-          const demotionElo = players[players.length - initialDemotionRows].elo;
-          for (let i = players.length - initialDemotionRows - 1; i >= 0; i--) {
-            if (players[i].elo === demotionElo) {
-              demotionRows++;
-            } else {
-              break;
+          if (demotionRows) {
+            const demotionElo = players[players.length - initialDemotionRows].elo;
+            for (let i = players.length - initialDemotionRows - 1; i >= 0; i--) {
+              if (players[i].elo === demotionElo) {
+                demotionRows++;
+              } else {
+                break;
+              }
             }
           }
         }
@@ -145,12 +141,14 @@ export const fetchLeaderboard = onRequest((request, response) => {
       };
 
       leaderboard.ranking = players.map((player, index) => {
-        const denominator = player.wins + player.losses;
+        const statsObject = isAllTime ? player.allTimeStats : player.leagueStats;
+
+        const denominator = statsObject.wins + statsObject.losses;
         let winsRatio = 0;
         if (denominator === 0) {
           winsRatio = 0;
         } else {
-          winsRatio = Math.round((player.wins/denominator)*100);
+          winsRatio = Math.round((statsObject.wins/denominator)*100);
         }
 
         let chest = null;
@@ -165,11 +163,11 @@ export const fetchLeaderboard = onRequest((request, response) => {
         }
 
         return {
-          rank: isAllTime ? player.allTimeRank : player.rank,
+          rank: statsObject.rank,
           player: player.name,
           elo: player.elo,
-          wins: player.wins,
-          losses: player.losses,
+          wins: statsObject.wins,
+          losses: statsObject.losses,
           winsRatio: winsRatio + "%",
           avatar: player.avatar,
           isPlayer: player.id === uid,
@@ -260,7 +258,7 @@ async function updateRanks(league: League) {
 
   playersSnapshot.forEach((doc) => {
       const playerRef = db.collection("players").doc(doc.id);
-      batch.update(playerRef, {rank: rank});
+      batch.update(playerRef, {'leagueStats.rank': rank});
       rank++;
   });
 
@@ -272,7 +270,7 @@ async function updateRanks(league: League) {
 
   allTimeplayersSnapshot.forEach((doc) => {
       const playerRef = db.collection("players").doc(doc.id);
-      batch.update(playerRef, {allTimeRank: rank});
+      batch.update(playerRef, {'allTimeStats.rank': rank});
       rank++;
   });
 

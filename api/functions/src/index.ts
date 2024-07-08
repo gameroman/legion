@@ -5,7 +5,7 @@ import {fetchLeaderboard, leaguesUpdate, updateRanksOnEloChange,
   updateRanksOnPlayerCreation} from "./leaderboardsAPI";
 import {inventoryData, purchaseItem, inventoryTransaction, inventorySave, getReward}
   from "./inventoryAPI";
-import {rosterData, characterData, rewardsUpdate,
+import {rosterData, characterData, postGameUpdate,
   generateOnSaleCharacters, listOnSaleCharacters,
   deleteOnSaleCharacters, purchaseCharacter, spendSP} from "./characterAPI";
 import {createPlayer, getPlayerData, queuingData,
@@ -15,7 +15,7 @@ import {getDashboardData, getActionLog, logQueuingActivity, insertGameAction,
   getGameLog} from "./dashboardAPI";
 export {
   fetchLeaderboard, inventoryData, purchaseItem,
-  createPlayer, rosterData, characterData, rewardsUpdate,
+  createPlayer, rosterData, characterData, postGameUpdate,
   generateOnSaleCharacters, listOnSaleCharacters, deleteOnSaleCharacters,
   purchaseCharacter, leaguesUpdate, getPlayerData, queuingData, createGame,
   gameData, inventorySave, inventoryTransaction, saveGoldReward, spendSP,

@@ -22,9 +22,9 @@ const chestsDelays = {
   [ChestColor.GOLD]: 24*60*60,
 };
 
-function selectRandomAvatar() {
+function selectRandomAvatar(): string {
   // Return a random value betweem 1 and 31 included
-  return Math.floor(Math.random() * 31) + 1;
+  return (Math.floor(Math.random() * 31) + 1).toString();
 }
 
 function generateName() {
@@ -60,8 +60,6 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
     characters: [],
     elo: 100,
     league: League.BRONZE,
-    wins: 0,
-    losses: 0,
     xp: 0,
     lvl: 1,
     dailyloot: {
@@ -78,6 +76,26 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
         hasKey: false,
       },
     } as DailyLootAllDBData,
+    leagueStats: {
+      rank: -1,
+      wins: 0,
+      losses: 0,
+      winStreak: 0,
+      lossesStreak: 0,
+      nbGames: 0,
+      avgAudienceScore: 0,
+      avgGrade: 0,
+    },
+    allTimeStats: {
+      rank: -1,
+      wins: 0,
+      losses: 0,
+      winStreak: 0,
+      lossesStreak: 0,
+      nbGames: 0,
+      avgAudienceScore: 0,
+      avgGrade: 0,
+    },
   } as DBPlayerData;
 
   // Start a batch to ensure atomicity
@@ -169,8 +187,8 @@ export const getPlayerData = onRequest((request, response) => {
           teamName: "teamName",
           avatar: playerData.avatar,
           league: playerData.league,
-          rank: playerData.rank,
-          allTimeRank: playerData.allTimeRank,
+          rank: playerData.leagueStats.rank,
+          allTimeRank: playerData.allTimeStats.rank,
           dailyloot: playerData.dailyloot,
         } as APIPlayerData);
       } else {

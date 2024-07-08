@@ -120,14 +120,13 @@ export async function processChestRewards(
   });
 }
 
-export const rewardsUpdate = onRequest((request, response) => {
-  logger.info("Updating rewards");
+export const postGameUpdate = onRequest((request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
     try {
       const uid = await getUID(request);
-      const {isWinner, xp, gold, characters, elo, key, chests} =
+      const {isWinner, xp, gold, characters, elo, key, chests, rawGrade, score} =
         request.body.outcomes as OutcomeData;
       const mode = request.body.mode as PlayMode;
 
@@ -170,14 +169,50 @@ export const rewardsUpdate = onRequest((request, response) => {
         if (mode != PlayMode.PRACTICE) {
           if (isWinner) {
               transaction.update(playerRef, {
-                wins: admin.firestore.FieldValue.increment(1),
                 lossesStreak: 0,
               });
           } else {
               transaction.update(playerRef, {
-                losses: admin.firestore.FieldValue.increment(1),
                 lossesStreak: admin.firestore.FieldValue.increment(1),
               });
+          }
+
+          if (mode == PlayMode.RANKED) {
+            if (isWinner) {
+              transaction.update(playerRef, {
+                'leagueStats.wins': admin.firestore.FieldValue.increment(1),
+                'allTimeStats.wins': admin.firestore.FieldValue.increment(1),
+                'leagueStats.winStreak': admin.firestore.FieldValue.increment(1),
+                'allTimeStats.winStreak': admin.firestore.FieldValue.increment(1),
+                'leagueStats.lossesStreak': 0,
+                'allTimeStats.lossesStreak': 0,
+              });
+            } else {
+              transaction.update(playerRef, {
+                'leagueStats.losses': admin.firestore.FieldValue.increment(1),
+                'allTimeStats.losses': admin.firestore.FieldValue.increment(1),
+                'leagueStats.winStreak': 0,
+                'allTimeStats.winStreak': 0,
+                'leagueStats.lossesStreak': admin.firestore.FieldValue.increment(1),
+                'allTimeStats.lossesStreak': admin.firestore.FieldValue.increment(1),
+              });
+            }
+            let leagueAvgAudienceScore = playerDoc.data()?.leagueStats.avgAudienceScore || 0;
+            let allTimeAvgAudienceScore = playerDoc.data()?.allTimeStats.avgAudienceScore || 0;
+            let leagueAvgGrade = playerDoc.data()?.leagueStats.avgGrade || 0;
+            let allTimeAvgGrade = playerDoc.data()?.allTimeStats.avgGrade || 0;
+            leagueAvgAudienceScore = (leagueAvgAudienceScore * playerData.leagueStats.nbGames + score) / (playerData.leagueStats.nbGames + 1);
+            allTimeAvgAudienceScore = (allTimeAvgAudienceScore * playerData.allTimeStats.nbGames + score) / (playerData.allTimeStats.nbGames + 1);
+            leagueAvgGrade = (leagueAvgGrade * playerData.leagueStats.nbGames + rawGrade) / (playerData.leagueStats.nbGames + 1);
+            allTimeAvgGrade = (allTimeAvgGrade * playerData.allTimeStats.nbGames + rawGrade) / (playerData.allTimeStats.nbGames + 1);
+            transaction.update(playerRef, {
+              'leagueStats.nbGames': admin.firestore.FieldValue.increment(1),
+              'allTimeStats.nbGames': admin.firestore.FieldValue.increment(1),
+              'leagueStats.avgAudienceScore': leagueAvgAudienceScore,
+              'allTimeStats.avgAudienceScore': allTimeAvgAudienceScore,
+              'leagueStats.avgGrade': leagueAvgGrade,
+              'allTimeStats.avgGrade': allTimeAvgGrade,
+            });
           }
         }
 
