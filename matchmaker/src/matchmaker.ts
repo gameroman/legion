@@ -13,6 +13,9 @@ import { PlayMode, League } from '@legion/shared/enums';
 import firebaseConfig from '@legion/shared/firebaseConfig';
 
 dotenv.config();
+
+console.log(`FIREBASE_AUTH_EMULATOR_HOST: ${process.env.FIREBASE_AUTH_EMULATOR_HOST}`);
+
 const discordClient = new Client({intents: [GatewayIntentBits.Guilds]});
 discordClient.login(process.env.DISCORD_TOKEN);
 

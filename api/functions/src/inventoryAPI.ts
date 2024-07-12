@@ -439,7 +439,7 @@ export const inventoryTransaction = onRequest(async (request, response) => {
           .reduce((acc, curr) => acc + curr, 0);
 
         if (load >= playerData.carrying_capacity) {
-          logger.info("Carrying capacity full");
+          logger.info("Carrying capacity full!");
           response.send({ status: 1 });
           return;
         }

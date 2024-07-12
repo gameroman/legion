@@ -18,12 +18,13 @@
   "emulators": {
     "auth": {
       "port": 9099,
-      "host": "0.0.0.0"
+      "host": "0.0.0.0",
+      "cors": ["matchmaker:3000"]
     },
     "functions": {
       "port": 5001,
       "host": "0.0.0.0",
-      "cors": ["http://127.0.0.1:4000", "http://localhost:4000"]
+      "cors": ["http://127.0.0.1:4000", "http://localhost:4000", "matchmaker:3000"]
     },
     "firestore": {
       "port": 8090,
