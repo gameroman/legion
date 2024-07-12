@@ -113,7 +113,7 @@ function tryMatchPlayers() {
 
         for (let j = i + 1; j < playersQueue.length; j++) {
             let player2 = playersQueue[j];
-            if (player1.mode === player2.mode && canBeMatched(player1, player2)) {
+            if (player1.mode == player2.mode && canBeMatched(player1, player2)) {
                 console.log(`Match found between ${player1.socket.id} and ${player2.socket.id}`);
                 // Start a game for these two players
                 const success = createGame(player1.socket, player2.socket, player1.mode, player1.league);
@@ -137,7 +137,7 @@ function tryMatchPlayers() {
 function canBeMatched(player1: Player, player2: Player): boolean {
     const isDifferentPlayers = player1.socket.uid !== player2.socket.uid;
     const isEloCompatible = Math.abs(player1.elo - player2.elo) <= player1.range && Math.abs(player1.elo - player2.elo) <= player2.range;
-    const isLeagueCompatible = player1.mode !== PlayMode.RANKED || player1.league === player2.league;
+    const isLeagueCompatible = player1.mode != PlayMode.RANKED || player1.league == player2.league;
     return isDifferentPlayers && isEloCompatible && isLeagueCompatible;
 }
 
@@ -247,7 +247,7 @@ io.on("connection", (socket: any) => {
             console.log(`Decoded UID ${decodedToken.uid}`);
             socket.uid = decodedToken.uid;
 
-            if (data.mode === PlayMode.PRACTICE) {
+            if (data.mode == PlayMode.PRACTICE) {
                 createGame(socket, null, PlayMode.PRACTICE);
                 return;
             }

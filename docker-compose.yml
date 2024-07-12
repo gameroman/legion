@@ -49,9 +49,9 @@ services:
       dockerfile: ./matchmaker/Dockerfile
     ports:
       - "3000:3000"
-    # volumes:
-    #   - ./matchmaker:/usr/src/app
-    #   - ./shared:/usr/src/app/shared
+    volumes:
+      - ./matchmaker:/usr/src/app
+      - ./shared:/usr/src/app/shared
     environment:
       - NODE_ENV=development
       - FIREBASE_AUTH_EMULATOR_HOST=${FIREBASE_AUTH_EMULATOR_HOST}

@@ -8,7 +8,7 @@
     "emulators:start:functions": "firebase emulators:start --only functions",
     "functions:start": "firebase functions:shell",
     "serve": "nodemon --watch 'src/**/*.ts' --watch 'shared/**/*.ts' --exec 'npm run build && npm run emulators:start'",
-    "serve:functions": "nodemon --watch 'src/**/*.ts' --watch 'shared/**/*.ts' --exec 'npm run build && npm run emulators:start:functions'",
+    "serve:functions": "nodemon --watch 'src/**/*.ts' --watch 'shared/**/*.ts' --exec 'npm run build'",
     "watch:functions": "nodemon",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
