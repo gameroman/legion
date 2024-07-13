@@ -5,9 +5,9 @@ services:
       dockerfile: ./client/Dockerfile
     ports:
       - "8080:8080"
-    # volumes:
-      # - ./client:/usr/src/app
-      # - ./shared:/usr/src/app/shared
+    volumes:
+      - ./client:/usr/src/app
+      - ./shared:/usr/src/app/shared
     environment:
       - NODE_ENV=development
       - FIREBASE_AUTH_EMULATOR_HOST=${FIREBASE_AUTH_EMULATOR_HOST}

@@ -1,7 +1,6 @@
 // SeasonCard.tsx
 import './SeasonCard.style.css';
 import { h, Component, createRef } from 'preact';
-import html2canvas from 'html2canvas';
 
 interface SeasonCardProps {
     seasonEnd: number;
@@ -61,30 +60,18 @@ class SeasonCard extends Component<SeasonCardProps> {
 
     shareOnTwitter = async (rank: number, tab: string) => {
         const leagueName = tab === 'alltime' ? 'All Time' : tab.charAt(0).toUpperCase() + tab.slice(1);
-        if (this.captureRef.current) {
-            const canvas = await html2canvas(this.captureRef.current);
-            canvas.toBlob((blob) => {
-                const url = URL.createObjectURL(blob);
-                const tweetText = `I'm ranked #${rank} in the ${leagueName} league in #Legion! Can you beat me? #PvP`
-                // const twitterUrl = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(url)}`;
-                const twitterUrl = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}`;
-                const width = 550;
-                const height = 300;
-                const left = (window.innerWidth - width) / 2;
-                const top = (window.innerHeight - height) / 2;
+        const tweetText = `I'm ranked #${rank} in the ${leagueName} league in #Legion! Can you beat me? #PvP`
+        const twitterUrl = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}`;
+        const width = 550;
+        const height = 300;
+        const left = (window.innerWidth - width) / 2;
+        const top = (window.innerHeight - height) / 2;
 
-                window.open(
-                    twitterUrl,
-                    'Share on Twitter',
-                    `width=${width},height=${height},top=${top},left=${left}`
-                );
-
-                // Revoke the object URL after some time to release memory
-                setTimeout(() => {
-                    URL.revokeObjectURL(url);
-                }, 10000);
-            });
-        }
+        window.open(
+            twitterUrl,
+            'Share on Twitter',
+            `width=${width},height=${height},top=${top},left=${left}`
+        );
     }
 
     render() {
