@@ -3,7 +3,7 @@
     "esModuleInterop": true,
     "baseUrl": "./", 
     "paths": {
-      "@legion/shared/*": ["../shared/*"] 
+      "@legion/shared/*": ["shared/*"] 
     }
   },
 }

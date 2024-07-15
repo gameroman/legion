@@ -4,8 +4,10 @@ WORKDIR /usr/src/app
 
 # COPY server/ ./
 # COPY shared ./shared
-RUN npm install
 
+COPY server/package*.json ./
+
+RUN npm install
 
 EXPOSE 3123
 CMD ["npm", "run", "start"]
