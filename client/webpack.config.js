@@ -18,7 +18,40 @@ module.exports = {
           {
             loader: 'ts-loader',
             options: {
-              configFile: isDocker ? 'tsconfig.docker.json' : 'tsconfig.json'
+              configFile: isDocker ? 'tsconfig.docker.json' : 'tsconfig.json',
+              errorFormatter: (error, colors) => {
+                try {
+                  // Function to replace absolute paths with relative ones
+                  const replaceAbsolutePath = (str) => {
+                    if (typeof str === 'string') {
+                      return str.replace(/\/usr\/src\/app\//g, '');
+                    }
+                    return str;
+                  };
+      
+                  let errorMessage = '';
+      
+                  // Add file location
+                  if (error.file) {
+                    errorMessage += colors.cyan(replaceAbsolutePath(error.file));
+                    if (error.line) {
+                      errorMessage += colors.cyan(':' + error.line);
+                      if (error.character) {
+                        errorMessage += colors.cyan(':' + error.character);
+                      }
+                    }
+                    errorMessage += '\n';
+                  }
+      
+                  // Add error severity and content
+                  errorMessage += colors.red(error.severity.toUpperCase() + ': ') + error.content;
+      
+                  return errorMessage;
+                } catch (formattingError) {
+                  console.error('Error in errorFormatter:', formattingError);
+                  return colors.red('ERROR: Unable to format error message');
+                }
+              }
             }
           }
         ],
