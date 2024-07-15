@@ -4,6 +4,7 @@ WORKDIR /usr/src/app
 
 # COPY client/ ./
 # COPY shared ./shared
+COPY client/package*.json ./
 RUN npm install
 
 EXPOSE 8080
