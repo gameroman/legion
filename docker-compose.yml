@@ -26,8 +26,10 @@ services:
       - ./server:/usr/src/app
       - ./shared:/usr/src/app/shared
     environment:
+      - API_URL=http://api:5001/legion-32c6d/us-central1
+      - CLIENT_ORIGIN=*
+      - FIREBASE_AUTH_EMULATOR_HOST=api:9099
       - NODE_ENV=development
-      - FIREBASE_AUTH_EMULATOR_HOST=${FIREBASE_AUTH_EMULATOR_HOST}
 
   api:
     build:
@@ -58,6 +60,7 @@ services:
     environment:
       - API_URL=http://api:5001/legion-32c6d/us-central1
       - CLIENT_ORIGIN=*
+      - DISCORD_TOKEN=MTAzNDE1NTg2MDY1NTYxMjAxNQ.Gofr5O.OLARZ3Qikq0DtpXLG3hYvARq09n8zOlVkU8fSM
       - FIREBASE_AUTH_EMULATOR_HOST=api:9099
       - NODE_ENV=development
 
