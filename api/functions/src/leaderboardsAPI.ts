@@ -238,7 +238,7 @@ export const fetchLeaderboard = onRequest((request, response) => {
   });
 });
 
-export const leaguesUpdate = functions.pubsub.schedule("every 5 seconds")
+export const leaguesUpdate = functions.pubsub.schedule("* * * * *")
   .onRun(async (context) => {
     logger.info("Updating leagues");
     const db = admin.firestore();

@@ -13,11 +13,11 @@
   },
   "main": "lib/index.js",
   "dependencies": {
-    "firebase-tools": "^13.13.0",
     "@firebase/firestore-compat": "^0.3.23",
     "cors": "^2.8.5",
     "firebase-admin": "^11.11.1",
-    "firebase-functions": "^4.5.0",
+    "firebase-functions": "^5.0.1",
+    "firebase-tools": "^13.13.0",
     "unique-names-generator": "^4.7.1"
   },
   "devDependencies": {
