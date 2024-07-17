@@ -583,8 +583,18 @@
   cursor: pointer;
 }
 
-.player_hud_skills:hover {
+/* .player_hud_skills:hover {
   border: 1px solid #71deff;
+} */
+
+.player_hud_skills:hover, 
+.player_hud_skills:active, 
+.player_hud_skills:focus, 
+.player_hud_skills:focus-within, 
+.player_hud_skills:visited, 
+.player_hud_skills:target
+{
+  border: 1px solid #71deff !important;
 }
 
 .player_hud_action_container {
@@ -1004,6 +1014,8 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
+
+  z-index: 10;
 }
 
 .streak_gold_list img {
