@@ -93,7 +93,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
         }));
     }
 
-    nextTip = () => { 
+    nextTip = () => {
         let len = this.state.queueData.tips.length;
         this.setState((prevState) => ({
             tipCount: (prevState.tipCount + 1 + len) % len
@@ -171,17 +171,19 @@ class QueuePage extends Component<QPageProps, QpageState> {
     }
 
     componentDidMount() {
-        this.joinQueue(); 
+        this.joinQueue();
         let timeInterval = this.state.queueData.estimatedWaitingTime * 10;
-        this.interval = setInterval(() => {
-            // console.log('state -> ', this.state.progress);
-            this.setState((prevState) => ({
-                progress: prevState.progress + 1,
-            }));
-            if (this.state.progress == 100) {
-                clearInterval(this.interval);
-            }
-        }, timeInterval);
+        if (this.state.queueData.estimatedWaitingTime != -1) {
+            this.interval = setInterval(() => {
+                // console.log('state -> ', this.state.progress);
+                this.setState((prevState) => ({
+                    progress: prevState.progress + 1,
+                }));
+                if (this.state.progress == 100) {
+                    clearInterval(this.interval);
+                }
+            }, timeInterval);
+        }
         this.intervalWaited = setInterval(() => {
             this.setState((prevState) => ({
                 waited: prevState.waited + 1,
@@ -256,7 +258,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
                                     <div>
                                         <div>APPROX WAITING TIME</div>
                                         <div>
-                                            <span style={{ color: 'deepskyblue' }}>123</span>&nbsp;Secs
+                                            <span style={{ color: 'deepskyblue' }}>{this.state.queueData.estimatedWaitingTime}</span>&nbsp;Secs
                                         </div>
                                     </div>
                                 </div>

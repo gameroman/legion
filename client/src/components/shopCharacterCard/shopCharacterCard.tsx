@@ -23,13 +23,13 @@ class ShopCharacterCard extends Component<ShopCharacteCardProps> {
   render() { 
     const getRarityValue = (effort) => {
       if(effort < 10) {
-        return {val: "common", clr: "cyan"};
+        return {val: "Common", clr: "cyan"};
       } else if(effort < 25) {
-        return {val: "rare", clr: "tomato"};
+        return {val: "Rare", clr: "tomato"};
       } else if(effort < 50) {
-        return {val: "epic", clr: "red"};
+        return {val: "Epic", clr: "red"};
       } else {
-        return {val: "legendary", clr: "orange"};
+        return {val: "Legendary", clr: "orange"};
       }
     }
 

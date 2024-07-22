@@ -1648,7 +1648,7 @@ canvas {
   cursor: pointer;
 }
 .active {
-  background-color: #3f3e49;
+  background-color: #252b36;
   border: 1px solid goldenrod;
 }
 
@@ -1663,7 +1663,7 @@ canvas {
   /* background-color: tomato; */
 }
 .queue-detail-body > div {
-  margin: 0.1vw 0;
+  margin: 0.1vw 0 0.1vw;
 }
 .queue-detail-body > div:not(:last-child) {
   border-bottom: 1px solid transparent;
@@ -1673,12 +1673,14 @@ canvas {
 }
 .queue-detail-body > div > div:first-child {
   /* font-family: Franklin Gothic; */
-  font-size: 0.8vw;
+  font-size: 0.8vw; 
+  line-height: 1vw;
   color: white;
 }
 .queue-detail-body > div > div:last-child { 
   /* font-family: Tahoma; */
-  font-size: 1vw;
+  font-size: 1vw; 
+  line-height: 1vw;
   /* font-weight: bold; */
   color: white;
   display: flex;

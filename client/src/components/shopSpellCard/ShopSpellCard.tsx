@@ -37,13 +37,13 @@ class ShopSpellCard extends Component<ShopCardProps> {
   render() {
     const getRarityValue = (effort) => {
       if(effort < 10) {
-        return {val: "common", clr: "cyan"};
+        return {val: "Common", clr: "cyan"};
       } else if(effort < 25) {
-        return {val: "rare", clr: "tomato"};
+        return {val: "Rare", clr: "tomato"};
       } else if(effort < 50) {
-        return {val: "epic", clr: "red"};
+        return {val: "Epic", clr: "red"};
       } else {
-        return {val: "legendary", clr: "orange"};
+        return {val: "Legendary", clr: "orange"};
       }
     }
 
@@ -56,7 +56,7 @@ class ShopSpellCard extends Component<ShopCardProps> {
     }
 
     const titleStyle = {
-      border: `1px solid ${RarityColor[data.rarity]}`,
+      // border: `1px solid ${RarityColor[data.rarity]}`,
       borderRadius: '4px',
     }
 
@@ -100,7 +100,7 @@ class ShopSpellCard extends Component<ShopCardProps> {
         <div className="spell-card-effect-container">
           <div className="spell-card-effect">
             <img src="/inventory/mp_icon.png" alt="cost" />
-            <span>{data.cost}</span>
+            <span>+{data.cost}</span>
           </div>
           <div className="spell-card-effect">
             <img src="/inventory/cd_icon.png" alt="cost" />
