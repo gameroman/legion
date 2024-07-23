@@ -595,6 +595,10 @@
 .player_hud_skills:target
 {
   border: 1px solid #71deff !important;
+} 
+
+.player_hud_skills:has(.skill-item-image) {
+  background-color: goldenrod;
 }
 
 .player_hud_action_container {
@@ -1100,7 +1104,9 @@
   align-items: center;
 
   position: absolute;
-  bottom: 94px;
+  bottom: 94px; 
+
+  z-index: 0;
 }
 
 .endgame_rewards_heading_container {

@@ -16,7 +16,9 @@ const tips = [
     "To have data to use in the UI, use the Log In button and create an account, which will create a user in the Firestore database.",
     "New version of legion game will be launched soon! Expect great interface and wonderful game experience, excellent, fantastic, great! New versio of legion game will be launched soon! Expect great interface and wonderful game experience, excellent, fantastic, great!",
     "Event handlers have access to the event that triggered the function.",
-]
+] 
+
+const playModes = ['practice', 'casual', 'ranked']; 
 
 interface QueueData {
     goldRewardInterval: number;
@@ -37,7 +39,8 @@ interface QpageState {
     progress: number;
     findState: string;
     waited: number;
-    queueData: QueueData;
+    queueData: QueueData; 
+    earnedGold: number; 
 }
 
 
@@ -82,7 +85,8 @@ class QueuePage extends Component<QPageProps, QpageState> {
                         link: "https://www.google.com"
                     }
                 ]
-            },
+            }, 
+            earnedGold: 0, 
         };
     }
 
@@ -118,11 +122,13 @@ class QueuePage extends Component<QPageProps, QpageState> {
             route(`/game/${gameId}`);
         });
 
-        this.socket.on('updateGold', ({ gold }) => {
+        this.socket.on('updateGold', ({ gold }) => { 
+            this.setState({ earnedGold: gold });
             console.log(`Received gold update: ${gold}`);
         });
 
-        this.socket.on('queueData', (data) => {
+        this.socket.on('queueData', (data) => { 
+            console.log('data -> ', data);
             this.setState({ queueData: { ...data } });
 
             // {
@@ -159,8 +165,8 @@ class QueuePage extends Component<QPageProps, QpageState> {
             console.log('data -> ', data);
         });
 
-        // this.socket.emit('joinQueue', { mode: this.props.matches.mode || 0 });
-        console.log('Joining queue');
+        this.socket.emit('joinQueue', { mode: this.props.matches.mode || 0 });
+        console.log('Joining queue'); 
     }
 
     handleQuickFind = () => {
@@ -246,7 +252,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
                                         <div>EARNED</div>
                                         <div>
                                             <div><img src="/gold_icon.png" /></div>
-                                            <div><span style={{ color: 'coral' }}>0</span></div>
+                                            <div><span style={{ color: 'coral' }}>{this.state.earnedGold}</span></div>
                                         </div>
                                     </div>
                                     <div>
@@ -282,7 +288,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
 
                         </div>
                         <div className="queue-text">
-                            Waiting for players in casual mode…
+                            Waiting for players in {playModes[this.props.matches.mode]} mode…
                         </div>
                     </div>
                 </div>

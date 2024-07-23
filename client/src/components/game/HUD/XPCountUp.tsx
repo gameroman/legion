@@ -20,15 +20,16 @@ class XPCountUp extends Component<CountUpProps, CountUpState> {
     private timer: NodeJS.Timeout | null = null;
     state: CountUpState = {
         isLevelUp: 0,
-        xpCounter: 0,
+        xpCounter: this.props.member.xp,
         totalXP: this.props.character.xp + this.props.member.xp,
     }
 
-    componentDidMount(): void {
+    componentDidMount(): void { 
+        console.log('c ' + this.props.character.xp + ' m ' + this.props.member.xp);
         const interval = Math.max(0.1, this.state.totalXP / 500);
         this.timer = setInterval(() => {
             const { member, character } = this.props;
-            const maxXP = getXPThreshold(character.level);
+            const maxXP = getXPThreshold(character.level); 
 
             if (this.state.totalXP > maxXP && this.state.xpCounter >= maxXP) {
                 this.setState(prevState => ({ 
@@ -81,7 +82,7 @@ class XPCountUp extends Component<CountUpProps, CountUpState> {
                         <div className="flex justify_between width_full">
                             <span className="endgame_character_exp">EXP</span>
                             <span className="endgame_character_expVal">
-                                +{Math.floor(this.state.xpCounter)}
+                                +{Math.floor(this.props.character.xp)}
                             </span>
                         </div>
                         <div className="endgame_character_exp_bg">
