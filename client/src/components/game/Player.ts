@@ -188,11 +188,11 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     isFrozen() {
-        return this.statuses[StatusEffect.FREEZE] > 0;
+        return this.statuses[StatusEffect.FREEZE] != 0;
     }
 
     isParalyzed() {
-        return (this.statuses[StatusEffect.PARALYZE] > 0) || this.isFrozen();
+        return (this.statuses[StatusEffect.PARALYZE] != 0) || this.isFrozen();
     }
 
     canAct() {
@@ -224,9 +224,11 @@ export class Player extends Phaser.GameObjects.Container {
 
         if (this.isFrozen()) {
             this.animationLock = false;
+            console.log(`Blocking animation`);
             return;
         }
 
+        console.log(`Playing animation ${key}`);
         this.sprite.play(`${this.texture}_anim_${key}`);
         if (revertToIdle) {
             this.sprite.once('animationcomplete', this.handleAnimationComplete, this);
@@ -652,6 +654,7 @@ export class Player extends Phaser.GameObjects.Container {
             this.statuses[StatusEffect.PARALYZE] = 0;
             this.statusSprite.anims.stop();
             this.statusSprite.setVisible(false);
+            console.log(`[setParalyzed] playing ${this.getIdleAnim()}`);
             this.playAnim(this.getIdleAnim());
         }
     }
