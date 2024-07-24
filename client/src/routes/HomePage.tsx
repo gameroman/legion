@@ -4,11 +4,6 @@ import { Router, Route } from 'preact-router';
 import AuthContext from '../contexts/AuthContext';
 import { PlayerContext } from '../contexts/PlayerContext';
 
-import firebase from 'firebase/compat/app'
-import * as firebaseui from 'firebaseui'
-import 'firebaseui/dist/firebaseui.css'
-import 'firebase/compat/auth';
-
 import PlayPage from '../components/PlayPage';
 import TeamPage from '../components/TeamPage';
 import ShopPage from '../components/ShopPage';
@@ -51,7 +46,7 @@ class HomePage extends Component<object, {}> {
                             <div className="mainContent">
                                 {/* <Router onChange={this.handleRouteChange}> */}
                                 <Router>
-                                    <Route default path="/play" component={PlayPage} />
+                                    <Route path="/play" component={PlayPage} />
                                     <Route path="/queue/:mode" component={QueuePage} />
                                     <Route path="/team/:id?" component={TeamPage} />
                                     <Route path="/shop/:id?" component={ShopPage} />

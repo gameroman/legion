@@ -64,6 +64,7 @@ export class Arena extends Phaser.Scene
         this.load.spritesheet('slash', 'vfx/slash.png', { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('thunder', 'vfx/bolts.png', { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('ice', 'vfx/ice.png', { frameWidth: 96, frameHeight: 96});
+        this.load.spritesheet('ice2', 'vfx/ice2.png', { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('impact', 'vfx/sword_impact.png', { frameWidth: 291, frameHeight: 291});
 
         this.load.spritesheet('statuses', 'States.png', { frameWidth: 96, frameHeight: 96});
@@ -757,7 +758,6 @@ export class Arena extends Phaser.Scene
     }
 
     processLocalAnimation({x, y, id, isKill}) {
-        console.log(`Processing local animation`);
         const spell = getSpellById(id);
         if (spell.size % 2 === 0) {
             x += 0.5;
@@ -974,6 +974,18 @@ export class Arena extends Phaser.Scene
         });
 
         this.anims.create({
+            key: `ice+`, 
+            frames: this.anims.generateFrameNumbers('ice', { start: 36, end: 48 }), 
+            frameRate: 15,
+        });
+
+        this.anims.create({
+            key: `iceX`, 
+            frames: this.anims.generateFrameNumbers('ice2', {frames: [128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171]}), 
+            frameRate: 15,
+        });
+
+        this.anims.create({
             key: `cast`, 
             frames: this.anims.generateFrameNumbers('cast', { frames: [10, 11, 12] }), 
             frameRate: 15, // Number of frames per second
@@ -1133,7 +1145,6 @@ export class Arena extends Phaser.Scene
     }
 
     displaySpellArea(location, size, duration) {
-        console.log(`Displaying spell`);
         if (size % 2 === 0) {
             location.x += 0.5;
             location.y += 0.5;
@@ -1158,7 +1169,6 @@ export class Arena extends Phaser.Scene
             repeat: repeatCount - 1,    // Number of blinks (or -1 for infinite)
             onComplete: () => {
                 spellAreaImage.destroy(); // Destroy the image at the end
-                console.log('Destroyed spell area');
             }
         });
     }

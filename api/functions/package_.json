@@ -5,7 +5,7 @@
     "build": "webpack",
     "build:watch": "webpack --watch",
     "emulators:start": "firebase emulators:start --import ./firestore-emulator-data --export-on-exit ./firestore-emulator-data",
-    "serve:functions": "nodemon --watch 'src/**/*.ts' --exec 'npm run build'",
+    "serve:functions": "nodemon --watch 'src/**/*.ts' --watch 'shared/**/*.ts' --exec 'npm run build'",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",

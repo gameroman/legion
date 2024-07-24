@@ -228,7 +228,7 @@ export class Player extends Phaser.GameObjects.Container {
             return;
         }
 
-        console.log(`Playing animation ${key}`);
+        // console.log(`Playing animation ${key}`);
         this.sprite.play(`${this.texture}_anim_${key}`);
         if (revertToIdle) {
             this.sprite.once('animationcomplete', this.handleAnimationComplete, this);
