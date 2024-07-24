@@ -82,7 +82,7 @@ class RankPage extends Component {
       text: 'These are some highlights of players who stand out in your league. Try to see if you can feature there!',
       attachTo: {
         element: '.highlights-container',
-        on: 'bottom'
+        on: 'left'
       },
       buttons: [
         {

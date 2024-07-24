@@ -1496,12 +1496,6 @@ canvas {
   height: auto;
 }
 
-.login-header h1 {
-  font-size: 36px;
-  margin-bottom: 10px;
-  color: #4a90e2;
-}
-
 .login-header p {
   /* padding-top: 50px; */
   font-size: 14px;
@@ -1579,8 +1573,20 @@ canvas {
   text-align: center;
 }
 
+.tour-step button {
+  background-color: #ffbf00;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  font-family: 'Kim';
+  color: white;
+}
+
+.tour-step button:not(:disabled):hover {
+  background-color: #ffaa00;
+  color: white;
+}
+
 .shepherd-text {
-  font-family: Kim ;
+  /* font-family: 'Kim' ; */
   color: white;
 }
 
@@ -1595,37 +1601,30 @@ canvas {
   content: "";
   transform: rotate(45deg);
   background: #242b37;
-  border: 2px solid #ffbf00;
 }
 
 /* Top arrow */
 .shepherd-element[data-popper-placement^=bottom] > .shepherd-arrow:before {
   border-top: 2px solid #ffbf00;
   border-left: 2px solid #ffbf00;
-  border-bottom: none;
-  border-right: none;
 }
 
 /* Bottom arrow */
 .shepherd-element[data-popper-placement^=top] > .shepherd-arrow:before {
   border-bottom: 2px solid #ffbf00;
   border-right: 2px solid #ffbf00;
-  border-top: none;
-  border-left: none;
 }
 
 /* Left arrow */
 .shepherd-element[data-popper-placement^=right] > .shepherd-arrow:before {
   border-left: 2px solid #ffbf00;
-  border-top: 2px solid #ffbf00;
-  border-bottom: none;
-  border-right: none;
+  border-bottom: 2px solid #ffbf00;
+  left: 0px;
 }
 
 /* Right arrow */
 .shepherd-element[data-popper-placement^=left] > .shepherd-arrow:before {
+  border-top: 2px solid #ffbf00;
   border-right: 2px solid #ffbf00;
-  border-bottom: 2px solid #ffbf00;
-  border-top: none;
-  border-left: none;
+  right: 0px;
 }
