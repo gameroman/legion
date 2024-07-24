@@ -186,6 +186,7 @@ export interface APIPlayerData {
     rank: number;
     allTimeRank: number;
     dailyloot: DailyLootAllAPIData;
+    tours: string[];
 }
 
 export interface DBPlayerData {

@@ -54,7 +54,7 @@ class Navbar extends Component<Props, State> {
     copyIDtoClipboard = () => {  
         const textToCopy = this.props.playerData.uid;
         navigator.clipboard.writeText(textToCopy).then(() => {
-            successToast('Player ID copied!');
+            successToast(`Player ID ${textToCopy} copied!`);
         }).catch(err => {
             console.error('Failed to copy text: ', err);
         });

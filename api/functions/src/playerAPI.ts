@@ -96,6 +96,13 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
       avgAudienceScore: 0,
       avgGrade: 0,
     },
+    tours: {
+      'play': false,
+      'team': false,
+      'rank': false,
+      'shop': false,
+      'queue': false,
+    },
   } as DBPlayerData;
 
   // Start a batch to ensure atomicity
@@ -151,7 +158,6 @@ const transformDailyLoot = (dailyloot: DailyLootAllDBData): DailyLootAllAPIData 
 
 
 export const getPlayerData = onRequest((request, response) => {
-  logger.info("Fetching playerData");
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -178,6 +184,8 @@ export const getPlayerData = onRequest((request, response) => {
         // a `countdown` field
         playerData.dailyloot = transformDailyLoot(playerData.dailyloot);
 
+        const tours = Object.keys(playerData.tours).filter((tour) => !playerData.tours[tour]);
+
         response.send({
           uid,
           gold: playerData.gold,
@@ -190,6 +198,7 @@ export const getPlayerData = onRequest((request, response) => {
           rank: playerData.leagueStats.rank,
           allTimeRank: playerData.allTimeStats.rank,
           dailyloot: playerData.dailyloot,
+          tours,
         } as APIPlayerData);
       } else {
         response.status(404).send("Not Found: Invalid player ID");

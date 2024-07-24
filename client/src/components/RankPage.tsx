@@ -6,8 +6,8 @@ import SeasonCard from './seasonCard/SeasonCard';
 import AwardedPlayer from './awardedPlayer/AwardedPlayer';
 import { rankNoImage } from '@legion/shared/enums';
 import { PlayerContext } from '../contexts/PlayerContext';
+import { startTour   } from './tours';
 import 'react-loading-skeleton/dist/skeleton.css'
-import Shepherd from 'shepherd.js';
 
 import Skeleton from 'react-loading-skeleton';
 
@@ -45,92 +45,8 @@ class RankPage extends Component {
   }
 
   async componentDidMount() {
-    this.state.tour = new Shepherd.Tour({
-      useModalOverlay: true,
-      defaultStepOptions: {
-        classes: 'tour-step',
-        scrollTo: true
-      }
-    });
-    this.state.tour.addStep({
-      text: 'This is the Rank Page. Here you can check your ranking in your league\'s leaderboard or the all-time leaderboard and check out the top players of each league!',
-      buttons: [
-        {
-          text: 'Next',
-          action: this.state.tour.next
-        }
-      ]
-    });
-    this.state.tour.addStep({
-      text: 'Here you can see your current rank and ELO rating and see when the current season ends.',
-      attachTo: {
-        element: '.recap-single-container',
-        on: 'bottom'
-      },
-      buttons: [
-        {
-          text: 'Back',
-          action: this.state.tour.back
-        },
-        {
-          text: 'Next',
-          action: this.state.tour.next
-        }
-      ]
-    });
-    this.state.tour.addStep({
-      text: 'These are some highlights of players who stand out in your league. Try to see if you can feature there!',
-      attachTo: {
-        element: '.highlights-container',
-        on: 'left'
-      },
-      buttons: [
-        {
-          text: 'Back',
-          action: this.state.tour.back
-        },
-        {
-          text: 'Next',
-          action: this.state.tour.next
-        }
-      ]
-    });
-    this.state.tour.addStep({
-      text: 'This menu allows you to display the leaderboards of each league, from top to bottom: Bronze, Silver, Gold, Zenith, Apex, and All-time.',
-      attachTo: {
-        element: '.rank-tab-container',
-        on: 'right'
-      },
-      buttons: [
-        {
-          text: 'Back',
-          action: this.state.tour.back
-        },
-        {
-          text: 'Next',
-          action: this.state.tour.next
-        }
-      ]
-    });
-    this.state.tour.addStep({
-      text: 'This is the leaderboard of the current league. You can sort is as you like and see which players might be promoted or demoted at the end of the season, and who will earn rewards.',
-      attachTo: {
-        element: '.rank-table-container',
-        on: 'top'
-      },
-      buttons: [
-        {
-          text: 'Back',
-          action: this.state.tour.back
-        },
-        {
-          text: 'Complete',
-          action: this.state.tour.next
-        }
-      ]
-    });
     await this.fetchLeaderboard();
-    this.state.tour.start();
+    startTour('rank', this.context.player.tours);
   }
 
   handleCurrTab = (index: number) => {

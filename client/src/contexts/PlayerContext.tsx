@@ -13,6 +13,7 @@ export interface PlayerContextData {
   allTimeRank: number;
   dailyloot: DailyLootAllAPIData;
   league: League;
+  tours: string[];
 }
 
 export interface PlayerContextState {
@@ -35,6 +36,7 @@ export const PlayerContext = createContext<{
     allTimeRank: 0,
     dailyloot: null,
     league: League.BRONZE,
+    tours: [],
   },
   setPlayerInfo: () => {},
   refreshPlayerData: () => {}
