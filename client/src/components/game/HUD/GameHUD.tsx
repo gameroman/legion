@@ -90,7 +90,9 @@ class GameHUD extends Component<object, State> {
   }
 
   render() {
-    const { playerVisible, player, team1, team2, isTutorial, isSpectator } = this.state;
+    const { playerVisible, player, team1, team2, isTutorial, isSpectator } = this.state; 
+    console.log('team1 -> ', team1);
+    console.log('team2 -> ', team2);
     const members = team1?.members[0].isPlayer ? team1?.members : team2?.members;
 
     return (
