@@ -1571,3 +1571,61 @@ canvas {
 .toast {
   border: 2px solid #ffbf00;
 }
+
+.tour-step {
+  border: 2px solid #ffbf00;
+  background-color: #242b37;
+  padding: 10px;
+  text-align: center;
+}
+
+.shepherd-text {
+  font-family: Kim ;
+  color: white;
+}
+
+.shepherd-arrow, .shepherd-arrow:before {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  z-index: -1;
+}
+
+.shepherd-arrow:before {
+  content: "";
+  transform: rotate(45deg);
+  background: #242b37;
+  border: 2px solid #ffbf00;
+}
+
+/* Top arrow */
+.shepherd-element[data-popper-placement^=bottom] > .shepherd-arrow:before {
+  border-top: 2px solid #ffbf00;
+  border-left: 2px solid #ffbf00;
+  border-bottom: none;
+  border-right: none;
+}
+
+/* Bottom arrow */
+.shepherd-element[data-popper-placement^=top] > .shepherd-arrow:before {
+  border-bottom: 2px solid #ffbf00;
+  border-right: 2px solid #ffbf00;
+  border-top: none;
+  border-left: none;
+}
+
+/* Left arrow */
+.shepherd-element[data-popper-placement^=right] > .shepherd-arrow:before {
+  border-left: 2px solid #ffbf00;
+  border-top: 2px solid #ffbf00;
+  border-bottom: none;
+  border-right: none;
+}
+
+/* Right arrow */
+.shepherd-element[data-popper-placement^=left] > .shepherd-arrow:before {
+  border-right: 2px solid #ffbf00;
+  border-bottom: 2px solid #ffbf00;
+  border-top: none;
+  border-left: none;
+}
