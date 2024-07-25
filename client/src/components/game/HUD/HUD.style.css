@@ -601,6 +601,10 @@
   background-color: goldenrod;
 } */
 
+.goldend_background {
+  background-color: goldenrod;
+}
+
 .player_hud_action_container {
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);

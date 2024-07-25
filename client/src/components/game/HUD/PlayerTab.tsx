@@ -17,8 +17,12 @@ interface State {
   clickedSpell: number;
   poisonCounter: number;
   frozenCounter: number;
-  selectedSpell: BaseSpell;
+  selectedSpell: BaseSpell; 
+  clickedItemIndex: number | null; 
 }
+
+const itemBasicNumber = 100; 
+const spellBasicNumber = 200; 
 
 class PlayerTab extends Component<Props, State> {
   timerID: NodeJS.Timeout;
@@ -32,17 +36,20 @@ class PlayerTab extends Component<Props, State> {
       clickedSpell: -1,
       poisonCounter: 25,
       frozenCounter: 15,
-      selectedSpell: null,
+      selectedSpell: null, 
+      clickedItemIndex: null, 
     };
     this.events = this.props.eventEmitter;
   }
 
   componentDidMount() {
-    this.timerID = setInterval(() => this.tick(), 1000);
+    this.timerID = setInterval(() => this.tick(), 1000); 
+    document.addEventListener('click', this.handleDocumentClick); 
   }
 
   componentWillUnmount() {
-    clearInterval(this.timerID);
+    clearInterval(this.timerID); 
+    document.removeEventListener('click', this.handleDocumentClick); 
   }
 
   tick() {
@@ -67,6 +74,20 @@ class PlayerTab extends Component<Props, State> {
     setTimeout(() => {
       this.setState({ [stateField]: -1 });
     }, 1000);
+  } 
+
+  handleClick = (event: Event, type: string, index: number, indexItem) => {
+    event.stopPropagation(); 
+    this.setState((prevState: State) => ({
+      clickedItemIndex: prevState.clickedItemIndex === indexItem ? null : indexItem,
+    })); 
+    this.actionClick(type, index);
+  } 
+
+  handleDocumentClick = (event: MouseEvent) => {
+    if (!(event.target instanceof HTMLElement && event.target.contains(this.base))) {
+      this.setState({ clickedItemIndex: null}); 
+    }
   }
 
   getCooldownRatio(player: PlayerProps): number {
@@ -96,7 +117,7 @@ class PlayerTab extends Component<Props, State> {
     const cooldownRatio = this.getCooldownRatio(player);
     const cooldownBarStyle = {
       width: `${cooldownRatio * 100}%`,
-    };
+    }; 
 
     return (
       <div className="flex flex_col items_center">
@@ -145,8 +166,17 @@ class PlayerTab extends Component<Props, State> {
               <p className="hud_actions_title">Items</p>
               <div className="grid player_hud_action_container gap_4 padding_y_4">
                 {Array.from({ length: 6 }, (_, idx) => (
-                  <div className="player_hud_skills flex items_center justify_center relative" key={idx}
-                    onClick={() => this.actionClick('item', idx)}>
+                  <div 
+                    className="player_hud_skills flex items_center justify_center relative" 
+                    key={idx}
+                    // onClick={() => this.actionClick('item', idx)} 
+                    style={{
+                      backgroundColor: this.state.clickedItemIndex === idx + itemBasicNumber ? '#bf9b30' : 'initial',
+                    }}
+                    onClick={(event: Event) => {
+                      this.handleClick(event, 'item', idx, idx + itemBasicNumber); 
+                    }}
+                  >
                     <ActionItem
                       action={player.items[idx]}
                       index={idx}
@@ -167,7 +197,14 @@ class PlayerTab extends Component<Props, State> {
                   <div
                     className="player_hud_skills flex items_center justify_center relative"
                     key={idx}
-                    onClick={() => this.actionClick('spell', idx)}>
+                    // onClick={() => this.actionClick('spell', idx)}
+                    style={{
+                      backgroundColor: this.state.clickedItemIndex === idx + spellBasicNumber ? '#bf9b30' : 'initial',
+                    }}
+                    onClick={(event: Event) => {
+                      this.handleClick(event, 'spell', idx, idx + spellBasicNumber); 
+                    }}
+                  >
                     <ActionItem
                       action={player.spells[idx]}
                       index={idx}
