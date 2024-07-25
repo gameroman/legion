@@ -347,3 +347,39 @@ export const claimChest = onRequest((request, response) => {
   });
 });
 
+export const completeTour = onRequest((request, response) => {
+  const db = admin.firestore();
+
+  corsMiddleware(request, response, async () => {
+    try {
+      const uid = await getUID(request);
+      const tour = request.query.tour;
+      logger.info("Completing tour for player:", uid, "tour:", tour);
+
+      await db.runTransaction(async (transaction) => {
+        const playerRef = db.collection("players").doc(uid);
+        const playerDoc = await transaction.get(playerRef);
+
+        if (!playerDoc.exists) {
+          throw new Error("Invalid player ID");
+        }
+
+        const playerData = playerDoc.data();
+        if (!playerData) {
+          throw new Error("playerData is null");
+        }
+
+        playerData.tours[tour as keyof typeof playerData.tours] = true;
+
+        transaction.update(playerRef, {
+          tours: playerData.tours,
+        });
+
+        response.send({});
+      });
+    } catch (error) {
+      console.error("completeTour error:", error);
+      response.status(500).send("Error");
+    }
+  });
+});

@@ -7,6 +7,9 @@ export function startTour(page, todoTours) {
         case 'rank':
             startRankTour();
             break;
+        case 'play':
+            startPlayTour();
+            break;
         default:
             break;
     }
@@ -49,6 +52,52 @@ function step(tour, text, attachTo, isLast = false) {
             enabled: true,
         },
       }
+}
+
+function startPlayTour() {
+    const tour = getTour();
+    tour.addStep(step(tour, 'This is the Play Page. From here you can launch games, watch other player\'s games and claim your daily loot!', null))
+    tour.addStep(step(
+        tour,
+        'Use these flags to navigate between the different menus.',
+        {
+            element: '.menuItems',
+            on: 'bottom'
+        })
+    );
+    tour.addStep(step(
+        tour,
+        'These are your gold, your rank in your starting league and your ELO rating.',
+        {
+            element: '#goldEloArea',
+            on: 'bottom'
+        })
+    );
+    tour.addStep(step(
+        tour,
+        'These are you characters, you can click on them to manage their stats and equipment!',
+        {
+            element: '.rosterContainer',
+            on: 'bottom'
+        })
+    );
+    tour.addStep(step(
+        tour,
+        'These 3 buttons allow you to start a game of your choice anytime you want!',
+        {
+            element: '.barContainer',
+            on: 'bottom'
+        })
+    );
+    tour.addStep(step(
+        tour,
+        'The daily loot chests are available every 6, 12 and 24 hours; make sure to play a casual or ranked games to win the keys to open them!',
+        {
+            element: '.dailyLootContainer',
+            on: 'top'
+        },
+        true),
+    );
 }
 
 function startRankTour() {
