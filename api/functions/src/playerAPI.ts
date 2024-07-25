@@ -353,7 +353,7 @@ export const completeTour = onRequest((request, response) => {
   corsMiddleware(request, response, async () => {
     try {
       const uid = await getUID(request);
-      const tour = request.query.tour;
+      const tour = request.body.page;
       logger.info("Completing tour for player:", uid, "tour:", tour);
 
       await db.runTransaction(async (transaction) => {

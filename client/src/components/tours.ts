@@ -1,8 +1,12 @@
 import Shepherd from 'shepherd.js';
+import { apiFetch } from '../services/apiService';
 
 export function startTour(page, todoTours) {
-    if (!todoTours.includes(page))
+    console.log(`Starting tour for ${page}`);
+    if (!todoTours.includes(page)) {
+        console.log(`Tour for ${page} already completed`);
         return;
+    }
     switch (page) {
         case 'rank':
             startRankTour();
@@ -13,6 +17,12 @@ export function startTour(page, todoTours) {
         default:
             break;
     }
+    apiFetch('completeTour', {
+        method: 'POST',
+        body: {
+            page
+        }
+    });
 }
 
 function getTour() {
@@ -55,11 +65,12 @@ function step(tour, text, attachTo, isLast = false) {
 }
 
 function startPlayTour() {
+    console.log('Starting play tour');
     const tour = getTour();
     tour.addStep(step(tour, 'This is the Play Page. From here you can launch games, watch other player\'s games and claim your daily loot!', null))
     tour.addStep(step(
         tour,
-        'Use these flags to navigate between the different menus.',
+        'Use these flags to navigate between the different menus!',
         {
             element: '.menuItems',
             on: 'bottom'
@@ -67,7 +78,7 @@ function startPlayTour() {
     );
     tour.addStep(step(
         tour,
-        'These are your gold, your rank in your starting league and your ELO rating.',
+        'These are your gold, your rank in your starting league and your ELO rating!',
         {
             element: '#goldEloArea',
             on: 'bottom'
@@ -78,7 +89,7 @@ function startPlayTour() {
         'These are you characters, you can click on them to manage their stats and equipment!',
         {
             element: '.rosterContainer',
-            on: 'bottom'
+            on: 'top'
         })
     );
     tour.addStep(step(
@@ -95,9 +106,18 @@ function startPlayTour() {
         {
             element: '.dailyLootContainer',
             on: 'top'
+        }),
+    );
+    tour.addStep(step(
+        tour,
+        'Now just jump into a practice game and start playing!',
+        {
+            element: '#playmode_0',
+            on: 'bottom'
         },
         true),
     );
+    tour.start();
 }
 
 function startRankTour() {

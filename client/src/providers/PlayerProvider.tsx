@@ -22,6 +22,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           dailyloot: null,
           league: League.BRONZE,
           tours: [],
+          isLoaded: false,
         }
       };
 
@@ -56,6 +57,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
                   dailyloot: data.dailyloot,
                   league: data.league,
                   tours: data.tours,
+                  isLoaded: true,
               }
           });
       } catch (error) {

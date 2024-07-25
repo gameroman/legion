@@ -6,7 +6,7 @@ import SeasonCard from './seasonCard/SeasonCard';
 import AwardedPlayer from './awardedPlayer/AwardedPlayer';
 import { rankNoImage } from '@legion/shared/enums';
 import { PlayerContext } from '../contexts/PlayerContext';
-import { startTour   } from './tours';
+import { startTour } from './tours';
 import 'react-loading-skeleton/dist/skeleton.css'
 
 import Skeleton from 'react-loading-skeleton';
