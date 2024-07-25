@@ -96,6 +96,13 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
       avgAudienceScore: 0,
       avgGrade: 0,
     },
+    tours: {
+      'play': false,
+      'team': false,
+      'rank': false,
+      'shop': false,
+      'queue': false,
+    },
   } as DBPlayerData;
 
   // Start a batch to ensure atomicity
@@ -151,7 +158,6 @@ const transformDailyLoot = (dailyloot: DailyLootAllDBData): DailyLootAllAPIData 
 
 
 export const getPlayerData = onRequest((request, response) => {
-  logger.info("Fetching playerData");
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -178,6 +184,8 @@ export const getPlayerData = onRequest((request, response) => {
         // a `countdown` field
         playerData.dailyloot = transformDailyLoot(playerData.dailyloot);
 
+        const tours = Object.keys(playerData.tours).filter((tour) => !playerData.tours[tour]);
+
         response.send({
           uid,
           gold: playerData.gold,
@@ -190,6 +198,7 @@ export const getPlayerData = onRequest((request, response) => {
           rank: playerData.leagueStats.rank,
           allTimeRank: playerData.allTimeStats.rank,
           dailyloot: playerData.dailyloot,
+          tours,
         } as APIPlayerData);
       } else {
         response.status(404).send("Not Found: Invalid player ID");
@@ -338,3 +347,39 @@ export const claimChest = onRequest((request, response) => {
   });
 });
 
+export const completeTour = onRequest((request, response) => {
+  const db = admin.firestore();
+
+  corsMiddleware(request, response, async () => {
+    try {
+      const uid = await getUID(request);
+      const tour = request.body.page;
+      logger.info("Completing tour for player:", uid, "tour:", tour);
+
+      await db.runTransaction(async (transaction) => {
+        const playerRef = db.collection("players").doc(uid);
+        const playerDoc = await transaction.get(playerRef);
+
+        if (!playerDoc.exists) {
+          throw new Error("Invalid player ID");
+        }
+
+        const playerData = playerDoc.data();
+        if (!playerData) {
+          throw new Error("playerData is null");
+        }
+
+        playerData.tours[tour as keyof typeof playerData.tours] = true;
+
+        transaction.update(playerRef, {
+          tours: playerData.tours,
+        });
+
+        response.send({});
+      });
+    } catch (error) {
+      console.error("completeTour error:", error);
+      response.status(500).send("Error");
+    }
+  });
+});

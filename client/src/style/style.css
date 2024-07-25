@@ -1496,12 +1496,6 @@ canvas {
   height: auto;
 }
 
-.login-header h1 {
-  font-size: 36px;
-  margin-bottom: 10px;
-  color: #4a90e2;
-}
-
 .login-header p {
   /* padding-top: 50px; */
   font-size: 14px;
@@ -1570,4 +1564,91 @@ canvas {
 
 .toast {
   border: 2px solid #ffbf00;
+}
+
+.tour-step {
+  border: 2px solid #ffbf00;
+  background-color: #242b37;
+  padding: 10px;
+  text-align: center;
+}
+
+.shepherd-button {
+  background-color: #ffbf00;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  font-family: 'Kim';
+  color: white;
+}
+
+.shepherd-button:not(:disabled):hover {
+  background-color: #ffaa00;
+  color: white;
+}
+
+.shepherd-text {
+  /* font-family: 'Kim' ; */
+  color: white;
+}
+
+.shepherd-arrow, .shepherd-arrow:before {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  z-index: -1;
+}
+
+.shepherd-arrow:before {
+  content: "";
+  transform: rotate(45deg);
+  background: #242b37;
+}
+
+/* Top arrow */
+.shepherd-element[data-popper-placement^=bottom] > .shepherd-arrow:before {
+  border-top: 2px solid #ffbf00;
+  border-left: 2px solid #ffbf00;
+}
+
+/* Bottom arrow */
+.shepherd-element[data-popper-placement^=top] > .shepherd-arrow:before {
+  border-bottom: 2px solid #ffbf00;
+  border-right: 2px solid #ffbf00;
+}
+
+/* Left arrow */
+.shepherd-element[data-popper-placement^=right] > .shepherd-arrow:before {
+  border-left: 2px solid #ffbf00;
+  border-bottom: 2px solid #ffbf00;
+  left: 0px;
+}
+
+/* Right arrow */
+.shepherd-element[data-popper-placement^=left] > .shepherd-arrow:before {
+  border-top: 2px solid #ffbf00;
+  border-right: 2px solid #ffbf00;
+  right: 0px;
+}
+
+.shepherd-cancel-icon {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: rgb(255, 68, 68);
+  border-radius: 50%;
+  color: white;
+  font-size: 30px;
+  line-height: 22px;
+  text-align: center;
+  cursor: pointer;
+  z-index: 1;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  font-family: 'Kim';
+}
+
+.shepherd-cancel-icon:hover {
+  background: rgb(224, 0, 0);
+  color: white;
 }

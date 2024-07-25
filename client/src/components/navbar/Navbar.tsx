@@ -54,7 +54,7 @@ class Navbar extends Component<Props, State> {
     copyIDtoClipboard = () => {  
         const textToCopy = this.props.playerData.uid;
         navigator.clipboard.writeText(textToCopy).then(() => {
-            successToast('Player ID copied!');
+            successToast(`Player ID ${textToCopy} copied!`);
         }).catch(err => {
             console.error('Failed to copy text: ', err);
         });
@@ -113,7 +113,7 @@ class Navbar extends Component<Props, State> {
                     </Link>
                 </div>
 
-                <div className="flexContainer">
+                <div className="flexContainer" id="goldEloArea">
                     <UserInfoBar label={`${Math.round(this.props.playerData?.gold)}`}  />
                     <UserInfoBar label={`#${this.props.playerData?.rank}`} elo={this.props.playerData?.elo} league={this.props.playerData?.league} />
                     <div class="expand_btn" style={{backgroundImage: 'url("/expand_btn.png")'}} onClick={() => this.setState({ openDropdown: !this.state.openDropdown })} onMouseEnter={() => this.setState({ openDropdown: true })}>

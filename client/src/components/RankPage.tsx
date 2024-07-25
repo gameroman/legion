@@ -6,6 +6,7 @@ import SeasonCard from './seasonCard/SeasonCard';
 import AwardedPlayer from './awardedPlayer/AwardedPlayer';
 import { rankNoImage } from '@legion/shared/enums';
 import { PlayerContext } from '../contexts/PlayerContext';
+import { startTour } from './tours';
 import 'react-loading-skeleton/dist/skeleton.css'
 
 import Skeleton from 'react-loading-skeleton';
@@ -17,7 +18,8 @@ class RankPage extends Component {
     leaderboardData: null,
     sortColumn: 'elo',
     sortAscending: false,
-    curr_tab: 0
+    curr_tab: 0,
+    tour: null
   };
 
   camelCaseToNormal = (text) => {
@@ -44,6 +46,7 @@ class RankPage extends Component {
 
   async componentDidMount() {
     await this.fetchLeaderboard();
+    startTour('rank', this.context.player.tours);
   }
 
   handleCurrTab = (index: number) => {

@@ -21,6 +21,8 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           allTimeRank: 0,
           dailyloot: null,
           league: League.BRONZE,
+          tours: [],
+          isLoaded: false,
         }
       };
 
@@ -54,6 +56,8 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
                   allTimeRank: data.allTimeRank,
                   dailyloot: data.dailyloot,
                   league: data.league,
+                  tours: data.tours,
+                  isLoaded: true,
               }
           });
       } catch (error) {
