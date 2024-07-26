@@ -55,7 +55,8 @@ class Action extends Component<ActionItemProps> {
   }
 
   render() {
-    const { action, index, clickedIndex, canAct, actionType, hideHotKey, onActionClick } = this.props;
+    const { action, index, clickedIndex, canAct, actionType, hideHotKey, onActionClick } = this.props; 
+    // console.log('actionItem -> ', action);
 
     const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
     const startPosition = keyboardLayout.indexOf(actionType === InventoryType.CONSUMABLES ? 'Z' : 'Q');

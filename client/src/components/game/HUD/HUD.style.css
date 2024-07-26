@@ -1033,8 +1033,8 @@
 }
 
 .streak_gold_list > div {
-  width: 34px;
-  height: 36px;
+  width: 32px; 
+  height: 32px; 
   background-repeat: no-repeat;
 }
 
