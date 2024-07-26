@@ -59,7 +59,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
             queueData: {
                 goldRewardInterval: 0,
                 goldReward: 0,
-                estimatedWaitingTime: 10,
+                estimatedWaitingTime: -1,
                 nbInQueue: 0, // countQueuingPlayers(player.mode, player.league),
                 tips: [
                     "o have data to use in the UI, use the Log In button and create an account, which will create a user in the Firestore database.",
@@ -272,7 +272,8 @@ class QueuePage extends Component<QPageProps, QpageState> {
                                     <div>
                                         <div>APPROX WAITING TIME</div>
                                         <div>
-                                            <span style={{ color: 'deepskyblue' }}>{this.state.queueData.estimatedWaitingTime == -1 ? '?' : this.state.queueData.estimatedWaitingTime}</span>&nbsp;Secs
+                                            <span style={{ color: 'deepskyblue' }}>{this.state.queueData.estimatedWaitingTime == -1 ? '?' : this.state.queueData.estimatedWaitingTime}</span>&nbsp;
+                                            {this.state.queueData.estimatedWaitingTime == -1 ? '' : 'Secs'}
                                         </div>
                                     </div>
                                 </div>
