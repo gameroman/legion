@@ -41,6 +41,7 @@ interface QpageState {
     waited: number;
     queueData: QueueData; 
     earnedGold: number; 
+    queueDataLoaded: boolean; 
 }
 
 
@@ -87,6 +88,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
                 ]
             }, 
             earnedGold: 0, 
+            queueDataLoaded: false, 
         };
     }
 
@@ -128,8 +130,11 @@ class QueuePage extends Component<QPageProps, QpageState> {
         });
 
         this.socket.on('queueData', (data) => { 
+
             console.log('data -> ', data);
-            this.setState({ queueData: { ...data } });
+
+            this.setState({ queueDataLoaded: true }); 
+            this.setState({ queueData: { ...data } }); 
 
             // {
             //     goldRewardInterval,
@@ -177,7 +182,10 @@ class QueuePage extends Component<QPageProps, QpageState> {
     }
 
     componentDidMount() {
-        this.joinQueue();
+        this.joinQueue(); 
+        // if(!this.state.queueDataLoaded) {
+
+        // }
         let timeInterval = this.state.queueData.estimatedWaitingTime * 10;
         if (this.state.queueData.estimatedWaitingTime != -1) {
             this.interval = setInterval(() => {
@@ -194,7 +202,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
             this.setState((prevState) => ({
                 waited: prevState.waited + 1,
             }))
-        }, 1000);
+        }, 1000); 
     }
 
     componentWillMount() {
@@ -264,7 +272,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
                                     <div>
                                         <div>APPROX WAITING TIME</div>
                                         <div>
-                                            <span style={{ color: 'deepskyblue' }}>{this.state.queueData.estimatedWaitingTime}</span>&nbsp;Secs
+                                            <span style={{ color: 'deepskyblue' }}>{this.state.queueData.estimatedWaitingTime == -1 ? '?' : this.state.queueData.estimatedWaitingTime}</span>&nbsp;Secs
                                         </div>
                                     </div>
                                 </div>
