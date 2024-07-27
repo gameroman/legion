@@ -179,7 +179,7 @@ function sendQData(player: Player) {
     player.socket.emit("queueData", {
         goldRewardInterval,
         goldReward,
-        estimatedWaitingTime: -1,
+        estimatedWaitingTime: 10,
         nbInQueue: countQueuingPlayers(player.mode, player.league),
         tips: [
             "o have data to use in the UI, use the Log In button and create an account, which will create a user in the Firestore database.",

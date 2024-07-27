@@ -158,7 +158,7 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
                         </div>
                         <div className="streak_gold_list_container">
                             {this.state.selectedChest.content.map((reward, idx) => { 
-                                console.log('rewardItem -> ', idx, reward); 
+                                // console.log('rewardItem ', idx, reward); 
                                 const coordinates = mapFrameToCoordinates(reward?.frame);
                                 const backgroundImageUrl = this.getBgImageUrl(reward?.type);
                                 return (

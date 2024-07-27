@@ -35,7 +35,7 @@ class ShopCharacterCard extends Component<ShopCharacteCardProps> {
 
     const {data} = this.props;
 
-    console.log('character -> data -> ', data);
+    // console.log('characterData ', data);
 
     const statsArray = Object.entries(data.stats).map(([key, value]) => ({ key, value: value as number }));
 

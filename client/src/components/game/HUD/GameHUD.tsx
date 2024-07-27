@@ -91,11 +91,12 @@ class GameHUD extends Component<object, State> {
 
   render() {
     const { playerVisible, player, team1, team2, isTutorial, isSpectator } = this.state; 
-    console.log('team1 -> ', team1);
-    console.log('team2 -> ', team2);
     const members = team1?.members[0].isPlayer ? team1?.members : team2?.members; 
     const score = team1?.members[0].isPlayer? team1?.score : team2?.score; 
-    console.log('score -> ', score);
+
+    console.log('team1 ', team1);
+    console.log('team2 ', team2);
+    console.log('score ', score);
 
     return (
       <div className="height_full flex flex_col justify_between padding_bottom_16">

@@ -48,7 +48,7 @@ class ShopConsumableCard extends Component<ShopCardProps> {
 
     const { data } = this.props;
 
-    console.log('consumable -> data -> ', data);
+    // console.log('consumableData ', data);
 
     const modalData: modalData = {
       id: data.id,

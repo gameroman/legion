@@ -31,7 +31,7 @@ class XPCountUp extends Component<CountUpProps, CountUpState> {
             const { member, character } = this.props;
             const maxXP = getXPThreshold(this.props.member.level); 
 
-            console.log('isLevelUp -> ', this.state.isLevelUp);
+            console.log('isLevelUp ', this.state.isLevelUp);
 
             if (this.state.totalXP > maxXP && this.state.xpCounter >= maxXP) {
                 this.setState(prevState => ({ 
@@ -61,8 +61,8 @@ class XPCountUp extends Component<CountUpProps, CountUpState> {
         const { character, member, memberIdx } = this.props;
         const maxXP = getXPThreshold(this.props.member.level); 
 
-        console.log('propsMember -> ', member); 
-        console.log('maxXp -> ', maxXP);
+        // console.log('propsMember ', member); 
+        // console.log('maxXp ', maxXP);
 
         return (
             <div className="endgame_character">
