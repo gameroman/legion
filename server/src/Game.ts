@@ -5,10 +5,11 @@ import { Team } from './Team';
 import { Spell } from './Spell';
 import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import {apiFetch} from './API';
-import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League } from '@legion/shared/enums';
+import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League, GEN } from '@legion/shared/enums';
 import { OutcomeData, TerrainUpdate, APIPlayerData, GameOutcomeReward, GameData, EndGameDataResults } from '@legion/shared/interfaces';
 import { getChestContent } from '@legion/shared/chests';
 import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL } from '@legion/shared/config';
+import { on } from 'events';
 
 enum GameAction {
     SPELL_USE,
@@ -423,6 +424,11 @@ export abstract class Game
         player.team.incrementOffensiveActions();
         player.addInteractedTarget(opponent);
 
+        let oneShot = false;
+        if (opponent.isDead()) {
+            oneShot = damage == opponent.getMaxHP();
+        }
+
         if (this.hasObstacle(opponent.x, opponent.y)) {
             const terrainUpdate = this.removeTerrain(opponent.x, opponent.y);
             this.broadcastTerrain([terrainUpdate]);
@@ -431,6 +437,12 @@ export abstract class Game
         
         const cooldown = player.getCooldown('attack');
         this.setCooldown(player, cooldown);
+
+        if (oneShot) {
+            this.broadcast('gen', {
+                gen: GEN.ONE_SHOT
+            });
+        }
 
         this.broadcast('attack', {
             team: team.id,
@@ -553,23 +565,25 @@ export abstract class Game
         spell.applyEffect(player, targets);
         player.setCasting(false);
 
-        let isKill = false;
+        let nbKills = 0;
+        let nbHits = 0;
+        let oneShot = false;
         targets.forEach(target => {
-            const wasDead = !target.isAlive();
             if (target.HPHasChanged()) {
                 const delta = target.getHPDelta();
                 player.increaseDamageDealt(delta);
                 if (!target.isAlive()){
-                    // player.team!.increaseScoreFromKill(player);
-                    isKill = true;
+                    nbKills++;
                 }
-                // if (delta < 0) player.team!.increaseScoreFromDamage(-delta);
                 if (delta > 0) {
                     player.team!.increaseScoreFromHeal(player);
                     player.team!.incrementHealing(delta);
+                } else if (delta < 0) {
+                    nbHits++;
                 }
-                if (wasDead && target.isAlive()) {
-                    target.team!.increaseScoreFromRevive();
+                console.log(`[Game:applyMagic] delta: ${delta}, targetHP: ${target.getHP()}, targetMaxHP: ${target.getMaxHP()}`);
+                if (delta < 0 && Math.abs(delta) == target.getMaxHP()) {
+                    oneShot = true;
                 }
             }
             player.addInteractedTarget(target);
@@ -577,6 +591,8 @@ export abstract class Game
         // Add all targets to the list of interacted targets
         player.team!.increaseScoreFromMultiHits(targets.length);
         player.team!.increaseScoreFromSpell(spell.score);
+
+        const nbFrozen = targets.filter(target => target.hasStatusEffect(StatusEffect.FREEZE)).length;
 
         if (spell.terrain) {
             const terrainUpdates = this.manageTerrain(spell, x, y);
@@ -590,11 +606,14 @@ export abstract class Game
         if (spell.status) {
             targets.forEach(target => {
                 const success = target.addStatusEffect(spell.status.effect, spell.status.duration, spell.status.chance);
+                console.log(`[Game:applyMagic] Status effect ${spell.status.effect} applied to target ${target.num}: ${success}`);
                 if (success) {
                     player.team!.increaseScoreFromStatusEffect();
                 }
             });
         }
+
+        const nbFrozen_ = targets.filter(target => target.hasStatusEffect(StatusEffect.FREEZE)).length;
 
         this.setCooldown(player, spell.cooldown * 1000);
         
@@ -602,8 +621,15 @@ export abstract class Game
             x,
             y,
             id: spell.id,
-            isKill,
+            isKill: nbKills > 0,
         });
+
+        const GENs = [];
+        if (nbFrozen_ > nbFrozen) GENs.push(GEN.FROZEN);
+        if (oneShot) GENs.push(GEN.ONE_SHOT);
+        if (nbKills > 1) GENs.push(GEN.MULTI_KILL);
+        if (nbHits > 1) GENs.push(GEN.MULTI_HIT);
+        this.broadcastGEN(GENs);
 
         team.socket?.emit('cooldown', {
             num: player.num,
@@ -616,6 +642,33 @@ export abstract class Game
         });
         
         team.sendScore();
+    }
+
+    broadcastGEN(GENs: GEN[]) {
+        /**
+         * Broadcast a single GEN among those in the array, based on the following priority order:
+         * 1. MULTI_KILL
+         * 2. ONE_SHOT
+         * 3. MULTI_HIT
+         * 4. FROZEN
+         */
+        if (GENs.includes(GEN.MULTI_KILL)) {
+            this.broadcast('gen', {
+                gen: GEN.MULTI_KILL
+            });
+        } else if (GENs.includes(GEN.ONE_SHOT)) {
+            this.broadcast('gen', {
+                gen: GEN.ONE_SHOT
+            });
+        } else if (GENs.includes(GEN.MULTI_HIT)) {
+            this.broadcast('gen', {
+                gen: GEN.MULTI_HIT
+            });
+        } else if (GENs.includes(GEN.FROZEN)) {
+            this.broadcast('gen', {
+                gen: GEN.FROZEN
+            });
+        }
     }
 
     processMagic({num, x, y, index, targetTeam, target}: {num: number, x: number, y: number, index: number, targetTeam: number, target: number}, team: Team ) {

@@ -9,10 +9,10 @@ equipments[0] = new BaseEquipment({
     name: "Jagged Sword",
     description: "",
     frame: 0,
-    effects: [{stat: Stat.ATK, value: 10}],
+    effects: [{stat: Stat.ATK, value: 1000}],
     slot: EquipmentSlot.WEAPON,
     effort: 15,
-    minLevel: 5,
+    minLevel: 1,
     classes: [Class.WARRIOR],
 });
 

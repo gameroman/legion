@@ -147,6 +147,10 @@ export class ServerPlayer {
         return this.hp > 0;
     }
 
+    isDead() {
+        return !this.isAlive();
+    }
+
     updatePos(x: number, y: number) {
         this.x = x;
         this.y = y;
@@ -187,6 +191,10 @@ export class ServerPlayer {
         return this.hp - this._hp;
     }
 
+    getMaxHP() {
+        return this.maxHP;
+    }
+
     getHPratio() {
         return this.hp / this.maxHP;
     }
@@ -223,6 +231,10 @@ export class ServerPlayer {
             this.mp = this.maxMP;
         }
         return this.mp;
+    }
+
+    hasStatusEffect(status: StatusEffect) {
+        return this.statuses[status] != 0;
     }
     
     setLevel(level: number) {

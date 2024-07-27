@@ -9,7 +9,7 @@ import { getSpellById } from '@legion/shared/Spells';
 import { lineOfSight, serializeCoords } from '@legion/shared/utils';
 import { getFirebaseIdToken } from '../../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
-import { Target, Terrain } from "@legion/shared/enums";
+import { Target, Terrain, GEN } from "@legion/shared/enums";
 import { TerrainUpdate, GameData, OutcomeData, PlayerNetworkData } from '@legion/shared/interfaces';
 
 const LOCAL_ANIMATION_SCALE = 3;
@@ -40,6 +40,8 @@ export class Arena extends Phaser.Scene
     sprites: Phaser.GameObjects.Sprite[] = [];
     environmentalAudioSources;
     gameSettings;
+    killCamActive = false;
+    pendingGEN: GEN;
 
     constructor() {
         super({ key: 'Arena' });
@@ -96,7 +98,8 @@ export class Arena extends Phaser.Scene
 
         this.load.atlas('groundTiles', 'tiles2.png', 'tiles2.json');
 
-        const GEN = ['gen_bg', 'begins', 'blood', 'blue_bang', 'combat', 'first', 'orange_bang', 'multi', 'kill'];
+        const GEN = ['gen_bg', 'begins', 'blood', 'blue_bang', 'combat', 'first', 'orange_bang', 'multi', 'kill', 
+            'hit', 'one', 'shot', 'frozen', 'stuff-is', 'on-fire'];
         GEN.forEach((name) => {
             this.load.image(name, `GEN/${name}.png`);
         });
@@ -180,6 +183,10 @@ export class Arena extends Phaser.Scene
 
         this.socket.on('terrain', (data) => {
             this.processTerrain(data);
+        });
+
+        this.socket.on('gen', (data) => {
+            this.displayGEN(data.gen);
         });
 
         this.socket.on('localanimation', (data) => {
@@ -941,7 +948,7 @@ export class Arena extends Phaser.Scene
 
         this.anims.create({
             key: `explosion_1`, 
-            frames: this.anims.generateFrameNumbers('explosions', { start: 48, end: 60 }), 
+            frames: this.anims.generateFrameNumbers('explosions', { start: 48, end: 59 }), 
             frameRate: 15, // Number of frames per second
         });
 
@@ -1213,7 +1220,7 @@ export class Arena extends Phaser.Scene
         } else {
             const delay = 3000;
             setTimeout(this.updateOverview.bind(this), delay + 1000);
-            setTimeout(() => this.displayGEN('combat', 'begins'), delay);
+            setTimeout(() => this.displayGEN(GEN.COMBAT_BEGINS), delay);
         }
 
         events.on('itemClick', (index) => {
@@ -1280,11 +1287,45 @@ export class Arena extends Phaser.Scene
         });
     }
 
-    displayGEN(text1, text2) {
+    displayGEN(gen: GEN) {
+        if (this.killCamActive) {
+            this.pendingGEN = gen;
+            return;
+        }
+        let text1, text2;
+
+        switch (gen) {
+            case GEN.COMBAT_BEGINS:
+                text1 = 'combat';
+                text2 = 'begins';
+                break;
+            case GEN.MULTI_KILL:
+                text1 = 'multi';
+                text2 = 'kill';
+                break;
+            case GEN.MULTI_HIT:
+                text1 = 'multi';
+                text2 = 'hit';
+                break;
+            case GEN.ONE_SHOT:
+                text1 = 'one';
+                text2 = 'shot';
+                break;
+            case GEN.FROZEN:
+                text1 = 'frozen';
+                break;
+            default:
+                break;
+        }
+        console.log(`[GEN] ${text1} ${text2}`);
+
         const textTweenDuration = 600;
         const textDelay = 400;
+        const yOffset = 20;
+        const bgYPosition = (this.cameras.main.centerY / 2 + yOffset);
+        const yPosition = this.cameras.main.centerY - 200 + yOffset;
 
-        let genBg = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY / 2, 'gen_bg');
+        let genBg = this.add.image(this.cameras.main.centerX, bgYPosition, 'gen_bg');
         genBg.setAlpha(0).setDepth(10);
         this.tweens.add({
             targets: genBg,
@@ -1293,37 +1334,28 @@ export class Arena extends Phaser.Scene
             ease: 'Power2',
         });
 
-        let combat = this.add.image(-300, this.cameras.main.centerY - 200, text1).setDepth(10);
+        const targets = [
+            this.add.image(-300, yPosition, text1).setDepth(10),
+            this.add.image(this.cameras.main.width + 100, yPosition, 'blue_bang').setDepth(10)
+        ];
+        if (text2) {
+            targets.push(
+                this.add.image(this.cameras.main.width + 100, yPosition, text2).setDepth(10)
+            );
+        }
+
         this.tweens.add({
-            targets: combat,
+            targets,
             x: this.cameras.main.centerX,
             duration: textTweenDuration,
             ease: 'Power2',
             delay: textDelay, 
         });
 
-        let begins = this.add.image(this.cameras.main.width + 100, this.cameras.main.centerY - 200, text2).setDepth(10);
-        this.tweens.add({
-            targets: begins,
-            x: this.cameras.main.centerX,
-            duration: textTweenDuration,
-            ease: 'Power2',
-            delay: textDelay,
-        });
-
-        let blueBang = this.add.image(this.cameras.main.width + 100, this.cameras.main.centerY - 200, 'blue_bang').setDepth(10);
-        this.tweens.add({
-            targets: blueBang,
-            x: this.cameras.main.centerX,
-            duration: textTweenDuration,
-            ease: 'Power2',
-            delay: textDelay,
-        });
-
         // Fade out all images after a few seconds
         this.time.delayedCall(2000, () => {
             this.tweens.add({
-                targets: [genBg, combat, begins, blueBang],
+                targets: targets.concat([genBg]),
                 alpha: 0,
                 duration: 200,
                 ease: 'Power2',
@@ -1347,6 +1379,7 @@ export class Arena extends Phaser.Scene
     }
 
     killCam(x, y) {
+        this.killCamActive = true;
         // Save the original zoom and time scale
         const originalZoom = this.cameras.main.zoom;
         const originalTimeScale = this.localAnimationSprite.anims.timeScale;
@@ -1390,6 +1423,11 @@ export class Arena extends Phaser.Scene
             this.sprites.forEach((sprite) => {
                 sprite.anims.timeScale = originalTimeScale;
             });
+            this.killCamActive = false;
+            if (this.pendingGEN !== null) {
+                this.displayGEN(this.pendingGEN);
+                this.pendingGEN = null;
+            }
         });
     }
 

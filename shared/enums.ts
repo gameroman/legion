@@ -124,3 +124,11 @@ export enum GameStatus {
     ONGOING,
     COMPLETED,
   }
+
+export enum GEN {
+    COMBAT_BEGINS,
+    MULTI_KILL,
+    MULTI_HIT,
+    ONE_SHOT,
+    FROZEN,
+}

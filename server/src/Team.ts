@@ -121,6 +121,7 @@ export class Team {
 
     incrementScore(amount: number) {
         this.score += amount;
+        console.log(`[Team:incrementScore] ${this.id} score: ${this.score}`);
     }
 
     snapshotScore() {

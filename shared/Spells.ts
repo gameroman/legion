@@ -127,7 +127,7 @@ spells.push(new BaseSpell({
 
     size: 3,
     target: Target.AOE,
-    effects: [{stat: Stat.HP, value: -120, modifiers: SPBasedBoostDeboost}],
+    effects: [{stat: Stat.HP, value: -20, modifiers: SPBasedBoostDeboost}],
     status: {effect: StatusEffect.PARALYZE, chance: 0.9, duration: 120},
     effort: 60,
 
