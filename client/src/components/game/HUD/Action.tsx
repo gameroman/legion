@@ -48,17 +48,25 @@ class Action extends Component<ActionItemProps> {
 
   handleCloseModal = () => {
       this.setState({openModal: false});
-      this.props.handleItemEffect([], InventoryActionType.EQUIP);
+
+      if (this.props.handleItemEffect) {
+        this.props.handleItemEffect([], InventoryActionType.EQUIP);
+      }
   }
 
   render() {
-    const { action, index, clickedIndex, canAct, actionType, hideHotKey, onActionClick } = this.props;
+    const { action, index, clickedIndex, canAct, actionType, hideHotKey, onActionClick } = this.props; 
+    // console.log('actionItem ', action);
 
     const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
     const startPosition = keyboardLayout.indexOf(actionType === InventoryType.CONSUMABLES ? 'Z' : 'Q');
     const keyBinding = keyboardLayout.charAt(startPosition + index);
 
     const handleOnClickAction = (e: any) => {
+      const pathArray = window.location.pathname.split('/');
+
+      if (pathArray[1] === 'game') return;
+
       if (actionType === InventoryType.EQUIPMENTS) {
         this.props.handleItemEffect(action.effects, InventoryActionType.EQUIP, (action as BaseEquipment).slot);
       }
@@ -79,7 +87,7 @@ class Action extends Component<ActionItemProps> {
 
     return (
       <div 
-        className={`${index === clickedIndex ? 'flash-effect' : ''}`} 
+        // className={`${index === clickedIndex ? 'flash-effect' : ''}`} 
         onClick={handleOnClickAction}>
         {action.id > -1 && <div 
           className={!canAct ? 'skill-item-image skill-item-image-off' : 'skill-item-image'}

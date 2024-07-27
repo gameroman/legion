@@ -175,6 +175,8 @@ export class Player extends Phaser.GameObjects.Container {
             items: this.inventory,
             casting: this.casting,
             statuses: this.statuses,
+            pendingSpell: this.pendingSpell,
+            pendingItem: this.pendingItem,
           }
     }
 
@@ -339,8 +341,13 @@ export class Player extends Phaser.GameObjects.Container {
         // console.log(`Pressed ${keyCode}`);
         this.arena.playSound('click');
         const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
-        const itemsIndex = keyboardLayout.indexOf('Z');
         const index = keyboardLayout.indexOf(keyCode);
+        this.onKey(index);
+    }
+
+    onKey(index) {
+        const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+        const itemsIndex = keyboardLayout.indexOf('Z');
         if (index >= itemsIndex) {
             this.useItem(index - itemsIndex);
         } else {
@@ -355,6 +362,10 @@ export class Player extends Phaser.GameObjects.Container {
 
     useItem(index) {
         // console.log(`Using item at slot ${index}`);
+        if (this.pendingItem == index) {
+            this.cancelItem();
+            return;
+        }
         const item = this.getItemAtSlot(index);
         if (!item) {
             console.error(`No item at slot ${index}`);
@@ -371,6 +382,7 @@ export class Player extends Phaser.GameObjects.Container {
             } else {
                 this.pendingItem = index;
                 this.arena.toggleItemMode(true);
+                this.arena.emitEvent('pendingItemChange');
             }
         }
     }
@@ -398,12 +410,20 @@ export class Player extends Phaser.GameObjects.Container {
     cancelSkill() {
         this.pendingSpell = null;
         this.arena.toggleTargetMode(false);
+        this.arena.emitEvent('pendingSpellChange');
+    }
+
+    cancelItem() {
+        this.pendingItem = null;
+        this.arena.toggleTargetMode(false);
+        this.arena.toggleItemMode(false);
+        this.arena.emitEvent('pendingItemChange');
     }
 
     useSkill(index) {
         const spell = this.spells[index];
         if (!spell) {
-            console.error(`No skill at slot ${index}`);
+            console.error(`No spell at slot ${index}`);
             return;
         }
         if (this.pendingSpell == index) {
@@ -418,6 +438,7 @@ export class Player extends Phaser.GameObjects.Container {
         
         this.pendingSpell = index;
         this.arena.toggleTargetMode(true, spell.size);
+        this.arena.emitEvent('pendingSpellChange');
     }
 
     isTarget() {

@@ -1,15 +1,16 @@
 // Button.tsx
 import './ShopSpellCard.style.css'
 import { h, Component } from 'preact';
-import { Class, InventoryType, Target } from "@legion/shared/enums";
+import { Class, InventoryType, RarityColor, Target } from "@legion/shared/enums";
 import { BaseSpell } from '@legion/shared/BaseSpell';
 import { mapFrameToCoordinates } from '../utils';
 import { Tooltip as ReactTooltip } from "react-tooltip";
 
 export enum SpellTitleBG {
+  'url(/shop/item_title_bg_white.png)',
   'url(/shop/item_title_bg_blue.png)',
-  'url(/shop/item_title_bg_green.png)',
-  'url(/shop/item_title_bg_purple.png)'
+  'url(/shop/item_title_bg_purple.png)',
+  'url(/shop/item_title_bg_green.png)'
 }
 
 enum ClassIcon {
@@ -34,7 +35,19 @@ interface ShopCardProps {
 
 class ShopSpellCard extends Component<ShopCardProps> {
   render() {
-    const { data } = this.props;
+    const getRarityValue = (effort) => {
+      if(effort < 10) {
+        return {val: "Common", clr: "cyan"};
+      } else if(effort < 25) {
+        return {val: "Rare", clr: "tomato"};
+      } else if(effort < 50) {
+        return {val: "Epic", clr: "red"};
+      } else {
+        return {val: "Legendary", clr: "orange"};
+      }
+    }
+
+    const { data } = this.props; 
 
     const classStyle = (classes: Class) => {
       return {
@@ -43,7 +56,8 @@ class ShopSpellCard extends Component<ShopCardProps> {
     }
 
     const titleStyle = {
-      backgroundImage: SpellTitleBG[data.rarity]
+      // border: `1px solid ${RarityColor[data.rarity]}`,
+      borderRadius: '4px',
     }
 
     const modalData: modalData = {
@@ -86,7 +100,7 @@ class ShopSpellCard extends Component<ShopCardProps> {
         <div className="spell-card-effect-container">
           <div className="spell-card-effect">
             <img src="/inventory/mp_icon.png" alt="cost" />
-            <span>+ {data.cost}</span>
+            <span>{data.cost}</span>
           </div>
           <div className="spell-card-effect">
             <img src="/inventory/cd_icon.png" alt="cost" />
@@ -96,6 +110,11 @@ class ShopSpellCard extends Component<ShopCardProps> {
             <img src="/inventory/target_icon.png" alt="cost" />
             <span>{Target[data.target]}</span>
           </div>
+        </div>
+        <div style={{lineHeight: '0.5'}}>
+          <span style={{color: `${getRarityValue(data.effort).clr}`, fontSize: '11px'}}>
+            {getRarityValue(data.effort).val}
+          </span>
         </div>
         <div className="spell-card-price">
           <img src="/gold_icon.png" alt="gold" />

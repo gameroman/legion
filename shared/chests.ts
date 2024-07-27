@@ -4,13 +4,13 @@ import { spells } from "./Spells";
 import { equipments } from "./Equipments";
 import { AVERAGE_GOLD_REWARD_PER_GAME } from "./config";
 
-enum RewardType {
+export enum RewardType {
     CONSUMABLES = 'consumable',
     SPELL = 'spell',
     EQUIPMENT = 'equipment',
     GOLD = 'gold',
 }
-export type ChestReward = { type: RewardType, rarity: Rarity | null, id: number, amount: number, name: string };
+export type ChestReward = { type: RewardType, rarity: Rarity | null, id: number, frame: number, amount: number, name: string };
 
 function getRandomType(distribution: { [key: string]: number }): RewardType {
     const typeRoll = Math.random() * 100;
@@ -38,7 +38,7 @@ function getRandomItem(
     let chosenRarity: Rarity | null = null;
 
     if (allowGold && Math.random() < goldChance) {
-        return { type: RewardType.GOLD, name: "gold", id: -1, rarity: Rarity.COMMON, amount: goldAmount};
+        return { type: RewardType.GOLD, name: "gold", id: -1, frame: -1, rarity: Rarity.COMMON, amount: goldAmount};
     }
 
     for (const rarity in rarityDistribution) {
@@ -83,7 +83,7 @@ function getRandomItem(
     const itemIndex = Math.floor(Math.random() * filteredPool.length);
     // console.log(`Reward type: ${rewardType}, Chosen rarity: ${chosenRarity}, pool length: ${filteredPool.length}, item index: ${itemIndex}`);
     const item = filteredPool[itemIndex];
-    return { type: rewardType, rarity: chosenRarity, id: item.id, name: item.name, amount: 1 };
+    return { type: rewardType, rarity: chosenRarity, id: item.id, frame: item.frame, name: item.name, amount: 1 };
 }
 
 export function getChestContent(type: ChestColor): ChestReward[] {

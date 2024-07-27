@@ -41,6 +41,7 @@ interface Player {
 }
 
 const playersQueue: Player[] = [];
+// TODO: move to config
 const eloRangeIncreaseInterval = 20; // seconds
 const eloRangeStart = 50;
 const eloRangeStep = 50; // Increase range by 50 points every interval
@@ -135,6 +136,14 @@ function tryMatchPlayers() {
     }
 }
 
+function countQueuingPlayers(mode: PlayMode, league: League): number {
+    const playersInMode =  playersQueue.filter(player => player.mode === mode);
+    if (mode == PlayMode.RANKED) {
+        return playersInMode.filter(player => player.league === league).length;
+    }
+    return playersInMode.length;
+}
+
 function canBeMatched(player1: Player, player2: Player): boolean {
     const isDifferentPlayers = player1.socket.uid !== player2.socket.uid;
     const isEloCompatible = Math.abs(player1.elo - player2.elo) <= player1.range && Math.abs(player1.elo - player2.elo) <= player2.range;
@@ -169,6 +178,40 @@ async function createGame(player1: Socket, player2?: Socket, mode: PlayMode = Pl
     }
 }
 
+function sendQData(player: Player) {
+    player.socket.emit("queueData", {
+        goldRewardInterval,
+        goldReward,
+        estimatedWaitingTime: 10,
+        nbInQueue: countQueuingPlayers(player.mode, player.league),
+        tips: [
+            "o have data to use in the UI, use the Log In button and create an account, which will create a user in the Firestore database.",
+            "New version of legion game will be launched soon! Expect great interface and wonderful game experience, excellent, fantastic, great! New versio of legion game will be launched soon! Expect great interface and wonderful game experience, excellent, fantastic, great!",
+            "Event handlers have access to the event that triggered the function."
+        ],
+        news: [
+            {
+                title: "Title",
+                date: "2022-12-01",
+                text: "New versio of legion game will be launched soon! Expect great interface and wonderful game experience, excellent, ",
+                link: "https://www.google.com"
+            },
+            {
+                title: "Title",
+                date: "2022-12-01",
+                text: "New versio of legion game will be launched soon! Expect great interface and wonderful game experience, excellent, ",
+                link: "https://www.google.com"
+            },
+            {
+                title: "Title",
+                date: "2022-12-01",
+                text: "New versio of legion game will be launched soon! Expect great interface and wonderful game experience, excellent, ",
+                link: "https://www.google.com"
+            }
+        ]
+    });
+}
+
 httpServer.listen(3000, () => {
     console.log("Matchmaking server listening on port 3000");
 });
@@ -191,6 +234,7 @@ async function addToQueue(socket: any, mode: PlayMode) {
             gold: 0,
         };
         playersQueue.push(player);
+        sendQData(player);
         console.log(`Player ${socket.id} joined queue  in mode ${mode} with elo ${player.elo} and league ${player.league}`);
     } catch (error) {
         console.error(`Error adding player to queue: ${error}`);

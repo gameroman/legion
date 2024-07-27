@@ -1,11 +1,12 @@
 // ShopConsumableCard.tsx
 import './ShopConsumableCard.style.css';
 import { h, Component } from 'preact';
-import { InventoryType, Target } from "@legion/shared/enums";
+import { InventoryType, RarityColor, Target } from "@legion/shared/enums";
 import { BaseItem } from '@legion/shared/BaseItem';
 import { SpellTitleBG } from '../shopSpellCard/ShopSpellCard';
 import { mapFrameToCoordinates } from '../utils';
 import { Tooltip as ReactTooltip } from "react-tooltip";
+import { Effect } from '@legion/shared/interfaces';
 
 export enum StatIcons {
   '/shop/hp_icon.png',
@@ -33,7 +34,21 @@ interface ShopCardProps {
 
 class ShopConsumableCard extends Component<ShopCardProps> {
   render() {
+    const getRarityValue = (effort) => {
+      if(effort < 10) {
+        return {val: "Common", clr: "cyan"};
+      } else if(effort < 25) {
+        return {val: "Rare", clr: "tomato"};
+      } else if(effort < 50) {
+        return {val: "Epic", clr: "red"};
+      } else {
+        return {val: "Legendary", clr: "orange"};
+      }
+    }
+
     const { data } = this.props;
+
+    // console.log('consumableData ', data);
 
     const modalData: modalData = {
       id: data.id,
@@ -44,9 +59,15 @@ class ShopConsumableCard extends Component<ShopCardProps> {
     }
 
     const titleStyle = {
-      backgroundImage: SpellTitleBG[data.rarity]
+      // border: `1px solid ${RarityColor[data.rarity]}`,
+      borderRadius: '4px',
     }
+    
     const coordinates = mapFrameToCoordinates(data.frame);
+
+    const getEffectValue = (effect: Effect) => {
+      return effect.value > 0 && effect.stat !== 1 ? `+${effect.value}` : `+${effect.value}`;
+    }
 
     return (
       <div className="shop-card-container" key={this.props.key} onClick={(e) => this.props.handleOpenModal(e, modalData)}>
@@ -67,7 +88,7 @@ class ShopConsumableCard extends Component<ShopCardProps> {
         <div className="consumable-card-effect-container">
           {data.effects.map((effect, index) => <div key={index} className="consumable-card-effect">
             <img src={StatIcons[effect.stat]} style={effect.stat === 1 ? 'transform: scaleX(0.8)' : ''} alt="" />
-            <span>{effect.value > 0 ? `+${effect.value}` : effect.value}</span>
+            <span>{getEffectValue(effect)}</span>
           </div>)}
           <div className="consumable-card-effect">
             <img src="/inventory/cd_icon.png" style={{transform: 'scaleX(0.8)'}} alt="cost" />
@@ -77,6 +98,11 @@ class ShopConsumableCard extends Component<ShopCardProps> {
             <img src="/inventory/target_icon.png" alt="cost" />
             <span>{Target[data.target]}</span>
           </div>
+        </div>
+        <div style={{lineHeight: '0.5'}}>
+          <span style={{color: `${getRarityValue(data.effort).clr}`, fontSize: '11px'}}>
+            {getRarityValue(data.effort).val}
+          </span>
         </div>
         <div className="shop-card-price">
           <img src="/gold_icon.png" alt="gold" />

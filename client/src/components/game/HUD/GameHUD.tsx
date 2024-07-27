@@ -4,7 +4,8 @@ import PlayerTab from './PlayerTab';
 import Overview from './Overview';
 import { Endgame } from './Endgame';
 import { EventEmitter } from 'eventemitter3';
-import { OutcomeData, PlayerProps, TeamOverview } from "@legion/shared/interfaces";
+import { CharacterUpdate, GameOutcomeReward, OutcomeData, PlayerProps, TeamOverview } from "@legion/shared/interfaces";
+import SpectatorFooter from './SpectatorFooter';
 
 interface State {
   playerVisible: boolean;
@@ -17,14 +18,17 @@ interface State {
   isWinner: boolean;
   xpReward: number;
   goldReward: number;
+  characters: CharacterUpdate[];
   isTutorial: boolean;
   isSpectator: boolean;
+  grade: string;
+  chests: GameOutcomeReward[];
 }
 
 const events = new EventEmitter();
 
 class GameHUD extends Component<object, State> {
-  state: State = { 
+  state: State = {
     playerVisible: false,
     player: null,
     clickedItem: -1,
@@ -37,6 +41,9 @@ class GameHUD extends Component<object, State> {
     isSpectator: false,
     xpReward: 0,
     goldReward: 0,
+    characters: [],
+    grade: null,
+    chests: [],
   }
 
   componentDidMount() {
@@ -66,12 +73,15 @@ class GameHUD extends Component<object, State> {
   }
 
   endGame = (data: OutcomeData) => {
-    const {isWinner, xp, gold} = data;
+    const {isWinner, xp, gold, grade, chests, characters} = data;
     this.setState({ 
       gameOver: true,
       isWinner,
+      grade: grade,
       xpReward: xp,
       goldReward: gold,
+      characters: characters,
+      chests: chests
     });
   }
 
@@ -80,15 +90,27 @@ class GameHUD extends Component<object, State> {
   }
 
   render() {
-    const { playerVisible, player, team1, team2, isTutorial, isSpectator } = this.state;
+    const { playerVisible, player, team1, team2, isTutorial, isSpectator } = this.state; 
+    const members = team1?.members[0].isPlayer ? team1?.members : team2?.members; 
+    const score = team1?.members[0].isPlayer? team1?.score : team2?.score; 
+
     return (
-      <div>
+      <div className="height_full flex flex_col justify_between padding_bottom_16">
         <div className="hud-container">
-            <Overview position="left" {...team2} />
-            {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
-            <Overview position="right" {...team1} />
+          <Overview position="left" isSpectator={isSpectator} selectedPlayer={player} {...team2} />
+          {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
+          <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} {...team1} />
         </div>
-        {this.state.gameOver && <Endgame xpReward={this.state.xpReward} goldReward={this.state.goldReward} />}
+        {team1 && <SpectatorFooter isTutorial={isTutorial} score={score} />}
+        {this.state.gameOver && <Endgame 
+          members={members} 
+          grade={this.state.grade}
+          chests={this.state.chests}
+          isWinner={this.state.isWinner} 
+          xpReward={this.state.xpReward} 
+          goldReward={this.state.goldReward} 
+          characters={this.state.characters}
+        />}
       </div>
     );
   }

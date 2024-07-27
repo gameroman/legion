@@ -7,9 +7,8 @@ import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import {apiFetch} from './API';
 import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League } from '@legion/shared/enums';
 import { OutcomeData, TerrainUpdate, APIPlayerData, GameOutcomeReward, GameData, EndGameDataResults } from '@legion/shared/interfaces';
-import { XP_PER_LEVEL } from '@legion/shared/config';
-import { AVERAGE_GOLD_REWARD_PER_GAME } from '@legion/shared/config';
 import { getChestContent } from '@legion/shared/chests';
+import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL } from '@legion/shared/config';
 
 enum GameAction {
     SPELL_USE,

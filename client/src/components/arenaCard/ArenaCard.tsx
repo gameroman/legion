@@ -47,6 +47,12 @@ class ArenaCard extends Component<CardProps> {
         cursor: 'pointer'
     }
 
+    const countDown = {
+        hour: Math.floor(Math.min(23, this.state.time / 3600)),
+        minute: Math.floor((this.state.time % 3600) / 60),
+        second: Math.floor(this.state.time % 60)
+    };
+
     return (
       <div className="arenaCard" style={bgStyle} onMouseEnter={() => this.setState({active: true})} onMouseLeave={() => this.setState({active: false})}>
         <div className="team_a_members">
@@ -54,8 +60,11 @@ class ArenaCard extends Component<CardProps> {
         </div>
         <div className="team_a_info">
           <span>{data.teamA.name}</span>
-          <span className="teamScore">{`${Math.floor(this.state.time / 60)}`.padStart(2, "0")}:
-          {`${this.state.time % 60}`.padStart(2, "0")}</span>
+          <span className="teamScore">
+            {`${countDown.hour}`.padStart(2, "0")}:
+            {`${countDown.minute}`.padStart(2, "0")}:
+            {`${countDown.second}`.padStart(2, "0")}
+          </span>
         </div>
         <div className="vsSpan"><span>VS</span></div>
         <div className="team_b_info">

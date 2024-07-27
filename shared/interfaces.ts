@@ -67,7 +67,7 @@ export interface ConsumableData {
     animation: string;
     cooldown: number;
     target: Target;
-    size: number;
+    size?: number;
     effects: Effect[];
     effort: number;
 }
@@ -314,6 +314,8 @@ export interface PlayerProps {
     items: BaseItem[];
     casting: boolean;
     statuses: StatusEffects;
+    pendingSpell: number;
+    pendingItem: number;
 }
 
 export type StatusEffects = {
@@ -332,6 +334,7 @@ export interface TeamMember {
   cooldown: number;
   totalCooldown: number;
   class: Class;
+  statuses: StatusEffects;
 }
 
 export interface TeamOverview {

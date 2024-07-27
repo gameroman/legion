@@ -142,8 +142,7 @@ class ItemDialog extends Component<DialogProps> {
             </button>
           </div>
         </div>
-    );
-    
+      );    
     };
 
     const consumableDialog = (dialogData: BaseItem) => {
@@ -155,6 +154,7 @@ class ItemDialog extends Component<DialogProps> {
       const backgroundPosition = `${coordinates.x}px ${coordinates.y}px`;
       return (
         <div className="dialog-item-container">
+          <div className="dialog-item-heading-bg"></div>
           <div className="dialog-item-heading">
             <div className="dialog-item-heading-image" style={{ 
               backgroundImage: `url(consumables.png)`,
