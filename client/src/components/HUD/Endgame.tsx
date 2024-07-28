@@ -8,7 +8,7 @@ import XPCountUp from './XPCountUp';
 import ActionItem from './Action';
 import { InventoryType } from '@legion/shared/enums';
 import { BaseItem } from '@legion/shared/BaseItem';
-import { mapFrameToCoordinates } from '../../utils';
+import { mapFrameToCoordinates } from '../utils';
 import { RewardType } from '@legion/shared/chests';
 
 /* eslint-disable react/prefer-stateless-function */

@@ -294,7 +294,6 @@
   gap: 4px;
   position: relative;
   padding: 8px 16px 12px 36px;
-  cursor: pointer;
   max-width: 320px;
 }
 
@@ -580,12 +579,10 @@
   background-color: #1c1f25;
   border: 1px solid #274c57;
   border-radius: 4px;
-  cursor: pointer;
+  cursor: var(--game-pointer);
+
 }
 
-/* .player_hud_skills:hover {
-  border: 1px solid #71deff;
-} */
 
 .player_hud_skills:hover, 
 .player_hud_skills:active, 
@@ -597,9 +594,6 @@
   border: 1px solid #71deff !important;
 } 
 
-/* .player_hud_skills:has(.skill-item-image) {
-  background-color: goldenrod;
-} */
 
 .goldend_background {
   background-color: goldenrod;
@@ -608,6 +602,7 @@
 .player_hud_action_container {
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
+  cursor: var(--game-pointer);
 }
 
 .spectator_container {
@@ -765,7 +760,6 @@
   justify-content: center;
 
   color: #ffffff;
-  cursor: pointer;
 }
 
 .game_leave_btn:hover {
@@ -1078,12 +1072,16 @@
   cursor: pointer;
 }
 
-.exit_game_menu {
+.exit_game_label {
   background-color: #252b36;
   border: 1px solid #4583d0;
   border-radius: 4px;
   padding: 6px 8px;
-  cursor: pointer;
+  cursor: var(--game-pointer);
+}
+
+.exit_game_menu {
+  cursor: var(--game-pointer);
 }
 
 .light_shining_bg {
@@ -1181,6 +1179,7 @@
   background-image: url("@assets/HUD/small_box_btn_bg.png");
   background-size: 100% 100%;
   padding: 4px;
+  cursor: var(--game-pointer);
 }
 
 .spectator:hover {

@@ -1,13 +1,13 @@
 
 import { io } from 'socket.io-client';
 import { Player } from './Player';
-import { GameHUD, events } from './HUD/GameHUD';
+import { GameHUD, events } from '../components/HUD/GameHUD';
 import { Team } from './Team';
 import { MusicManager } from './MusicManager';
 import { CellsHighlight } from './CellsHighlight';
 import { getSpellById } from '@legion/shared/Spells';
 import { lineOfSight, serializeCoords } from '@legion/shared/utils';
-import { getFirebaseIdToken } from '../../services/apiService';
+import { getFirebaseIdToken } from '../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain, GEN } from "@legion/shared/enums";
 import { TerrainUpdate, GameData, OutcomeData, PlayerNetworkData } from '@legion/shared/interfaces';
@@ -446,7 +446,7 @@ export class Arena extends Phaser.Scene
     }
 
     toggleTargetMode(flag: boolean, size?: number) {
-        this.HUD.toggleCursor(flag, 'scroll');
+        // this.HUD.toggleCursor(flag, 'scroll');
         if (flag) {
             this.cellsHighlight.setTargetMode(size, true);
             this.clearHighlight();
@@ -456,7 +456,7 @@ export class Arena extends Phaser.Scene
     }
 
     toggleItemMode(flag: boolean) {
-        this.HUD.toggleCursor(flag, 'item');
+        // this.HUD.toggleCursor(flag, 'item');
         if (flag) {
             this.cellsHighlight.setItemMode(true);
             this.clearHighlight();
@@ -1062,7 +1062,7 @@ export class Arena extends Phaser.Scene
             const {x, y} = this.gridToPixelCoords(character.x + offset, character.y);
 
             const player = new Player(
-                this, this, this.HUD, team, character.name, character.x, character.y, x, y,
+                this, this, team, character.name, character.x, character.y, x, y,
                 i + 1, character.frame, isPlayer, character.class,
                 character.hp, character.maxHP, character.mp, character.maxMP,
                 character.level, character.xp,
@@ -1167,11 +1167,6 @@ export class Arena extends Phaser.Scene
         }
     }
 
-    createHUD() {
-        this.scene.launch('HUD'); 
-        this.HUD = this.scene.get('HUD');
-    }
-
     displaySpellArea(location, size, duration) {
         if (size % 2 === 0) {
             location.x += 0.5;
@@ -1206,7 +1201,6 @@ export class Arena extends Phaser.Scene
 
         const isReconnect = data.general.reconnect;
 
-        this.createHUD(); 
         this.playerTeamId = data.player.teamId;
 
         if(this.playerTeamId === undefined) {

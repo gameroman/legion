@@ -7,7 +7,6 @@ import { getConsumableById } from '@legion/shared/Items';
 import { getSpellById } from '@legion/shared/Spells';
 import { Target, StatusEffect, Class } from "@legion/shared/enums";
 import { Arena } from "./Arena";
-import { HUD } from "./HUD";
 import { PlayerProps, StatusEffects } from "@legion/shared/interfaces";
 
 enum GlowColors {
@@ -25,7 +24,6 @@ export class Player extends Phaser.GameObjects.Container {
     isPlayer = false;
     texture: string;
     arena: Arena;
-    hud: HUD;
     gridX: number;
     gridY: number;
     num: number;
@@ -59,14 +57,13 @@ export class Player extends Phaser.GameObjects.Container {
     level: number;
 
     constructor(
-        scene: Phaser.Scene, arenaScene: Arena, hudScene: HUD, team: Team, name: string, gridX: number, gridY: number, x: number, y: number,
+        scene: Phaser.Scene, arenaScene: Arena, team: Team, name: string, gridX: number, gridY: number, x: number, y: number,
         num: number, texture: string, isPlayer: boolean, characterClass: Class,
         hp: number, maxHP: number, mp: number, maxMP: number, level: number, xp: number,
         ) {
         super(scene, x, y);
         this.scene = scene;
         this.arena = arenaScene;
-        this.hud = hudScene;
 
         this.team = team;
         this.texture = texture;
@@ -298,7 +295,7 @@ export class Player extends Phaser.GameObjects.Container {
 
     onPointerOver() {
         if (this.isTarget() && this.arena.selectedPlayer.pendingSpell == null) {
-            this.hud.toggleCursor(true, 'swords');
+            // this.hud.toggleCursor(true, 'swords');
         }
         /**
          * If `isPlayer` is false, glow in red
@@ -320,7 +317,7 @@ export class Player extends Phaser.GameObjects.Container {
     
     onPointerOut() {
         if (!this.isPlayer && this.arena.selectedPlayer?.pendingSpell == null) {
-            this.hud.toggleCursor(false, 'scroll');
+            // this.hud.toggleCursor(false, 'scroll');
         }
         if (this.isSelected()) return;
         this.glowFx.setActive(false);
@@ -333,7 +330,7 @@ export class Player extends Phaser.GameObjects.Container {
             this.arena.selectPlayer(this);
         } else if(this.isTarget()) {
             this.arena.sendAttack(this);
-            this.hud.toggleCursor(false);
+            // this.hud.toggleCursor(false);
         }
     }
 

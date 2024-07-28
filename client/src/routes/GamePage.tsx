@@ -1,7 +1,7 @@
 // GamePage.tsx
 import { h, Component } from 'preact';
-import { GameHUD } from '../components/game/HUD/GameHUD';
-import { startGame } from '../components/game/game';
+import { GameHUD } from '../components/HUD/GameHUD';
+import { startGame } from '../game/game';
 
 interface GamePageProps {
   matches: {
@@ -11,13 +11,12 @@ interface GamePageProps {
 
 class GamePage extends Component<GamePageProps, {}> {
   componentDidMount() {
-    // this.props.matches.id)
     startGame();
   }
 
   render() {
     return (
-      <div>
+      <div className="gameCursor">
         <GameHUD />
         <div id="scene" />
       </div>

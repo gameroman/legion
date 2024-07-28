@@ -123,12 +123,12 @@ class PlayerInfo extends Component<Props, State> {
           </div>
         </div>}
         <Modal isOpen={this.state.modalOpen} style={customStyles} onRequestClose={this.handleCloseModal}>
-          <div className="exit_game_menu" onClick={(e) => this.handleOpenModal(e, true)}>
+          <div className="exit_game_label" onClick={(e) => this.handleOpenModal(e, true)}>
             <p>Abandon Game!</p>
           </div>
         </Modal>
         <Modal isOpen={this.state.modalOpen1} onRequestClose={this.handleCloseModal} style={customStyles1}>
-          <div className="flex flex_col gap_4">
+          <div className="exit_game_menu flex flex_col gap_4">
             <div className="game_leave_dialog">Are you sure want to abandon the game? This will count as a loss.</div>
             <div className="flex gap_4">
               <div className="game_leave_btn" onClick={this.handleExit}>Leave</div>

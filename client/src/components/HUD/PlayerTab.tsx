@@ -1,8 +1,8 @@
 import { h, Component } from 'preact';
-import ActionItem from './Action';
+import ItemIcon from './ItemIcon';
 import { InventoryType, Target } from '@legion/shared/enums';
 import TabBar from './TabBar';
-import { mapFrameToCoordinates } from '../../utils';
+import { mapFrameToCoordinates } from '../utils';
 import { BaseSpell } from '@legion/shared/BaseSpell';
 import { PlayerProps } from '@legion/shared/interfaces';
 
@@ -162,7 +162,6 @@ class PlayerTab extends Component<Props, State> {
                   <div 
                     className="player_hud_skills flex items_center justify_center relative" 
                     key={idx}
-                    // onClick={() => this.actionClick('item', idx)} 
                     style={{
                       backgroundColor: this.state.clickedItemIndex === idx + itemBasicNumber ? '#bf9b30' : 'initial',
                     }}
@@ -170,13 +169,11 @@ class PlayerTab extends Component<Props, State> {
                       this.handleClick(event, 'item', idx, idx + itemBasicNumber); 
                     }}
                   >
-                    <ActionItem
+                    <ItemIcon
                       action={player.items[idx]}
                       index={idx}
-                      clickedIndex={this.state.clickedSpell}
                       canAct={canAct}
                       actionType={InventoryType.CONSUMABLES}
-                      onActionClick={() => { }}
                       key={idx}
                     />
                   </div>
@@ -190,7 +187,6 @@ class PlayerTab extends Component<Props, State> {
                   <div
                     className="player_hud_skills flex items_center justify_center relative"
                     key={idx}
-                    // onClick={() => this.actionClick('spell', idx)}
                     style={{
                       backgroundColor: this.state.clickedItemIndex === idx + spellBasicNumber ? '#bf9b30' : 'initial',
                     }}
@@ -198,13 +194,11 @@ class PlayerTab extends Component<Props, State> {
                       this.handleClick(event, 'spell', idx, idx + spellBasicNumber); 
                     }}
                   >
-                    <ActionItem
+                    <ItemIcon
                       action={player.spells[idx]}
                       index={idx}
-                      clickedIndex={this.state.clickedSpell}
                       canAct={canAct && player.spells[idx]?.cost <= player.mp}
                       actionType={InventoryType.SKILLS}
-                      onActionClick={() => { }}
                       key={idx}
                     />
                   </div>

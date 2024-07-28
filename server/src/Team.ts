@@ -73,47 +73,46 @@ export class Team {
     }
 
     increaseScoreFromDamage(amount: number) {
-        this.score += amount;
+        this.incrementScore(amount);
     }
 
     increaseScoreFromSpell(amount: number) {
-        this.score += amount;
+        this.incrementScore(amount);
     }
 
     increaseScoreFromMultiHits(amount: number) {
         if (amount > 1) {
             // Apply an exponential multiplier to the score
-            this.score += Math.pow(MULTIHIT_SCORE_BASE, amount);
-            // console.log(`Multi hit: ${this.id} score: ${this.score}`);
+            this.incrementScore(Math.pow(MULTIHIT_SCORE_BASE, amount));
         }
     }
 
     increaseScoreFromKill(player: ServerPlayer) {
-        this.score += KILL_SCORE_BONUS * (1 + (1 - player.getHPratio()));
+        this.incrementScore(KILL_SCORE_BONUS * (1 + (1 - player.getHPratio())));
     }
 
     increaseScoreFromHeal(player: ServerPlayer) {
-        this.score += HEAL_SCORE_BONUS * (1 + (1 - player.getPreviousHPRatio()));
+        this.incrementScore(HEAL_SCORE_BONUS * (1 + (1 - player.getPreviousHPRatio())));
     }
 
     increaseScoreFromRevive(nb = 1) {
-        this.score += nb * REVIVE_SCORE_BONUS;
+        this.incrementScore(nb * REVIVE_SCORE_BONUS);
     }
 
     increaseScoreFromStatusEffect() {
-        this.score += STATUS_EFFECT_SCORE_BONUS;
+        this.incrementScore(STATUS_EFFECT_SCORE_BONUS);
     }
 
     increaseScoreFromTerrain() {
-        this.score += TERRAIN_SCORE_BONUS;
+        this.incrementScore(TERRAIN_SCORE_BONUS);
     }
 
     increaseScoreFromDot() {
-        this.score += DOT_SCORE_BONUS;
+        this.incrementScore(DOT_SCORE_BONUS);
     }
 
     increaseScoreFromFirstBlood() {
-        this.score += FIRST_BLOOD_BONUS
+        this.incrementScore(FIRST_BLOOD_BONUS);
     }
 
     incrementHealing(amount: number) {

@@ -1,3 +1,7 @@
+:root {
+  --game-pointer: url('/public/pointers/hand_pointer.png'), auto;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -50,7 +54,8 @@ canvas {
 
 @font-face {
     font-family: 'Kim';
-    src: url('../../public/kim.otf') format('opentype');
+    /* src: url('../../public/kim.otf') format('opentype'); */
+    src: url('/public/kim.otf') format('opentype');
 }
 
 .player-main {
@@ -298,30 +303,7 @@ canvas {
     gap: 6px;
 }
 
-/* .member::before {
-  content: "";
-  position: absolute;
-  background-color: inherit;
-  z-index: -1;
-}
 
-.member-left::before {
-  top: -30px;
-  right: -60%;
-  bottom: 0;
-  left: -50%;
-  transform: rotate(45deg);
-  width: 170px;
-}
-
-.member-right::before {
-  top: -30px;
-  right: -50%;
-  bottom: 0;
-  left: -60%;
-  transform: rotate(-45deg);
-  width: 170px;
-} */
 
   .member {
     position: relative;
@@ -331,19 +313,9 @@ canvas {
     font-family: 'Kim', sans-serif;
     text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
     color: white;
-/* 
-    border-top: 2px solid white;
-    border-bottom: 2px solid white; */
   }
 
-  /* .member-left {
-    background: linear-gradient(to right, lightblue, transparent);
-  }
 
-  .member-right {
-    background: linear-gradient(to left, lightblue, transparent);
-  }
-   */
   .member-portrait {
     position: relative;
     width: 50px;
@@ -1360,22 +1332,7 @@ canvas {
 .purchase-adjust  {
   border-radius: 5px;
   cursor: pointer;
-  /* background-color: green; */
 }
-/* 
-.header-gold {
-  background: url('../../public/gold2.png') no-repeat left center;
-  background-size: contain;
-  color: white;
-  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
-  border-radius: 25px; 
-  padding: 5px 10px; 
-  padding-left: 60px;
-  font-family: Kim;
-  margin-left: 10px;
-  border: 1px solid #CD853F;
-  font-size: 30px;
-} */
 
 .endgame {
   background: linear-gradient(rgba(10, 10, 10, 0.9), rgba(20, 20, 20, 0.9)); /* Dark grey, almost black background with slight transparency */
@@ -2044,8 +2001,6 @@ canvas {
   width: 2.5vw; 
   height: 2.5vw;
   cursor: pointer;
-  /* background-color: tomato; */
-  /* background-color: grey; */
 }
 .queue-btns > a > div > img {
   width: 100%;
@@ -2055,16 +2010,13 @@ canvas {
   margin-right: 0.25vw;
 }
 
-/* a:active,
-a:focus,
-a:visited {
-  text-decoration: none !important;
-} */
-
 a:-webkit-any-link {
   text-decoration: none;
 }
 
+.gameCursor {
+  cursor: url('../../public/pointers/general_pointer.png'), auto;
+}
 
 
 
