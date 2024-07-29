@@ -295,7 +295,9 @@ export class Player extends Phaser.GameObjects.Container {
 
     onPointerOver() {
         if (this.isTarget() && this.arena.selectedPlayer.pendingSpell == null) {
-            // this.hud.toggleCursor(true, 'swords');
+            this.arena.emitEvent('hoverEnemyCharacter');
+        } else if (this.isPlayer){
+            this.arena.emitEvent('hoverCharacter');
         }
         /**
          * If `isPlayer` is false, glow in red
@@ -308,7 +310,6 @@ export class Player extends Phaser.GameObjects.Container {
             glowColor = GlowColors.Enemy;
         } else if (!this.isSelected()) {
             glowColor = GlowColors.Ally;
-            this.arena.emitEvent('hoverCharacter');
         }
         if (glowColor) {
             this.glowFx.color = glowColor;

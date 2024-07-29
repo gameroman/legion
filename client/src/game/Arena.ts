@@ -594,6 +594,9 @@ export class Arena extends Phaser.Scene
             case 'unhoverCharacter':
                 events.emit('unhoverCharacter');
                 break;
+            case 'hoverEnemyCharacter':
+                events.emit('hoverEnemyCharacter');
+                break;
             default:
                 break;
         }

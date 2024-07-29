@@ -56,7 +56,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     events.on('updateOverview', this.updateOverview);
     events.on('gameEnd', this.endGame);
     events.on('hoverCharacter', () => this.handleCursorChange('pointerCursor'));
-    // events.on('hoverEnemyCharacter', () => this.handleCursorChange('swordCursor'));
+    events.on('hoverEnemyCharacter', () => this.handleCursorChange('swordCursor'));
     events.on('unhoverCharacter', () => this.handleCursorChange('normalCursor'));
 
   }
@@ -97,7 +97,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   handleCursorChange = (newCursorClass: string) => {
-    console.log(`newCursorClass: ${newCursorClass}`);
+    // console.log(`newCursorClass: ${newCursorClass}`);
     this.props.changeMainDivClass(newCursorClass);
   }
 

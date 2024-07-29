@@ -2026,9 +2026,9 @@ a:-webkit-any-link {
   cursor: var(--game-pointer);
 }
 
-/* .swordCursor {
+.swordCursor {
   cursor: url('../../public/pointers/attack_pointer.png'), auto;
-} */
+}
 
 
 
