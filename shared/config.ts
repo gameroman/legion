@@ -5,6 +5,7 @@ export const STARTING_GOLD = 100;
 export const STARTING_CONSUMABLES = [0,0,1];
 export const XP_PER_LEVEL = 50;
 export const AVERAGE_GOLD_REWARD_PER_GAME = 100; 
+export const MAX_AUDIENCE_SCORE = 1500;
 
 // Admin
 export const TIME_COEFFICIENT = 1;

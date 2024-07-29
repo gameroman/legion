@@ -1171,6 +1171,7 @@ export class Arena extends Phaser.Scene
         this.gameSettings = {
             tutorial: false,
             spectator: false,
+            mode: null,
         }
     }
 
@@ -1216,8 +1217,9 @@ export class Arena extends Phaser.Scene
 
         this.gameSettings.tutorial = data.general.tutorial;
         this.gameSettings.spectator = data.general.spectator;
+        this.gameSettings.mode = data.general.mode;
 
-        this.teamsMap.set(data.player.teamId, new Team(this, data.player.teamId, true, data.player.player));
+        this.teamsMap.set(data.player.teamId, new Team(this, data.player.teamId, true, data.player.player, data.player.score));
         this.teamsMap.set(data.opponent.teamId, new Team(this, data.opponent.teamId, false, data.opponent.player));
 
         this.placeCharacters(data.player.team, true, this.teamsMap.get(data.player.teamId), isReconnect);
@@ -1236,6 +1238,7 @@ export class Arena extends Phaser.Scene
             setTimeout(() => this.displayGEN(GEN.COMBAT_BEGINS), delay);
         }
 
+        // Events from the HUD
         events.on('itemClick', (index) => {
             this.selectedPlayer?.onKey(index);
         });

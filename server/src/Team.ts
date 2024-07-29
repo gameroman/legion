@@ -3,7 +3,8 @@ import { Socket } from "socket.io";
 import { ServerPlayer } from "./ServerPlayer";
 import { Game } from "./Game";
 import { CharacterUpdate, APIPlayerData, TeamData } from '@legion/shared/interfaces';
-import { ChestColor, PlayMode } from '@legion/shared/enums';
+import { ChestColor } from '@legion/shared/enums';
+import { MAX_AUDIENCE_SCORE } from "@legion/shared/config";
 
 
 const MULTIHIT_SCORE_BASE = 6;
@@ -120,7 +121,7 @@ export class Team {
     }
 
     incrementScore(amount: number) {
-        this.score += amount;
+        this.score = Math.min(MAX_AUDIENCE_SCORE, this.score + amount);
         console.log(`[Team:incrementScore] ${this.id} score: ${this.score}`);
     }
 

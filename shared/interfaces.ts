@@ -1,7 +1,7 @@
 import { BaseEquipment } from "./BaseEquipment";
 import { BaseItem } from "./BaseItem";
 import { BaseSpell } from "./BaseSpell";
-import { Stat, Target, EffectDirection, EquipmentSlot, Terrain, ChestColor, StatusEffect, Class } from "./enums";
+import { Stat, Target, EffectDirection, EquipmentSlot, Terrain, ChestColor, StatusEffect, Class, PlayMode } from "./enums";
 import {ChestReward} from "@legion/shared/chests";
 
 export class EffectModifier {
@@ -287,6 +287,7 @@ interface GamePlayerData {
     teamId: number;
     player: PlayerProfileData;
     team: PlayerNetworkData[];
+    score: number;
 }
 
 export interface GameData {
@@ -294,6 +295,7 @@ export interface GameData {
         reconnect: boolean;
         tutorial: boolean;
         spectator: boolean;
+        mode: PlayMode;
     },
     player: GamePlayerData,
     opponent: GamePlayerData,

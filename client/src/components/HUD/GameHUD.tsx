@@ -6,6 +6,7 @@ import { Endgame } from './Endgame';
 import { EventEmitter } from 'eventemitter3';
 import { CharacterUpdate, GameOutcomeReward, OutcomeData, PlayerProps, TeamOverview } from "@legion/shared/interfaces";
 import SpectatorFooter from './SpectatorFooter';
+import { PlayMode } from '@legion/shared/enums';
 
 interface GameHUDProps {
   changeMainDivClass: (newClass: string) => void;
@@ -26,6 +27,7 @@ interface GameHUDState {
   characters: CharacterUpdate[];
   isTutorial: boolean;
   isSpectator: boolean;
+  mode: PlayMode;
   grade: string;
   chests: GameOutcomeReward[];
 }
@@ -46,6 +48,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     gameOver: false,
     isTutorial: false,
     isSpectator: false,
+    mode: null,
     xpReward: 0,
     goldReward: 0,
     characters: [],
@@ -110,7 +113,11 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
 
   updateOverview = (team1: TeamOverview, team2: TeamOverview, general: any) => {
     this.setState({ team1, team2 });
-    this.setState({ isTutorial: general.isTutorial, isSpectator: general.isSpectator })
+    this.setState({ 
+      isTutorial: general.isTutorial,
+      isSpectator: general.isSpectator,
+      mode : general.mode
+    })
   }
 
   endGame = (data: OutcomeData) => {
@@ -136,7 +143,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   render() {
-    const { playerVisible, player, team1, team2, isTutorial, isSpectator } = this.state; 
+    const { playerVisible, player, team1, team2, isTutorial, isSpectator, mode } = this.state; 
     const members = team1?.members[0].isPlayer ? team1?.members : team2?.members; 
     const score = team1?.members[0].isPlayer? team1?.score : team2?.score; 
 
@@ -147,7 +154,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
           {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
           <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} {...team1} />
         </div>
-        {team1 && <SpectatorFooter isTutorial={isTutorial} score={score} />}
+        {team1 && <SpectatorFooter isTutorial={isTutorial} score={score} mode={mode} />}
         {this.state.gameOver && <Endgame 
           members={members} 
           grade={this.state.grade}

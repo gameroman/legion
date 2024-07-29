@@ -17,7 +17,7 @@ export class Team {
     playerRank: number;
     score = 0;
 
-    constructor(scene, number: number, isPlayerTeam: boolean, teamData: PlayerProfileData) {
+    constructor(scene, number: number, isPlayerTeam: boolean, teamData: PlayerProfileData, score = 0) {
         this.scene = scene;
         this.id = number;
         this.isPlayerTeam = isPlayerTeam;
@@ -26,6 +26,7 @@ export class Team {
         this.playerAvatar = teamData.playerAvatar;
         this.playerLevel = teamData.playerLevel;
         this.playerRank = teamData.playerRank;
+        this.score = score;
     }   
 
     addMember(player: Player): void {

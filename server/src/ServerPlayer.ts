@@ -418,6 +418,7 @@ export class ServerPlayer {
     }
 
     applyDoT(damage: number) {
+        if (this.isDead()) return;
         this.takeDamage(damage);
         this.team!.game.getOtherTeam(this.team.id).increaseScoreFromDot();
     }
