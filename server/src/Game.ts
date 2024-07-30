@@ -9,7 +9,6 @@ import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League, GEN } from
 import { OutcomeData, TerrainUpdate, APIPlayerData, GameOutcomeReward, GameData, EndGameDataResults } from '@legion/shared/interfaces';
 import { getChestContent } from '@legion/shared/chests';
 import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL } from '@legion/shared/config';
-import { on } from 'events';
 
 enum GameAction {
     SPELL_USE,

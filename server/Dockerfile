@@ -2,9 +2,6 @@ FROM node:20
 
 WORKDIR /usr/src/app
 
-# COPY server/ ./
-# COPY shared ./shared
-
 COPY server/package*.json ./
 
 RUN npm install

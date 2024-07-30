@@ -100,7 +100,7 @@ export class ServerPlayer {
             data['spells'] = this.getNetworkSpells();
             data['xp'] = this.xp;
         }
-        console.log(`Placement data: ${JSON.stringify(data)}`);
+        console.log(`[ServerPlayer:getPlacementData] ${JSON.stringify(data)}`);
         return data;
     }
 
@@ -118,11 +118,11 @@ export class ServerPlayer {
     }
 
     isFrozen() {
-        return this.statuses[StatusEffect.FREEZE] > 0;
+        return this.statuses[StatusEffect.FREEZE] != 0;
     }
 
     isParalyzed() {
-        return (this.statuses[StatusEffect.PARALYZE] > 0) || this.isFrozen();
+        return (this.statuses[StatusEffect.PARALYZE] != 0) || this.isFrozen();
     }
 
     canAct() {
@@ -169,6 +169,7 @@ export class ServerPlayer {
         this.updateHP(damage);
         if (this.isDead()) {
             this.justDied = true;
+            this.clearStatusEffects();
             this.team!.game.handleTeamKill(this.team);
         }
 
@@ -425,6 +426,7 @@ export class ServerPlayer {
 
     // Called when the terrain effect is applied for the first time
     setUpTerrainEffect(terrain: Terrain) {
+        console.log(`[ServerPlayer:setUpTerrainEffect] Terrain effect ${terrain}`);
         switch (terrain) {
             case Terrain.FIRE:
                 if (this.DoTTimer) {
@@ -438,7 +440,9 @@ export class ServerPlayer {
                 this.addStatusEffect(StatusEffect.FREEZE, -1, 1);
                 break;
             case Terrain.NONE:
+                console.log(`[ServerPlayer:setUpTerrainEffect] Terrain effect NONE`);
                 if (this.isFrozen()) {
+                    console.log(`[ServerPlayer:setUpTerrainEffect] Removing freeze`);
                     this.removeStatusEffect(StatusEffect.FREEZE);
                 }
                 break;
@@ -485,6 +489,15 @@ export class ServerPlayer {
                 this.statuses[key]--;
                 change = true;
             }
+        }
+        if (change) this.broadcastStatusEffectChange();
+    }
+
+    clearStatusEffects() {
+        let change = false;
+        for (const key in this.statuses) {
+            if (this.statuses[key] != 0) change = true;
+            this.statuses[key] = 0;
         }
         if (change) this.broadcastStatusEffectChange();
     }

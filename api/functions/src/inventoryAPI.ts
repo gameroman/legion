@@ -140,8 +140,7 @@ function canEquipEquipment(characterData: DBCharacterData, equipmentId: number):
     console.error("Invalid equipment ID");
     return false;
   }
-  // console.log(equipment.minLevel, characterData.level, equipment.classes, characterData.class);
-  return (equipment.minLevel <= characterData.level) && (equipment.classes.includes(characterData.class));
+  return (equipment.minLevel <= characterData.level) && (!equipment.classes.length || equipment.classes.includes(characterData.class));
 }
 
 interface EquipUnequipOutcome {

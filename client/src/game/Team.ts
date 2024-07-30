@@ -63,7 +63,7 @@ export class Team {
 
     setScore(score: number) {
         this.score = score;
-        console.log(`Team ${this.id} score: ${this.score}`);
+        // console.log(`Team ${this.id} score: ${this.score}`);
     }
 
     getOverview(): TeamOverview {

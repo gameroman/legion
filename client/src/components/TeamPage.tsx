@@ -166,7 +166,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
             return;
           }
 
-          if (data.classes && !data.classes.includes(this.state.character_sheet_data.class)) {
+          if (data.classes.length && !data.classes.includes(this.state.character_sheet_data.class)) {
             errorToast('Character class is not compatible!');
             return;
           }
