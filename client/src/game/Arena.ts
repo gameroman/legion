@@ -1074,13 +1074,13 @@ export class Arena extends Phaser.Scene
                 character.level, character.xp,
                 );
             
-            console.log(`isPlayer: ${isPlayer}, cooldown: ${character.cooldown}`);
             if (isPlayer) {
                 player.setDistance(character.distance);
                 player.setCooldown(1); // hack
                 player.setInventory(character.inventory);
                 player.setSpells(character.spells);
             }
+            player.setStatuses(character.statuses);
 
             if (!isReconnect) {
                 this.time.delayedCall(750, player.makeEntrance, [], player);
