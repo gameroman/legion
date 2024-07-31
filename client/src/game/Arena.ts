@@ -563,6 +563,7 @@ export class Arena extends Phaser.Scene
                 this.refreshOverview();
                 break;
             case 'pendingSpellChange':
+            case 'pendingItemChange':
             case 'selectPlayer':
             case 'inventoryChange':
                 this.refreshBox();
@@ -1254,8 +1255,8 @@ export class Arena extends Phaser.Scene
         }
 
         // Events from the HUD
-        events.on('itemClick', (index) => {
-            this.selectedPlayer?.onKey(index);
+        events.on('itemClick', (keyIndex) => {
+            this.selectedPlayer?.onKey(keyIndex);
         });
 
         events.on('abandonGame', () => {

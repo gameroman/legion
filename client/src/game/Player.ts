@@ -126,8 +126,8 @@ export class Player extends Phaser.GameObjects.Container {
             this.maxMP = maxMP;
             this.mp = mp;
 
-            this.moveTo(this.numKey, 3);
-            this.moveTo(this.sprite, 2);
+            this.moveTo(this.numKey, 5);
+            this.moveTo(this.sprite, 4);
 
             this.setMP(mp);
         } else {
@@ -274,6 +274,8 @@ export class Player extends Phaser.GameObjects.Container {
         this.hideMovementRange();
         this.selected = false;
         this.glowFx.setActive(false);
+        this.pendingSpell = null;
+        this.pendingItem = null;
     }
 
     isSelected() {
@@ -353,13 +355,13 @@ export class Player extends Phaser.GameObjects.Container {
         this.onKey(index);
     }
 
-    onKey(index) {
+    onKey(keyIndex) {
         const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
         const itemsIndex = keyboardLayout.indexOf('Z');
-        if (index >= itemsIndex) {
-            this.useItem(index - itemsIndex);
+        if (keyIndex >= itemsIndex) {
+            this.useItem(keyIndex - itemsIndex);
         } else {
-            this.useSkill(index);
+            this.useSkill(keyIndex);
         }
     }
 

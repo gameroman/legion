@@ -10,19 +10,9 @@ interface Props {
   player: PlayerProps;
   eventEmitter: any;
 }
-
 interface State {
   player: PlayerProps;
-  clickedItem: number;
-  clickedSpell: number;
-  poisonCounter: number;
-  frozenCounter: number;
-  selectedSpell: BaseSpell; 
-  clickedItemIndex: number | null; 
 }
-
-const itemBasicNumber = 100; 
-const spellBasicNumber = 200; 
 
 class PlayerTab extends Component<Props, State> {
   timerID: NodeJS.Timeout;
@@ -32,56 +22,26 @@ class PlayerTab extends Component<Props, State> {
     super(props);
     this.state = {
       player: this.props.player,
-      clickedItem: -1,
-      clickedSpell: -1,
-      poisonCounter: 25,
-      frozenCounter: 15,
-      selectedSpell: null, 
-      clickedItemIndex: null, 
     };
     this.events = this.props.eventEmitter;
   }
 
   componentDidMount() {
-    this.timerID = setInterval(() => this.tick(), 1000); 
-    document.addEventListener('click', this.handleDocumentClick); 
+    // this.timerID = setInterval(() => this.tick(), 1000); 
   }
 
   componentWillUnmount() {
     clearInterval(this.timerID); 
-    document.removeEventListener('click', this.handleDocumentClick); 
   }
 
-  tick() {
-    this.setState(prevState => ({
-      poisonCounter: Math.max(0, prevState.poisonCounter - 1),
-      frozenCounter: Math.max(0, prevState.frozenCounter - 1)
-    }))
-  }
-
-  actionClick(type: string, index: number) {
+  actionClick(index: number) {
     this.events.emit('itemClick', index);
-    const stateField = type == 'item' ? 'clickedItem' : 'clickedSpell';
-    this.setState({ [stateField]: index });
-
-    setTimeout(() => {
-      this.setState({ [stateField]: -1 });
-    }, 1000);
   } 
 
-  handleClick = (event: Event, type: string, index: number, indexItem) => {
+  handleClick = (event: Event, index: number) => {
     event.stopPropagation(); 
-    this.setState((prevState: State) => ({
-      clickedItemIndex: prevState.clickedItemIndex === indexItem ? null : indexItem,
-    })); 
-    this.actionClick(type, index);
+    this.actionClick(index);
   } 
-
-  handleDocumentClick = (event: MouseEvent) => {
-    if (!(event.target instanceof HTMLElement && event.target.contains(this.base))) {
-      this.setState({ clickedItemIndex: null}); 
-    }
-  }
 
   getCooldownRatio(player: PlayerProps): number {
     return (player.maxCooldown - player.cooldown) / player.maxCooldown;
@@ -106,12 +66,13 @@ class PlayerTab extends Component<Props, State> {
     const isCooldownActive = player.cooldown > 0;
     const isDead = player.hp <= 0;
     const canAct = !isCooldownActive && !isDead && !player.casting;
-    const headerText = `#${player.number} ${player.name}`;
     const cooldownRatio = this.getCooldownRatio(player);
     const cooldownBarStyle = {
       width: `${cooldownRatio * 100}%`,
     }; 
 
+    const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+    const itemsIndex = keyboardLayout.indexOf('Z');
     return (
       <div className="flex flex_col items_center">
         <div className="player_tab_container">
@@ -163,10 +124,10 @@ class PlayerTab extends Component<Props, State> {
                     className="player_hud_skills flex items_center justify_center relative" 
                     key={idx}
                     style={{
-                      backgroundColor: this.state.clickedItemIndex === idx + itemBasicNumber ? '#bf9b30' : 'initial',
+                      backgroundColor: player.pendingItem === idx ? '#bf9b30' : 'initial',
                     }}
                     onClick={(event: Event) => {
-                      this.handleClick(event, 'item', idx, idx + itemBasicNumber); 
+                      this.handleClick(event, itemsIndex + idx); 
                     }}
                   >
                     <ItemIcon
@@ -188,10 +149,10 @@ class PlayerTab extends Component<Props, State> {
                     className="player_hud_skills flex items_center justify_center relative"
                     key={idx}
                     style={{
-                      backgroundColor: this.state.clickedItemIndex === idx + spellBasicNumber ? '#bf9b30' : 'initial',
+                      backgroundColor: player.pendingSpell === idx ? '#bf9b30' : 'initial',
                     }}
                     onClick={(event: Event) => {
-                      this.handleClick(event, 'spell', idx, idx + spellBasicNumber); 
+                      this.handleClick(event, idx); 
                     }}
                   >
                     <ItemIcon

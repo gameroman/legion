@@ -14,8 +14,6 @@ interface GameHUDProps {
 interface GameHUDState {
   playerVisible: boolean;
   player: PlayerProps;
-  clickedItem: number;
-  clickedSpell: number;
   pendingSpell: boolean;
   pendingItem: boolean;
   team1: TeamOverview;
@@ -38,8 +36,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   state: GameHUDState = {
     playerVisible: false,
     player: null,
-    clickedItem: -1,
-    clickedSpell: -1,
     pendingSpell: false,
     pendingItem: false,
     team1: null,
@@ -59,7 +55,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   componentDidMount() {
     events.on('showPlayerBox', this.showPlayerBox);
     events.on('hidePlayerBox', this.hidePlayerBox);
-    events.on('keyPress', this.keyPress);
     events.on('updateOverview', this.updateOverview);
     events.on('gameEnd', this.endGame);
     events.on('hoverCharacter', () => {
@@ -133,12 +128,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     });
   }
 
-  keyPress = (key: string) => {
-    this.setState({ clickedSpell: 0 });
-  }
-
   handleCursorChange = (newCursorClass: string) => {
-    // console.log(`newCursorClass: ${newCursorClass}`);
     this.props.changeMainDivClass(newCursorClass);
   }
 
