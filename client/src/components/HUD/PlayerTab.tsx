@@ -46,8 +46,8 @@ class PlayerTab extends Component<Props, State> {
     return (player.maxCooldown - player.cooldown) / player.maxCooldown;
   }
 
-  getBackgroundPosition (pendingSpellIdx: number) {
-    const coordinates = mapFrameToCoordinates(this.props.player.spells[pendingSpellIdx]?.frame);
+  getBackgroundPosition (frame: number) {
+    const coordinates = mapFrameToCoordinates(frame);
     coordinates.x = -coordinates.x + 0;
     coordinates.y = -coordinates.y + 1;
     const backgroundPosition = `${coordinates.x}px ${coordinates.y}px`;
@@ -174,7 +174,7 @@ class PlayerTab extends Component<Props, State> {
           <div className="spell_target">
             <div className="equip-dialog-image" style={{
               backgroundImage: `url(spells.png)`,
-              backgroundPosition: this.getBackgroundPosition(player.pendingSpell),
+              backgroundPosition: this.getBackgroundPosition(this.props.player.spells[player.pendingSpell].frame),
             }} />
             <div className="dialog-spell-info-container">
               <div className="dialog-spell-info">
@@ -188,6 +188,25 @@ class PlayerTab extends Component<Props, State> {
               <div className="dialog-spell-info">
                 <img src={'/inventory/target_icon.png'} alt="target" />
                 <span>{Target[player.spells[player.pendingSpell]?.target]}</span>
+              </div>
+            </div>
+          </div>
+        </div>}
+        {player.pendingItem !== null && <div className="spell_target_container">
+          <p className="spell_target_title">Select a target</p>
+          <div className="spell_target">
+            <div className="equip-dialog-image" style={{
+              backgroundImage: `url(consumables.png)`,
+              backgroundPosition: this.getBackgroundPosition(this.props.player.items[player.pendingItem].frame),
+            }} />
+            <div className="dialog-item-info-container">
+              <div className="dialog-spell-info">
+                <img src={'/inventory/cd_icon.png'} alt="cd" />
+                <span>{player.items[player.pendingItem]?.cooldown}s</span>
+              </div>
+              <div className="dialog-spell-info">
+                <img src={'/inventory/target_icon.png'} alt="target" />
+                <span>{Target[player.items[player.pendingItem]?.target]}</span>
               </div>
             </div>
           </div>

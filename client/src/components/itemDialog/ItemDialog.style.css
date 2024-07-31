@@ -193,6 +193,12 @@
     gap: 4px;
 }
 
+.dialog-item-info-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+}
+
 .dialog-spell-info {
     flex: 1;
     padding: 4px;

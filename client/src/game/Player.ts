@@ -376,6 +376,9 @@ export class Player extends Phaser.GameObjects.Container {
             this.cancelItem();
             return;
         }
+        if (this.pendingSpell != null) {
+            this.cancelSkill();
+        }
         const item = this.getItemAtSlot(index);
         if (!item) {
             console.error(`No item at slot ${index}`);
@@ -440,7 +443,9 @@ export class Player extends Phaser.GameObjects.Container {
             this.cancelSkill();
             return;
         }
-
+        if (this.pendingItem != null) {
+            this.cancelItem();
+        }
         if (!this.canAct() || spell.cost > this.mp) {
             this.arena.playSound('nope', 0.2);
             return;
