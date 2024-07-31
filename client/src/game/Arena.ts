@@ -1350,7 +1350,7 @@ export class Arena extends Phaser.Scene
                 text2 = 'on-fire';
                 break;
             default:
-                break;
+                return;
         }
         // console.log(`[GEN] ${text1} ${text2}`);
 
@@ -1459,7 +1459,7 @@ export class Arena extends Phaser.Scene
                 sprite.anims.timeScale = originalTimeScale;
             });
             this.killCamActive = false;
-            if (this.pendingGEN !== null) {
+            if (this.pendingGEN !== null && this.pendingGEN !== undefined) {
                 this.displayGEN(this.pendingGEN);
                 this.pendingGEN = null;
             }

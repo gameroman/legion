@@ -470,6 +470,7 @@ export class ServerPlayer {
     }
 
     addStatusEffect(status: StatusEffect, duration: number, chance: number = 1) {
+        if (this.isDead()) return false;
         if (Math.random() > chance) return false;
         this.statuses[status] = duration;
         if (DoTStatuses.includes(status)) {
@@ -499,7 +500,9 @@ export class ServerPlayer {
         for (const key in this.statuses) {
             if (this.statuses[key] > 0) {
                 this.statuses[key]--;
-                change = true;
+                if (this.statuses[key] == 0) {
+                    change = true;
+                }
             }
         }
         if (change) this.broadcastStatusEffectChange();

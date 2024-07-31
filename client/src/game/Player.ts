@@ -659,12 +659,12 @@ export class Player extends Phaser.GameObjects.Container {
             this.sprite.anims.stop();
             this.cooldownTween?.stop();
             this.statusSprite.setVisible(true);
-            this.statusSprite.anims.play('paralyzed');
+            console.log(`[setParalyzed] playing paralyzed animation`);
+            this.statusSprite.anims.play('poisoned');
         } else {
             this.statuses[StatusEffect.PARALYZE] = 0;
             this.statusSprite.anims.stop();
             this.statusSprite.setVisible(false);
-            console.log(`[setParalyzed] playing ${this.getIdleAnim()}`);
             this.playAnim(this.getIdleAnim());
         }
     }
@@ -673,7 +673,8 @@ export class Player extends Phaser.GameObjects.Container {
         if (duration != 0) {
             this.statuses[StatusEffect.POISON] = duration;
             this.statusSprite.setVisible(true);
-            this.statusSprite.anims.play('poisoned');
+            console.log(`[setPoisoned] playing poisoned animation`);
+            this.statusSprite.anims.play('paralyzed');
         } else {
             this.statuses[StatusEffect.POISON] = 0;
             this.statusSprite.anims.stop();
