@@ -188,11 +188,6 @@ function sendQData(player: Player) {
         goldReward,
         estimatedWaitingTime: 10,
         nbInQueue: countQueuingPlayers(player.mode, player.league),
-        tips: [
-            "o have data to use in the UI, use the Log In button and create an account, which will create a user in the Firestore database.",
-            "New version of legion game will be launched soon! Expect great interface and wonderful game experience, excellent, fantastic, great! New versio of legion game will be launched soon! Expect great interface and wonderful game experience, excellent, fantastic, great!",
-            "Event handlers have access to the event that triggered the function."
-        ],
         news: [
             {
                 title: "Title",

@@ -1,0 +1,15 @@
+export const tips = [
+    "You earn gold while queuing for a match. The longer you queue, the higher the reward. Patience pays off!",
+    "Teaching spells to characters cannot be undone (for now) and will consume the spell, so choose wisely!",
+    "Regularly play Casual or Ranked games to win the keys to your daily loot chests!",
+    "Your characters earn SP when leveling-up. Spend them to increase their stats!",
+    "If your mages often lack MP during a game, consider equipping them with Ethers!",
+    "The Poison spell is a great way to deal damage over time to your enemies!",
+    "Fire spells set the ground on fire, dealing damage to any character standing on or crossing it!",
+    "Ice spells can freeze your enemies, preventing them from moving or attacking until freed!",
+    "The only way to free a frozen character is to attack them with a melee attack or use a fire spell on them!",
+    "Thunder spells can paralyze your enemies, preventing them from moving or attacking for a limited time!",
+    "The + and X versions of spells tend to have larger areas of effect and deal more damage!",
+    "Every action in the game has a cooldown time. While a character is in cooldown, they cannot do anything, but you can still use your other characters in the meantime!",
+    "Targetting ice spells on an empty cell will still create ice blocks that can be used to block your enemies' path!",
+];

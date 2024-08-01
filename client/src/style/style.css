@@ -1958,17 +1958,15 @@ canvas {
 .queue-tips-container {
   width: 40vw;
   text-align: center;
+  font-size: 14px;
 }
 .queue-tips-container > div:first-child {
-  font-size: 1.1vw;
   margin-top: 0.2vw;
   margin-bottom: 0.4vw;
 }
 .queue-tips-container > div:last-child{
-  font-size: 0.8vw;
   height: 2.8vw;
-  overflow: hidden;
-  /* transition:ease-in-out 5s; */
+  /* overflow: hidden; */
 }
 .queue-tips-arrow {
   position: absolute;
