@@ -445,7 +445,6 @@ export const purchaseCharacter = onRequest((request, response) => {
 });
 
 export const spendSP = onRequest((request, response) => {
-  logger.info("Spending skill points");
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -456,6 +455,11 @@ export const spendSP = onRequest((request, response) => {
       const amount = 1;
       const index = request.body.index as number;
       let stat;
+      console.log(`Spending ${amount} SP on stat ${index} = ${statFields[index]}`);
+
+      if (index < 0 || index >= statFields.length) {
+        throw new Error("Invalid stat index");
+      }
 
       await db.runTransaction(async (transaction) => {
         const playerRef = db.collection("players").doc(uid);
@@ -497,7 +501,6 @@ export const spendSP = onRequest((request, response) => {
           sp_bonuses: spBonuses,
         });
       });
-      console.log("Transaction successfully committed!");
 
       logPlayerAction(uid, "spendSP", {characterId, amount, stat});
 

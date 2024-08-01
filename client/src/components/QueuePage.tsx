@@ -6,6 +6,7 @@ import { Link, useRouter } from 'preact-router';
 import { getFirebaseIdToken } from '../services/apiService';
 import { ENABLE_APPROX_WT, ENABLE_MM_TOGGLE, ENABLE_Q_NEWS } from '@legion/shared/config';
 import { tips } from './tips'
+import { PlayerContext } from '../contexts/PlayerContext';
 
 interface QPageProps {
     matches: {
@@ -42,6 +43,7 @@ interface QpageState {
 
 /* eslint-disable react/prefer-stateless-function */
 class QueuePage extends Component<QPageProps, QpageState> {
+    static contextType = PlayerContext; 
     interval = null;
     intervalWaited = null;
     constructor(props: QPageProps) {
@@ -118,6 +120,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
 
         this.socket.on('updateGold', ({ gold }) => {
             this.setState({ earnedGold: gold });
+            this.context.setPlayerInfo({ gold: this.context.player.gold + 1 });
             console.log(`Received gold update: ${gold}`);
         });
 

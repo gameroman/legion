@@ -109,7 +109,7 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
           </div>)}
         </div>
         <div style={{lineHeight: '0.5'}}>
-          <span style={{color: `${getRarityValue(data.effort).clr}`, fontSize: '11px'}}>
+          <span style={{color: `${getRarityValue(data.effort).clr}`, fontSize: '11px', fontFamily: 'Kim'}}>
             {getRarityValue(data.effort).val}
           </span>
         </div>

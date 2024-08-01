@@ -6,9 +6,10 @@ import { CHARACTER_INFO, INFO_BG_COLOR, INFO_TYPE, ItemDialogType } from './Item
 import { BaseItem } from '@legion/shared/BaseItem';
 import { BaseSpell } from '@legion/shared/BaseSpell';
 import { BaseEquipment } from '@legion/shared/BaseEquipment';
-import { InventoryActionType, Stat, Target } from '@legion/shared/enums';
+import { InventoryActionType, Stat, Target, statFields } from '@legion/shared/enums';
 import { apiFetch } from '../../services/apiService';
 import { errorToast, successToast, mapFrameToCoordinates } from '../utils';
+import { getSPIncrement } from '@legion/shared/levelling';
 
 Modal.setAppElement('#root');
 interface DialogProps {
@@ -48,20 +49,19 @@ class ItemDialog extends Component<DialogProps> {
       body: payload
     })
       .then((data) => {
-        if (data.status == 0) {
-          // successToast(this.props.actionType > 0 ? 'Item un-equipped!' : 'Item equipped!');
-          
+        if (data.status == 0) {          
           this.props.refreshCharacter();
-        // } else {
-        //   errorToast('Character inventory is full!');
         }
       })
       .catch(error => errorToast(`Error: ${error}`));
   }
 
-  spendSP = (index: number) => {
+  spendSP = (stat: string) => {
     if (!this.props.characterId) return;
 
+    const index = statFields.indexOf(stat);
+    if (index === -1) return;
+  
     const payload = {
       index,
       characterId: this.props.characterId,
@@ -75,7 +75,7 @@ class ItemDialog extends Component<DialogProps> {
     })
       .then((data) => {
         if (data.status == 0) {
-          successToast('SP spent!');
+          successToast(`${statFields[index].toUpperCase()} increased by ${getSPIncrement(index)}!`);
           
           this.props.refreshCharacter();
         } else {
@@ -231,7 +231,7 @@ class ItemDialog extends Component<DialogProps> {
           <span className='character-info-addition' style={dialogData.effect && Number(dialogData.effect) < 0 ? { color: '#c95a74' } : { color: '#9ed94c' }}>{getInfoVal(dialogData.effect)}</span>
         </p>
         <div className="dialog-button-container">
-          <button className="dialog-accept" onClick={() => this.spendSP(0)}><img src="/inventory/confirm_icon.png" alt="confirm" />Accept</button>
+          <button className="dialog-accept" onClick={() => this.spendSP(dialogData.key)}><img src="/inventory/confirm_icon.png" alt="confirm" />Accept</button>
           <button className="dialog-decline" onClick={handleClose}><img src="/inventory/cancel_icon.png" alt="decline" />Cancel</button>
         </div>
       </div>

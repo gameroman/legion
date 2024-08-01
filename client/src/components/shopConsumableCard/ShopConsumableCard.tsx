@@ -66,7 +66,8 @@ class ShopConsumableCard extends Component<ShopCardProps> {
     const coordinates = mapFrameToCoordinates(data.frame);
 
     const getEffectValue = (effect: Effect) => {
-      return effect.value > 0 && effect.stat !== 1 ? `+${effect.value}` : `+${effect.value}`;
+      if(effect.value === -1) return '∞';
+      return `+${effect.value}`;
     }
 
     return (
@@ -100,7 +101,7 @@ class ShopConsumableCard extends Component<ShopCardProps> {
           </div>
         </div>
         <div style={{lineHeight: '0.5'}}>
-          <span style={{color: `${getRarityValue(data.effort).clr}`, fontSize: '11px'}}>
+          <span style={{color: `${getRarityValue(data.effort).clr}`, fontSize: '11px', fontFamily: 'Kim'}}>
             {getRarityValue(data.effort).val}
           </span>
         </div>
