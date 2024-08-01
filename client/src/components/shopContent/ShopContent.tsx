@@ -111,8 +111,8 @@ class ShopContent extends Component<ShopContentProps> {
                 return;
             }
         } else {
-            if (inventorySize(this.props.inventory) >= this.props.carrying_capacity) {
-                errorToast('Inventory full!');
+            if (inventorySize(this.props.inventory) + quantity > this.props.carrying_capacity) {
+                errorToast('Not enough room in inventory!');
                 return;
             }
         }
