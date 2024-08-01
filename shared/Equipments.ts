@@ -98,6 +98,28 @@ equipments[7] = new BaseEquipment({
     minLevel: 1,
 });
 
+equipments[8] = new BaseEquipment({
+    id: 8,
+    name: "Hardened gloves",
+    description: "",
+    frame: 110,
+    effects: [{stat: Stat.DEF, value: 3}],
+    slot: EquipmentSlot.GLOVES,
+    effort: 3,
+    minLevel: 1,
+});
+
+equipments[9] = new BaseEquipment({
+    id: 9,
+    name: "Light boots",
+    description: "",
+    frame: 130,
+    effects: [{stat: Stat.DEF, value: 3}],
+    slot: EquipmentSlot.BOOTS,
+    effort: 3,
+    minLevel: 1,
+});
+
 export function getEquipmentById(id:number): BaseEquipment | undefined {
     return equipments.find(e => e.id === id);
 }

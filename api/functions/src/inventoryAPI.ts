@@ -135,12 +135,13 @@ function canLearnSpell(characterData: DBCharacterData): boolean {
 }
 
 function canEquipEquipment(characterData: DBCharacterData, equipmentId: number): boolean {
+  console.log(`[canEquipEquipment] equipmentId: ${equipmentId}`);
   const equipment = getEquipmentById(equipmentId);
   if (!equipment) {
     console.error("Invalid equipment ID");
     return false;
   }
-  console.log(`[canEquipEquipment] Equipment name: [${equipmentId}] ${equipment.name} Character level: ${characterData.level}, Equipment min level: ${equipment.minLevel}, Equipment classes: ${equipment.classes}, Character class: ${characterData.class}`);
+  console.log(`[canEquipEquipment] Equipment name: ${equipment.name} Character level: ${characterData.level}, Equipment min level: ${equipment.minLevel}, Equipment classes: ${equipment.classes}, Character class: ${characterData.class}`);
   return (equipment.minLevel <= characterData.level) && (!equipment.classes.length || equipment.classes.includes(characterData.class));
 }
 

@@ -294,7 +294,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
                                                 <img src="/queue/exit_icon.png" />
                                             </div>
                                             <div className="queue-footer-text">
-                                                CANCEL QUEUE
+                                                LEAVE QUEUE
                                             </div>
                                         </div>
                                     </Link>
