@@ -145,7 +145,7 @@ class Overview extends Component<Props, State> {
                   <div className="char_stats_mp" style={{ width: `${(member.mp / member.maxMP) * 100}%` }}></div>
                 </div>}
               </div>
-              {this.props.isPlayerTeam && <div className={`char_stats_cooldown_bar ${member.totalCooldown && cooldown === 0 ? 'cooldown_bar_flash' : ''}`} style={position === 'left' && {justifyContent: 'flex-start'}}>
+              {this.props.isPlayerTeam && <div className={`char_stats_cooldown_bar ${member.totalCooldown && cooldown === 0 ? 'cooldown_bar_flash' : ''}`} style={position === 'left' && {justifyContent: 'flex-start', marginLeft: '40px'}}>
                 <div className="char_stats_cooldown" style={{ width: `${(1 - (cooldown / member.totalCooldown)) * 100}%` }}></div>
               </div>}
               <div className={`char_statuses ${position === 'right' && 'char_statuses_right'}`}>

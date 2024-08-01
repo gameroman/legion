@@ -1217,3 +1217,12 @@
     transform: rotate(360deg);
   }
 }
+
+@keyframes oscillate-brightness {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.5); }
+}
+.blinking-gradient {
+  background: linear-gradient(to bottom right, #ecbb29, #1c1f25);
+  animation: oscillate-brightness 0.5s ease-in-out infinite;
+}

@@ -122,7 +122,7 @@ class PlayerTab extends Component<Props, State> {
               <div className="grid player_hud_action_container gap_4 padding_y_4">
                 {Array.from({ length: 6 }, (_, idx) => (
                   <div 
-                    className="player_hud_skills flex items_center justify_center relative" 
+                    className={`player_hud_skills flex items_center justify_center relative ${player.pendingItem === idx ? 'blinking-gradient' : ''}`}                    
                     key={idx}
                     style={{
                       background: player.pendingItem === idx ? goldenGradient : 'initial',
@@ -147,14 +147,11 @@ class PlayerTab extends Component<Props, State> {
               <div className="grid player_hud_action_container gap_4 padding_y_4">
                 {Array.from({ length: 6 }, (_, idx) => (
                   <div
-                    className="player_hud_skills flex items_center justify_center relative"
-                    key={idx}
-                    style={{
-                      background: player.pendingSpell === idx ? goldenGradient : 'initial',
-                    }}
-                    onClick={(event: Event) => {
-                      this.handleClick(event, idx); 
-                    }}
+                  className={`player_hud_skills flex items_center justify_center relative ${player.pendingSpell === idx ? 'blinking-gradient' : ''}`}                    
+                  key={idx}
+                  onClick={(event: Event) => {
+                    this.handleClick(event, idx); 
+                  }}
                   >
                     <ItemIcon
                       action={player.spells[idx]}
