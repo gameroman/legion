@@ -32,7 +32,10 @@ function generateName() {
   const options = {
     dictionaries: [adjectives, colors, animals],
     length: 2,
+    separator: " ",
+    style: "capital",
   };
+  // @ts-ignore
   const base = uniqueNamesGenerator(options);
   return base.length > 16 ? base.slice(0, 16) : base;
 }

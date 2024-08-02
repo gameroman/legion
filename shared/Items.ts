@@ -136,6 +136,19 @@ items[9] = new BaseItem({
     effort: 20,
 });
 
+items[10] = new BaseItem({
+    id: 10,
+    name: "Antidote",
+    description: "Cures poison",
+    frame: 10,
+    animation: "potion_heal",
+    sfx: "healing",
+    cooldown: 7,
+    target: Target.SELF,
+    effects: [],
+    effort: 1.5,
+});
+
 export function getConsumableById(id: number): BaseItem | undefined {
     return items.find(item => item.id === id);
 }
