@@ -71,7 +71,9 @@ export class Player extends Phaser.GameObjects.Container {
         this.isPlayer = isPlayer;
         this.distance = 2;
         this.maxHP = maxHP;
-        this.hp = hp;
+        this.maxMP = maxMP;
+        this.hp = this.maxHP;
+        this.mp = this.maxMP;
         this.num = num;
         this.class = characterClass;
         this.xp = xp;
@@ -82,7 +84,14 @@ export class Player extends Phaser.GameObjects.Container {
 
         // Create the sprite using the given key and add it to the container
         this.sprite = scene.add.sprite(0, 0, texture);
-        this.add(this.sprite);
+
+        // Create a Graphics object for the selection oval
+        this.selectionOval = scene.add.graphics();
+        this.selectionOval.lineStyle(4, 0xffd700, 1);
+        this.selectionOval.strokeEllipse(0, 55, 70, this.sprite.height / 4);
+        this.selectionOval.setVisible(false);
+        this.add(this.selectionOval);
+        this.add(this.sprite); // Add sprite after selection oval for proper depth
 
         this.statuses = {
             [StatusEffect.FREEZE]: 0,
@@ -109,42 +118,31 @@ export class Player extends Phaser.GameObjects.Container {
         // @ts-ignore
         this.scene.sprites.push(poisoned);
 
+        // For cast effect, slash effect, etc.
+        this.animationSprite = scene.add.sprite(0, 20, '').setScale(2).setVisible(false);
+        this.animationSprite.on('animationcomplete', () => this.animationSprite.setVisible(false), this);
+        this.add(this.animationSprite);
+
+        this.healthBar = new HealthBar(scene, 0, -50, 0x00ff08);
+        this.add(this.healthBar);
+        this.setHP(hp);
+
         if (isPlayer) {
             this.numKey = scene.add.text(30, 70, num.toString(), { fontFamily: 'Kim', fontSize: '12px', color: '#fff', stroke: '#000', strokeThickness: 3 }).setOrigin(1,1);
             this.add(this.numKey);
-
-            // Create a Graphics object for the selection oval
-            this.selectionOval = scene.add.graphics();
-            this.selectionOval.lineStyle(4, 0xffd700, 1);
-            this.selectionOval.strokeEllipse(0, 55, 70, this.sprite.height / 4);
-            this.selectionOval.setVisible(false);
-            this.add(this.selectionOval);
 
             this.cooldown = new CircularProgress(scene, -8, 28, 10, 0xffc400).setVisible(false);
             this.add(this.cooldown);
 
             this.MPBar = new HealthBar(scene, 0, -40, 0x0099ff);
             this.add(this.MPBar);
-            this.maxMP = maxMP;
             this.setMP(mp);
-
-            this.moveTo(this.numKey, 5);
-            this.moveTo(this.sprite, 4);
         } 
 
-        this.baseSquare.lineStyle(4, isPlayer ? 0x0000ff : 0xff0000); 
+        this.baseSquare.lineStyle(4, isPlayer ? 0x0000ff : 0xff0000); // Must be called before strokeRect
+        this.baseSquare.strokeRect(-30, 10, 60, 60);  
 
         if (gridX < this.arena.gridWidth/2) this.sprite.flipX = true;
-
-        this.healthBar = new HealthBar(scene, 0, -50, 0x00ff08);
-        this.add(this.healthBar);
-
-        this.baseSquare.strokeRect(-30, 10, 60, 60); // adjust position and size as needed
-        this.baseSquare.setDepth(this.depth - 2);  
-
-        this.animationSprite = scene.add.sprite(0, 20, '').setScale(2).setVisible(false);
-        this.animationSprite.on('animationcomplete', () => this.animationSprite.setVisible(false), this);
-        this.add(this.animationSprite);
 
         this.glowFx = this.sprite.preFX.addGlow(0x000000, 6);
         this.glowFx.setActive(false);
@@ -158,8 +156,6 @@ export class Player extends Phaser.GameObjects.Container {
 
         this.sprite.on('pointerover', this.onPointerOver, this);
         this.sprite.on('pointerout', this.onPointerOut, this);
-
-        this.setHP(hp);
     }
 
     // Returns the fields needed to display the top screen Player box in-game.
