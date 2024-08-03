@@ -497,22 +497,32 @@ export class ServerPlayer {
 
     decrementStatuses() {
         let change = false;
-        for (const key in this.statuses) {
-            if (this.statuses[key] > 0) {
-                this.statuses[key]--;
-                if (this.statuses[key] == 0) {
+        for (const status in this.statuses) {
+            if (this.statuses[status] > 0) {
+                this.statuses[status]--;
+                if (this.statuses[status] == 0) {
                     change = true;
+                    this.clearDoTSatus(status as keyof StatusEffects);
                 }
             }
         }
         if (change) this.broadcastStatusEffectChange();
     }
 
+    clearDoTSatus(status: StatusEffect) {
+        if (DoTStatuses.includes(status)) {
+            if (this.statusDoTTimer) {
+                clearTimeout(this.statusDoTTimer);
+            }
+        }
+    }
+
     clearStatusEffects() {
         let change = false;
-        for (const key in this.statuses) {
-            if (this.statuses[key] != 0) change = true;
-            this.statuses[key] = 0;
+        for (const status in this.statuses) {
+            if (this.statuses[status] != 0) change = true;
+            this.statuses[status] = 0;
+            this.clearDoTSatus(status as keyof StatusEffects);
         }
         if (change) this.broadcastStatusEffectChange();
     }

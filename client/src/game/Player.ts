@@ -101,8 +101,13 @@ export class Player extends Phaser.GameObjects.Container {
         this.statusSprites.set(StatusEffect.PARALYZE, paralyzed);
         this.statusSprites.set(StatusEffect.POISON, poisoned);
 
+        // List of sprites maintained for kill cam effect
         // @ts-ignore
         this.scene.sprites.push(this.sprite);
+        // @ts-ignore
+        this.scene.sprites.push(paralyzed);
+        // @ts-ignore
+        this.scene.sprites.push(poisoned);
 
         // TODO: refactor as subclass
         if (isPlayer) {
