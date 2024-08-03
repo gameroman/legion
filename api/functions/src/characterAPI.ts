@@ -511,6 +511,10 @@ export const spendSP = onRequest((request, response) => {
           sp: admin.firestore.FieldValue.increment(-amount),
           sp_bonuses: spBonuses,
         });
+
+        transaction.update(playerRef, {
+          'utilizationStats.everSpentSP': true,
+        });
       });
 
       logPlayerAction(uid, "spendSP", {characterId, amount, stat});

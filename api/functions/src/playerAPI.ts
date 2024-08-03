@@ -339,6 +339,10 @@ export const claimChest = onRequest((request, response) => {
           dailyloot: playerData.dailyloot,
         });
 
+        transaction.update(playerRef, {
+          'utilizationStats.everOpenedDailyLoot': true,
+        });
+
         const content: ChestReward[] = getChestContent(chestType as ChestColor);
         logger.info(`Chest content: ${JSON.stringify(content)}`);
 
