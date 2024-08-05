@@ -2,6 +2,7 @@ import {Class, Stat} from "@legion/shared/enums";
 import { apiFetch } from '../services/apiService';
 import { guide } from './tips';
 import { startTour } from './tours';  
+import { PlayerContext } from '../contexts/PlayerContext';
 
 import Toastify from 'toastify-js'
 
@@ -87,9 +88,11 @@ export function playSoundEffect(src: string) {
   audio.play().catch(error => console.error('Error playing sound:', error));
 }
 
-export function manageHelp(page: string, todoTours: string[]) {
+export function manageHelp(page: string, context: any) {
+  const todoTours = context.player.tours;
   if (todoTours.includes(page)) {
     startTour(page);
+    context.setPlayerInfo({ tours: todoTours.filter(tour => tour !== page) });
   } else {
     fetchGuideTip();
   }

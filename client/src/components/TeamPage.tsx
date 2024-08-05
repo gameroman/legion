@@ -53,7 +53,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
   async componentDidMount() {
     await this.fetchCharacterData();
     await this.fetchInventoryData();
-    manageHelp('team', this.context.player.tours);
+    manageHelp('team', this.context);
   }
 
   componentDidUpdate(prevProps: TeamPageProps) {

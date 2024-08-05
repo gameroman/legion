@@ -15,7 +15,7 @@ class PlayPage extends Component {
   static contextType = PlayerContext; 
   componentDidUpdate() {
     if (!this.context.player.isLoaded) return;
-    manageHelp('play', this.context.player.tours);
+    manageHelp('play', this.context);
   }
   render() {
     const data = {

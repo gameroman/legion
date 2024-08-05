@@ -46,7 +46,7 @@ class RankPage extends Component {
 
   async componentDidMount() {
     await this.fetchLeaderboard();
-    manageHelp('rank', this.context.player.tours);
+    manageHelp('rank', this.context);
   }
 
   handleCurrTab = (index: number) => {

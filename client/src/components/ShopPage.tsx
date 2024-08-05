@@ -50,7 +50,7 @@ class ShopPage extends Component<ShopPageProps, State> {
   async componentDidMount() {
     await this.fetchInventoryData(); 
     this.fetchCharactersOnSale();
-    manageHelp('shop', this.context.player.tours);
+    manageHelp('shop', this.context);
   }
 
   async fetchInventoryData() {

@@ -515,6 +515,7 @@ const figureOutGuideTip = (playerData: any) => {
 };
 
 const figureOutConbatTip = (playerData: any) => {
+  console.log(`Fetching combat tip ...`);
   // "Your characters know cool spells, this time why don't you give them a try in combat?",
   if (!playerData.guideTipsShown.includes(9) &&
   playerData.characters.some((characterRef: any) => {
