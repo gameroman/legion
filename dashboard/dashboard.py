@@ -249,6 +249,8 @@ def pretty_print_player_summary(player_summary):
         print(f"    Inventory: {character['inventory']}")
         print(f"    Equipment: {character['equipment']}")
         print()
+    # Utilization stats
+    print(f"\nUtilization Stats: {player_summary['utilizationStats']}")
 
 
 def get_game_log(game_id):

@@ -261,7 +261,7 @@ export const getActionLog = onRequest(async (request, response) => {
             }
             const playerData = playerDoc.data();
             // @ts-ignore
-            const { gold, rank, leagueStats, allTimeStats, characters, lossesStreak } = playerData;
+            const { gold, rank, leagueStats, allTimeStats, characters, lossesStreak, utilizationStats } = playerData;
 
             // Fetch character details
             const characterDetails = [];
@@ -289,6 +289,7 @@ export const getActionLog = onRequest(async (request, response) => {
                 allTimeRank: allTimeStats.rank,
                 lossesStreak: allTimeStats.lossesStreak,
                 characters: characterDetails,
+                utilizationStats, 
             };
 
             // Send the response
