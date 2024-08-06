@@ -319,6 +319,7 @@ export interface PlayerProps {
     statuses: StatusEffects;
     pendingSpell: number;
     pendingItem: number;
+    isParalyzed: boolean;
 }
 
 export type StatusEffects = {

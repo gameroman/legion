@@ -171,7 +171,7 @@ class ItemDialog extends Component<DialogProps> {
               dialogData.effects.map(effect => 
                 <div className="dialog-item-info">
                   <div className="character-info-dialog-card" style={{ backgroundColor: INFO_BG_COLOR[Stat[effect.stat]] }}><span>{Stat[effect.stat]}</span></div>
-                  <span style={effect.value > 0 ? { color: '#9ed94c' } : { color: '#c95a74' }}>{effect.value > 0 ? `+${effect.value}` : effect.value}</span>
+                  <span style={effect.value > 0 || effect.value == -1 ? { color: '#9ed94c' } : { color: '#c95a74' }}>{effect.value > 0 ? `+${effect.value}` : (effect.value == -1 ? '∞' : effect.value)}</span>
                 </div>
               )
             }

@@ -44,6 +44,7 @@ export class Player extends Phaser.GameObjects.Container {
     spells: BaseSpell[] = [];
     animationSprite: Phaser.GameObjects.Sprite;
     statusSprites: Map<StatusEffect, Phaser.GameObjects.Sprite>;
+    statusTimer: NodeJS.Timeout;
     pendingSpell: number | null = null;
     pendingItem: number | null = null;
     casting = false;
@@ -93,30 +94,6 @@ export class Player extends Phaser.GameObjects.Container {
         this.add(this.selectionOval);
         this.add(this.sprite); // Add sprite after selection oval for proper depth
 
-        // this.statuses = {
-        //     [StatusEffect.FREEZE]: 0,
-        //     [StatusEffect.PARALYZE]: 0,
-        //     [StatusEffect.POISON]: 0,
-        //     [StatusEffect.BURN]: 0,
-        //     [StatusEffect.SLEEP]: 0,
-        // };
-
-        // const paralyzed = scene.add.sprite(0, -20, 'statuses').setOrigin(0.5, 0.1).setVisible(false);
-        // const poisoned = scene.add.sprite(0, -20, 'statuses').setOrigin(0.5, 0.1).setVisible(false);
-        // this.add(paralyzed);
-        // this.add(poisoned);
-
-        // this.statusSprites = new Map();
-        // this.statusSprites.set(StatusEffect.PARALYZE, paralyzed);
-        // this.statusSprites.set(StatusEffect.POISON, poisoned);
-
-        // // List of sprites maintained for kill cam effect
-        // // @ts-ignore
-        // this.scene.sprites.push(this.sprite);
-        // // @ts-ignore
-        // this.scene.sprites.push(paralyzed);
-        // // @ts-ignore
-        // this.scene.sprites.push(poisoned);
         this.setUpStatusEffects();
 
         // For cast effect, slash effect, etc.
@@ -210,6 +187,7 @@ export class Player extends Phaser.GameObjects.Container {
             statuses: this.statuses,
             pendingSpell: this.pendingSpell,
             pendingItem: this.pendingItem,
+            isParalyzed: this.isParalyzed(),
           }
     }
 
@@ -678,14 +656,49 @@ export class Player extends Phaser.GameObjects.Container {
         if (this.isAlive()) this.playAnim('victory');
     }
 
-    setStatuses(statuses) {
-        this.setFrozen(statuses[StatusEffect.FREEZE]);
-        this.setParalyzed(statuses[StatusEffect.PARALYZE]);
-        this.setPoisoned(statuses[StatusEffect.POISON]);
+    setStatuses(statuses: StatusEffects) {
+        Object.keys(statuses).forEach(status => {
+            const duration = statuses[status];
+            this.statuses[status] = duration;
+            if (duration != 0) {
+                this.showStatusAnimation(status as keyof StatusEffects);
+                this.setStatusTimer();
+            } else {
+                this.hideStatusAnimation(status as keyof StatusEffects);
+            } 
+        });
+
+        if (statuses[StatusEffect.FREEZE] != null) this.toggleCharacterImmobilization(statuses[StatusEffect.FREEZE]);
+        if (statuses[StatusEffect.PARALYZE] != null) this.toggleCharacterImmobilization(statuses[StatusEffect.PARALYZE]);
+
         this.arena.emitEvent('statusesChange', {num: this.num})
     }
 
+    setStatusTimer() {
+        if (this.statusTimer) return;
+        let change = false;
+        this.statusTimer = setInterval(() => {
+            Object.keys(this.statuses).forEach(status => {
+                if (this.statuses[status] > 0) {
+                    change = true;
+                    this.statuses[status] -= 1
+                };
+            });
+            if (change) {
+                this.arena.emitEvent('statusesChange', {num: this.num});
+            } else {
+                this.clearStatusTimer()
+            }
+        }, 1000);
+    }
+
+    clearStatusTimer() {
+        clearInterval(this.statusTimer);
+        this.statusTimer = null;
+    }
+
     showStatusAnimation(status: StatusEffect) {
+        console.log(`Showing status animation for ${status}`);
         const keys = {
             [StatusEffect.FREEZE]: 'freeze',
             [StatusEffect.PARALYZE]: 'paralyzed',
@@ -715,29 +728,14 @@ export class Player extends Phaser.GameObjects.Container {
         });
     }
 
-    setFrozen(duration) {
+    toggleCharacterImmobilization(duration) {
         if (duration != 0) 
         {
-            this.statuses[StatusEffect.FREEZE] = duration;   
             this.sprite.anims.stop();   
             this.cooldownTween?.stop();
         } else {
-            this.statuses[StatusEffect.FREEZE] = 0;
             this.playAnim(this.getIdleAnim());
         }   
-    }
-
-    setParalyzed(duration) {
-        if (duration != 0) {
-            this.statuses[StatusEffect.PARALYZE] = duration;
-            this.sprite.anims.stop();
-            this.cooldownTween?.stop();
-            this.showStatusAnimation(StatusEffect.PARALYZE);
-        } else {
-            this.statuses[StatusEffect.PARALYZE] = 0;
-            this.hideStatusAnimation(StatusEffect.PARALYZE);
-            this.playAnim(this.getIdleAnim());
-        }
     }
 
     setPoisoned(duration) {

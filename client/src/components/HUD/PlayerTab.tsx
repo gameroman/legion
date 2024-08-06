@@ -64,7 +64,7 @@ class PlayerTab extends Component<Props, State> {
     };
     const isCooldownActive = player.cooldown > 0;
     const isDead = player.hp <= 0;
-    const canAct = !isCooldownActive && !isDead && !player.casting;
+    const canAct = !isCooldownActive && !isDead && !player.casting && !player.isParalyzed;
     const cooldownRatio = this.getCooldownRatio(player);
     const cooldownBarStyle = {
       width: `${cooldownRatio * 100}%`,
@@ -102,7 +102,7 @@ class PlayerTab extends Component<Props, State> {
                 <div className="player_content_statuses">
                   {Object.keys(player.statuses).map((status: string) => player?.statuses[status] !== 0 && <div>
                     <img key={status} src={`/HUD/${status}_icon.png`} alt="" />
-                    <span>{player.statuses[status]}</span>
+                    <span>{player.statuses[status] == -1 ? '∞' : player.statuses[status] }</span>
                   </div>
                   )}
                 </div>
