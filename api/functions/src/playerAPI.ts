@@ -148,13 +148,18 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
     playerData.characters.push(characterRef);
   });
 
-  // Commit the batch
   return batch.commit()
     .then(() => {
       logger.info("New player and characters created for user:", user.uid);
+      // Add a delay of 100ms
+      return new Promise((resolve) => setTimeout(resolve, 100));
+    })
+    .then(() => {
+      logger.info("Delay completed, function finishing for user:", user.uid);
     })
     .catch((error) => {
-      logger.info("Error creating player and characters:", error);
+      logger.error("Error creating player and characters:", error);
+      throw error; // Re-throw the error to ensure the function fails
     });
 });
 

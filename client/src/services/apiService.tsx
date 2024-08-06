@@ -3,6 +3,17 @@ import { firebaseAuth } from './firebaseService';
 
 const apiBaseUrl = process.env.API_URL;
 
+const getTokenWithRetry = async (user, maxAttempts = 3, delay = 100) => {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+            return await user.getIdToken(true);
+        } catch (error) {
+            if (attempt === maxAttempts - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+};
+
 export async function getFirebaseIdToken() {
     try {
         const user = firebaseAuth.currentUser;
@@ -10,7 +21,8 @@ export async function getFirebaseIdToken() {
             return;
             // throw new Error("No authenticated user found");
         }
-        return await user.getIdToken(true);
+        // return await user.getIdToken(true);
+        return await getTokenWithRetry(user);
     } catch (error) {
         // console.error("Error getting Firebase ID token", error);
         throw error;
