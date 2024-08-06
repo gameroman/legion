@@ -42,7 +42,7 @@ function showToast(text: string, duration: number = 3000, avatar: string) {
   }).showToast();
 }
 
-export function showGuideToast(text: string, destination: string, duration: number = 5000) {
+export function showGuideToast(text: string, destination: string, duration: number = 4000) {
   Toastify({
     text,
     duration,
@@ -89,11 +89,15 @@ export function playSoundEffect(src: string) {
 }
 
 export function manageHelp(page: string, context: any) {
+  console.log(`Manage help for ${page}`);
+  console.trace();
   const todoTours = context.player.tours;
   if (todoTours.includes(page)) {
+    console.log(`Starting tour for ${page}`);
     startTour(page);
     context.setPlayerInfo({ tours: todoTours.filter(tour => tour !== page) });
   } else {
+    console.log(`Fetching guide tip for ${page}`);
     fetchGuideTip();
   }
 }

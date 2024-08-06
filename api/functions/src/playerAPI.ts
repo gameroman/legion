@@ -40,12 +40,18 @@ function generateName() {
   return base.length > 16 ? base.slice(0, 16) : base;
 }
 
-export const createPlayer = functions.auth.user().onCreate((user) => {
+export const createPlayer = functions.auth.user().onCreate(async (user) => {
   logger.info("Creating character for user:", user.uid);
   const db = admin.firestore();
   const playerRef = db.collection("players").doc(user.uid);
   const now = Date.now() / 1000;
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().replace('T', ' ').slice(0, 19);
+  const startLeague = League.BRONZE;
+
+  const bronzePlayersCount = await db.collection("players")
+    .where("league", "==", startLeague)
+    .count()
+    .get();
 
   // Define the character data structure
   const playerData = {
@@ -62,7 +68,7 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
     },
     characters: [],
     elo: 100,
-    league: League.BRONZE,
+    league: startLeague,
     xp: 0,
     lvl: 1,
     dailyloot: {
@@ -80,7 +86,7 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
       },
     } as DailyLootAllDBData,
     leagueStats: {
-      rank: -1,
+      rank: bronzePlayersCount.data().count + 1,
       wins: 0,
       losses: 0,
       winStreak: 0,
@@ -148,18 +154,13 @@ export const createPlayer = functions.auth.user().onCreate((user) => {
     playerData.characters.push(characterRef);
   });
 
+  // Commit the batch
   return batch.commit()
     .then(() => {
       logger.info("New player and characters created for user:", user.uid);
-      // Add a delay of 100ms
-      return new Promise((resolve) => setTimeout(resolve, 100));
-    })
-    .then(() => {
-      logger.info("Delay completed, function finishing for user:", user.uid);
     })
     .catch((error) => {
-      logger.error("Error creating player and characters:", error);
-      throw error; // Re-throw the error to ensure the function fails
+      logger.info("Error creating player and characters:", error);
     });
 });
 
@@ -198,7 +199,7 @@ export const getPlayerData = onRequest((request, response) => {
 
         updateDAU(uid);
         // Update the lastActiveDate field
-        const today = new Date().toISOString().split("T")[0];
+        const today = new Date().toISOString().replace('T', ' ').slice(0, 19);
         if (playerData.lastActiveDate !== today) {
           await db.collection("players").doc(uid).update({
             lastActiveDate: today,
@@ -412,7 +413,9 @@ export const completeTour = onRequest((request, response) => {
 });
 
 const figureOutGuideTip = (playerData: any) => {
-  if (!playerData.tours.play) {
+  const joinedSince = (new Date().getTime() - new Date(playerData.joinDate).getTime()) / 1000;
+  console.log(`[figureOutGuideTip] joinedSince: ${joinedSince}`);
+  if (joinedSince < 10) {
     return {
       guideId: -1,
       route: "/play",
