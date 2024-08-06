@@ -70,6 +70,7 @@ export class Arena extends Phaser.Scene
         this.load.spritesheet('ice2', 'vfx/ice2.png', { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('impact', 'vfx/sword_impact.png', { frameWidth: 291, frameHeight: 291});
         this.load.spritesheet('poison', 'vfx/poison.png', { frameWidth: 64, frameHeight: 64});
+        this.load.spritesheet('mute', 'vfx/mute.png', { frameWidth: 64, frameHeight: 64});
 
         this.load.spritesheet('statuses', 'States.png', { frameWidth: 96, frameHeight: 96});
 
@@ -90,6 +91,7 @@ export class Arena extends Phaser.Scene
         this.load.audio('ice', 'sfx/spells/ice.wav');
         this.load.audio('healing', 'sfx/spells/healing.wav');
         this.load.audio('poison', 'sfx/spells/poison.wav');
+        this.load.audio('mute', 'sfx/spells/mute.wav');
 
         this.load.audio(`bgm_start`, `music/bgm_start.wav`);
         for (let i = 1; i <= 12; i++) {
@@ -865,7 +867,7 @@ export class Arena extends Phaser.Scene
     createSounds() {
         this.SFX = {};
         const sounds = ['click', 'slash', 'steps', 'nope', 'heart', 'cooldown', 'fireball','healing',
-            'cast', 'thunder', 'ice', 'shatter', 'flames', 'crowd', 'cheer', 'poison']
+            'cast', 'thunder', 'ice', 'shatter', 'flames', 'crowd', 'cheer', 'poison', 'mute']
         sounds.forEach((sound) => {
             this.SFX[sound] = this.sound.add(sound);
         })
@@ -1057,6 +1059,12 @@ export class Arena extends Phaser.Scene
         this.anims.create({
             key: `poison`, 
             frames: this.anims.generateFrameNumbers('poison', { start: 0, end: 16 }), 
+            frameRate: 15,
+        });
+
+        this.anims.create({
+            key: `mute`, 
+            frames: this.anims.generateFrameNumbers('mute', { start: 0, end: 13 }), 
             frameRate: 15,
         });
 

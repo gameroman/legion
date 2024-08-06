@@ -235,6 +235,25 @@ spells.push(new BaseSpell({
     classes: [Class.WHITE_MAGE],
 }));
 
+spells.push(new BaseSpell({
+    id: 11,
+    name: "Silence",
+    description: "Make the target unable to cast spells for 3 minutes",
+    frame: 4,
+    vfx: "mute",
+    sfx: "mute",
+    shake: false,
+
+    size: 1,
+    target: Target.AOE,
+    effects: [],
+    status: {effect: StatusEffect.MUTE, chance: 1, duration: 180},
+    effort: 9,
+
+    score: 10,
+    classes: [Class.WHITE_MAGE],
+}));
+
 export function getStarterSpells(characterClass: Class):number[] {
     // Return the id's of lvl1 spells for the provided class
     return spells.filter(spell => spell.minLevel === 1 && spell.classes.includes(characterClass)).map(spell => spell.id);

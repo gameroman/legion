@@ -98,6 +98,7 @@ export enum StatusEffect {
     POISON = "Poison",
     SLEEP = "Sleep",
     PARALYZE = "Paralyze",
+    MUTE = "Mute",
 }
 
 export const equipmentFields = ["weapon", "helmet", "armor", "belt", "gloves",

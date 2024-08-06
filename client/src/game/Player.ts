@@ -171,6 +171,7 @@ export class Player extends Phaser.GameObjects.Container {
             [StatusEffect.POISON]: 0,
             [StatusEffect.BURN]: 0,
             [StatusEffect.SLEEP]: 0,
+            [StatusEffect.MUTE]: 0,
         };
         this.statusSprites = new Map();
 
