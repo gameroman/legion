@@ -17,3 +17,6 @@ export const ENABLE_Q_NEWS = false;
 // Admin
 export const TIME_COEFFICIENT = 1;
 export const FREEZE_AI = true;
+export const STARTING_GOLD_ADMIN = 100000;
+export const STARTING_SPELLS_ADMIN = [2];
+export const STARTING_EQUIPMENT_ADMIN = [2];

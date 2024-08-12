@@ -11,7 +11,7 @@ import {APIPlayerData, DailyLootAllDBData, DailyLootAllAPIData, DBPlayerData} fr
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {getChestContent, ChestReward} from "@legion/shared/chests";
 import {processChestRewards} from "./characterAPI";
-import {STARTING_CONSUMABLES, STARTING_GOLD, BASE_INVENTORY_SIZE} from "@legion/shared/config";
+import {STARTING_CONSUMABLES, STARTING_GOLD, BASE_INVENTORY_SIZE, STARTING_GOLD_ADMIN, STARTING_SPELLS_ADMIN, STARTING_EQUIPMENT_ADMIN} from "@legion/shared/config";
 import {logPlayerAction, updateDAU} from "./dashboardAPI";
 
 const NB_START_CHARACTERS = 3;
@@ -47,6 +47,9 @@ export const createPlayer = functions.auth.user().onCreate(async (user) => {
   const now = Date.now() / 1000;
   const today = new Date().toISOString().replace('T', ' ').slice(0, 19);
   const startLeague = League.BRONZE;
+  console.log(`[createPlayer] Admin mode: ${process.env.ADMIN_MODE}`);
+  const isAdmin = (process.env.ADMIN_MODE == 'true');
+  console.log(`[createPlayer] isAdmin: ${isAdmin}`);
 
   const bronzePlayersCount = await db.collection("players")
     .where("league", "==", startLeague)
@@ -59,12 +62,12 @@ export const createPlayer = functions.auth.user().onCreate(async (user) => {
     avatar: selectRandomAvatar(),
     joinDate: today,
     lastActiveDate: today,
-    gold: STARTING_GOLD,
+    gold: isAdmin ? STARTING_GOLD_ADMIN : STARTING_GOLD,
     carrying_capacity: BASE_INVENTORY_SIZE,
     inventory: {
       consumables: STARTING_CONSUMABLES,
-      equipment: [],
-      spells: [],
+      equipment: isAdmin ? STARTING_EQUIPMENT_ADMIN : [],
+      spells: isAdmin ? STARTING_SPELLS_ADMIN : [],
     },
     characters: [],
     elo: 100,

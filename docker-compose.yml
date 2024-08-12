@@ -50,6 +50,7 @@ services:
       - ./shared:/usr/src/app/shared
     environment:
       - NODE_ENV=docker
+      - ADMIN_MODE=true
 
   matchmaker:
     build:
