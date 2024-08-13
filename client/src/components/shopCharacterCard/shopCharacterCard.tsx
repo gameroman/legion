@@ -7,16 +7,32 @@ import { modalData } from '../shopContent/ShopContent';
 
 // Import image assets
 import goldIcon from '@assets/gold_icon.png';
-
+import { spells } from '@legion/shared/Spells';
+import { mapFrameToCoordinates } from '../utils';
+import { Target } from '@legion/shared/enums';
+import { BaseSpell } from '@legion/shared/BaseSpell';
 interface ShopCharacteCardProps {
   key: number;
   data: any;
   handleOpenModal: (e: any, modalData: modalData) => void;
 }
 
-class ShopCharacterCard extends Component<ShopCharacteCardProps> {
-  render() { 
-    const {data} = this.props;
+interface ShopCharacterCardState {
+  curItem: BaseSpell;
+  shopCharacterCardDialogShow: boolean;
+}
+
+class ShopCharacterCard extends Component<ShopCharacteCardProps, ShopCharacterCardState> {
+  constructor(props: ShopCharacteCardProps) {
+    super(props);
+    this.state = {
+      curItem: null,
+      shopCharacterCardDialogShow: false,
+    }
+  }
+
+  render() {
+    const { data } = this.props;
 
     const statsArray = Object.entries(data.stats).map(([key, value]) => ({ key, value: value as number }));
 
@@ -39,8 +55,21 @@ class ShopCharacterCard extends Component<ShopCharacteCardProps> {
       isCharacter: true
     }
 
+    // console.log("dataSkillSlots => ", data.skill_slots);
+    // console.log("characterData => ", data);
+
+    // console.log("spellData => ", spells);
+
+    const getSpell = (spellId) => {
+      // console.log("individualSpell => ", spells.find(item => item.id == spellId)); 
+      return spells.find(item => item.id == spellId);
+    }
+
     return (
-      <div className="shop-character-card-container" key={this.props.key} onClick={(e) => this.props.handleOpenModal(e, modalData)}>
+      <div className="shop-character-card-container" key={this.props.key} onClick={(e) => {
+        this.props.handleOpenModal(e, modalData); 
+        this.setState({shopCharacterCardDialogShow: false});  
+      }}>
         <div className="shop-character-card-title">
           <div className="shop-character-card-title-name">
             <span>{data.name}</span>
@@ -56,11 +85,70 @@ class ShopCharacterCard extends Component<ShopCharacteCardProps> {
 
         <div className="shop-character-card-content">
           <div className="character-card-portrait" style={portraitStyle}></div>
-          <div className="shop-character-card-class-container">
-            {Array.from({ length: data.skill_slots }, (_, i) => (
-              <div key={i} className="shop-character-card-slot"></div>
+          <div onClick={(event) => event.stopPropagation()} className="shop-character-card-class-container">
+            {data.skills.map((item, i) => (
+              <div
+                key={i}
+                style={{ backgroundImage: 'linear-gradient(to right, white, #1c1f25)' }}
+                className="shop-character-card-slot"
+                onClick={() => {
+                  this.setState({ shopCharacterCardDialogShow: true });
+                  this.setState({ curItem: getSpell(item) });
+                }}
+              >
+                <div
+                  style={{
+                    backgroundImage: `url(/spells.png)`,
+                    backgroundPosition: `-${mapFrameToCoordinates(getSpell(item).frame).x}px -${mapFrameToCoordinates(getSpell(item).frame).y}px`,
+                    cursor: 'pointer',
+                  }}
+                />
+              </div>
             ))}
+
+            {Array.from({ length: data.skill_slots }, (_, i) => {
+              if (i >= data.skills.length) {
+                return (
+                  <div key={i} className="shop-character-card-slot"></div>
+                )
+              }
+            })}
           </div>
+
+          <div className="shop-character-card-dialog-position">
+            <div
+              onClick={(event) => event.stopPropagation()}
+              style={this.state.shopCharacterCardDialogShow ? { display: "flex" } : { display: "none" }}
+              className="shop-character-card-dialog-container"
+            >
+              <div className="shop-character-card-dialog-wrapper">
+                <div className="shop-character-card-dialog-container-image" style={{
+                  backgroundImage: `url(spells.png)`,
+                  backgroundPosition: `-${mapFrameToCoordinates(this.state.curItem?.frame).x}px -${mapFrameToCoordinates(this.state.curItem?.frame).y}px`,
+                }} />
+              </div>
+              <p className="shop-character-card-dialog-name">{this.state.curItem?.name}</p>
+              <p className="shop-character-card-dialog-desc">{this.state.curItem?.description}</p>
+              <div className="shop-character-card-dialog-info-container">
+                <div className="shop-character-card-dialog-info">
+                  <img src={'/inventory/mp_icon.png'} alt="mp" />
+                  <span>{this.state.curItem?.cost}</span>
+                </div>
+                <div className="shop-character-card-dialog-info">
+                  <img src={'/inventory/cd_icon.png'} alt="cd" />
+                  <span>{this.state.curItem?.cooldown}s</span>
+                </div>
+                <div className="shop-character-card-dialog-info">
+                  <img src={'/inventory/target_icon.png'} alt="target" />
+                  <span>{Target[this.state.curItem?.target]}</span>
+                </div>
+              </div>
+              <div className="dialog-button-container">
+                <button className="dialog-decline" onClick={() => this.setState({ shopCharacterCardDialogShow: false })}><img src="/inventory/cancel_icon.png" alt="decline" />Cancel</button>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <div className="shop-character-card-effect-container">
