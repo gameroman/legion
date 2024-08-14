@@ -94,6 +94,16 @@ export class Player extends Phaser.GameObjects.Container {
         this.add(this.selectionOval);
         this.add(this.sprite); // Add sprite after selection oval for proper depth
 
+        this.healthBar = new HealthBar(scene, 0, -50, 0x00ff08);
+        this.add(this.healthBar);
+        this.setHP(hp);
+
+        if (isPlayer) {
+            this.MPBar = new HealthBar(scene, 0, -40, 0x0099ff);
+            this.add(this.MPBar);
+            this.setMP(mp);
+        }
+
         this.setUpStatusEffects();
 
         // For cast effect, slash effect, etc.
@@ -101,20 +111,12 @@ export class Player extends Phaser.GameObjects.Container {
         this.animationSprite.on('animationcomplete', () => this.animationSprite.setVisible(false), this);
         this.add(this.animationSprite);
 
-        this.healthBar = new HealthBar(scene, 0, -50, 0x00ff08);
-        this.add(this.healthBar);
-        this.setHP(hp);
-
         if (isPlayer) {
             this.numKey = scene.add.text(30, 70, num.toString(), { fontFamily: 'Kim', fontSize: '12px', color: '#fff', stroke: '#000', strokeThickness: 3 }).setOrigin(1,1);
             this.add(this.numKey);
 
             this.cooldown = new CircularProgress(scene, -8, 28, 10, 0xffc400).setVisible(false);
             this.add(this.cooldown);
-
-            this.MPBar = new HealthBar(scene, 0, -40, 0x0099ff);
-            this.add(this.MPBar);
-            this.setMP(mp);
         } 
 
         this.baseSquare.lineStyle(4, isPlayer ? 0x0000ff : 0xff0000); // Must be called before strokeRect
@@ -150,12 +152,24 @@ export class Player extends Phaser.GameObjects.Container {
             [StatusEffect.SLEEP]: 0,
             [StatusEffect.MUTE]: 0,
         };
+
+        const yOffsets = {
+            [StatusEffect.MUTE]: -30,
+        };
+
+        const xOffsets = {
+            [StatusEffect.MUTE]: 10,
+        };
+
         this.statusSprites = new Map();
 
         statusEffects.forEach(effect => {
             this.statuses[StatusEffect[effect]] = 0;
 
-            const sprite = this.scene.add.sprite(0, -20, 'statuses')
+            const yOffset = yOffsets[StatusEffect[effect]] || 0;
+            const xOffset = xOffsets[StatusEffect[effect]] || 0;
+
+            const sprite = this.scene.add.sprite(0 + xOffset, -20 + yOffset, 'statuses')
                 .setOrigin(0.5, 0.1)
                 .setVisible(false);
             
@@ -705,6 +719,7 @@ export class Player extends Phaser.GameObjects.Container {
             [StatusEffect.POISON]: 'poisoned',
             [StatusEffect.BURN]: 'burn',
             [StatusEffect.SLEEP]: 'sleep',
+            [StatusEffect.MUTE]: 'muted',
         };
         const sprite = this.statusSprites.get(status);
         if (sprite) {

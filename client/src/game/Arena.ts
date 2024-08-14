@@ -1094,6 +1094,13 @@ export class Arena extends Phaser.Scene
             repeat: -1,
         });
 
+        this.anims.create({
+            key: `muted`, 
+            frames: this.anims.generateFrameNumbers('statuses', { start: 16, end: 23 }), 
+            frameRate: 10,
+            repeat: -1,
+        });
+
 
         this.animationScales = {
             slash: 1,

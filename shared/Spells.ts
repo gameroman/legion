@@ -250,6 +250,7 @@ spells.push(new BaseSpell({
     vfx: "mute",
     sfx: "mute",
     shake: false,
+    yoffset: 30,
 
     size: 1,
     target: Target.AOE,
@@ -259,7 +260,7 @@ spells.push(new BaseSpell({
 
     score: 10,
     classes: [Class.WHITE_MAGE],
-    minLevel: 2,
+    minLevel: 1,
 }));
 
 export function getStarterSpells(characterClass: Class):number[] {
