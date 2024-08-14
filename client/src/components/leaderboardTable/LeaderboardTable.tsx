@@ -2,18 +2,18 @@
 import { ChestColor } from "@legion/shared/enums";
 import './LeaderboardTable.style.css';
 import { h, Component } from 'preact';
+import { avatarContext } from '../utils';
 
 // Import image assets
 import promoteIcon from '@assets/leaderboard/promote_icon.png';
 import demoteIcon from '@assets/leaderboard/demote_icon.png';
 import leaderboardBgOwn from '@assets/leaderboard/leaderboard_bg_own.png';
 import leaderboardBgFriend from '@assets/leaderboard/leaderboard_bg_friend.png';
-import leaderboardAvatarFrame from '@assets/leaderboard/leaderboard_avatar_frame.png';
-import leaderboardAvatarFrameFriend from '@assets/leaderboard/leaderboard_avatar_frame_friend.png';
 import arrowIcon from '@assets/leaderboard/arrow.png';
 import goldChest from '@assets/shop/gold_chest.png';
 import silverChest from '@assets/shop/silver_chest.png';
 import bronzeChest from '@assets/shop/bronze_chest.png';
+
 
 interface PlayerData {
     rank: number;
@@ -104,19 +104,27 @@ class LeaderboardTable extends Component<LeaderboardTableProps> {
                     : 'none'
         });
 
+        const loadAvatar = (index) => {
+            if (this.state.tableData[index].avatar != '0') {
+                try {
+                    return avatarContext(`./${this.state.tableData[index].avatar}.png`);
+                } catch (error) {
+                    console.error(`Failed to load avatar: ${this.state.tableData[index].avatar}.png`, error);
+                }
+            }
+        }
+
+        const rankRowAvatar = (index: number) => { 
+            return {
+                backgroundImage: `url(${loadAvatar(index)})`
+            }
+        }
+
         const getRowBG = (player: PlayerData): React.CSSProperties => ({
             backgroundImage: player.isPlayer
                 ? `url(${leaderboardBgOwn})`
                 : player.isFriend
                     ? `url(${leaderboardBgFriend})`
-                    : 'none'
-        });
-
-        const rankRowAvatar = (player: PlayerData): React.CSSProperties => ({
-            backgroundImage: player.isPlayer
-                ? `url(${leaderboardAvatarFrame})`
-                : player.isFriend
-                    ? `url(${leaderboardAvatarFrameFriend})`
                     : 'none'
         });
 
@@ -146,7 +154,7 @@ class LeaderboardTable extends Component<LeaderboardTableProps> {
                             <tr key={index} className={item.player === 'Me' ? 'highlighted-row' : ''} style={getRowBG(item)}>
                                 <td className="rank-row">
                                     <div className="rank-row-number" style={rankRowNumberStyle(item.rank)}>{item.rank}</div>
-                                    <div className="rank-row-avatar" style={rankRowAvatar(item)}></div>
+                                    <div className="rank-row-avatar" style={rankRowAvatar(index)}></div>
                                     <div className="rank-row-upgrade" style={getUpgradeImage(item.rank)}></div>
                                 </td>
                                 <td>{item.player}</td>

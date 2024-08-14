@@ -9,6 +9,9 @@ import errorIcon from '@assets/svg/error.svg';
 
 import Toastify from 'toastify-js'
 
+const spriteContext = require.context('@assets/sprites', false, /\.(png|jpe?g|svg)$/);
+export const avatarContext = require.context('@assets/avatars', false, /\.(png|jpe?g|svg)$/);
+
 export function classEnumToString(characterClass: Class) {
     const classToName: { [key in Class]?: string } = {};
     classToName[Class.WARRIOR] = "Warrior";
@@ -112,8 +115,6 @@ function fetchGuideTip() {
   })
   .catch(error => console.error(`Fetching tip error: ${error}`));
 }
-
-const spriteContext = require.context('@assets/sprites', false, /\.(png|jpe?g|svg)$/);
 
 export function getSpritePath(fileName: string) {
   try {

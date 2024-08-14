@@ -6,7 +6,7 @@ import { Link, useRouter } from 'preact-router';
 import firebase from 'firebase/compat/app'
 import UserInfoBar from '../userInfoBar/UserInfoBar';
 import { PlayerContextData } from 'src/contexts/PlayerContext';
-import { successToast, errorToast, showGuideToast } from '../utils';
+import { successToast, avatarContext } from '../utils';
 import { ENABLE_PLAYER_LEVEL } from '@legion/shared/config';
 
 import legionLogo from '@assets/logo.png';
@@ -25,7 +25,6 @@ import discordIcon from '@assets/svg/discord.svg';
 import copyIcon from '@assets/svg/copy.svg';
 import logoutIcon from '@assets/svg/logout.svg';
 
-const avatarContext = require.context('@assets/avatars', false, /\.(png|jpe?g|svg)$/);
 
 enum MenuItems {
     PLAY = 'PLAY',
@@ -73,6 +72,7 @@ class Navbar extends Component<Props, State> {
 
     loadAvatar = () => {
         const { avatar } = this.props.playerData;
+        console.log('NAVBAR AVATAR => ', avatar);
         if (avatar != '0') {
             try {
                 const avatarUrl = avatarContext(`./${avatar}.png`);
