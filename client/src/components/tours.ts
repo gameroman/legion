@@ -84,7 +84,7 @@ function startPlayTour() {
     );
     tour.addStep(step(
         tour,
-        'These are your gold, your rank in your starting league and your ELO rating!',
+        'These are your gold and your rank in your current league!',
         {
             element: '#goldEloArea',
             on: 'bottom'
@@ -210,7 +210,7 @@ function startRankTour() {
     tour.addStep(step(tour, 'This is the Rank Page. Here you can check your ranking in your league\'s leaderboard or the all-time leaderboard and check out the top players of each league!', null))
     tour.addStep(step(
         tour,
-        'Here you can see your current rank and ELO rating and see when the current season ends.',
+        'Here you can see your current rank, the metric used to determine that rank and see when the current season ends.',
         {
             element: '.recap-single-container',
             on: 'bottom'

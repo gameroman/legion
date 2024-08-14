@@ -34,7 +34,7 @@ class UserInfoBar extends Component<BarProps> {
         </div>
         <div className="userInfoLabel">
           <span className="labelSpan">{this.props.label}</span>
-          {this.props.elo && <span className="eloSpan"> <strong>Elo:</strong> {this.props.elo}</span>}
+          {/* {this.props.elo && <span className="eloSpan"> <strong>Elo:</strong> {this.props.elo}</span>} */}
         </div>
       </div>
     );

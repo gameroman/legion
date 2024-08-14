@@ -314,7 +314,7 @@ async function updateRanks(league: League) {
 
   const playersSnapshot = await db.collection("players")
       .where("league", "==", league)
-      .orderBy("elo", "desc")
+      .orderBy("leagueStats.wins", "desc")
       .get();
 
   let rank = 1;

@@ -179,6 +179,7 @@ export interface APIPlayerData {
     uid: string;
     gold: number;
     elo: number;
+    wins: number;
     league: number;
     lvl: number;
     name: string;

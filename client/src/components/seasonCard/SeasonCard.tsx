@@ -7,7 +7,7 @@ interface SeasonCardProps {
     currTab: string;
     playerRanking: {
         rank: number;
-        elo: number;
+        metric: number;
     };
     rankRowNumberStyle: (index: number) => {};
 }
@@ -94,6 +94,8 @@ class SeasonCard extends Component<SeasonCardProps> {
             second: Math.floor(this.state.time % 60)
         };
 
+        const isAllTime = this.props.currTab === 'alltime';
+
         return (
             <div className="season-card-container">
                 <div className="recap-single-container" ref={this.captureRef}>
@@ -105,10 +107,10 @@ class SeasonCard extends Component<SeasonCardProps> {
                         </div>
                     </div>
                     <div className="season-recap">
-                        <p className="season-recap-title">ELO</p>
-                        <p className="season-recap-label">RATING</p>
+                        <p className="season-recap-title">{isAllTime ? 'ELO' : 'NB'}</p>
+                        <p className="season-recap-label">{isAllTime ? 'RATING' : 'WINS'}</p>
                         <div className="season-recap-img" style={eloBGStyle}>
-                            <span>{this.props.playerRanking.elo}</span>
+                            <span>{this.props.playerRanking.metric}</span>
                         </div>
                     </div>
                     <div className="season-recap">

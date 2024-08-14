@@ -41,7 +41,6 @@ function generateName() {
 }
 
 export const createPlayer = functions.auth.user().onCreate(async (user) => {
-  logger.info("Creating character for user:", user.uid);
   const db = admin.firestore();
   const playerRef = db.collection("players").doc(user.uid);
   const now = Date.now() / 1000;
@@ -160,7 +159,7 @@ export const createPlayer = functions.auth.user().onCreate(async (user) => {
   return batch.commit()
     .then(() => {
       logger.info("New player and characters created for user:", user.uid);
-      return new Promise((resolve) => setTimeout(resolve, 150));
+      return new Promise((resolve) => setTimeout(resolve, 200));
     })
     .then(() => {
       logger.info("Delay completed, function finishing for user:", user.uid);
@@ -228,6 +227,7 @@ export const getPlayerData = onRequest((request, response) => {
           avatar: playerData.avatar,
           league: playerData.league,
           rank: playerData.leagueStats.rank,
+          wins: playerData.leagueStats.wins,
           allTimeRank: playerData.allTimeStats.rank,
           dailyloot: playerData.dailyloot,
           tours,

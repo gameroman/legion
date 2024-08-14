@@ -32,7 +32,7 @@ class RankPage extends Component {
     const isAllTime = this.state.curr_tab === 5;
     return {
       rank: isAllTime ? this.context.player.allTimeRank : (isCorrectLeague ? this.context.player.rank : "-"),
-      elo: this.context.player.elo,
+      metric: isAllTime ? this.context.player.elo : this.context.player.wins,
     }
   };
 

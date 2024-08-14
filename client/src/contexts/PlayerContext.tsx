@@ -9,6 +9,7 @@ export interface PlayerContextData {
   lvl: number;
   gold: number;
   elo: number;
+  wins: number;
   rank: number;
   allTimeRank: number;
   dailyloot: DailyLootAllAPIData;
@@ -33,6 +34,7 @@ export const PlayerContext = createContext<{
     lvl: 0,
     gold: 0,
     elo: 0,
+    wins: 0,
     rank: 0,
     allTimeRank: 0,
     dailyloot: null,
