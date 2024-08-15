@@ -310,7 +310,7 @@ export const updateRanksOnPlayerCreation = functions.firestore
 
 type RankingCriteria = {
   whereClause?: [string, firestore.WhereFilterOp, any];
-  orderByField: string;
+  orderByFields: { field: string; direction: 'asc' | 'desc' }[];
   rankField: string;
 };
 
@@ -321,12 +321,15 @@ async function updateRanks(league: League) {
 
   const leagueRankingCriteria: RankingCriteria = {
     whereClause: ["league", "==", league],
-    orderByField: "leagueStats.wins",
+    orderByFields: [
+      { field: "leagueStats.wins", direction: "desc" },
+      { field: "leagueStats.losses", direction: "asc" },
+    ],
     rankField: "leagueStats.rank",
   };
 
   const allTimeRankingCriteria: RankingCriteria = {
-    orderByField: "elo",
+    orderByFields: [{ field: "elo", direction: "desc" }],
     rankField: "allTimeStats.rank",
   };
 
@@ -341,10 +344,15 @@ async function updateRankingsForCriteria(
   batch: firestore.WriteBatch,
   criteria: RankingCriteria
 ) {
-  let query = db.collection('players')
-    .orderBy(criteria.orderByField, "desc");
+  let query = db.collection('players');
+
+  criteria.orderByFields.forEach(({ field, direction }) => {
+    // @ts-ignore
+    query = query.orderBy(field, direction);
+  });
 
   if (criteria.whereClause) {
+    // @ts-ignore
     query = query.where(...criteria.whereClause);
   }
 
@@ -352,22 +360,36 @@ async function updateRankingsForCriteria(
   const players = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
   let rank = 1;
-  let previousScore: number | null = null;
+  let previousScores: number[] | null = null;
 
   players.forEach((player, index) => {
-    const currentScore = getNestedProperty(player, criteria.orderByField);
+    const currentScores = criteria.orderByFields.map(({ field }) => getNestedProperty(player, field));
 
-    if (previousScore !== null && currentScore < previousScore) {
+    if (previousScores !== null && !areScoresEqual(currentScores, previousScores, criteria.orderByFields)) {
       rank = index + 1;
     }
 
     const playerRef = db.collection('players').doc(player.id);
     batch.update(playerRef, { [criteria.rankField]: rank });
 
-    previousScore = currentScore;
+    previousScores = currentScores;
   });
 }
 
 function getNestedProperty(obj: any, path: string): any {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+}
+
+function areScoresEqual(
+  currentScores: number[],
+  previousScores: number[],
+  orderByFields: { field: string; direction: 'asc' | 'desc' }[]
+): boolean {
+  return currentScores.every((score, index) => {
+    if (orderByFields[index].direction === 'desc') {
+      return score === previousScores[index];
+    } else {
+      return score === previousScores[index];
+    }
+  });
 }
