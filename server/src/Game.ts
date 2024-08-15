@@ -1011,7 +1011,9 @@ export abstract class Game
                             elo: rewards.elo,
                             characters: rewards.characters,
                             key: rewards.key,
-                            chests: rewards.chests
+                            chests: rewards.chests,
+                            score: rewards.score,
+                            rawGrade: rewards.rawGrade,
                         } as OutcomeData,
                         mode: this.mode,
                         spellsUsed: team.anySpellsUsed()

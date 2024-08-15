@@ -229,10 +229,12 @@ export const postGameUpdate = onRequest((request, response) => {
               });
             }
             let leagueAvgAudienceScore = playerDoc.data()?.leagueStats.avgAudienceScore || 0;
+            console.log(`[postGameUpdate] previous leagueAvgAudienceScore: ${leagueAvgAudienceScore}`);
             let allTimeAvgAudienceScore = playerDoc.data()?.allTimeStats.avgAudienceScore || 0;
             let leagueAvgGrade = playerDoc.data()?.leagueStats.avgGrade || 0;
             let allTimeAvgGrade = playerDoc.data()?.allTimeStats.avgGrade || 0;
             leagueAvgAudienceScore = (leagueAvgAudienceScore * playerData.leagueStats.nbGames + score) / (playerData.leagueStats.nbGames + 1);
+            console.log(`[postGameUpdate] new leagueAvgAudienceScore: ${leagueAvgAudienceScore}, nbGames: ${playerData.leagueStats.nbGames}, score: ${score}`);
             allTimeAvgAudienceScore = (allTimeAvgAudienceScore * playerData.allTimeStats.nbGames + score) / (playerData.allTimeStats.nbGames + 1);
             leagueAvgGrade = (leagueAvgGrade * playerData.leagueStats.nbGames + rawGrade) / (playerData.leagueStats.nbGames + 1);
             allTimeAvgGrade = (allTimeAvgGrade * playerData.allTimeStats.nbGames + rawGrade) / (playerData.allTimeStats.nbGames + 1);
