@@ -66,6 +66,15 @@ class Navbar extends Component<Props, State> {
         });
     };
 
+    formatNumber= (number) => {
+        // const format = 'fr-FR';
+        const format = 'en-US';
+        return new Intl.NumberFormat(format, { 
+          useGrouping: true,
+          maximumFractionDigits: 0
+        }).format(number);
+    };
+
     render() {
         const route = useRouter();
         const dropdownContentStyle = {
@@ -120,8 +129,8 @@ class Navbar extends Component<Props, State> {
                 </div>
 
                 <div className="flexContainer" id="goldEloArea">
-                    <UserInfoBar label={`${Math.round(this.props.playerData?.gold)}`}  />
-                    <UserInfoBar label={`#${this.props.playerData?.rank}`} elo={this.props.playerData?.elo} league={this.props.playerData?.league} />
+                    <UserInfoBar label={`${this.formatNumber(Math.round(this.props.playerData?.gold))}`}  />
+                    <UserInfoBar label={`#${this.props.playerData?.rank}`} elo={this.props.playerData?.elo || 1} league={this.props.playerData?.league} />
                     <div class="expand_btn" style={{backgroundImage: 'url("/expand_btn.png")'}} onClick={() => this.setState({ openDropdown: !this.state.openDropdown })} onMouseEnter={() => this.setState({ openDropdown: true })}>
                         <div class="dropdown-content" style={dropdownContentStyle} onMouseLeave={() => this.setState({ openDropdown: false })}>
                             <div className="" onClick={() => window.open('', '_blank')}>
