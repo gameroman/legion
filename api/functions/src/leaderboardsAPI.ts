@@ -84,10 +84,6 @@ export const fetchLeaderboard = onRequest((request, response) => {
       const players: Player[] = docSnap.docs.map((doc) => ({id: doc.id, ...doc.data()})) as Player[];
       console.log(`Fetched ${players.length} players`);
 
-      let goldScore = -1;
-      let silverScore = -1;
-      let bronzeScore = -1;
-
       if (!isAllTime) {
         const initialPromotionRows = Math.ceil(players.length * 0.2); // TODO: make config param
         const initialDemotionRows = tabId == 0 ? 0 : Math.floor(players.length * 0.2);
@@ -113,24 +109,6 @@ export const fetchLeaderboard = onRequest((request, response) => {
               if (players[i].leagueStats.wins === demotionScore) {
                 demotionRows++;
               } else {
-                break;
-              }
-            }
-          }
-        }
-
-        if (players.length > 0) {
-          goldScore = players[0].leagueStats.wins;
-          for (let i = 1; i < players.length; i++) {
-            if (players[i].leagueStats.wins < goldScore) {
-              silverScore = players[i].leagueStats.wins;
-              break;
-            }
-          }
-          if (silverScore !== -1) {
-            for (let i = 1; i < players.length; i++) {
-              if (players[i].leagueStats.wins < silverScore) {
-                bronzeScore = players[i].leagueStats.wins;
                 break;
               }
             }
@@ -217,11 +195,11 @@ export const fetchLeaderboard = onRequest((request, response) => {
 
         let chest = null;
         if (!isAllTime) {
-          if (player.leagueStats.wins === goldScore) {
+          if (player.leagueStats.rank === 1) {
             chest = ChestColor.GOLD;
-          } else if (player.leagueStats.wins === silverScore) {
+          } else if (player.leagueStats.rank === 2) {
             chest = ChestColor.SILVER;
-          } else if (player.leagueStats.wins === bronzeScore) {
+          } else if (player.leagueStats.rank === 3) {
             chest = ChestColor.BRONZE;
           }
         }
@@ -366,7 +344,7 @@ async function updateRankingsForCriteria(
     const currentScores = criteria.orderByFields.map(({ field }) => getNestedProperty(player, field));
 
     if (previousScores !== null && !areScoresEqual(currentScores, previousScores, criteria.orderByFields)) {
-      rank = index + 1;
+      rank++;
     }
 
     const playerRef = db.collection('players').doc(player.id);
