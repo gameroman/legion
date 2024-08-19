@@ -29,6 +29,9 @@ interface LeaderboardRow {
   winsRatio: string;
   isPlayer: boolean;
   chestColor: ChestColor | null;
+  isPromoted: boolean;
+  isDemoted: boolean;
+  playerId?: string | null;
 }
 interface Player extends DBPlayerData{
   id: string;
@@ -56,7 +59,7 @@ function getSecondsUntilEndOfWeek(): number {
 }
 
 
-async function getLeagueLeaderboard(leagueID: number, uid?: string) {
+async function getLeagueLeaderboard(leagueID: number, rankingOnly: boolean, uid?: string) {
   const db = admin.firestore();
   const isAllTime = leagueID === 5;
 
@@ -90,53 +93,57 @@ async function getLeagueLeaderboard(leagueID: number, uid?: string) {
     }, players[0]);
   };
 
-  const highestAvgGradePlayer = getHighlightPlayer("avgGrade");
-  const highestAvgScorePlayer = getHighlightPlayer("avgAudienceScore");
-  const highestWinStreakPlayer = getHighlightPlayer("winStreak");
-
+  let highestAvgGradePlayer;
+  let highestAvgScorePlayer;
+  let highestWinStreakPlayer;
   const highlights: LeaderboardHighlight[] = [];
 
-  if (highestAvgGradePlayer) {
-    highlights.push({
-      name: highestAvgGradePlayer.name,
-      avatar: highestAvgGradePlayer.avatar,
-      title: "Ace Player",
-      description: `Highest Game Grades`,
-    });
-  }
+  if (!rankingOnly) {
+    highestAvgGradePlayer = getHighlightPlayer("avgGrade");
+    highestAvgScorePlayer = getHighlightPlayer("avgAudienceScore");
+    highestWinStreakPlayer = getHighlightPlayer("winStreak");
 
-  if (highestAvgScorePlayer) {
-    highlights.push({
-      name: highestAvgScorePlayer.name,
-      avatar: highestAvgScorePlayer.avatar,
-      title: "Crowd Favorite",
-      description: `Highest Audience Scores`,
-    });
-  }
-
-  if (highestWinStreakPlayer) {
-    highlights.push({
-      name: highestWinStreakPlayer.name,
-      avatar: highestWinStreakPlayer.avatar,
-      title: "Unstoppable",
-      description: `Longest Win Streak`,
-    });
-  }
-
-  if (isAllTime) {
-    const richestPlayer = players.reduce((prev, current) => {
-      return (prev.gold > current.gold) ? prev : current;
-    }, players[0]);
-    if (richestPlayer) {
+    if (highestAvgGradePlayer) {
       highlights.push({
-        name: richestPlayer.name,
-        avatar: richestPlayer.avatar,
-        title: "Richest Player",
-        description: `Player witht the most gold`,
+        name: highestAvgGradePlayer.name,
+        avatar: highestAvgGradePlayer.avatar,
+        title: "Ace Player",
+        description: `Highest Game Grades`,
       });
     }
-  }
 
+    if (highestAvgScorePlayer) {
+      highlights.push({
+        name: highestAvgScorePlayer.name,
+        avatar: highestAvgScorePlayer.avatar,
+        title: "Crowd Favorite",
+        description: `Highest Audience Scores`,
+      });
+    }
+
+    if (highestWinStreakPlayer) {
+      highlights.push({
+        name: highestWinStreakPlayer.name,
+        avatar: highestWinStreakPlayer.avatar,
+        title: "Unstoppable",
+        description: `Longest Win Streak`,
+      });
+    }
+
+    if (isAllTime) {
+      const richestPlayer = players.reduce((prev, current) => {
+        return (prev.gold > current.gold) ? prev : current;
+      }, players[0]);
+      if (richestPlayer) {
+        highlights.push({
+          name: richestPlayer.name,
+          avatar: richestPlayer.avatar,
+          title: "Richest Player",
+          description: `Player witht the most gold`,
+        });
+      }
+    }
+  }
 
   const leaderboard: APILeaderboardResponse = {
     seasonEnd,
@@ -177,11 +184,16 @@ async function getLeagueLeaderboard(leagueID: number, uid?: string) {
       winsRatio: winsRatio + "%",
       avatar: player.avatar,
       isPlayer: player.id === uid,
+      playerId: rankingOnly ? player.id : null,
       chestColor: chest,
       isPromoted: statsObject.rank <= promotionRank,
       isDemoted: statsObject.rank >= demotionRank,
     } as LeaderboardRow;
   });
+  if (rankingOnly) {
+    // Only return the ranking, of which only the rows for promoted or demoted players
+    return leaderboard.ranking.filter((row) => row.isPromoted || row.isDemoted);
+  }
   return leaderboard;
 }
 
@@ -194,7 +206,7 @@ export const fetchLeaderboard = onRequest((request, response) => {
       if (typeof tabId !== "number" || isNaN(tabId)) {
         throw new Error("Invalid tab ID");
       }
-      const leaderboard = await getLeagueLeaderboard(tabId, uid);
+      const leaderboard = await getLeagueLeaderboard(tabId, false, uid);
       logPlayerAction(uid, "fetchLeaderboard", {tabId});
       response.send(leaderboard);
     } catch (error) {
@@ -205,11 +217,61 @@ export const fetchLeaderboard = onRequest((request, response) => {
 });
 
 async function updateLeagues() {
-  // Iterate over the int values of the League enum
+  const db = admin.firestore();
   const leaguesToUpdate = [0, 1, 2, 3, 4];
-  leaguesToUpdate.forEach(async (leagueID) => {
-    const leaderboard = await getLeagueLeaderboard(leagueID);
-  });
+  const updatedPlayers = new Set<string>(); // Set to keep track of updated player IDs
+
+  for (const leagueID of leaguesToUpdate) {
+    const players = await getLeagueLeaderboard(leagueID, true) as LeaderboardRow[];
+
+    await db.runTransaction(async (transaction) => {
+      const playerUpdates = players.map((player) => {
+        if (updatedPlayers.has(player.playerId!)) {
+          return null; // Skip players who have already been updated
+        }
+
+        let newLeague = player.isPromoted ? leagueID + 1 : player.isDemoted ? leagueID - 1 : leagueID;
+        newLeague = Math.max(0, Math.min(4, newLeague));
+
+        if (newLeague === leagueID) {
+          return null;
+        }
+
+        updatedPlayers.add(player.playerId!); // Add player ID to the set of updated players
+
+        const playerRef = db.collection('players').doc(player.playerId!);
+        return {
+          ref: playerRef,
+          data: {
+            league: newLeague,
+            leagueStats: getEmptyLeagueStats(),
+          },
+        };
+      }).filter((update) => update !== null);
+
+      playerUpdates.forEach((update) => {
+        if (update) {
+          transaction.update(update.ref, update.data);
+        }
+      });
+    });
+
+    // Call updateRanks after all players in the league have been updated
+    await updateRanks(leagueID);
+  }
+}
+
+export function getEmptyLeagueStats(rank = 1) {
+  return {
+    rank,
+    wins: 0,
+    losses: 0,
+    winStreak: 0,
+    lossesStreak: 0,
+    nbGames: 0,
+    avgAudienceScore: 0,
+    avgGrade: 0,
+  };
 }
 
 export const leaguesUpdate = functions.pubsub.schedule("* * * * *")
@@ -330,3 +392,8 @@ function areScoresEqual(
     }
   });
 }
+
+export const manualLeaguesUpdate = onRequest(async (request, response) => {
+  await updateLeagues();
+  response.send("Leagues updates");
+});

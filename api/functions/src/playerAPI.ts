@@ -13,6 +13,7 @@ import {getChestContent, ChestReward} from "@legion/shared/chests";
 import {processChestRewards} from "./characterAPI";
 import {STARTING_CONSUMABLES, STARTING_GOLD, BASE_INVENTORY_SIZE, STARTING_GOLD_ADMIN, STARTING_SPELLS_ADMIN, STARTING_EQUIPMENT_ADMIN} from "@legion/shared/config";
 import {logPlayerAction, updateDAU} from "./dashboardAPI";
+import {getEmptyLeagueStats} from "./leaderboardsAPI";
 
 const NB_START_CHARACTERS = 3;
 
@@ -86,26 +87,8 @@ export const createPlayer = functions.auth.user().onCreate(async (user) => {
         hasKey: false,
       },
     } as DailyLootAllDBData,
-    leagueStats: {
-      rank: bronzePlayersCount.data().count + 1,
-      wins: 0,
-      losses: 0,
-      winStreak: 0,
-      lossesStreak: 0,
-      nbGames: 0,
-      avgAudienceScore: 0,
-      avgGrade: 0,
-    },
-    allTimeStats: {
-      rank: -1,
-      wins: 0,
-      losses: 0,
-      winStreak: 0,
-      lossesStreak: 0,
-      nbGames: 0,
-      avgAudienceScore: 0,
-      avgGrade: 0,
-    },
+    leagueStats: getEmptyLeagueStats(bronzePlayersCount.data().count + 1),
+    allTimeStats: getEmptyLeagueStats(-1),
     casualStats: {
       nbGames: 0,
       wins: 0,

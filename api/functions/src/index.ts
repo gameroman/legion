@@ -2,7 +2,7 @@ import {onRequest} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 
 import {fetchLeaderboard, leaguesUpdate, updateRanksOnEloChange,
-  updateRanksOnPlayerCreation} from "./leaderboardsAPI";
+  updateRanksOnPlayerCreation, manualLeaguesUpdate} from "./leaderboardsAPI";
 import {inventoryData, purchaseItem, inventoryTransaction, inventorySave, getReward}
   from "./inventoryAPI";
 import {rosterData, characterData, postGameUpdate,
@@ -21,7 +21,7 @@ export {
   gameData, inventorySave, inventoryTransaction, saveGoldReward, spendSP,
   getReward, claimChest, updateRanksOnEloChange, updateRanksOnPlayerCreation,
   completeGame, getDashboardData, getActionLog, logQueuingActivity, insertGameAction,
-  getGameLog, completeTour, fetchGuideTip,
+  getGameLog, completeTour, fetchGuideTip, manualLeaguesUpdate,
 };
 
 export const helloWorld = onRequest((request, response) => {
