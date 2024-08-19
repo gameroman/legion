@@ -112,8 +112,8 @@ class RankPage extends Component {
           </div>
           {this.state.leaderboardData ? <LeaderboardTable
             data={this.state.leaderboardData.ranking}
-            promotionRows={this.state.leaderboardData.promotionRows}
-            demotionRows={this.state.leaderboardData.demotionRows}
+            promotionRows={this.state.leaderboardData.promotionRank}
+            demotionRows={this.state.leaderboardData.demotionRank}
             camelCaseToNormal={this.camelCaseToNormal}
             rankRowNumberStyle={rankRowNumberStyle}
           /> :

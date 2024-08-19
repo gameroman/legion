@@ -1,16 +1,15 @@
 import {onRequest} from "firebase-functions/v2/https";
-import * as logger from "firebase-functions/logger";
 import admin, {corsMiddleware, getUID} from "./APIsetup";
 import * as functions from "firebase-functions";
 import { firestore } from 'firebase-admin';
 import {League, ChestColor} from "@legion/shared/enums";
 import {logPlayerAction} from "./dashboardAPI";
 import {DBPlayerData} from "@legion/shared/interfaces";
-
+import {PROMOTION_RATIO, DEMOTION_RATIO} from "@legion/shared/config";
 interface APILeaderboardResponse {
   seasonEnd: number;
-  promotionRows: number;
-  demotionRows: number;
+  promotionRank: number;
+  demotionRank: number;
   highlights: any[];
   ranking: LeaderboardRow[];
 }
@@ -57,13 +56,13 @@ function getSecondsUntilEndOfWeek(): number {
 }
 
 
-async function getLeagueLeaderboard(uid: string, leagueID: number) {
+async function getLeagueLeaderboard(leagueID: number, uid?: string) {
   const db = admin.firestore();
   const isAllTime = leagueID === 5;
 
   let seasonEnd = -1;
-  let promotionRows = 0;
-  let demotionRows = 0;
+  let promotionRank = 0;
+  let demotionRank = 0;
 
   if (!isAllTime) {
     seasonEnd = getSecondsUntilEndOfWeek();
@@ -77,35 +76,8 @@ async function getLeagueLeaderboard(uid: string, leagueID: number) {
   console.log(`Fetched ${players.length} players`);
 
   if (!isAllTime) {
-    const initialPromotionRows = Math.ceil(players.length * 0.2); // TODO: make config param
-    const initialDemotionRows = leagueID == 0 ? 0 : Math.floor(players.length * 0.2);
-    console.log(`[fetchLeaderboard] Initial promotion rows: ${initialPromotionRows}, initial demotion rows: ${initialDemotionRows}`);
-
-    // Calculate promotion rows considering ties
-    if (players.length > 0) {
-      promotionRows = initialPromotionRows;
-      const promotionScore = players[initialPromotionRows - 1].leagueStats.wins;
-      for (let i = initialPromotionRows; i < players.length; i++) {
-        if (players[i].leagueStats.wins === promotionScore) {
-          promotionRows++;
-        } else {
-          break;
-        }
-      }
-
-      // Calculate demotion rows considering ties
-      demotionRows = initialDemotionRows;
-      if (demotionRows) {
-        const demotionScore = players[players.length - initialDemotionRows].leagueStats.wins;
-        for (let i = players.length - initialDemotionRows - 1; i >= 0; i--) {
-          if (players[i].leagueStats.wins === demotionScore) {
-            demotionRows++;
-          } else {
-            break;
-          }
-        }
-      }
-    }
+    promotionRank = Math.ceil(players.length * PROMOTION_RATIO);
+    demotionRank = leagueID == 0 ? 0 : Math.floor(players.length * DEMOTION_RATIO);
   }
 
   const getHighlightPlayer = (metric: string) => {
@@ -168,8 +140,8 @@ async function getLeagueLeaderboard(uid: string, leagueID: number) {
 
   const leaderboard: APILeaderboardResponse = {
     seasonEnd,
-    promotionRows,
-    demotionRows,
+    promotionRank,
+    demotionRank,
     highlights,
     ranking: [],
   };
@@ -206,6 +178,8 @@ async function getLeagueLeaderboard(uid: string, leagueID: number) {
       avatar: player.avatar,
       isPlayer: player.id === uid,
       chestColor: chest,
+      isPromoted: statsObject.rank <= promotionRank,
+      isDemoted: statsObject.rank >= demotionRank,
     } as LeaderboardRow;
   });
   return leaderboard;
@@ -220,7 +194,7 @@ export const fetchLeaderboard = onRequest((request, response) => {
       if (typeof tabId !== "number" || isNaN(tabId)) {
         throw new Error("Invalid tab ID");
       }
-      const leaderboard = await getLeagueLeaderboard(uid, tabId);
+      const leaderboard = await getLeagueLeaderboard(tabId, uid);
       logPlayerAction(uid, "fetchLeaderboard", {tabId});
       response.send(leaderboard);
     } catch (error) {
@@ -230,38 +204,18 @@ export const fetchLeaderboard = onRequest((request, response) => {
   });
 });
 
+async function updateLeagues() {
+  // Iterate over the int values of the League enum
+  const leaguesToUpdate = [0, 1, 2, 3, 4];
+  leaguesToUpdate.forEach(async (leagueID) => {
+    const leaderboard = await getLeagueLeaderboard(leagueID);
+  });
+}
+
 export const leaguesUpdate = functions.pubsub.schedule("* * * * *")
   .onRun(async (context) => {
-    logger.info("Updating leagues");
-    const db = admin.firestore();
-
-    /**
-     * Bronze: 0-999
-     * Silver: 1000-1199
-     * Gold: 1200-1399
-     * Zenith: 1400-1599
-     * Apex: 1600+
-     */
-
     try {
-      const docSnap = await db.collection("players").get();
-      const players = docSnap.docs.map((doc) => doc.data());
-      // Iterate over all players and update their league based on their elo
-      players.forEach((player) => {
-        if (player.elo < 1000) {
-          player.league = 0;
-        } else if (player.elo < 1200) {
-          player.league = 1;
-        } else if (player.elo < 1400) {
-          player.league = 2;
-        } else if (player.elo < 1600) {
-          player.league = 3;
-        } else {
-          player.league = 4;
-        }
-        db.collection("players").doc(player.uid)
-          .update({league: player.league});
-      });
+      await updateLeagues();
     } catch (error) {
       console.error("leaguesUpdate error:", error);
     }
