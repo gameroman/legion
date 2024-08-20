@@ -7,7 +7,7 @@ import { h, Component } from 'preact';
 import { PlayerContext } from '../../contexts/PlayerContext';
 import { apiFetch } from '../../services/apiService';
 import { InventoryType, ShopTabs } from '@legion/shared/enums';
-import {MAX_CHARACTERS} from "@legion/shared/config";
+import { MAX_CHARACTERS } from "@legion/shared/config";
 import { PlayerInventory, ShopItems, DBCharacterData } from '@legion/shared/interfaces';
 import { errorToast, successToast, playSoundEffect } from '../utils';
 import ShopSpellCard from '../shopSpellCard/ShopSpellCard';
@@ -60,8 +60,8 @@ function sortByRarityAndPrice(a: any, b: any) {
 }
 
 class ShopContent extends Component<ShopContentProps> {
-    static contextType = PlayerContext; 
-    
+    static contextType = PlayerContext;
+
     state = {
         curr_tab: ShopTabs.CONSUMABLES,
         openModal: false,
@@ -75,11 +75,17 @@ class ShopContent extends Component<ShopContentProps> {
     }
 
     componentDidMount(): void {
-        this.setState({curr_tab: this.props.requireTab ?? ShopTabs.CONSUMABLES});
+        if (this.state.inventoryData) {
+            console.log("true");
+        } else {
+            console.log("false");
+        }
+
+        this.setState({ curr_tab: this.props.requireTab ?? ShopTabs.CONSUMABLES });
     }
 
     handleOpenModal = (e: any, modalData: modalData) => {
-        const elementRect = e.currentTarget.getBoundingClientRect(); 
+        const elementRect = e.currentTarget.getBoundingClientRect();
 
         const modalPosition = {
             top: Math.min(elementRect.top + elementRect.height / 2, window.innerHeight - elementRect.height + 40),
@@ -94,7 +100,7 @@ class ShopContent extends Component<ShopContentProps> {
     }
 
     handleInventory = (inventory: ShopItems) => {
-        this.setState({inventoryData: inventory});
+        this.setState({ inventoryData: inventory });
     }
 
     hasEnoughGold = (quantity: number) => {
@@ -156,7 +162,7 @@ class ShopContent extends Component<ShopContentProps> {
 
     render() {
         if (!this.props.characters) return;
-        if(!this.state.inventoryData) return;
+        if (!this.state.inventoryData) return;
 
         const defaultShopItems = {
             consumables: items,
@@ -174,7 +180,7 @@ class ShopContent extends Component<ShopContentProps> {
 
         const getItemAmount = (index: number, type: InventoryType) => {
             return this.props.inventory[type].filter((item: number) => item == index).length;
-        } 
+        }
 
         // console.log("spellData => ", this.state.inventoryData.spells); 
 
@@ -198,15 +204,15 @@ class ShopContent extends Component<ShopContentProps> {
         return (
             <div className='shop-content'>
                 <ShopItemFilter
-                 curr_tab={this.state.curr_tab}
-                 shopItems={defaultShopItems}
-                 handleInventory={this.handleInventory} />
-                 
+                    curr_tab={this.state.curr_tab}
+                    shopItems={defaultShopItems}
+                    handleInventory={this.handleInventory} />
+
                 <div className='shop-tabs-container'>
                     {this.state.inventoryData && shopTabIcons.map((icon, index) =>
                         <Link
                             href={`/shop/${ShopTabs[index].toLowerCase()}`}
-                            onClick={() => this.setState({curr_tab: index})}
+                            onClick={() => this.setState({ curr_tab: index })}
                             key={index}
                             className='shop-tab-item'
                             style={tabItemStyle(index)}>
@@ -214,13 +220,26 @@ class ShopContent extends Component<ShopContentProps> {
                         </Link>
                     )}
                 </div>
-                {this.state.inventoryData ? <div className='shop-items-container'>{renderItems()}</div> : (
-                    <Skeleton 
-                        height={332} 
-                        count={2} 
-                        highlightColor='#0000004d' 
-                        baseColor='#0f1421' 
-                        style={{margin: '2px 0', width: '1024px', height: '628px'}}/>
+                {(this.state.inventoryData && this.props.characters.length) ? <div className='shop-items-container'>{renderItems()}</div> : (
+                    <div style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                        gap: '16px',
+                    }}>
+                        {[...Array(12)].map((_, index) => (
+                            <Skeleton
+                                key={index}
+                                height={320}
+                                highlightColor="#0000004d"
+                                baseColor="#0f1421"
+                                style={{
+                                    width: '200px',
+                                    margin: '2px 0',
+                                }}
+                            />
+                        ))}
+                    </div>
                 )}
                 <PurchaseDialog
                     gold={this.props.gold}
