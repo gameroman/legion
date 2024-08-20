@@ -4,6 +4,7 @@ import * as functions from "firebase-functions";
 import { firestore } from 'firebase-admin';
 import {League, ChestColor} from "@legion/shared/enums";
 import {logPlayerAction} from "./dashboardAPI";
+import {awardChestContent} from "./playerAPI";
 import {DBPlayerData} from "@legion/shared/interfaces";
 import {PROMOTION_RATIO, DEMOTION_RATIO} from "@legion/shared/config";
 interface APILeaderboardResponse {
@@ -79,7 +80,7 @@ async function getLeagueLeaderboard(leagueID: number, rankingOnly: boolean, uid?
   console.log(`Fetched ${players.length} players`);
 
   if (!isAllTime) {
-    promotionRank = Math.ceil(players.length * PROMOTION_RATIO);
+    promotionRank = Math.max(Math.ceil(players.length * PROMOTION_RATIO), 3);
     demotionRank = leagueID == 0 ? 0 : Math.floor(players.length * DEMOTION_RATIO);
   }
 
@@ -240,6 +241,11 @@ async function updateLeagues() {
         updatedPlayers.add(player.playerId!); // Add player ID to the set of updated players
 
         const playerRef = db.collection('players').doc(player.playerId!);
+
+        if (player.chestColor) {
+          awardChestContent(playerRef, player.chestColor);
+        }
+
         return {
           ref: playerRef,
           data: {

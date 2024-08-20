@@ -10,7 +10,6 @@ import {Class, ChestColor, League} from "@legion/shared/enums";
 import {APIPlayerData, DailyLootAllDBData, DailyLootAllAPIData, DBPlayerData} from "@legion/shared/interfaces";
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {getChestContent, ChestReward} from "@legion/shared/chests";
-import {processChestRewards} from "./characterAPI";
 import {STARTING_CONSUMABLES, STARTING_GOLD, BASE_INVENTORY_SIZE, STARTING_GOLD_ADMIN, STARTING_SPELLS_ADMIN, STARTING_EQUIPMENT_ADMIN} from "@legion/shared/config";
 import {logPlayerAction, updateDAU} from "./dashboardAPI";
 import {getEmptyLeagueStats} from "./leaderboardsAPI";
@@ -290,72 +289,131 @@ export const saveGoldReward = onRequest((request, response) => {
   });
 });
 
+export async function awardChestContent(
+  playerRef: admin.firestore.DocumentReference,
+  chestColor: ChestColor,
+) {
+  const content: ChestReward[] = getChestContent(chestColor);
+  logger.info(`[awardChestContent] Chest content: ${JSON.stringify(content)}`);
+
+  try {
+    // First, get the current player data
+    const playerDoc = await playerRef.get();
+    if (!playerDoc.exists) {
+      throw new Error('Player document does not exist');
+    }
+    const playerData = playerDoc.data() as DBPlayerData;
+
+    // Prepare updates
+    const updates: { [key: string]: any } = {};
+    let goldIncrement = 0;
+
+    for (const reward of content) {
+      switch (reward.type) {
+        case "gold":
+          goldIncrement += (reward.amount || 0);
+          break;
+        case "consumable":
+          if (!updates["inventory.consumables"]) {
+            updates["inventory.consumables"] = [...(playerData.inventory?.consumables || [])];
+          }
+          updates["inventory.consumables"].push(reward.id);
+          break;
+        case "spell":
+          if (!updates["inventory.spells"]) {
+            updates["inventory.spells"] = [...(playerData.inventory?.spells || [])];
+          }
+          updates["inventory.spells"].push(reward.id);
+          break;
+        case "equipment":
+          if (!updates["inventory.equipment"]) {
+            updates["inventory.equipment"] = [...(playerData.inventory?.equipment || [])];
+          }
+          updates["inventory.equipment"].push(reward.id);
+          break;
+        default:
+          logger.warn(`[awardChestContent] Unknown reward type: ${reward.type}`);
+      }
+    }
+
+    // Apply updates
+    if (goldIncrement > 0) {
+      updates.gold = admin.firestore.FieldValue.increment(goldIncrement);
+    }
+
+    await playerRef.update(updates);
+
+    logger.info(`[awardChestContent] Successfully awarded chest content to player ${playerRef.id}`);
+    return content;
+  } catch (error) {
+    logger.error(`[awardChestContent] Error awarding chest content: ${error}`);
+    throw error;
+  }
+}
+
 export const claimChest = onRequest((request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
     try {
       const uid = await getUID(request);
-      const chestType = request.query.chestType;
+      const chestType = request.query.chestType as keyof DailyLootAllDBData;
       logger.info("Claiming chest for player:", uid, "chestType:", chestType);
 
-      await db.runTransaction(async (transaction) => {
-        const playerRef = db.collection("players").doc(uid);
-        const playerDoc = await transaction.get(playerRef);
+      const playerRef = db.collection("players").doc(uid);
+      const playerDoc = await playerRef.get();
 
-        if (!playerDoc.exists) {
-          throw new Error("Invalid player ID");
-        }
+      if (!playerDoc.exists) {
+        throw new Error("Invalid player ID");
+      }
 
-        const playerData = playerDoc.data();
-        if (!playerData) {
-          throw new Error("playerData is null");
-        }
+      const playerData = playerDoc.data();
+      if (!playerData) {
+        throw new Error("playerData is null");
+      }
 
-        const chest = playerData.dailyloot[chestType as keyof DailyLootAllDBData];
-        if (!chest) {
-          throw new Error("Invalid chest type");
-        }
+      const chest = playerData.dailyloot[chestType];
+      if (!chest) {
+        throw new Error("Invalid chest type");
+      }
 
-        const now = Date.now() / 1000;
-        if (!chest.hasKey) {
-          response.status(400).send("Key for chest not owned!");
-          return;
-        }
-        if (chest.time > now) {
-          response.status(400).send("Chest is still locked!");
-          return;
-        }
+      const now = Date.now() / 1000;
+      if (!chest.hasKey) {
+        response.status(400).send("Key for chest not owned!");
+        return;
+      }
+      if (chest.time > now) {
+        response.status(400).send("Chest is still locked!");
+        return;
+      }
 
-        playerData.dailyloot[chestType as keyof DailyLootAllDBData] = {
-          time: now + chestsDelays[chestType as keyof DailyLootAllDBData],
-          hasKey: false,
-        };
+      const batch = db.batch();
 
-        transaction.update(playerRef, {
-          dailyloot: playerData.dailyloot,
-        });
+      // Update dailyloot
+      playerData.dailyloot[chestType] = {
+        time: now + chestsDelays[chestType],
+        hasKey: false,
+      };
+      batch.update(playerRef, {
+        dailyloot: playerData.dailyloot,
+      });
 
-        transaction.update(playerRef, {
-          'utilizationStats.everOpenedDailyLoot': true,
-        });
+      // Update utilization stats
+      batch.update(playerRef, {
+        'utilizationStats.everOpenedDailyLoot': true,
+      });
 
-        const content: ChestReward[] = getChestContent(chestType as ChestColor);
-        logger.info(`Chest content: ${JSON.stringify(content)}`);
+      // Commit the batch
+      await batch.commit();
 
-        const inventory = playerDoc.data()?.inventory || {};
-        const consumables = inventory.consumables || [];
-        const spells = inventory.spells || [];
-        const equipment = inventory.equipment || [];
+      // Award chest content
+      const content = await awardChestContent(playerRef, chestType as ChestColor);
 
-        await processChestRewards(transaction, playerRef, content, consumables, spells, equipment);
-
-        const dailyLootResponse = transformDailyLoot(playerData.dailyloot);
-        logPlayerAction(uid, "claimChest", {chestType});
-        response.send({
-          content,
-          dailyloot: dailyLootResponse,
-        });
+      const dailyLootResponse = transformDailyLoot(playerData.dailyloot);
+      logPlayerAction(uid, "claimChest", {chestType});
+      response.send({
+        content,
+        dailyloot: dailyLootResponse,
       });
     } catch (error) {
       console.error("claimChest error:", error);

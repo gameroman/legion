@@ -888,6 +888,7 @@ export abstract class Game
     }
     
     computeAudienceRewards(score: number, chests: Array<GameOutcomeReward>): void {
+        console.log(`[Game:computeAudienceRewards] League: ${this.league}, Score: ${score}`);
         const leagueRewards = {
             [League.BRONZE]: [ChestColor.BRONZE, ChestColor.BRONZE, ChestColor.BRONZE],
             [League.SILVER]: [ChestColor.BRONZE, ChestColor.BRONZE, ChestColor.SILVER],
