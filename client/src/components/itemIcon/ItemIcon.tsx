@@ -14,9 +14,9 @@ import consumablesSpritesheet from '@assets/consumables.png';
 import spellsSpritesheet from '@assets/spells.png';
 
 interface ItemIconProps {
-  characterId?: string, 
-  characterName?: string, 
-  characterLevel?: number, 
+  characterId?: string,
+  characterName?: string,
+  characterLevel?: number,
   action: BaseItem | BaseSpell | BaseEquipment | null;
   index: number;
   actionType: InventoryType;
@@ -34,32 +34,32 @@ class ItemIcon extends Component<ItemIconProps> {
     modalType: ItemDialogType.EQUIPMENTS,
     modalData: null,
     modalPosition: {
-        top: 0,
-        left: 0
+      top: 0,
+      left: 0
     }
-}
+  }
 
   handleOpenModal = (e: any, modalData: BaseItem | BaseSpell | BaseEquipment | CHARACTER_INFO, modalType: string) => {
-      const elementRect = e.currentTarget.getBoundingClientRect();
+    const elementRect = e.currentTarget.getBoundingClientRect();
 
-      const modalPosition = {
-          top: elementRect.top + elementRect.height / 2,
-          left: elementRect.left + elementRect.width / 2,
-      };
+    const modalPosition = {
+      top: elementRect.top + elementRect.height / 2,
+      left: elementRect.left + elementRect.width / 2,
+    };
 
-      this.setState({openModal: true, modalType, modalPosition, modalData});
+    this.setState({ openModal: true, modalType, modalPosition, modalData });
   }
 
   handleCloseModal = () => {
-      this.setState({openModal: false});
+    this.setState({ openModal: false });
 
-      if (this.props.handleItemEffect) {
-        this.props.handleItemEffect([], InventoryActionType.EQUIP);
-      }
+    if (this.props.handleItemEffect) {
+      this.props.handleItemEffect([], InventoryActionType.EQUIP);
+    }
   }
 
   render() {
-    const { action, index, actionType, hideHotKey, onActionClick } = this.props; 
+    const { action, index, actionType, hideHotKey, onActionClick } = this.props;
     // console.log('ItemIconProps => ', this.props); 
 
     const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
@@ -90,31 +90,31 @@ class ItemIcon extends Component<ItemIconProps> {
     const spritesheet = spriteSheetsMap[actionType];
 
     return (
-      <div 
+      <div
         onClick={handleOnClickAction}>
-        {action.id > -1 && <div 
+        {action.id > -1 && <div
           className='item-icon'
           style={{
             backgroundImage: `url(${spritesheet})`,
             backgroundPosition: `-${mapFrameToCoordinates(action.frame).x}px -${mapFrameToCoordinates(action.frame).y}px`,
             cursor: 'pointer',
           }}
-          />}
+        />}
         {!hideHotKey && <span className="key-binding">{keyBinding}</span>}
-        
-        <ItemDialog 
+
+        <ItemDialog
           index={index}
           isEquipped={false}
-          characterId={this.props.characterId} 
-          characterName={this.props.characterName} 
-          characterLevel={this.props.characterLevel} 
-          actionType={InventoryActionType.EQUIP} 
-          dialogOpen={this.state.openModal} 
-          dialogType={this.state.modalType} 
-          position={this.state.modalPosition} 
-          dialogData={this.state.modalData} 
+          characterId={this.props.characterId}
+          characterName={this.props.characterName}
+          characterLevel={this.props.characterLevel}
+          actionType={InventoryActionType.EQUIP}
+          dialogOpen={this.state.openModal}
+          dialogType={this.state.modalType}
+          position={this.state.modalPosition}
+          dialogData={this.state.modalData}
           handleClose={this.handleCloseModal}
-          refreshCharacter={this.props.refreshCharacter} 
+          refreshCharacter={this.props.refreshCharacter}
           updateInventory={this.props.updateInventory}
         />
       </div>
