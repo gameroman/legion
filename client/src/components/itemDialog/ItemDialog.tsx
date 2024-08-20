@@ -175,7 +175,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
           }} />
           <p className="equip-dialog-name">{dialogData.name}</p> 
           <div style={this.props.characterLevel >= dialogData.minLevel + 1? {backgroundColor: "#2f404d"}: {backgroundColor: "darkred"}} className="equip-dialog-lvl">
-            LV <span>{dialogData.minLevel}</span>
+            Lvl <span>{dialogData.minLevel}</span>
           </div>
           <p className="equip-dialog-desc">{dialogData.description}</p>
           <div className="dialog-button-container">
@@ -185,7 +185,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
               disabled={this.props.characterLevel < dialogData.minLevel + 1}
               onClick={() => this.AcceptAction(dialogType, this.props.index)}
             >
-              <img src="/inventory/confirm_icon.png" alt="confirm" />
+              <img src={confirmIcon} alt="confirm" />
               {acceptBtn}
             </button>
             <button className="dialog-decline" onClick={handleClose}>
@@ -222,11 +222,11 @@ class ItemDialog extends Component<DialogProps, DialogState> {
           <p className="dialog-item-desc">{dialogData.description}</p>
           <div className="dialog-consumable-info-container">
             <div className="dialog-consumable-info">
-              <img src={'/inventory/cd_icon.png'} alt="cd" />
+              <img src={cdIcon} alt="cd" />
               <span>{dialogData.cooldown}s</span>
             </div>
             <div className="dialog-consumable-info">
-              <img src={'/inventory/target_icon.png'} alt="target" />
+              <img src={targetIcon} alt="target" />
               <span>{Target[dialogData.target]}</span>
             </div>
           </div>
@@ -281,17 +281,17 @@ class ItemDialog extends Component<DialogProps, DialogState> {
             </div>
           </div>
           <div className="dialog-button-container">
-            {!isEquipped && <button className="dialog-accept" onClick={() => this.setState({dialogSpellModalShow: true})}><img src={confirmIcon} alt="confirm" />{acceptBtn}</button>}
+            {!isEquipped && <button className="dialog-accept" onClick={() => this.setState({ dialogSpellModalShow: true })}><img src={confirmIcon} alt="confirm" />{acceptBtn}</button>}
             <button className="dialog-decline" onClick={handleClose}><img src={cancelIcon} alt="decline" />Cancel</button>
-          </div> 
-          <div style={this.state.dialogSpellModalShow? {display: 'block'}: {display: 'none'}} class="dialog-spell-modal">
-              <div className="dialog-spell-modal-text">
-                Are you sure you want to teach {dialogData.name} to {this.props.characterName}?
-              </div>
-              <div className="dialog-spell-modal-btns">
-                <button onClick = {() => {this.AcceptAction(dialogType, this.props.index); this.setState({dialogSpellModalShow: false});}} className="dialog-spell-modal-confirm">Confirm</button> 
-                <button onClick={() => this.setState({dialogSpellModalShow: false})} className="dialog-spell-modal-cancel">Cancel</button>
-              </div>
+          </div>
+          <div style={this.state.dialogSpellModalShow ? { display: 'block' } : { display: 'none' }} class="dialog-spell-modal">
+            <div className="dialog-spell-modal-text">
+              Are you sure you want to teach {dialogData.name} to {this.props.characterName}?
+            </div>
+            <div className="dialog-button-container">
+              <button className="dialog-accept" onClick={() => { this.AcceptAction(dialogType, this.props.index); this.setState({ dialogSpellModalShow: false }); }}><img src={confirmIcon} alt="confirm" />Confirm</button>
+              <button className="dialog-decline" onClick={() => this.setState({ dialogSpellModalShow: false })}><img src={cancelIcon} alt="decline" />Cancel</button>
+            </div>
           </div>
         </div>
       )
