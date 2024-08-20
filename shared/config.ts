@@ -8,6 +8,7 @@ export const AVERAGE_GOLD_REWARD_PER_GAME = 100;
 export const MAX_AUDIENCE_SCORE = 1500;
 export const PROMOTION_RATIO = 0.2;
 export const DEMOTION_RATIO = 0.2;
+export const SEASON_END_CRON = '0 19 * * 5' // UTC
 
 // Feature flags
 export const ENABLE_PLAYER_LEVEL = false;

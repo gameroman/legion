@@ -2,11 +2,13 @@ import {onRequest} from "firebase-functions/v2/https";
 import admin, {corsMiddleware, getUID} from "./APIsetup";
 import * as functions from "firebase-functions";
 import { firestore } from 'firebase-admin';
+import { addWeeks, setDay, setHours, setMinutes, setSeconds, differenceInSeconds } from 'date-fns';
+
 import {League, ChestColor} from "@legion/shared/enums";
 import {logPlayerAction} from "./dashboardAPI";
 import {awardChestContent} from "./playerAPI";
 import {DBPlayerData} from "@legion/shared/interfaces";
-import {PROMOTION_RATIO, DEMOTION_RATIO} from "@legion/shared/config";
+import {PROMOTION_RATIO, DEMOTION_RATIO, SEASON_END_CRON} from "@legion/shared/config";
 interface APILeaderboardResponse {
   seasonEnd: number;
   promotionRank: number;
@@ -59,6 +61,32 @@ function getSecondsUntilEndOfWeek(): number {
   return secondsUntilEndOfWeek;
 }
 
+function getSecondsUntilNextOccurrence(cronExpression: string): number {
+  const [minute, hour, , , dayOfWeek] = cronExpression.split(/\s+/);
+  console.log(`[getSecondsUntilNextOccurrence] cronExpression: ${cronExpression}, minute: ${minute}, hour: ${hour}, dayOfWeek: ${dayOfWeek}`);
+
+  const now = new Date();
+  let target = new Date(now);
+
+  // Set the day of the week (0-6, where 0 is Sunday)
+  target = setDay(target, parseInt(dayOfWeek) % 7);
+
+  // Set the hour and minute
+  target = setHours(target, parseInt(hour));
+  target = setMinutes(target, parseInt(minute));
+  target = setSeconds(target, 0);
+
+  // If the target time is in the past, add a week
+  if (target <= now) {
+    target = addWeeks(target, 1);
+  }
+  // console.log(`[getSecondsUntilNextOccurrence] now: ${now}, target: ${target}`);
+
+  // Calculate the difference in seconds
+  const secondsLeft = differenceInSeconds(target, now);
+
+  return secondsLeft;
+}
 
 async function getLeagueLeaderboard(leagueID: number, rankingOnly: boolean, uid?: string) {
   const db = admin.firestore();
@@ -69,7 +97,7 @@ async function getLeagueLeaderboard(leagueID: number, rankingOnly: boolean, uid?
   let demotionRank = 0;
 
   if (!isAllTime) {
-    seasonEnd = getSecondsUntilEndOfWeek();
+    seasonEnd = getSecondsUntilNextOccurrence(SEASON_END_CRON);
   }
 
   let query = isAllTime ? db.collection("players") : db.collection("players").where("league", "==", leagueID);
@@ -280,7 +308,7 @@ export function getEmptyLeagueStats(rank = 1) {
   };
 }
 
-export const leaguesUpdate = functions.pubsub.schedule("* * * * *")
+export const leaguesUpdate = functions.pubsub.schedule(SEASON_END_CRON)
   .onRun(async (context) => {
     try {
       await updateLeagues();
