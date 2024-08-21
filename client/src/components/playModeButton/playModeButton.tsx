@@ -5,6 +5,10 @@ import { route } from 'preact-router';
 import PracticeIcon from '@assets/practice_icon.png';
 import CasualIcon from '@assets/casual_icon.png';
 import RankedIcon from '@assets/ranked_icon.png';
+import specialBtnBgActive from '@assets/special_btn_bg_active.png';
+import specialBtnBgIdle from '@assets/special_btn_bg_idle.png';
+import middlePlayActive from '@assets/middle_play_active.png';
+import middlePlayIdle from '@assets/middle_play_idle.png';
 import { PlayMode } from '@legion/shared/enums';
 
 interface ButtonProps {
@@ -24,7 +28,10 @@ class PlayModeButton extends Component<ButtonProps> {
     
     render() {
         const btnBg = {
-            backgroundImage: `url(./${this.props.label === 'ranked' ? 'special_btn_bg_' : 'middle_play_'}` + `${this.state.active ? 'active' : 'idle'}.png)`,
+            backgroundImage: `url(${this.props.label === 'ranked' 
+                ? (this.state.active ? specialBtnBgActive : specialBtnBgIdle)
+                : (this.state.active ? middlePlayActive : middlePlayIdle)
+                })`,
             cursor: 'pointer'
         };
 

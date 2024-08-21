@@ -91,14 +91,16 @@ module.exports = {
   },
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'src/index.html'
+      template: 'src/index.html',
+      hash: true,
     }),
     new Dotenv({
-      systemvars: true // Load all system variables as well
+      path: path.resolve(__dirname, '.production.env'),
+      systemvars: true // Load all system variables as well to get those defined in docker-compose.yml
     })
   ]
 };

@@ -64,14 +64,13 @@ async function apiFetch(endpoint, options: ApiFetchOptions = {}, timeoutDuration
             headers.append('Content-Type', 'application/json');
             options.body = JSON.stringify(options.body); // Stringify the body if it's an object
         } 
-        // else {
-        //     endpoint += `?uid=${idToken}`;
-        // }
 
         headers.append("Authorization", `Bearer ${idToken}`);
 
-        console.log(`Calling ${apiBaseUrl}/${endpoint}`);
-        const fetchPromise = fetch(`${apiBaseUrl}/${endpoint}`, {
+        // console.log(`API URL: ${apiBaseUrl}`);
+        const fullEndpoint = `${apiBaseUrl}/${endpoint}`;
+        console.log(`Calling ${fullEndpoint}`);
+        const fetchPromise = fetch(fullEndpoint, {
             ...options,
             headers,
         });

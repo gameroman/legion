@@ -30,3 +30,5 @@ Alternatively run each service separately bare-metal:
 ## Deployment
 
 API deployment: `bash deploy_api.sh`
+
+Note: The API has its own `firebase.json` file used for local development with the Firebase emulators. The `firebase.json` at the root of the repository is the one used for deployment to prod.

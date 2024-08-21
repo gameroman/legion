@@ -1,6 +1,5 @@
 {
-  "functions": 
-  {
+  "functions": {
     "source": "./api/functions",
     "runtime": "nodejs20",
     "codebase": "default",
@@ -12,6 +11,20 @@
     ],
     "predeploy": [
       "npm --prefix ./api/functions run build"
+    ]
+  },
+  "hosting": {
+    "public": "client/dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
     ]
   }
 }
