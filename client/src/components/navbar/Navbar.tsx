@@ -72,7 +72,6 @@ class Navbar extends Component<Props, State> {
 
     loadAvatar = () => {
         const { avatar } = this.props.playerData;
-        console.log('NAVBAR AVATAR => ', avatar);
         if (avatar != '0') {
             try {
                 const avatarUrl = avatarContext(`./${avatar}.png`);

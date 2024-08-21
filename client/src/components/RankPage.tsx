@@ -40,14 +40,14 @@ const rankIcons = {
 };
 
 class RankPage extends Component {
-  static contextType = PlayerContext; 
+  static contextType = PlayerContext;
 
   state = {
     leaderboardData: null,
     sortColumn: 'elo',
     sortAscending: false,
     curr_tab: this.context.player.league,
-    tour: null
+    tour: null,
   };
 
   camelCaseToNormal = (text) => {
@@ -65,6 +65,8 @@ class RankPage extends Component {
   };
 
   async fetchLeaderboard() {
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
     const data = await apiFetch(`fetchLeaderboard?tab=${this.state.curr_tab}`);
     if (data) {
       console.log(`Ldb data: ${JSON.stringify(data)}`);
@@ -82,9 +84,9 @@ class RankPage extends Component {
       await this.fetchLeaderboard();
     });
   }
-  
+
   render() {
-    if (!this.state.leaderboardData) return null;
+    // if (!this.state.leaderboardData) return;
 
     const tabs = ['bronze', 'silver', 'gold', 'zenith', 'apex', 'alltime'];
 
@@ -144,21 +146,29 @@ class RankPage extends Component {
 
         <div className="flexContainer" style={{ gap: '24px' }}>
           <div className="rank-tab-container">
-            {this.state.leaderboardData && tabs.map((tab, i) => (
-              <div key={i} style={getRankTabStyle(i)} onClick={() => this.handleCurrTab(i)}>
-                <img src={rankIcons[tab]} alt={`${tab} rank`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-              </div>
-            ))}
-          </div>
-          {this.state.leaderboardData ? (
+            {this.state.leaderboardData && tabs.map((tab, i) => <div key={i} style={getRankTabStyle(i)} onClick={() => this.handleCurrTab(i)}>
+              <img src={`/icons/${tab}_rank.png`} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            </div>)}
+          </div> 
+          {/* {
+            this.state.leaderboardData && 
+            <LeaderboardTable
+              data={this.state.leaderboardData.ranking}
+              promotionRows={this.state.leaderboardData.promotionRows}
+              demotionRows={this.state.leaderboardData.demotionRows}
+              camelCaseToNormal={this.camelCaseToNormal}
+              rankRowNumberStyle={rankRowNumberStyle}
+            />
+          } */}
+
+          {this.state.leaderboardData ?
             <LeaderboardTable
               data={this.state.leaderboardData.ranking}
               promotionRows={this.state.leaderboardData.promotionRank}
               demotionRows={this.state.leaderboardData.demotionRank}
               camelCaseToNormal={this.camelCaseToNormal}
               rankRowNumberStyle={rankRowNumberStyle}
-            />
-          ) : (
+            /> :
             <Skeleton
               height={46}
               count={12}
@@ -166,7 +176,7 @@ class RankPage extends Component {
               baseColor='#0f1421'
               style={{ margin: '2px 0', width: '940px' }}
             />
-          )}
+          }
         </div>
       </div>
     );
