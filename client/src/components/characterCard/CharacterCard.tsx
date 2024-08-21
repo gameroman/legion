@@ -35,12 +35,12 @@ class CharacterCard extends Component<APICharacterData> {
     const bgStyle = {
       backgroundImage: `url(${this.getBgImagePath(this.state.active)})`,
       cursor: 'pointer'
-    } 
+    }
 
     // console.log("CharacterCardProps => ", this.props); 
-    
+
     return (
-      <div className="cardContainer" style={bgStyle} onClick={this.handleCardClick} onMouseEnter={() => this.setState({active: true})} onMouseLeave={() => this.setState({active: false})}>
+      <div className="cardContainer" style={bgStyle} onClick={this.handleCardClick} onMouseEnter={() => this.setState({ active: true })} onMouseLeave={() => this.setState({ active: false })}>
         <div className="characterLevel">
           <span className="level">Lvl</span>
           <span className="levelVal">{level}</span>
@@ -51,10 +51,12 @@ class CharacterCard extends Component<APICharacterData> {
         </div>
         <div className="portraitContainer">
           <div className="portrait" style={portraitStyle} />
-        </div> 
-        <div className="characterSp">
-          {this.props.sp}
         </div>
+        {this.props?.sp > 0 && (
+          <div className="characterSp">
+            {this.props.sp}
+          </div>
+        )}
       </div>
     );
   }
