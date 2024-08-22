@@ -1,31 +1,45 @@
 // LeaderboardTable.tsx
-import {ChestColor} from "@legion/shared/enums";
+import { ChestColor } from "@legion/shared/enums";
 import './LeaderboardTable.style.css';
 import { h, Component } from 'preact';
 
+// Import image assets
+import promoteIcon from '@assets/leaderboard/promote_icon.png';
+import demoteIcon from '@assets/leaderboard/demote_icon.png';
+import leaderboardBgOwn from '@assets/leaderboard/leaderboard_bg_own.png';
+import leaderboardBgFriend from '@assets/leaderboard/leaderboard_bg_friend.png';
+import leaderboardAvatarFrame from '@assets/leaderboard/leaderboard_avatar_frame.png';
+import leaderboardAvatarFrameFriend from '@assets/leaderboard/leaderboard_avatar_frame_friend.png';
+import arrowIcon from '@assets/leaderboard/arrow.png';
+import goldChest from '@assets/shop/gold_chest.png';
+import silverChest from '@assets/shop/silver_chest.png';
+import bronzeChest from '@assets/shop/bronze_chest.png';
+
+interface PlayerData {
+    rank: number;
+    player: string;
+    elo: number;
+    wins: number;
+    losses: number;
+    winsRatio: string;
+    isFriend?: boolean;
+    isPlayer?: boolean;
+    chestColor?: ChestColor;
+}
+
 interface LeaderboardTableProps {
-    data: {
-        "rank": number,
-        "player": string,
-        "elo": number,
-        "wins": number,
-        "losses": number,
-        "winsRatio": string,
-        "isFriend"?: boolean,
-    }[];
+    data: PlayerData[];
     promotionRows: number;
     demotionRows: number;
     camelCaseToNormal: (text: string) => string;
-    rankRowNumberStyle: (index: number) => {};
+    rankRowNumberStyle: (index: number) => React.CSSProperties;
 }
-
 
 const rewardImage = {
-    [ChestColor.BRONZE]: 'gold_chest',
-    [ChestColor.SILVER]: 'silver_chest',
-    [ChestColor.GOLD]: 'bronze_chest'
-}
-
+    [ChestColor.BRONZE]: bronzeChest,
+    [ChestColor.SILVER]: silverChest,
+    [ChestColor.GOLD]: goldChest
+};
 
 enum columnType {
     "elo" = "elo",
@@ -39,15 +53,15 @@ enum columnType {
 
 class LeaderboardTable extends Component<LeaderboardTableProps> {
     state = {
-        tableData: [],
+        tableData: [] as PlayerData[],
         isAscending: Array(4).fill(false)
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         this.setState({ tableData: this.props.data });
     }
 
-    async componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps: LeaderboardTableProps) {
         if (prevProps.data !== this.props.data) {
             this.setState({ tableData: this.props.data });
         }
@@ -80,49 +94,33 @@ class LeaderboardTable extends Component<LeaderboardTableProps> {
         const { demotionRows, promotionRows, rankRowNumberStyle, camelCaseToNormal } = this.props;
         const columns = ['no', 'player name', 'elo', 'wins', 'losses', 'wins ratio', 'rewards'];
 
-        const getUpgradeImage = (index: number) => {
-            if (index <= promotionRows) return {
-                backgroundImage: `url(/leaderboard/promote_icon.png)`,
-            }
+        const getUpgradeImage = (index: number): React.CSSProperties => ({
+            backgroundImage: index <= promotionRows
+                ? `url(${promoteIcon})`
+                : (demotionRows && index > this.state.tableData.length - demotionRows)
+                    ? `url(${demoteIcon})`
+                    : 'none'
+        });
 
-            if (demotionRows && index > this.state.tableData.length - demotionRows) return {
-                backgroundImage: `url(/leaderboard/demote_icon.png)`,
-            }
+        const getRowBG = (player: PlayerData): React.CSSProperties => ({
+            backgroundImage: player.isPlayer
+                ? `url(${leaderboardBgOwn})`
+                : player.isFriend
+                    ? `url(${leaderboardBgFriend})`
+                    : 'none'
+        });
 
-            return {
-                backgroundImage: '',
-            }
-        }
+        const rankRowAvatar = (player: PlayerData): React.CSSProperties => ({
+            backgroundImage: player.isPlayer
+                ? `url(${leaderboardAvatarFrame})`
+                : player.isFriend
+                    ? `url(${leaderboardAvatarFrameFriend})`
+                    : 'none'
+        });
 
-        const getRowBG = (index: number) => {
-            if (this.state.tableData[index].isPlayer) return {
-                backgroundImage: `url(/leaderboard/leaderboard_bg_own.png)`,
-            }
-
-            if (this.state.tableData[index].isFriend) return {
-                backgroundImage: `url(/leaderboard/leaderboard_bg_friend.png)`,
-            }
-
-            return;
-        }
-
-        const rankRowAvatar = (index: number) => {
-            if (this.state.tableData[index].isPlayer) return {
-                backgroundImage: `url(/leaderboard/leaderboard_avatar_frame.png)`,
-            }
-
-            if (this.state.tableData[index].isFriend) return {
-                backgroundImage: `url(/leaderboard/leaderboard_avatar_frame_friend.png)`,
-            }
-
-            return;
-        }
-
-        const sortIconStyle = (index: number) => {
-            return {
-                transform: `rotate(${this.state.isAscending[index - 2] ? '180' : '0'}deg)`
-            }
-        }
+        const sortIconStyle = (index: number): React.CSSProperties => ({
+            transform: `rotate(${this.state.isAscending[index - 2] ? '180' : '0'}deg)`
+        });
 
         return (
             <div className="rank-table-container">
@@ -132,25 +130,29 @@ class LeaderboardTable extends Component<LeaderboardTableProps> {
                             {columns.map((column, i) => (
                                 <th key={i} onClick={() => this.handleSort(columnType[column], i)}>
                                     <span>{camelCaseToNormal(column)}</span>
-                                    {(i > 1 && i < 6) && <img className="thead-sort-icon" src="/leaderboard/arrow.png" alt="" style={sortIconStyle(i)} />}
+                                    {(i > 1 && i < 6) && <img className="thead-sort-icon" src={arrowIcon} alt="Sort" style={sortIconStyle(i)} />}
                                 </th>
                             ))}
                         </tr>
                     </thead>
                     <tbody>
                         {this.state.tableData.map((item, index) => (
-                            <tr key={index} className={item.player === 'Me' ? 'highlighted-row' : ''} style={getRowBG(index)}>
+                            <tr key={index} className={item.player === 'Me' ? 'highlighted-row' : ''} style={getRowBG(item)}>
                                 <td className="rank-row">
-                                    <div className="rank-row-number" style={rankRowNumberStyle(this.state.tableData[index].rank)}>{item.rank}</div>
-                                    <div className="rank-row-avatar" style={rankRowAvatar(index)}></div>
-                                    <div className="rank-row-upgrade" style={getUpgradeImage(this.state.tableData[index].rank)}></div>
+                                    <div className="rank-row-number" style={rankRowNumberStyle(item.rank)}>{item.rank}</div>
+                                    <div className="rank-row-avatar" style={rankRowAvatar(item)}></div>
+                                    <div className="rank-row-upgrade" style={getUpgradeImage(item.rank)}></div>
                                 </td>
                                 <td>{item.player}</td>
                                 <td>{item.elo}</td>
                                 <td className="rank-row-win">{item.wins}</td>
                                 <td>{item.losses}</td>
                                 <td className="rank-row-winRatio">{item.winsRatio}</td>
-                                <td className="rank-row-reward">{rewardImage[this.state.tableData[index].chestColor] && <img src={`/shop/${rewardImage[this.state.tableData[index].chestColor]}.png`} alt="" />}</td>
+                                <td className="rank-row-reward">
+                                    {item.chestColor && rewardImage[item.chestColor] && 
+                                        <img src={rewardImage[item.chestColor]} alt={`${ChestColor[item.chestColor]} chest`} />
+                                    }
+                                </td>
                             </tr>
                         ))}
                     </tbody>

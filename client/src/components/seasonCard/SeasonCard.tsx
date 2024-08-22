@@ -2,6 +2,13 @@
 import './SeasonCard.style.css';
 import { h, Component, createRef } from 'preact';
 
+// Import image assets
+import eloRatingBg from '@assets/rank/elo_rating_bg.png';
+import recapBluebar from '@assets/rank/recap_blue_bar.png';
+import infinityIcon from '@assets/rank/infinity_icon.png';
+import cdIcon from '@assets/inventory/cd_icon.png';
+import shareIcon from '@assets/rank/share_icon.png';
+
 interface SeasonCardProps {
     seasonEnd: number;
     currTab: string;
@@ -43,7 +50,6 @@ class SeasonCard extends Component<SeasonCardProps> {
         } else {
             const targetEndTime = new Date().getTime() + this.props.seasonEnd * 1000;
 
-
             this.timer = setInterval(() => {
                 const currentTime = new Date().getTime();
                 const remainingTime = Math.max((targetEndTime as number - currentTime) / 1000, 0);
@@ -55,7 +61,6 @@ class SeasonCard extends Component<SeasonCardProps> {
                 }
             }, 1000);
         }
-
     }
 
     shareOnTwitter = async (rank: number, tab: string) => {
@@ -76,12 +81,12 @@ class SeasonCard extends Component<SeasonCardProps> {
 
     render() {
         const eloBGStyle = {
-            backgroundImage: 'url(/rank/elo_rating_bg.png)',
+            backgroundImage: `url(${eloRatingBg})`,
             transform: 'scale(1.2)',
         }
 
         const seasonBGStyle = {
-            backgroundImage: 'url(/rank/recap_blue_bar.png)',
+            backgroundImage: `url(${recapBluebar})`,
             width: '80%',
             bottom: `${this.state.time === -1 ? '20px' : '36px'}`,
             padding: `${this.state.time === -1 ? '10px 8px' : '4px 8px'}`
@@ -117,7 +122,7 @@ class SeasonCard extends Component<SeasonCardProps> {
                         <p className="season-recap-title">SEASON</p>
                         <p className="season-recap-label">ENDS IN</p>
                         <div className="recap-season-bg" style={seasonBGStyle}>
-                            {this.state.time === -1 ? <img src="/rank/infinity_icon.png" alt="infinity" /> : (
+                            {this.state.time === -1 ? <img src={infinityIcon} alt="infinity" /> : (
                                 <div style={{ width: '100%' }}>
                                     <div className="recap-season-timer-label">
                                         <span>D</span>
@@ -134,11 +139,11 @@ class SeasonCard extends Component<SeasonCardProps> {
                                 </div>
                             )}
                         </div>
-                        {this.state.time !== -1 && <img src="/inventory/cd_icon.png" alt="timer" className="season-timer-icon" />}
+                        {this.state.time !== -1 && <img src={cdIcon} alt="timer" className="season-timer-icon" />}
                     </div>
                 </div>
                 <div className="season-share-button" onClick={() => this.shareOnTwitter(this.props.playerRanking.rank, this.props.currTab)}>
-                    <img src="/rank/share_icon.png" alt="" />
+                    <img src={shareIcon} alt="Share" />
                     <span>SHARE</span>
                 </div>
             </div>
