@@ -4,6 +4,32 @@ import './ShopItemFilter.style.css'
 import { h, Component } from 'preact';
 import { ShopItems } from '@legion/shared/interfaces';
 
+// Import image assets
+import confirmIcon from '@assets/inventory/confirm_icon.png';
+
+// Import equipment slot icons
+import weaponIcon from '@assets/inventory/weapon_icon.png';
+import helmetIcon from '@assets/inventory/helmet_icon.png';
+import armorIcon from '@assets/inventory/armor_icon.png';
+import beltIcon from '@assets/inventory/belt_icon.png';
+import glovesIcon from '@assets/inventory/gloves_icon.png';
+import bootsIcon from '@assets/inventory/boots_icon.png';
+import leftRingIcon from '@assets/inventory/left_ring_icon.png';
+import rightRingIcon from '@assets/inventory/right_ring_icon.png';
+import necklaceIcon from '@assets/inventory/necklace_icon.png';
+
+const equipmentSlotIcons = {
+    [EquipmentSlot.WEAPON]: weaponIcon,
+    [EquipmentSlot.HELMET]: helmetIcon,
+    [EquipmentSlot.ARMOR]: armorIcon,
+    [EquipmentSlot.BELT]: beltIcon,
+    [EquipmentSlot.GLOVES]: glovesIcon,
+    [EquipmentSlot.BOOTS]: bootsIcon,
+    [EquipmentSlot.LEFT_RING]: leftRingIcon,
+    [EquipmentSlot.RIGHT_RING]: rightRingIcon,
+    [EquipmentSlot.NECKLACE]: necklaceIcon,
+};
+
 interface ShopItemFilterProps {
     curr_tab: ShopTabs;
     shopItems: ShopItems;
@@ -22,10 +48,11 @@ class ShopItemFilter extends Component<ShopItemFilterProps, ShopItemFilterState>
         currClass: null,
         slotCheckbox: new Array(9).fill(false)
     }
+
     render() {
         const { curr_tab, shopItems } = this.props;
 
-        if (curr_tab !== 1 && curr_tab !== 2) return; // only accept equipment & spells
+        if (curr_tab !== 1 && curr_tab !== 2) return null; // only accept equipment & spells
 
         const CharacterClasses = [Class.WARRIOR, Class.WHITE_MAGE, Class.BLACK_MAGE];
         const EquipmentSlots = Object.values(EquipmentSlot).filter(value => typeof value === 'string');
@@ -77,29 +104,38 @@ class ShopItemFilter extends Component<ShopItemFilterProps, ShopItemFilterState>
                         <span>Filter Items</span>
                     </div>
                 </div>
-                {this.state.isOpen && <div className="shop-filter-list">
-                    {curr_tab === 1 && <div className="shop-filter-slots-container">
-                        <div className="shop-filter-slots">
-                            {EquipmentSlots.map((slot, index) => <div key={index} className="shop-filter-slot">
-                                <input
-                                    type="checkbox"
-                                    name={slot as string}
-                                    id={`${index}`}
-                                    checked={this.state.slotCheckbox[index]}
-                                    onChange={() => handleCheckboxChange(index)} />
-                                <img src={`/inventory/${slot}_icon.png`} alt="" />
-                            </div>)}
-                        </div>
-                        <div className="shop-filter-divider"></div>
-                    </div>}
+                {this.state.isOpen && (
+                    <div className="shop-filter-list">
+                        {curr_tab === 1 && (
+                            <div className="shop-filter-slots-container">
+                                <div className="shop-filter-slots">
+                                    {EquipmentSlots.map((slot, index) => (
+                                        <div key={index} className="shop-filter-slot">
+                                            <input
+                                                type="checkbox"
+                                                name={slot as string}
+                                                id={`${index}`}
+                                                checked={this.state.slotCheckbox[index]}
+                                                onChange={() => handleCheckboxChange(index)}
+                                            />
+                                            <img src={equipmentSlotIcons[EquipmentSlot[slot]]} alt={slot as string} />
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="shop-filter-divider"></div>
+                            </div>
+                        )}
 
-                    <ul>
-                        {CharacterClasses.map(character_class => <li onClick={() => handleCurrentClass(character_class)}>
-                            {this.state.currClass === character_class && <img src="/inventory/confirm_icon.png" alt="confirm" />}
-                            <span>{Class[character_class]}</span>
-                        </li>)}
-                    </ul>
-                </div>}
+                        <ul>
+                            {CharacterClasses.map(character_class => (
+                                <li key={character_class} onClick={() => handleCurrentClass(character_class)}>
+                                    {this.state.currClass === character_class && <img src={confirmIcon} alt="confirm" />}
+                                    <span>{Class[character_class]}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
             </div>
         );
     }

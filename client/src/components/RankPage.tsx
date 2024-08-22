@@ -8,8 +8,27 @@ import { rankNoImage } from '@legion/shared/enums';
 import { PlayerContext } from '../contexts/PlayerContext';
 import { manageHelp } from './utils';
 import 'react-loading-skeleton/dist/skeleton.css'
-
 import Skeleton from 'react-loading-skeleton';
+
+// Import image assets
+import tabsActiveImage from '@assets/shop/tabs_active.png';
+import tabsIdleImage from '@assets/shop/tabs_idle.png';
+import activeRankNoImage from '@assets/leaderboard/active_rankno.png';
+import bronzeRankIcon from '@assets/icons/bronze_rank.png';
+import silverRankIcon from '@assets/icons/silver_rank.png';
+import goldRankIcon from '@assets/icons/gold_rank.png';
+import zenithRankIcon from '@assets/icons/zenith_rank.png';
+import apexRankIcon from '@assets/icons/apex_rank.png';
+import alltimeRankIcon from '@assets/icons/alltime_rank.png';
+
+const rankIcons = {
+  bronze: bronzeRankIcon,
+  silver: silverRankIcon,
+  gold: goldRankIcon,
+  zenith: zenithRankIcon,
+  apex: apexRankIcon,
+  alltime: alltimeRankIcon,
+};
 
 class RankPage extends Component {
   static contextType = PlayerContext; 
@@ -56,13 +75,13 @@ class RankPage extends Component {
   }
   
   render() {
-    if (!this.state.leaderboardData) return;
+    if (!this.state.leaderboardData) return null;
 
     const tabs = ['bronze', 'silver', 'gold', 'zenith', 'apex', 'alltime'];
 
     const getRankTabStyle = (index: number) => {
       return {
-        backgroundImage: `url(/shop/tabs_${index === this.state.curr_tab ? 'active' : 'idle'}.png)`,
+        backgroundImage: `url(${index === this.state.curr_tab ? tabsActiveImage : tabsIdleImage})`,
         backgroundSize: '100% 100%',
         width: '48px',
         height: '48px',
@@ -73,57 +92,70 @@ class RankPage extends Component {
 
     const rankRowNumberStyle = (index: number) => {
       return index <= 3 ? {
-        backgroundImage: `url(/leaderboard/${rankNoImage[index - 1]}.png)`,
+        backgroundImage: `url(${rankNoImage[index - 1]})`,
       } : {
-        backgroundImage: `url(/leaderboard/active_rankno.png)`,
+        backgroundImage: `url(${activeRankNoImage})`,
       }
     }
 
     return (
       <div className="rank-content">
         <div className="flexContainer" style={{ alignItems: 'flex-end' }}>
-          {this.state.leaderboardData ? <SeasonCard
-            currTab={tabs[this.state.curr_tab]}
-            rankRowNumberStyle={rankRowNumberStyle}
-            playerRanking={this.getPlayerRankData()}
-            seasonEnd={this.state.leaderboardData?.seasonEnd} /> :
+          {this.state.leaderboardData ? (
+            <SeasonCard
+              currTab={tabs[this.state.curr_tab]}
+              rankRowNumberStyle={rankRowNumberStyle}
+              playerRanking={this.getPlayerRankData()}
+              seasonEnd={this.state.leaderboardData?.seasonEnd}
+            />
+          ) : (
             <Skeleton
               height={152}
               count={1}
               highlightColor='#0000004d'
               baseColor='#0f1421'
-              style={{ margin: '2px 0', width: '472px' }} />}
+              style={{ margin: '2px 0', width: '472px' }}
+            />
+          )}
 
-          {this.state.leaderboardData ? <AwardedPlayer players={this.state.leaderboardData.highlights} /> :
+          {this.state.leaderboardData ? (
+            <AwardedPlayer players={this.state.leaderboardData.highlights} />
+          ) : (
             <Skeleton
               height={74}
               count={2}
               highlightColor='#0000004d'
               baseColor='#0f1421'
-              style={{ margin: '2px 0', width: '500px' }} />
-          }
+              style={{ margin: '2px 0', width: '500px' }}
+            />
+          )}
         </div>
 
         <div className="flexContainer" style={{ gap: '24px' }}>
           <div className="rank-tab-container">
-            {this.state.leaderboardData && tabs.map((tab, i) => <div key={i} style={getRankTabStyle(i)} onClick={() => this.handleCurrTab(i)}>
-              <img src={`/icons/${tab}_rank.png`} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-            </div>)}
+            {this.state.leaderboardData && tabs.map((tab, i) => (
+              <div key={i} style={getRankTabStyle(i)} onClick={() => this.handleCurrTab(i)}>
+                <img src={rankIcons[tab]} alt={`${tab} rank`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </div>
+            ))}
           </div>
-          {this.state.leaderboardData ? <LeaderboardTable
-            data={this.state.leaderboardData.ranking}
-            promotionRows={this.state.leaderboardData.promotionRank}
-            demotionRows={this.state.leaderboardData.demotionRank}
-            camelCaseToNormal={this.camelCaseToNormal}
-            rankRowNumberStyle={rankRowNumberStyle}
-          /> :
+          {this.state.leaderboardData ? (
+            <LeaderboardTable
+              data={this.state.leaderboardData.ranking}
+              promotionRows={this.state.leaderboardData.promotionRank}
+              demotionRows={this.state.leaderboardData.demotionRank}
+              camelCaseToNormal={this.camelCaseToNormal}
+              rankRowNumberStyle={rankRowNumberStyle}
+            />
+          ) : (
             <Skeleton
               height={46}
               count={12}
               highlightColor='#0000004d'
               baseColor='#0f1421'
-              style={{ margin: '2px 0', width: '940px' }} />
-          }
+              style={{ margin: '2px 0', width: '940px' }}
+            />
+          )}
         </div>
       </div>
     );
