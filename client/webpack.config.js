@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 
 const isDocker = process.env.IS_DOCKER;
@@ -101,6 +102,11 @@ module.exports = {
     new Dotenv({
       path: path.resolve(__dirname, '.production.env'),
       systemvars: true // Load all system variables as well to get those defined in docker-compose.yml
-    })
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'public/favicon.ico', to: 'favicon.ico' }
+      ],
+    }),
   ]
 };
