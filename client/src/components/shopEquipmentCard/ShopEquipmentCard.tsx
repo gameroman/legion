@@ -5,14 +5,17 @@ import { Class, InventoryType, RarityColor, equipmentFields } from "@legion/shar
 import { mapFrameToCoordinates } from '../utils';
 import { BaseEquipment } from '@legion/shared/BaseEquipment';
 import { StatIcons } from '../shopConsumableCard/ShopConsumableCard';
-import { SpellTitleBG } from '../shopSpellCard/ShopSpellCard';
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { Effect } from '@legion/shared/interfaces';
 
-enum ClassIcon {
-  '/shop/warrior_icon.png',
-  '/shop/mage_icon.png',
-}
+// Import image assets
+import equipmentSpritesheet from '@assets/equipment.png';
+import warriorIcon from '@assets/shop/warrior_icon.png';
+import mageIcon from '@assets/shop/mage_icon.png';
+import purpleBoxBg from '@assets/shop/purple_box_bg.png';
+import whiteBoxBg from '@assets/shop/white_box_bg.png';
+import itemCountIcon from '@assets/shop/item_count_icon.png';
+import goldIcon from '@assets/gold_icon.png';
 
 interface modalData {
   id: string | number;
@@ -45,11 +48,9 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
 
     const { data } = this.props; 
 
-    // console.log('equipmentData ', data);
-
     const classStyle = (classes: Class) => {
       return {
-        backgroundImage: `url(/shop/${classes === Class.BLACK_MAGE ? 'purple' : 'white'}_box_bg.png)`,
+        backgroundImage: `url(${classes === Class.BLACK_MAGE ? purpleBoxBg : whiteBoxBg})`,
       }
     }
 
@@ -57,12 +58,11 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
       id: data.id,
       name: data.name,
       frame: data.frame,
-      url: `equipment.png`,
+      url: equipmentSpritesheet,
       price: data.price
     }
 
     const titleStyle = {
-      // border: `1px solid ${RarityColor[data.rarity]}`,
       borderRadius: '4px',
     }
 
@@ -82,31 +82,39 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
               <span>{data.minLevel}</span>
             </div>
             <div className="equipment-card-info-box">
-              <img src="/shop/item_count_icon.png" alt="count icon" />
+              <img src={itemCountIcon} alt="count icon" />
               <span>{this.props.getItemAmount(data.id, InventoryType.EQUIPMENTS)}</span>
             </div>
           </div>
         </div>
         <div className="equipment-card-content">
           <div className="shop-portrait" style={{ 
-                backgroundImage: `url(equipment.png)`,
+                backgroundImage: `url(${equipmentSpritesheet})`,
                 backgroundPosition: `-${coordinates.x}px -${coordinates.y}px`,
             }} />
           <div className="shop-card-class-container">
-            {data.classes.map((classes, index) => <div key={index} className="shop-card-class" style={classStyle(classes)}>
-              <img src={classes === Class.WARRIOR ? ClassIcon[0] : ClassIcon[1]} style={classes === Class.WARRIOR ? 'transform: scaleX(1.5)' : ''} alt="mp" />
-            </div>)}
+            {data.classes.map((classes, index) => (
+              <div key={index} className="shop-card-class" style={classStyle(classes)}>
+                <img 
+                  src={classes === Class.WARRIOR ? warriorIcon : mageIcon} 
+                  style={classes === Class.WARRIOR ? {transform: 'scaleX(1.5)'} : {}} 
+                  alt={classes === Class.WARRIOR ? "warrior" : "mage"} 
+                />
+              </div>
+            ))}
           </div>
           <div className="equipment-card-class-badge">
-            <img src={`/inventory/${equipmentFields[data.slot]}_icon.png`} alt="" />
+            <img src={require(`@assets/inventory/${equipmentFields[data.slot]}_icon.png`)} alt="" />
           </div>
         </div>
         <p data-tooltip-id={`equipment-desc-tooltip-${data.id}`} className="equipment-card-description">{data.description}</p>
         <div className="consumable-card-effect-container">
-          {data.effects.map((effect, index) => <div key={index} className="consumable-card-effect">
-            <img src={StatIcons[effect.stat]} alt="" />
-            <span>{getEffectValue(effect)}</span>
-          </div>)}
+          {data.effects.map((effect, index) => (
+            <div key={index} className="consumable-card-effect">
+              <img src={StatIcons[effect.stat]} alt="" />
+              <span>{getEffectValue(effect)}</span>
+            </div>
+          ))}
         </div>
         <div style={{lineHeight: '0.5'}}>
           <span style={{color: `${getRarityValue(data.effort).clr}`, fontSize: '11px', fontFamily: 'Kim'}}>
@@ -114,7 +122,7 @@ class ShopEquipmentCard extends Component<ShopCardProps> {
           </span>
         </div>
         <div className="shop-card-price">
-          <img src="/gold_icon.png" alt="gold" />
+          <img src={goldIcon} alt="gold" />
           {data.price}
         </div>
 

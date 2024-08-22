@@ -9,7 +9,6 @@ import { apiFetch } from '../../services/apiService';
 import { InventoryType, ShopTabs } from '@legion/shared/enums';
 import {MAX_CHARACTERS} from "@legion/shared/config";
 import { PlayerInventory, ShopItems, DBCharacterData } from '@legion/shared/interfaces';
-import { ShopTabIcons } from './ShopContent.data';
 import { errorToast, successToast, playSoundEffect } from '../utils';
 import ShopSpellCard from '../shopSpellCard/ShopSpellCard';
 import ShopConsumableCard from '../shopConsumableCard/ShopConsumableCard';
@@ -22,6 +21,15 @@ import { items } from '@legion/shared/Items';
 import { equipments } from '@legion/shared/Equipments';
 import { inventorySize } from '@legion/shared/utils';
 import { Link } from 'preact-router';
+
+import tabActiveImage from '@assets/shop/tabs_active.png';
+import tabIdleImage from '@assets/shop/tabs_idle.png';
+
+// Import shop tab icons
+import spellsIcon from '@assets/shop/spells_icon.png';
+import consumablesIcon from '@assets/shop/consumables_icon.png';
+import equipmentsIcon from '@assets/shop/helmet_icon.png';
+import charactersIcon from '@assets/shop/char_icon.png';
 
 interface ShopContentProps {
     gold: number;
@@ -41,6 +49,7 @@ interface modalData {
     frame: number;
     url: string;
     price: number;
+    isCharacter?: boolean;
 }
 
 function sortByRarityAndPrice(a: any, b: any) {
@@ -159,7 +168,7 @@ class ShopContent extends Component<ShopContentProps> {
 
         const tabItemStyle = (index: number) => {
             return {
-                backgroundImage: `url(/shop/tabs_${index === this.state.curr_tab ? 'active' : 'idle'}.png)`,
+                backgroundImage: `url(${index === this.state.curr_tab ? tabActiveImage : tabIdleImage})`,
             }
         }
 
@@ -182,6 +191,8 @@ class ShopContent extends Component<ShopContentProps> {
             }
         }
 
+        const shopTabIcons = [consumablesIcon, equipmentsIcon, spellsIcon, charactersIcon];
+
         return (
             <div className='shop-content'>
                 <ShopItemFilter
@@ -190,14 +201,14 @@ class ShopContent extends Component<ShopContentProps> {
                  handleInventory={this.handleInventory} />
                  
                 <div className='shop-tabs-container'>
-                    {this.state.inventoryData && Object.keys(ShopTabIcons).map(key => ShopTabIcons[key]).map((icon, index) =>
+                    {this.state.inventoryData && shopTabIcons.map((icon, index) =>
                         <Link
                             href={`/shop/${ShopTabs[index].toLowerCase()}`}
                             onClick={() => this.setState({curr_tab: index})}
                             key={index}
                             className='shop-tab-item'
                             style={tabItemStyle(index)}>
-                            <img src={`/shop/${icon}`} alt="icon" />
+                            <img src={icon} alt={`${ShopTabs[index]} icon`} />
                         </Link>
                     )}
                 </div>

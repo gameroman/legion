@@ -1,21 +1,35 @@
-// ShopConsumableCard.tsx
 import './ShopConsumableCard.style.css';
 import { h, Component } from 'preact';
 import { InventoryType, RarityColor, Target } from "@legion/shared/enums";
 import { BaseItem } from '@legion/shared/BaseItem';
-import { SpellTitleBG } from '../shopSpellCard/ShopSpellCard';
 import { mapFrameToCoordinates } from '../utils';
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { Effect } from '@legion/shared/interfaces';
 
-export enum StatIcons {
-  '/shop/hp_icon.png',
-  '/inventory/mp_icon.png',
-  '/shop/attack_icon.png',
-  '/shop/def_icon.png',
-  '/shop/satk_icon.png',
-  '/shop/sdef_icon.png',
-}
+import consumablesSpritesheet from '@assets/consumables.png';
+
+// Import stat icons
+import hpIcon from '@assets/shop/hp_icon.png';
+import mpIcon from '@assets/inventory/mp_icon.png';
+import attackIcon from '@assets/shop/attack_icon.png';
+import defIcon from '@assets/shop/def_icon.png';
+import satkIcon from '@assets/shop/satk_icon.png';
+import sdefIcon from '@assets/shop/sdef_icon.png';
+
+// Import other icons
+import itemCountIcon from '@assets/shop/item_count_icon.png';
+import cdIcon from '@assets/inventory/cd_icon.png';
+import targetIcon from '@assets/inventory/target_icon.png';
+import goldIcon from '@assets/gold_icon.png';
+
+export const StatIcons = [
+  hpIcon,
+  mpIcon,
+  attackIcon,
+  defIcon,
+  satkIcon,
+  sdefIcon,
+];
 
 interface modalData {
   id: string | number;
@@ -48,18 +62,15 @@ class ShopConsumableCard extends Component<ShopCardProps> {
 
     const { data } = this.props;
 
-    // console.log('consumableData ', data);
-
     const modalData: modalData = {
       id: data.id,
       name: data.name,
-      url: `consumables.png`,
+      url: consumablesSpritesheet,
       frame: data.frame,
       price: data.price
     }
 
     const titleStyle = {
-      // border: `1px solid ${RarityColor[data.rarity]}`,
       borderRadius: '4px',
     }
     
@@ -75,28 +86,34 @@ class ShopConsumableCard extends Component<ShopCardProps> {
         <div className="shop-card-title" style={titleStyle}>
           <span>{data.name}</span>
           <div className="consumable-card-info-box">
-            <img src="/shop/item_count_icon.png" alt="count icon" />
+            <img src={itemCountIcon} alt="count icon" />
             <span>{this.props.getItemAmount(data.id, InventoryType.CONSUMABLES)}</span>
           </div>
         </div>
         <div className="consumable-card-content">
           <div className="shop-portrait" style={{ 
-              backgroundImage: `url(consumables.png)`,
+              backgroundImage: `url(${consumablesSpritesheet})`,
               backgroundPosition: `-${coordinates.x}px -${coordinates.y}px`,
           }} />
         </div>
         <p data-tooltip-id={`consumable-desc-tooltip-${data.id}`} className="consumable-card-description">{data.description}</p>
         <div className="consumable-card-effect-container">
-          {data.effects.map((effect, index) => <div key={index} className="consumable-card-effect">
-            <img src={StatIcons[effect.stat]} style={effect.stat === 1 ? 'transform: scaleX(0.8)' : ''} alt="" />
-            <span>{getEffectValue(effect)}</span>
-          </div>)}
+          {data.effects.map((effect, index) => (
+            <div key={index} className="consumable-card-effect">
+              <img 
+                src={StatIcons[effect.stat]} 
+                style={effect.stat === 1 ? {transform: 'scaleX(0.8)'} : {}} 
+                alt="" 
+              />
+              <span>{getEffectValue(effect)}</span>
+            </div>
+          ))}
           <div className="consumable-card-effect">
-            <img src="/inventory/cd_icon.png" style={{transform: 'scaleX(0.8)'}} alt="cost" />
+            <img src={cdIcon} style={{transform: 'scaleX(0.8)'}} alt="cooldown" />
             <span>{data.cooldown}</span>
           </div>
           <div className="consumable-card-effect">
-            <img src="/inventory/target_icon.png" alt="cost" />
+            <img src={targetIcon} alt="target" />
             <span>{Target[data.target]}</span>
           </div>
         </div>
@@ -106,7 +123,7 @@ class ShopConsumableCard extends Component<ShopCardProps> {
           </span>
         </div>
         <div className="shop-card-price">
-          <img src="/gold_icon.png" alt="gold" />
+          <img src={goldIcon} alt="gold" />
           {data.price}
         </div>
 

@@ -1,4 +1,4 @@
-// Button.tsx
+// ShopSpellCard.tsx
 import './ShopSpellCard.style.css'
 import { h, Component } from 'preact';
 import { Class, InventoryType, RarityColor, Target } from "@legion/shared/enums";
@@ -6,17 +6,17 @@ import { BaseSpell } from '@legion/shared/BaseSpell';
 import { mapFrameToCoordinates } from '../utils';
 import { Tooltip as ReactTooltip } from "react-tooltip";
 
-export enum SpellTitleBG {
-  'url(/shop/item_title_bg_white.png)',
-  'url(/shop/item_title_bg_blue.png)',
-  'url(/shop/item_title_bg_purple.png)',
-  'url(/shop/item_title_bg_green.png)'
-}
-
-enum ClassIcon {
-  '/shop/warrior_icon.png',
-  '/shop/mage_icon.png',
-}
+// Import image assets
+import spellsSpritesheet from '@assets/spells.png';
+import warriorIcon from '@assets/shop/warrior_icon.png';
+import mageIcon from '@assets/shop/mage_icon.png';
+import itemCountIcon from '@assets/shop/item_count_icon.png';
+import whiteBoxBg from '@assets/shop/white_box_bg.png';
+import purpleBoxBg from '@assets/shop/purple_box_bg.png';
+import mpIcon from '@assets/inventory/mp_icon.png';
+import cdIcon from '@assets/inventory/cd_icon.png';
+import targetIcon from '@assets/inventory/target_icon.png';
+import goldIcon from '@assets/gold_icon.png';
 
 interface modalData {
   id: string | number;
@@ -51,12 +51,11 @@ class ShopSpellCard extends Component<ShopCardProps> {
 
     const classStyle = (classes: Class) => {
       return {
-        backgroundImage: `url(/shop/${classes === Class.BLACK_MAGE ? 'purple' : 'white'}_box_bg.png)`
+        backgroundImage: `url(${classes === Class.BLACK_MAGE ? purpleBoxBg : whiteBoxBg})`
       }
     }
 
     const titleStyle = {
-      // border: `1px solid ${RarityColor[data.rarity]}`,
       borderRadius: '4px',
     }
 
@@ -64,7 +63,7 @@ class ShopSpellCard extends Component<ShopCardProps> {
       id: data.id,
       name: data.name,
       frame: data.frame,
-      url: `spells.png`,
+      url: spellsSpritesheet,
       price: data.price
     }
 
@@ -80,34 +79,36 @@ class ShopSpellCard extends Component<ShopCardProps> {
               <span>{data.minLevel}</span>
             </div>
             <div className="spell-card-info-box">
-              <img src="/shop/item_count_icon.png" alt="count icon" />
+              <img src={itemCountIcon} alt="count icon" />
               <span>{this.props.getItemAmount(data.id, InventoryType.SKILLS)}</span>
             </div>
           </div>
         </div>
         <div className="spell-card-content">
           <div className="shop-portrait" style={{ 
-                backgroundImage: `url(spells.png)`,
+                backgroundImage: `url(${spellsSpritesheet})`,
                 backgroundPosition: `-${coordinates.x}px -${coordinates.y}px`,
             }} />
           <div className="shop-card-class-container">
-            {data.classes.map((classes, index) => <div key={index} className="spell-card-class" style={classStyle(classes)}>
-              <img src={classes === Class.WARRIOR ? ClassIcon[0] : ClassIcon[1]} alt="mp" />
-            </div>)}
+            {data.classes.map((classes, index) => (
+              <div key={index} className="spell-card-class" style={classStyle(classes)}>
+                <img src={classes === Class.WARRIOR ? warriorIcon : mageIcon} alt="class icon" />
+              </div>
+            ))}
           </div>
         </div>
         <p data-tooltip-id={`spell-desc-tooltip-${data.id}`} className="spell-card-description">{data.description}</p>
         <div className="spell-card-effect-container">
           <div className="spell-card-effect">
-            <img src="/inventory/mp_icon.png" alt="cost" />
+            <img src={mpIcon} alt="cost" />
             <span>{data.cost}</span>
           </div>
           <div className="spell-card-effect">
-            <img src="/inventory/cd_icon.png" alt="cost" />
+            <img src={cdIcon} alt="cooldown" />
             <span>{data.cooldown}</span>
           </div>
           <div className="spell-card-effect">
-            <img src="/inventory/target_icon.png" alt="cost" />
+            <img src={targetIcon} alt="target" />
             <span>{Target[data.target]}</span>
           </div>
         </div>
@@ -117,7 +118,7 @@ class ShopSpellCard extends Component<ShopCardProps> {
           </span>
         </div>
         <div className="spell-card-price">
-          <img src="/gold_icon.png" alt="gold" />
+          <img src={goldIcon} alt="gold" />
           {data.price}
         </div>
 

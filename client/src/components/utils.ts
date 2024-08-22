@@ -117,6 +117,7 @@ function fetchGuideTip() {
 const spriteContext = require.context('@assets/sprites', false, /\.(png|jpe?g|svg)$/);
 
 export function getSpritePath(fileName: string) {
+  console.log(`Getting path for sprite: ${fileName}`);
   try {
     return spriteContext(`./${fileName}.png`);
   } catch (error) {
