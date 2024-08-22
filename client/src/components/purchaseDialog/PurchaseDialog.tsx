@@ -1,11 +1,17 @@
-// ItemDialog.tsx
+// PurchaseDialog.tsx
 import './PurchaseDialog.style.css';
 import Modal from 'react-modal';
 import { h, Component } from 'preact';
 import { mapFrameToCoordinates, getSpritePath } from '../utils';
 import { modalData } from '../shopContent/ShopContent';
 
+// Import image assets
+import goldIcon from '@assets/gold_icon.png';
+import confirmIcon from '@assets/inventory/confirm_icon.png';
+import cancelIcon from '@assets/inventory/cancel_icon.png';
+
 Modal.setAppElement('#root');
+
 interface PurchaseDialogProps {
   gold: number;
   dialogOpen: boolean;
@@ -100,22 +106,33 @@ class PurchaseDialog extends Component<PurchaseDialogProps, PurchaseDialogState>
 
           <div className="purchase-dialog-frame" style={spriteStyle}></div>
 
-          {!dialogData.isCharacter && <div className="purchase-count-container">
-            <div className="purchase-count-button" onClick={() => this.handleCount(false)}><span>-</span></div>
-            <div className="purchase-count">
-              <span>{this.state.count > 9 ? this.state.count : `0${this.state.count}`}</span>
+          {!dialogData.isCharacter && (
+            <div className="purchase-count-container">
+              <div className="purchase-count-button" onClick={() => this.handleCount(false)}><span>-</span></div>
+              <div className="purchase-count">
+                <span>{this.state.count > 9 ? this.state.count : `0${this.state.count}`}</span>
+              </div>
+              <div className="purchase-count-button" onClick={() => this.handleCount(true)}><span>+</span></div>
             </div>
-            <div className="purchase-count-button" onClick={() => this.handleCount(true)}><span>+</span></div>
-          </div>}
+          )}
 
           <div className="purchase-dialog-price">
-            <img src="/gold_icon.png" alt="cost" />
+            <img src={goldIcon} alt="cost" />
             <span style={countStyle}>{dialogData.price * this.state.count}</span>
           </div>
 
           <div className="purchase-dialog-button-container">
-            <button className="purchase-dialog-accept" onClick={() => this.props.purchase(dialogData.id, this.state.count, dialogData.price)} style={buyBtnStyle} disabled={!hasEnoughGold}><img src="/inventory/confirm_icon.png" alt="confirm" />Buy</button>
-            <button className="purchase-dialog-decline" onClick={this.handleCloseDialog}><img src="/inventory/cancel_icon.png" alt="decline" />Cancel</button>
+            <button 
+              className="purchase-dialog-accept" 
+              onClick={() => this.props.purchase(dialogData.id, this.state.count, dialogData.price)} 
+              style={buyBtnStyle} 
+              disabled={!hasEnoughGold}
+            >
+              <img src={confirmIcon} alt="confirm" />Buy
+            </button>
+            <button className="purchase-dialog-decline" onClick={this.handleCloseDialog}>
+              <img src={cancelIcon} alt="decline" />Cancel
+            </button>
           </div>
         </div>
       </Modal>

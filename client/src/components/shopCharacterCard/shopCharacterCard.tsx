@@ -5,6 +5,9 @@ import { INFO_BG_COLOR, INFO_TYPE } from '../itemDialog/ItemDialogType';
 import { classEnumToString, getSpritePath } from '../utils';
 import { modalData } from '../shopContent/ShopContent';
 
+// Import image assets
+import goldIcon from '@assets/gold_icon.png';
+
 interface ShopCharacteCardProps {
   key: number;
   data: any;
@@ -18,7 +21,7 @@ class ShopCharacterCard extends Component<ShopCharacteCardProps> {
     const statsArray = Object.entries(data.stats).map(([key, value]) => ({ key, value: value as number }));
 
     const portraitStyle = {
-      backgroundImage: `url(/sprites/${data.portrait}.png)`,
+      backgroundImage: `url(${getSpritePath(data.portrait)})`,
     };
 
     const statColor = (stat: string) => {
@@ -54,20 +57,26 @@ class ShopCharacterCard extends Component<ShopCharacteCardProps> {
         <div className="shop-character-card-content">
           <div className="character-card-portrait" style={portraitStyle}></div>
           <div className="shop-character-card-class-container">
-            { Array.from({ length: data.skill_slots }, (_, i) => (
+            {Array.from({ length: data.skill_slots }, (_, i) => (
               <div key={i} className="shop-character-card-slot"></div>
             ))}
           </div>
         </div>
 
         <div className="shop-character-card-effect-container">
-          {statsArray.map((stat, index) => <div key={index} className="shop-character-card-effect">
-            <div className="shop-character-card-effect-stat" style={statColor(stat.key)}><span>{INFO_TYPE[stat.key]}</span></div>
-            <div className="shop-character-card-effect-value"><span>{stat.value}</span></div>
-          </div>)}
+          {statsArray.map((stat, index) => (
+            <div key={index} className="shop-character-card-effect">
+              <div className="shop-character-card-effect-stat" style={statColor(stat.key)}>
+                <span>{INFO_TYPE[stat.key]}</span>
+              </div>
+              <div className="shop-character-card-effect-value">
+                <span>{stat.value}</span>
+              </div>
+            </div>
+          ))}
         </div>
         <div className="shop-card-price">
-          <img src="/gold_icon.png" alt="gold" />
+          <img src={goldIcon} alt="gold" />
           {data.price}
         </div>
       </div>
