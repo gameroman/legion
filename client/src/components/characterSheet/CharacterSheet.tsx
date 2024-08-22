@@ -12,6 +12,7 @@ import ItemDialog from '../itemDialog/ItemDialog';
 import { getXPThreshold } from '@legion/shared/levelling';
 import { InventoryActionType, InventoryType, RarityColor } from '@legion/shared/enums';
 import { Effect } from '@legion/shared/interfaces';
+import { equipmentFields } from '@legion/shared/enums';
 
 import helmetIcon from '@assets/inventory/helmet_icon.png';
 import armorIcon from '@assets/inventory/armor_icon.png';
@@ -33,7 +34,9 @@ interface InventoryRequestPayload {
     itemEffects: Effect[];
     refreshCharacter: () => void;
     handleItemEffect: (effects: Effect[], actionType: InventoryActionType) => void;
-    updateInventory?: (type: string, action: InventoryActionType, index: number) => void;
+    updateInventory?: (type: string, action: InventoryActionType, index: number) => void; 
+    selectedEquipmentSlot: number; 
+    handleSelectedEquipmentSlot: (newValue: number) => void; 
 }
 
 class CharacterSheet extends Component<InventoryRequestPayload> {
@@ -139,6 +142,7 @@ class CharacterSheet extends Component<InventoryRequestPayload> {
                     items = Object.entries(characterData.equipment)
                         .map(([key, value]) => ({ key, value }))
                         .slice(specialSlotsStart, 9); // Special equipment slots
+                    // console.log("This is special equip. ", items); 
                     desiredOrder = ['left_ring', 'right_ring', 'necklace'];
                     items.sort((a, b) => desiredOrder.indexOf(a.key) - desiredOrder.indexOf(b.key));
                     backgroundImageUrl = equipmentSpritesheet;
@@ -166,7 +170,8 @@ class CharacterSheet extends Component<InventoryRequestPayload> {
             return items.map((item, index) => {
                 if (isSpecialEquip) index += specialSlotsStart;
                 let content;
-                const itemData = getEquipmentById(item.value);
+                const itemData = getEquipmentById(item.value); 
+                // console.log("sheetItemData => ", item); 
                 if (item.value < 0) {
                     // Handle the case where there is no item equipped in this slot
                     content = (
@@ -192,12 +197,20 @@ class CharacterSheet extends Component<InventoryRequestPayload> {
                 
                 // console.log("itemData => ", itemData); 
 
+                // console.log("equipmentFields => ", equipmentFields); 
+                // console.log("characterSheetPropsSelectedEquipmentSlot => ", this.props.selectedEquipmentSlot); 
+                // console.log("characterSheetItemKey => ", item.key); 
+
                 // Return the container div for each item
                 return (
                     <div
                         key={index}
-                        className="sheet-item"
-                        style={itemData !== undefined && slotStyle} 
+                        className="sheet-item" 
+                        style={(itemData !== undefined) ? slotStyle : 
+                            (this.props.selectedEquipmentSlot > -1 && equipmentFields[this.props.selectedEquipmentSlot] === item.key) ? 
+                            {backgroundImage: "linear-gradient(to right bottom, rgb(193, 119, 13), rgb(28, 31, 37))"}: 
+                            {}
+                        } 
                         // style={(inventoryType === InventoryType.SKILLS || inventoryType === InventoryType.CONSUMABLES) && slotStyle}
                         onClick={(e) => this.handleUnEquipItem(e, itemData, ItemDialogType.EQUIPMENTS, index)}>
                         {content}
@@ -336,7 +349,8 @@ class CharacterSheet extends Component<InventoryRequestPayload> {
                     position={this.state.modalPosition}
                     dialogData={this.state.modalData}
                     handleClose={this.handleCloseModal}
-                    updateInventory={this.props.updateInventory}
+                    updateInventory={this.props.updateInventory} 
+                    handleSelectedEquipmentSlot={this.props.handleSelectedEquipmentSlot}
                 />
             </div>
         );
