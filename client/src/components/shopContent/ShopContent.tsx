@@ -49,6 +49,7 @@ export interface modalData {
     frame: number;
     url: string;
     price: number;
+    isCharacter?: boolean;
 }
 
 function sortByRarityAndPrice(a: any, b: any) {

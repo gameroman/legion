@@ -2,7 +2,7 @@
 import './shopCharacterCard.style.css';
 import { h, Component } from 'preact';
 import { INFO_BG_COLOR, INFO_TYPE } from '../itemDialog/ItemDialogType';
-import { classEnumToString } from '../utils';
+import { classEnumToString, getSpritePath } from '../utils';
 import { modalData } from '../shopContent/ShopContent';
 
 interface ShopCharacteCardProps {
@@ -31,8 +31,9 @@ class ShopCharacterCard extends Component<ShopCharacteCardProps> {
       id: data.id,
       name: data.name,
       frame: -1,
-      url: `/sprites/${data.portrait}.png`,
-      price: data.price
+      url: data.portrait,
+      price: data.price,
+      isCharacter: true
     }
 
     return (

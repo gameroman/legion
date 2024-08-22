@@ -2,7 +2,7 @@
 import './PurchaseDialog.style.css';
 import Modal from 'react-modal';
 import { h, Component } from 'preact';
-import { mapFrameToCoordinates } from '../utils';
+import { mapFrameToCoordinates, getSpritePath } from '../utils';
 import { modalData } from '../shopContent/ShopContent';
 
 Modal.setAppElement('#root');
@@ -45,7 +45,6 @@ class PurchaseDialog extends Component<PurchaseDialogProps, PurchaseDialogState>
     }
 
     const hasEnoughGold = this.state.count * dialogData.price <= this.props.gold;
-    const isCharacter = dialogData.url.includes('sprites');
 
     const customStyles = {
       content: {
@@ -66,8 +65,8 @@ class PurchaseDialog extends Component<PurchaseDialogProps, PurchaseDialogState>
 
     const coordinates = mapFrameToCoordinates(dialogData.frame);
 
-    const spriteStyle = isCharacter ? {
-      backgroundImage: `url(${dialogData.url})`,
+    const spriteStyle = dialogData.isCharacter ? {
+      backgroundImage: `url(${getSpritePath(dialogData.url)})`,
       width: '68px',
       minHeight: '98px',
       backgroundPosition: '-40px -40px',
@@ -101,7 +100,7 @@ class PurchaseDialog extends Component<PurchaseDialogProps, PurchaseDialogState>
 
           <div className="purchase-dialog-frame" style={spriteStyle}></div>
 
-          {!isCharacter && <div className="purchase-count-container">
+          {!dialogData.isCharacter && <div className="purchase-count-container">
             <div className="purchase-count-button" onClick={() => this.handleCount(false)}><span>-</span></div>
             <div className="purchase-count">
               <span>{this.state.count > 9 ? this.state.count : `0${this.state.count}`}</span>
