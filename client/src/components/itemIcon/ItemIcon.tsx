@@ -9,6 +9,10 @@ import { CHARACTER_INFO, ItemDialogType } from '../itemDialog/ItemDialogType';
 import { Effect } from '@legion/shared/interfaces';
 import { mapFrameToCoordinates } from '../utils';
 
+import equipmentSpritesheet from '@assets/equipment.png';
+import consumablesSpritesheet from '@assets/consumables.png';
+import spellsSpritesheet from '@assets/spells.png';
+
 interface ItemIconProps {
   characterId?: string,
   action: BaseItem | BaseSpell | BaseEquipment | null;
@@ -77,10 +81,10 @@ class ItemIcon extends Component<ItemIconProps> {
     }
 
     const spriteSheetsMap = {
-      [InventoryType.CONSUMABLES]: 'consumables',
-      [InventoryType.SKILLS]: 'spells',
-      [InventoryType.EQUIPMENTS]: 'equipment'
-    }
+      [InventoryType.CONSUMABLES]: consumablesSpritesheet,
+      [InventoryType.SKILLS]: spellsSpritesheet,
+      [InventoryType.EQUIPMENTS]: equipmentSpritesheet,
+    };
     const spritesheet = spriteSheetsMap[actionType];
 
     return (
@@ -89,7 +93,7 @@ class ItemIcon extends Component<ItemIconProps> {
         {action.id > -1 && <div 
           className='item-icon'
           style={{
-            backgroundImage: `url(/${spritesheet}.png)`,
+            backgroundImage: `url(${spritesheet})`,
             backgroundPosition: `-${mapFrameToCoordinates(action.frame).x}px -${mapFrameToCoordinates(action.frame).y}px`,
             cursor: 'pointer',
           }}

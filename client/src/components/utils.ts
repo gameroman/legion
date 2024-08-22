@@ -108,3 +108,14 @@ function fetchGuideTip() {
   })
   .catch(error => console.error(`Fetching tip error: ${error}`));
 }
+
+const spriteContext = require.context('@assets/sprites', false, /\.(png|jpe?g|svg)$/);
+
+export function getSpritePath(fileName: string) {
+  try {
+    return spriteContext(`./${fileName}.png`);
+  } catch (error) {
+    console.error(`Failed to load sprite: ${fileName}.png`, error);
+    return '';
+  }
+}

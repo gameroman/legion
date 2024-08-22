@@ -1,6 +1,6 @@
 import { h, Component } from 'preact';
 import './CharacterSheet.style.css';
-import { classEnumToString, mapFrameToCoordinates } from '../utils';
+import { classEnumToString, mapFrameToCoordinates, getSpritePath } from '../utils';
 import { BaseItem } from '@legion/shared/BaseItem';
 import { BaseSpell } from '@legion/shared/BaseSpell';
 import { BaseEquipment } from '@legion/shared/BaseEquipment';
@@ -12,6 +12,20 @@ import ItemDialog from '../itemDialog/ItemDialog';
 import { getXPThreshold } from '@legion/shared/levelling';
 import { InventoryActionType, InventoryType, RarityColor } from '@legion/shared/enums';
 import { Effect } from '@legion/shared/interfaces';
+
+import helmetIcon from '@assets/inventory/helmet_icon.png';
+import armorIcon from '@assets/inventory/armor_icon.png';
+import weaponIcon from '@assets/inventory/weapon_icon.png';
+import beltIcon from '@assets/inventory/belt_icon.png';
+import bootsIcon from '@assets/inventory/boots_icon.png';
+import glovesIcon from '@assets/inventory/gloves_icon.png';
+import leftRingIcon from '@assets/inventory/left_ring_icon.png';
+import rightRingIcon from '@assets/inventory/right_ring_icon.png';
+import necklaceIcon from '@assets/inventory/necklace_icon.png';
+
+import equipmentSpritesheet from '@assets/equipment.png';
+import consumablesSpritesheet from '@assets/consumables.png';
+import spellsSpritesheet from '@assets/spells.png';
 
 interface InventoryRequestPayload {
     characterId: string;
@@ -117,7 +131,7 @@ class CharacterSheet extends Component<InventoryRequestPayload> {
                     items = Object.entries(characterData.equipment)
                         .map(([key, value]) => ({ key, value }))
                         .slice(0, specialSlotsStart); // Standard equipment slots
-                    backgroundImageUrl = 'equipment.png';
+                    backgroundImageUrl = equipmentSpritesheet;
                     isSpecialEquip = false;
                     break;
                 case 'specialEquip':
@@ -126,12 +140,27 @@ class CharacterSheet extends Component<InventoryRequestPayload> {
                         .slice(specialSlotsStart, 9); // Special equipment slots
                     desiredOrder = ['left_ring', 'right_ring', 'necklace'];
                     items.sort((a, b) => desiredOrder.indexOf(a.key) - desiredOrder.indexOf(b.key));
-                    backgroundImageUrl = 'equipment.png';
+                    backgroundImageUrl = equipmentSpritesheet;
                     isSpecialEquip = true;
                     break;
                 default:
                     return null; // Or an empty component
             }
+
+            const getIconForSlot = (key) => {
+                switch (key) {
+                    case 'helmet': return helmetIcon;
+                    case 'armor': return armorIcon;
+                    case 'weapon': return weaponIcon;
+                    case 'boots': return bootsIcon;
+                    case 'belt': return beltIcon;
+                    case 'gloves': return glovesIcon;
+                    case 'left_ring': return leftRingIcon;
+                    case 'right_ring': return rightRingIcon;
+                    case 'necklace': return necklaceIcon;
+                    default: return null;
+                }
+            };
 
             return items.map((item, index) => {
                 if (isSpecialEquip) index += specialSlotsStart;
@@ -140,7 +169,7 @@ class CharacterSheet extends Component<InventoryRequestPayload> {
                 if (item.value < 0) {
                     // Handle the case where there is no item equipped in this slot
                     content = (
-                        <img src={`/inventory/${item.key}_icon.png`} alt={item.key}
+                        <img src={getIconForSlot(item.key)} alt={item.key}
                             style={{ transform: isSpecialEquip ? 'scaleY(0.6)' : 'scale(0.8)' }} />
                     );
                 } else {
@@ -184,14 +213,14 @@ class CharacterSheet extends Component<InventoryRequestPayload> {
                     capacity = characterData.carrying_capacity + characterData.carrying_capacity_bonus;
                     items = characterData.inventory;
                     dialogType = ItemDialogType.CONSUMABLES;
-                    backgroundImageUrl = 'consumables.png';
+                    backgroundImageUrl = consumablesSpritesheet;
                     dataCallback = getConsumableById;
                     break;
                 case InventoryType.SKILLS:
                     capacity = characterData.skill_slots;
                     items = characterData.skills;
                     dialogType = ItemDialogType.SKILLS;
-                    backgroundImageUrl = 'spells.png';
+                    backgroundImageUrl = spellsSpritesheet;
                     dataCallback = getSpellById;
                     break;
                 // Add other cases for different types
@@ -225,14 +254,8 @@ class CharacterSheet extends Component<InventoryRequestPayload> {
         const xpToLevel = getXPThreshold(characterData?.level);
 
         const portraitStyle = {
-            backgroundImage: `url(/sprites/${characterData?.portrait ?? '1_1'}.png)`,
+            backgroundImage: `url(${getSpritePath(characterData?.portrait)})`,
             animation: 'animate-sprite 0.7s steps(1) infinite',
-        };
-
-        const overlayStyle = { // Used for "power up" animation
-            backgroundImage: this.state.powerUpActive ? `url(/animations/potion_heal.png)` : 'none',
-            animation: this.state.powerUpActive ? 'power-up-animation 3s steps(16) infinite' : 'none', // Assuming 10 frames in the animation
-            display: this.state.powerUpActive ? 'block' : 'none'
         };
 
         const sliderStyle = {
@@ -265,7 +288,6 @@ class CharacterSheet extends Component<InventoryRequestPayload> {
                     <div className="team-character-info-container">
                         <div className="team-character-container">
                             <div className="team-character" style={portraitStyle}></div>
-                            <div className="team-character-overlay" style={overlayStyle}></div>
                         </div>
                         <div className="team-character-info">
                             {renderInfoBars()}

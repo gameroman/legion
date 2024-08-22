@@ -1,13 +1,9 @@
 import { h, Component } from 'preact';
 import { route } from 'preact-router';
-import { classEnumToString } from '../utils';
+import { classEnumToString, getSpritePath } from '../utils';
 import { APICharacterData } from '@legion/shared/interfaces';
 import './ChracterCard.style.css';
 
-// Create a context for all images in the @assets/sprites directory
-const spriteContext = require.context('@assets/sprites', false, /\.(png|jpe?g|svg)$/);
-
-// Create a context for background images
 const bgContext = require.context('@assets', false, /team_Bg_.*\.png$/);
 
 class CharacterCard extends Component<APICharacterData> {
@@ -18,15 +14,6 @@ class CharacterCard extends Component<APICharacterData> {
   handleCardClick = () => {
     const { id } = this.props;
     route(`/team/${id}`);
-  }
-
-  getImagePath = (fileName: string) => {
-    try {
-      return spriteContext(`./${fileName}.png`);
-    } catch (error) {
-      console.error(`Failed to load sprite: ${fileName}.png`, error);
-      return '';
-    }
   }
 
   getBgImagePath = (active: boolean) => {
@@ -42,7 +29,7 @@ class CharacterCard extends Component<APICharacterData> {
   render() {
     const { portrait, name, class: characterClass, level } = this.props;
     const portraitStyle = {
-      backgroundImage: `url(${this.getImagePath(portrait)})`,
+      backgroundImage: `url(${getSpritePath(portrait)})`,
     };
 
     const bgStyle = {
