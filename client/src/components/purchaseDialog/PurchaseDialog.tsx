@@ -3,18 +3,13 @@ import './PurchaseDialog.style.css';
 import Modal from 'react-modal';
 import { h, Component } from 'preact';
 import { mapFrameToCoordinates } from '../utils';
+import { modalData } from '../shopContent/ShopContent';
 
 Modal.setAppElement('#root');
 interface PurchaseDialogProps {
   gold: number;
   dialogOpen: boolean;
-  dialogData: {
-    id: string | number;
-    frame: number
-    name: string;
-    url: string;
-    price: number;
-  };
+  dialogData: modalData,
   position: {
     top: number,
     left: number

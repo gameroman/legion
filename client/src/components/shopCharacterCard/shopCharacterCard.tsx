@@ -1,17 +1,9 @@
 // ShopCharacterCard.tsx
 import './shopCharacterCard.style.css';
 import { h, Component } from 'preact';
-import { Class, Stat } from "@legion/shared/enums";
-import { equipments } from '@legion/shared/Equipments';
 import { INFO_BG_COLOR, INFO_TYPE } from '../itemDialog/ItemDialogType';
 import { classEnumToString } from '../utils';
-
-interface modalData {
-  id: string | number;
-  name: string;
-  url: string;
-  price: number;
-}
+import { modalData } from '../shopContent/ShopContent';
 
 interface ShopCharacteCardProps {
   key: number;
@@ -38,6 +30,7 @@ class ShopCharacterCard extends Component<ShopCharacteCardProps> {
     const modalData: modalData = {
       id: data.id,
       name: data.name,
+      frame: -1,
       url: `/sprites/${data.portrait}.png`,
       price: data.price
     }

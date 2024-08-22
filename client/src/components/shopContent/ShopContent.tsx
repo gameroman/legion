@@ -43,13 +43,12 @@ interface ShopContentProps {
     fetchCharactersOnSale: () => void;
 }
 
-interface modalData {
+export interface modalData {
     id: string;
     name: string;
     frame: number;
     url: string;
     price: number;
-    isCharacter?: boolean;
 }
 
 function sortByRarityAndPrice(a: any, b: any) {
