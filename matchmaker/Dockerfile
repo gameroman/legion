@@ -6,5 +6,7 @@ COPY matchmaker/package*.json ./
 
 RUN npm install
 
+COPY shared/ ./ 
+
 CMD ["npm", "run", "start"]
 # CMD ["tail", "-f", "/dev/null"]
