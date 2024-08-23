@@ -150,16 +150,6 @@ class RankPage extends Component {
               <img src={`/icons/${tab}_rank.png`} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>)}
           </div> 
-          {/* {
-            this.state.leaderboardData && 
-            <LeaderboardTable
-              data={this.state.leaderboardData.ranking}
-              promotionRows={this.state.leaderboardData.promotionRows}
-              demotionRows={this.state.leaderboardData.demotionRows}
-              camelCaseToNormal={this.camelCaseToNormal}
-              rankRowNumberStyle={rankRowNumberStyle}
-            />
-          } */}
 
           {this.state.leaderboardData ?
             <LeaderboardTable

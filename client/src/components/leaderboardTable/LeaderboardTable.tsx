@@ -2,7 +2,7 @@
 import { ChestColor } from "@legion/shared/enums";
 import './LeaderboardTable.style.css';
 import { h, Component } from 'preact';
-import { avatarContext } from '../utils';
+import { loadAvatar } from '../utils';
 import Skeleton from 'react-loading-skeleton';
 
 // Import image assets
@@ -106,19 +106,9 @@ class LeaderboardTable extends Component<LeaderboardTableProps> {
                     : 'none'
         });
 
-        const loadAvatar = (index) => {
-            if (this.state.tableData[index].avatar != '0') {
-                try {
-                    return avatarContext(`./${this.state.tableData[index].avatar}.png`);
-                } catch (error) {
-                    console.error(`Failed to load avatar: ${this.state.tableData[index].avatar}.png`, error);
-                }
-            }
-        }
-
         const rankRowAvatar = (index: number) => { 
             return {
-                backgroundImage: `url(${loadAvatar(index)})`
+                backgroundImage: `url(${loadAvatar(this.state.tableData[index].avatar)})`
             }
         }
 

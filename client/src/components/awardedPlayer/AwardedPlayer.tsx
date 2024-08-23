@@ -1,9 +1,7 @@
 // AwardedPlayer.tsx
 import './AwardedPlayer.style.css';
 import { h, Component } from 'preact';
-
-// Import image assets
-import playerProfileBg from '@assets/rank/player_profile_bg.png';
+import { loadAvatar } from '../utils';
 
 interface Player {
   name: string;
@@ -20,14 +18,18 @@ class AwardedPlayer extends Component<AwardedPlayerProps> {
   render() {
     return (
       <div className="highlights-container">
-        {this.props.players.map((player, index) => (
-          <div key={index} className="award-player-container">
-            <img src={playerProfileBg} alt="profile background" />
-            <span className="award-player-name">{player.name}</span>
-            <span className="award-player-title">{player.title}</span>
-            <span className="award-player-desc">{player.description}</span>
-          </div>
-        ))}
+        {
+          this.props.players.map(player => 
+            <div className="award-player-container">
+              <div className="award-player-avatar-container">
+                <img src={loadAvatar(player.avatar)} />
+              </div>  
+              <span className="award-player-name">{player.name}</span>
+              <span className="award-player-title">{player.title}</span>
+              <span className="award-player-desc">{player.description}</span>
+            </div>
+          )
+        }
       </div>
     );
   }

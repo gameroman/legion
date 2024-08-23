@@ -124,3 +124,13 @@ export function getSpritePath(fileName: string) {
     return '';
   }
 }
+
+export function loadAvatar(avatar) {
+  if (avatar != '0') {
+      try {
+          return avatarContext(`./${avatar}.png`);
+      } catch (error) {
+          console.error(`Failed to load avatar: ${avatar}.png`, error);
+      }
+  }
+}
