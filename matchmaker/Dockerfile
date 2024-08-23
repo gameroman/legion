@@ -6,6 +6,5 @@ COPY matchmaker/package*.json ./
 
 RUN npm install
 
-EXPOSE 3000
 CMD ["npm", "run", "start"]
 # CMD ["tail", "-f", "/dev/null"]

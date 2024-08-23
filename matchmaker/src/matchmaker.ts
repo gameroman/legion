@@ -211,8 +211,9 @@ function sendQData(player: Player) {
     });
 }
 
-httpServer.listen(3000, () => {
-    console.log("Matchmaking server listening on port 3000");
+const port = process.env.PORT || 3000;
+httpServer.listen(port, () => {
+    console.log(`Matchmaking server listening on port ${port}`);
 });
 
 
