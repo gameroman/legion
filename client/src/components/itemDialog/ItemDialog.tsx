@@ -194,15 +194,8 @@ class ItemDialog extends Component<DialogProps, DialogState> {
       }
     };
 
-    const getInfoVal = (val: string) => {
-      if (val === undefined) return '+1';
-      return Number(val) < 0 ? Number(val) + 1 : `+${Number(val) + 1}`;
-    };
-
     const equipmentDialog = (dialogData: BaseEquipment) => {
       if (!dialogData) return null;
-
-      // console.log("equipDialogData => ", dialogData);
 
       const coordinates = mapFrameToCoordinates(dialogData.frame);
       coordinates.x = -coordinates.x + 5;
@@ -211,11 +204,6 @@ class ItemDialog extends Component<DialogProps, DialogState> {
 
       const equipment = this.state.inventory.equipment;
       const equipmentData = getEquipmentById(equipment[this.props.index]);
-
-      // console.log("equipmentEquipment => ", equipment); 
-      // console.log("equipmentData => ", equipmentData); 
-      // console.log("itemDialogClass => ", this.props.characterClass); 
-      // console.log("itemDialogIncludes => ", equipmentData.classes.includes(this.props.characterClass)); 
 
       return (
         <div className="equip-dialog-container">

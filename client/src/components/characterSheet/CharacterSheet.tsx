@@ -142,7 +142,6 @@ class CharacterSheet extends Component<InventoryRequestPayload> {
                     items = Object.entries(characterData.equipment)
                         .map(([key, value]) => ({ key, value }))
                         .slice(specialSlotsStart, 9); // Special equipment slots
-                    // console.log("This is special equip. ", items); 
                     desiredOrder = ['left_ring', 'right_ring', 'necklace'];
                     items.sort((a, b) => desiredOrder.indexOf(a.key) - desiredOrder.indexOf(b.key));
                     backgroundImageUrl = equipmentSpritesheet;
@@ -194,28 +193,25 @@ class CharacterSheet extends Component<InventoryRequestPayload> {
                 const slotStyle = {
                     backgroundImage: item.value >= 0 && `linear-gradient(to bottom right, ${RarityColor[equipmentItem?.rarity]}, #1c1f25)`
                 } 
-                
-                // console.log("itemData => ", itemData); 
-
-                // console.log("equipmentFields => ", equipmentFields); 
-                // console.log("characterSheetPropsSelectedEquipmentSlot => ", this.props.selectedEquipmentSlot); 
-                // console.log("characterSheetItemKey => ", item.key); 
 
                 // Return the container div for each item
                 return (
                     <div
-                        key={index}
-                        className="sheet-item" 
-                        style={(itemData !== undefined) ? slotStyle : 
-                            (this.props.selectedEquipmentSlot > -1 && equipmentFields[this.props.selectedEquipmentSlot] === item.key) ? 
-                            {backgroundImage: "linear-gradient(to right bottom, rgb(193, 119, 13), rgb(28, 31, 37))"}: 
-                            {}
-                        } 
-                        // style={(inventoryType === InventoryType.SKILLS || inventoryType === InventoryType.CONSUMABLES) && slotStyle}
-                        onClick={(e) => this.handleUnEquipItem(e, itemData, ItemDialogType.EQUIPMENTS, index)}>
-                        {content}
+                      key={index}
+                      className={`sheet-item ${
+                        (itemData !== undefined)
+                          ? ''
+                          : (this.props.selectedEquipmentSlot > -1 && equipmentFields[this.props.selectedEquipmentSlot] === item.key)
+                            ? 'blinking-gradient'
+                            : ''
+                      }`}
+                      style={(itemData !== undefined) ? slotStyle : {}}
+                      // style={(inventoryType === InventoryType.SKILLS || inventoryType === InventoryType.CONSUMABLES) && slotStyle}
+                      onClick={(e) => this.handleUnEquipItem(e, itemData, ItemDialogType.EQUIPMENTS, index)}
+                    >
+                      {content}
                     </div>
-                );
+                  );
             });
         };
 
