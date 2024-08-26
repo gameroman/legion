@@ -141,10 +141,6 @@ export const createPlayer = functions.auth.user().onCreate(async (user) => {
   return batch.commit()
     .then(() => {
       logger.info("New player and characters created for user:", user.uid);
-      return new Promise((resolve) => setTimeout(resolve, 300));
-    })
-    .then(() => {
-      logger.info("Delay completed, function finishing for user:", user.uid);
     })
     .catch((error) => {
       logger.info("Error creating player and characters:", error);
