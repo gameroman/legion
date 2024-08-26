@@ -29,14 +29,14 @@ const rankNoImage = [
   bronzeRankNo,
 ];
 
-const rankIcons = {
-  bronze: bronzeRankIcon,
-  silver: silverRankIcon,
-  gold: goldRankIcon,
-  zenith: zenithRankIcon,
-  apex: apexRankIcon,
-  alltime: alltimeRankIcon,
-};
+export const rankIcons = [
+  bronzeRankIcon,
+  silverRankIcon,
+  goldRankIcon,
+  zenithRankIcon,
+  apexRankIcon,
+  alltimeRankIcon,
+];
 
 class RankPage extends Component {
   static contextType = PlayerContext;
@@ -142,9 +142,11 @@ class RankPage extends Component {
 
         <div className="flexContainer" style={{ gap: '24px' }}>
           <div className="rank-tab-container">
-            {tabs.map((tab, i) => <div key={i} style={getRankTabStyle(i)} onClick={() => this.handleCurrTab(i)}>
-              <img src={`/icons/${tab}_rank.png`} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-            </div>)}
+            {rankIcons.map((icon, i) => (
+              <div key={i} style={getRankTabStyle(i)} onClick={() => this.handleCurrTab(i)}>
+                <img src={icon} alt={tabs[i]} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </div>
+            ))}
           </div> 
 
           {!this.state.isLoading ?

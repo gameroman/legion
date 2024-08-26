@@ -2,13 +2,15 @@
 import './SeasonCard.style.css';
 import { h, Component, createRef } from 'preact';
 
-// Import image assets
 import eloRatingBg from '@assets/rank/elo_rating_bg.png';
 import recapBluebar from '@assets/rank/recap_blue_bar.png';
 import infinityIcon from '@assets/rank/infinity_icon.png';
 import cdIcon from '@assets/inventory/cd_icon.png';
 import shareIcon from '@assets/rank/share_icon.png';
 import infoIcon from '@assets/inventory/info_btn.png';
+import {rankIcons} from '../RankPage';
+
+const leagues = ['bronze', 'silver', 'gold', 'zenith', 'apex', 'alltime']; 
 
 interface SeasonCardProps {
     seasonEnd: number;
@@ -101,12 +103,14 @@ class SeasonCard extends Component<SeasonCardProps> {
         }; 
 
         const isAllTime = this.props.currTab === 'alltime';
+        console.log(this.props.currTab);
 
         return (
             <div className="season-card-container">
                 <div className="season-card-header">
                     <div className="season-card-header-img">
-                        <img src={`/icons/${this.props.currTab}_rank.png`} />
+                        <img src={rankIcons[leagues.indexOf(this.props.currTab)]} />
+                        {/* <img src={`/icons/${this.props.currTab}_rank.png`} /> */}
                     </div> 
                     <div className="season-card-header-title">
                         <span>{this.props.currTab.toUpperCase()} </span> 
