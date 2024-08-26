@@ -94,26 +94,20 @@ class CharacterSheet extends Component<CharacterSheetProps> {
             const order = ['hp', 'mp', 'atk', 'def', 'spatk', 'spdef'];
             const rearrangedItems = order.map(key => items.find(item => item.key === key));
 
-            const effectVal = (key: string) => {
+            const effectVal = (key: string): number => {
                 return this.props.itemEffects.filter(effect => order[effect.stat] === key)[0]?.value;
             }
 
-            const effectString = (key: string) => {
-                const val = effectVal(key);
-
-                if (val !== 0) {
-                    return val > 0 ? `+${val}` : val;
-                }
-
-                return null;
+            const totalStat = (baseValue: number, modifierKey: string) => {
+                return baseValue + (effectVal(modifierKey) || 0);
             }
 
             return rearrangedItems.map((item, index) => (
                 <div className="character-info-bar" key={index}>
                     <div className="info-class" style={{ backgroundColor: INFO_BG_COLOR[INFO_TYPE[item.key]] }}><span>{INFO_TYPE[item.key]}</span></div>
                     <div className="curr-info-container">
-                        <p className="curr-info">{item.value}
-                            <span style={effectVal(item.key) > 0 ? { color: '#9ed94c' } : { color: '#c95a74' }}>{effectString(item.key)}</span>
+                        <p className="curr-info">
+                            <span style={effectVal(item.key) > 0 ? { color: '#9ed94c' } : effectVal(item.key) < 0 ? { color: '#c95a74' } : {}}>{totalStat(item.value, item.key)}</span>
                         </p>
                     </div>
 
@@ -318,7 +312,6 @@ class CharacterSheet extends Component<CharacterSheetProps> {
                     </div>
                     <div className="team-items-container">
                         <div className="character-icon-container">
-                            {/* {renderCharacterItems()} */}
                             {renderEquipmentItems('specialEquip')}
                         </div>
                         <div className="team-item-container">

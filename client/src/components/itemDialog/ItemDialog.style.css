@@ -45,14 +45,11 @@
 } 
 
 .character-info-dialog-container {
-    /* display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 6px; */
     background-color: #1c1f25;
     border: 1px solid #3c616c;
     border-radius: 16px;
     padding: 16px 24px; 
+    font-family: 'Kim';
 } 
 
 .character-info-dialog-card-container { 

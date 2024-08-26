@@ -10,6 +10,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    font-family: 'Kim';
 }
 
 .team-equip-container {
@@ -267,6 +268,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: 'Kim';
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }
 
 .character-info-bar .info-class span {
@@ -276,9 +279,11 @@
 }
 
 .character-info-bar .curr-info-container {
-    width: 54px;
+    width: 60px;
     display: flex;
     justify-content: center;
+    font-family: 'Kim';
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }
 
 .character-info-bar .curr-info {
@@ -291,6 +296,10 @@
 }
 
 .character-info-bar .info-bar-plus {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 12px;
     height: 12px;
     background-image: url('@assets/inventory/add_stat_btn.png');

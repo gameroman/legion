@@ -90,9 +90,6 @@ class ItemDialog extends Component<DialogProps, DialogState> {
   }
 
   AcceptAction = (type: string, index: number) => {
-    console.log("AcceptType => ", type);
-    console.log("AcceptIndex => ", index);
-
     if (!this.props.characterId) return;
 
     const payload = {
@@ -338,7 +335,6 @@ class ItemDialog extends Component<DialogProps, DialogState> {
           <div className="character-info-dialog-card" style={{ backgroundColor: INFO_BG_COLOR[INFO_TYPE[dialogData.key]] }}><span>{INFO_TYPE[dialogData.key]}</span></div>
           <div className="character-info-dialog-card-text">
             {dialogData.value}
-            {/* <span className='character-info-addition' style={dialogData.effect && Number(dialogData.effect) < 0 ? { color: '#c95a74' } : { color: '#9ed94c' }}>{getInfoVal(dialogData.effect)}</span>  */}
             <span className='character-info-addition' style={dialogData.effect && Number(dialogData.effect) < 0 ? { color: '#c95a74' } : { color: '#9ed94c' }}>+{this.state.dialogValue}</span>
           </div>
         </div>
