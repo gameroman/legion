@@ -1,4 +1,3 @@
-// LeaderboardTable.tsx
 import { ChestColor } from "@legion/shared/enums";
 import './LeaderboardTable.style.css';
 import { h, Component } from 'preact';
@@ -11,11 +10,11 @@ import demoteIcon from '@assets/leaderboard/demote_icon.png';
 import leaderboardBg from '@assets/leaderboard/leaderboard_bg.png';
 import leaderboardBgOwn from '@assets/leaderboard/leaderboard_bg_own.png';
 import leaderboardBgFriend from '@assets/leaderboard/leaderboard_bg_friend.png';
+import leaderboardBgActive from '@assets/leaderboard/leaderboard_bg_active.png';
 import arrowIcon from '@assets/leaderboard/arrow.png';
 import goldChest from '@assets/shop/gold_chest.png';
 import silverChest from '@assets/shop/silver_chest.png';
 import bronzeChest from '@assets/shop/bronze_chest.png';
-
 
 interface PlayerData {
     rank: number;
@@ -27,6 +26,7 @@ interface PlayerData {
     isFriend?: boolean;
     isPlayer?: boolean;
     chestColor?: ChestColor;
+    avatar: string;
 }
 
 interface LeaderboardTableProps {
@@ -35,6 +35,12 @@ interface LeaderboardTableProps {
     demotionRows: number;
     camelCaseToNormal: (text: string) => string;
     rankRowNumberStyle: (index: number) => React.CSSProperties;
+}
+
+interface LeaderboardTableState {
+    tableData: PlayerData[];
+    isAscending: boolean[];
+    hoveredRow: number | null;
 }
 
 const rewardImage = {
@@ -53,10 +59,11 @@ enum columnType {
     "rewards" = "rewards"
 }
 
-class LeaderboardTable extends Component<LeaderboardTableProps> {
-    state = {
+class LeaderboardTable extends Component<LeaderboardTableProps, LeaderboardTableState> {
+    state: LeaderboardTableState = {
         tableData: [],
-        isAscending: Array(6).fill(false)
+        isAscending: Array(6).fill(false),
+        hoveredRow: null
     }
 
     componentDidMount() {
@@ -70,8 +77,6 @@ class LeaderboardTable extends Component<LeaderboardTableProps> {
     }
 
     handleSort(column: string, index: number) {
-        // console.log("tableData => ", this.state.tableData); 
-
         if (index != 0 && (index < 2 || index > 5)) return;
 
         const sortedData = this.state.tableData.sort((a, b) => {
@@ -94,6 +99,22 @@ class LeaderboardTable extends Component<LeaderboardTableProps> {
         });
     }
 
+    handleRowHover = (index: number | null) => {
+        this.setState({ hoveredRow: index });
+    }
+
+    getRowBG = (player: PlayerData, index: number): React.CSSProperties => {
+        if (player.isPlayer) {
+            return { backgroundImage: `url(${leaderboardBgOwn})` };
+        } else if (player.isFriend) {
+            return { backgroundImage: `url(${leaderboardBgFriend})` };
+        } else if (this.state.hoveredRow === index) {
+            return { backgroundImage: `url(${leaderboardBgActive})` };
+        } else {
+            return { backgroundImage: `url(${leaderboardBg})` };
+        }
+    };
+
     render() {
         const { demotionRows, promotionRows, rankRowNumberStyle, camelCaseToNormal } = this.props;
         const columns = ['rank', 'player name', 'elo', 'wins', 'losses', 'wins ratio', 'rewards'];
@@ -112,23 +133,11 @@ class LeaderboardTable extends Component<LeaderboardTableProps> {
             }
         }
 
-        const getRowBG = (player: PlayerData): React.CSSProperties => {
-            return {
-                backgroundImage: player.isPlayer
-                ? `url(${leaderboardBgOwn})`
-                : player.isFriend
-                    ? `url(${leaderboardBgFriend})`
-                    : `url(${leaderboardBg})`
-            }
-        };
-
         const sortIconStyle = (index: number) => {
             return {
                 transform: `rotate(${this.state.isAscending[index] ? '180' : '0'}deg)`
             }
         } 
-
-        // console.log("tableData => ", this.state.tableData); 
 
         return (
             <div className="rank-table-container">
@@ -147,7 +156,13 @@ class LeaderboardTable extends Component<LeaderboardTableProps> {
                     </thead>
                     <tbody>
                         {this.props.data ? this.state.tableData.map((item, index) => (
-                            <tr key={index} className={item.player === 'Me' ? 'highlighted-row' : ''} style={getRowBG(item)}>
+                            <tr 
+                                key={index} 
+                                className={item.player === 'Me' ? 'highlighted-row' : ''} 
+                                style={this.getRowBG(item, index)}
+                                onMouseEnter={() => this.handleRowHover(index)}
+                                onMouseLeave={() => this.handleRowHover(null)}
+                            >
                                 <td className="rank-row">
                                     <div className="rank-row-number" style={rankRowNumberStyle(item.rank)}>{item.rank}</div>
                                     <div className="rank-row-avatar" style={rankRowAvatar(index)}></div>
