@@ -1,4 +1,3 @@
-// RankPage.tsx
 import { h, Component } from 'preact';
 import { apiFetch } from '../services/apiService';
 import LeaderboardTable from './leaderboardTable/LeaderboardTable';
@@ -48,6 +47,7 @@ class RankPage extends Component {
     sortAscending: false,
     curr_tab: this.context.player.league,
     tour: null,
+    isLoading: true,
   };
 
   camelCaseToNormal = (text) => {
@@ -65,12 +65,13 @@ class RankPage extends Component {
   };
 
   async fetchLeaderboard() {
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    this.setState({ isLoading: true });
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     const data = await apiFetch(`fetchLeaderboard?tab=${this.state.curr_tab}`);
     if (data) {
       console.log(`Ldb data: ${JSON.stringify(data)}`);
-      this.setState({ leaderboardData: data });
+      this.setState({ leaderboardData: data, isLoading: false });
     }
   }
 
@@ -86,8 +87,6 @@ class RankPage extends Component {
   }
 
   render() {
-    // if (!this.state.leaderboardData) return;
-
     const tabs = ['bronze', 'silver', 'gold', 'zenith', 'apex', 'alltime'];
 
     const getRankTabStyle = (index: number) => {
@@ -109,12 +108,10 @@ class RankPage extends Component {
       }
     }
 
-    // console.log("currentLeague => ", this.context.player.league); 
-
     return (
       <div className="rank-content">
         <div className="flexContainer" style={{ alignItems: 'flex-end' }}>
-          {this.state.leaderboardData ? (
+          {!this.state.isLoading ? (
             <SeasonCard
               currTab={tabs[this.state.curr_tab]}
               rankRowNumberStyle={rankRowNumberStyle}
@@ -131,7 +128,7 @@ class RankPage extends Component {
             />
           )}
 
-          {this.state.leaderboardData ? (
+          {!this.state.isLoading ? (
             <AwardedPlayer players={this.state.leaderboardData.highlights} />
           ) : (
             <Skeleton
@@ -146,12 +143,12 @@ class RankPage extends Component {
 
         <div className="flexContainer" style={{ gap: '24px' }}>
           <div className="rank-tab-container">
-            {this.state.leaderboardData && tabs.map((tab, i) => <div key={i} style={getRankTabStyle(i)} onClick={() => this.handleCurrTab(i)}>
+            {tabs.map((tab, i) => <div key={i} style={getRankTabStyle(i)} onClick={() => this.handleCurrTab(i)}>
               <img src={`/icons/${tab}_rank.png`} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>)}
           </div> 
 
-          {this.state.leaderboardData ?
+          {!this.state.isLoading ?
             <LeaderboardTable
               data={this.state.leaderboardData.ranking}
               promotionRows={this.state.leaderboardData.promotionRank}
