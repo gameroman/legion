@@ -74,7 +74,7 @@ class ShopCharacterCard extends Component<ShopCharacteCardProps, ShopCharacterCa
           </div>
           <div className="shop-character-card-info-container">
             <div className="shop-character-card-info-box">
-              <span className="shop-character-card-info-lv">LV</span>
+              <span className="shop-character-card-info-lv">Lvl&nbsp;</span>
               <span>{data.level}</span>
             </div>
           </div>
@@ -82,7 +82,7 @@ class ShopCharacterCard extends Component<ShopCharacteCardProps, ShopCharacterCa
 
         <div className="shop-character-card-content">
           <div className="character-card-portrait" style={portraitStyle}></div>
-          <div onClick={(event) => event.stopPropagation()} className="shop-character-card-class-container">
+          <div className="shop-character-card-class-container">
             {data.skills.map((item, i) => (
               <div
                 key={i}
