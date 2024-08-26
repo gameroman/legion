@@ -196,8 +196,6 @@ class PlayerInfo extends Component<Props, State> {
       }
     };
 
-    // console.log("playerInfoData => ", this.props.player); 
-
     return (
       <div className={`player_info_container relative ${position === 'right' && 'player_info_container_right'}`} onClick={() => { }}>
         {ENABLE_PLAYER_LEVEL && <div className={`player_info_lv ${position === 'right' && 'player_info_lv_right'}`}>
@@ -216,7 +214,7 @@ class PlayerInfo extends Component<Props, State> {
           </div>
           <div className={`player_info_rank ${position === 'right' && 'row_reverse'}`}>
             <img src={getLeagueIcon(this.props.player.playerLeague)} alt="" />
-            <span># {this.props.player.playerRank}</span>
+            <span>{this.props.player.playerRank > -1 ? `# ${this.props.player.playerRank}` : ''}</span>
           </div>
         </div>
         {this.props.isPlayerTeam && <div className={position === 'right' ? "spectator_container_right" : "spectator_container"}>

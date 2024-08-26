@@ -39,14 +39,19 @@ export class Team {
             playerUID: '',
             elo: 0,
             lvl: 0,
-            playerName: 'Legion Bot',
+            playerName: this.getRandomAIName(),
             teamName: '',
             avatar: '',
             league: 0,
-            rank: 0,
+            rank: -1,
             dailyloot: null
         };
     }   
+
+    getRandomAIName() {
+        const names = ['Aureus', 'Sovereign', 'Sentinel', 'Praetorian', 'Centurion', 'Gladius', 'Phalanx'];
+        return names[Math.floor(Math.random() * names.length)];
+    }
 
     addMember(player: ServerPlayer) {
         this.members.push(player);

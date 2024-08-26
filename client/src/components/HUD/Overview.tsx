@@ -1,6 +1,7 @@
 import { h, Component } from 'preact';
 import { PlayerProps, TeamMember, PlayerProfileData } from "@legion/shared/interfaces";
 import PlayerInfo from './PlayerInfo';
+import { PlayMode } from '@legion/shared/enums';
 
 interface Props {
   members: TeamMember[];
@@ -11,6 +12,7 @@ interface Props {
   eventEmitter: any;
   isPlayerTeam: boolean;
   player: PlayerProfileData;
+  mode: PlayMode;
 }
 
 interface State {
