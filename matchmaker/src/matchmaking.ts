@@ -12,8 +12,6 @@ import {eloRangeIncreaseInterval, eloRangeStart, eloRangeStep, goldRewardInterva
     goldReward, casualModeThresholdTime, maxWaitTimeForPractice} from '@legion/shared/config';
 import { PlayMode, League } from '@legion/shared/enums';
 
-console.log(`FIREBASE_AUTH_EMULATOR_HOST: ${process.env.FIREBASE_AUTH_EMULATOR_HOST}`);
-
 const discordEnabled = (process.env.DISCORD_TOKEN !== undefined);
 const discordClient = new Client({intents: [GatewayIntentBits.Guilds]});
 if (discordEnabled) {

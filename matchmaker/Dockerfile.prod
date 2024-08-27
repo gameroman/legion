@@ -32,6 +32,9 @@ RUN npm install --omit=dev
 # Copy built JavaScript files from the builder stage
 COPY --from=builder /usr/src/app/dist ./dist
 
+# Copy .production.env file and rename it to .env
+COPY matchmaker/.production.env ./.env
+
 # RUN set -x && \
 #     echo "Contents of /usr/src/app:" && \
 #     ls /usr/src/app && \
@@ -45,5 +48,7 @@ COPY --from=builder /usr/src/app/dist ./dist
 #     cat /usr/src/app/dist/src/matchmaker.js
 
 # ENV NODE_DEBUG=module
+
+EXPOSE 3000
 
 CMD ["npm", "run", "start"]

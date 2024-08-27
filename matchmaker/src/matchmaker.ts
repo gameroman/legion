@@ -1,3 +1,4 @@
+import express from 'express';
 import { Server } from "socket.io";
 import { createServer } from "http";
 import dotenv from 'dotenv';
@@ -6,13 +7,31 @@ import { setupMatchmaking, processJoinQueue, processDisconnect } from './matchma
 
 dotenv.config();
 
-const httpServer = createServer();
+const allowedOrigins = [process.env.CLIENT_ORIGIN];
+console.log(`Allowed client origins: ${allowedOrigins}`);
+
+const app = express();
+const httpServer = createServer(app);
 const io = new Server(httpServer, {
     cors: {
-        origin: process.env.CLIENT_ORIGIN || "http://0.0.0.0:8080",
+        origin: (origin, callback) => {
+            
+            if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+              console.log("Successful connection from origin:", origin);
+              callback(null, true);
+            } else {
+              console.log("Origin not allowed:", origin);
+              callback(new Error('CORS not allowed'));
+            }
+        },
         methods: ["GET", "POST"],
         credentials: true
       }
+});
+
+// Basic HTTP endpoint for health checks
+app.get('/', (req, res) => {
+    res.send('Matchmaking server is running');
 });
 
 const port = process.env.PORT || 3000;
