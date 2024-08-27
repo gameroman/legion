@@ -250,6 +250,17 @@ equipments[20] = new BaseEquipment({
     minLevel: 1,
 });
 
+equipments[21] = new BaseEquipment({
+    id: 21,
+    name: "Ruby ring",
+    description: "",
+    frame: 42,
+    effects: [{stat: Stat.HP, value: 10}, {stat: Stat.ATK, value: 5}, {stat: Stat.DEF, value: 5}],
+    slot: EquipmentSlot.LEFT_RING,
+    effort: 11,
+    minLevel: 5,
+});
+
 export function getEquipmentById(id:number): BaseEquipment | undefined {
     return equipments.find(e => e.id === id);
 }
