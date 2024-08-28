@@ -78,6 +78,14 @@ module.exports = {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
       },
+      {
+        test: /\.(wav|mp3|ogg)$/i,
+        type: 'asset/resource'
+      },
+      {
+        test: /\.json$/i,
+        type: 'json'
+      }
     ]
   },
   resolve: {
