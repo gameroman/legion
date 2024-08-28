@@ -8,6 +8,12 @@ import { ENABLE_APPROX_WT, ENABLE_MM_TOGGLE, ENABLE_Q_NEWS } from '@legion/share
 import { tips } from './tips'
 import { PlayerContext } from '../contexts/PlayerContext';
 
+import goldIcon from '@assets/gold_icon.png';
+import exitIcon from '@assets/queue/exit_icon.png';
+import discordIcon from '@assets/queue/discord_btn.png';
+import xIcon from '@assets/queue/x_btn.png';
+import blueTriangle from '@assets/queue/blue_triangle.png';
+
 interface QPageProps {
     matches: {
         mode?: number;
@@ -218,14 +224,14 @@ class QueuePage extends Component<QPageProps, QpageState> {
                                         <div>
                                             <div>EARNINGS</div>
                                             <div>
-                                                <div><img src="/gold_icon.png" /></div>
+                                                <div><img src={goldIcon} /></div>
                                                 <div><span style={{ color: 'coral' }}>{queueData.goldReward}</span>/<span style={{ color: 'deepskyblue' }}>{queueData.goldRewardInterval}</span>&nbsp;Sec</div>
                                             </div>
                                         </div>
                                         <div>
                                             <div>EARNED</div>
                                             <div>
-                                                <div><img src="/gold_icon.png" /></div>
+                                                <div><img src={goldIcon}/></div>
                                                 <div><span style={{ color: 'coral' }}>{this.state.earnedGold}</span></div>
                                             </div>
                                         </div>
@@ -247,7 +253,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
                                     <Link href="/play">
                                         <div className="queue-detail-footer">
                                             <div className="queue-footer-exit">
-                                                <img src="/queue/exit_icon.png" />
+                                                <img src={exitIcon} />
                                             </div>
                                             <div className="queue-footer-text">
                                                 LEAVE QUEUE
@@ -255,7 +261,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
                                         </div>
                                     </Link>
                                     <div className="queue-detail-arrow">
-                                        <img src="/queue/blue_triangle.png" />
+                                        <img src={blueTriangle} />
                                     </div>
                                 </div>
                             </div>
@@ -304,12 +310,12 @@ class QueuePage extends Component<QPageProps, QpageState> {
                     <div className="queue-btns">
                         <Link href="https://x.com/iolegion" target="_blank">
                             <div className="btn-x">
-                                <img src="/queue/x_btn.png" />
+                                <img src={xIcon} />
                             </div>
                         </Link>
                         <Link href="">
                             <div className="btn-discord">
-                                <img src="/queue/discord_btn.png" />
+                                <img src={discordIcon} />
                             </div>
                         </Link>
                     </div>
