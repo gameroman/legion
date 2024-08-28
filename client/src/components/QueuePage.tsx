@@ -2,6 +2,7 @@ import { h, Component } from 'preact';
 import { io } from 'socket.io-client';
 import { route } from 'preact-router';
 import { Link, useRouter } from 'preact-router';
+import Skeleton from 'react-loading-skeleton';
 
 import { getFirebaseIdToken } from '../services/apiService';
 import { ENABLE_APPROX_WT, ENABLE_MM_TOGGLE, ENABLE_Q_NEWS } from '@legion/shared/config';
@@ -179,148 +180,151 @@ class QueuePage extends Component<QPageProps, QpageState> {
 
     render() {
         const { progress, queueData } = this.state;
-        if (!this.state.queueDataLoaded) {
-            return (
-                <div></div>
-            );
-        } else {
-            return (
-                <div className="queue-container">
-                    <div className="queue-body">
-                        <div className="queue-info">
-                            <div class="queue-spinner">
-                                <div className="queue-spinner-loader"></div>
-                            </div>
-                            <div className="queue-count">
-                                <div role="progressbar" style={`--value: ${progress}`}>
-                                    <div>
-                                        <div className="queue-count-number">
-                                            {queueData.nbInQueue}
-                                        </div>
-                                        <div className="queue-count-text">
-                                            Queueing
-                                        </div>
+        return (
+            <div className="queue-container">
+                <div className="queue-body">
+                    {this.state.queueDataLoaded ? (<div className="queue-info">
+                        <div class="queue-spinner">
+                            <div className="queue-spinner-loader"></div>
+                        </div>
+                        <div className="queue-count">
+                            <div role="progressbar" style={`--value: ${progress}`}>
+                                <div>
+                                    <div className="queue-count-number">
+                                        {queueData.nbInQueue}
+                                    </div>
+                                    <div className="queue-count-text">
+                                        Queueing
                                     </div>
                                 </div>
                             </div>
-                            <div className="queue-detail">
-                                <div>
-                                    {ENABLE_MM_TOGGLE && <div className="queue-detail-header">
-                                        <div
-                                            className={this.state.findState == 'quick' ? 'queue-detail-btn active' : 'queue-detail-btn'}
-                                            onClickCapture={this.handleQuickFind}
-                                        >
-                                            Quick find
+                        </div>
+                        <div className="queue-detail">
+                            <div>
+                                {ENABLE_MM_TOGGLE && <div className="queue-detail-header">
+                                    <div
+                                        className={this.state.findState == 'quick' ? 'queue-detail-btn active' : 'queue-detail-btn'}
+                                        onClickCapture={this.handleQuickFind}
+                                    >
+                                        Quick find
+                                    </div>
+                                    <div
+                                        className={this.state.findState == 'accurate' ? 'queue-detail-btn active' : 'queue-detail-btn'}
+                                        onClick={this.handleAccurateFind}
+                                    >
+                                        Accurate find
+                                    </div>
+                                </div>}
+                                <div className="queue-detail-body">
+                                    <div>
+                                        <div>EARNINGS</div>
+                                        <div>
+                                            <div><img src={goldIcon} /></div>
+                                            <div><span style={{ color: 'coral' }}>{queueData.goldReward}</span>/<span style={{ color: 'deepskyblue' }}>{queueData.goldRewardInterval}</span>&nbsp;Sec</div>
                                         </div>
-                                        <div
-                                            className={this.state.findState == 'accurate' ? 'queue-detail-btn active' : 'queue-detail-btn'}
-                                            onClick={this.handleAccurateFind}
-                                        >
-                                            Accurate find
+                                    </div>
+                                    <div>
+                                        <div>EARNED</div>
+                                        <div>
+                                            <div><img src={goldIcon}/></div>
+                                            <div><span style={{ color: 'coral' }}>{this.state.earnedGold}</span></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div>WAITED</div>
+                                        <div>
+                                            <span style={{ color: 'deepskyblue' }}>{this.state.waited}</span>&nbsp;Secs
+                                        </div>
+                                    </div>
+                                    {ENABLE_APPROX_WT && <div>
+                                        <div>APPROX WAITING TIME</div>
+                                        <div>
+                                            <span style={{ color: 'deepskyblue' }}>{this.state.queueData.estimatedWaitingTime == -1 ? '?' : this.state.queueData.estimatedWaitingTime}</span>&nbsp;
+                                            {this.state.queueData.estimatedWaitingTime == -1 ? '' : 'Secs'}
                                         </div>
                                     </div>}
-                                    <div className="queue-detail-body">
-                                        <div>
-                                            <div>EARNINGS</div>
-                                            <div>
-                                                <div><img src={goldIcon} /></div>
-                                                <div><span style={{ color: 'coral' }}>{queueData.goldReward}</span>/<span style={{ color: 'deepskyblue' }}>{queueData.goldRewardInterval}</span>&nbsp;Sec</div>
-                                            </div>
+                                </div>
+
+                                <Link href="/play">
+                                    <div className="queue-detail-footer">
+                                        <div className="queue-footer-exit">
+                                            <img src={exitIcon} />
                                         </div>
-                                        <div>
-                                            <div>EARNED</div>
-                                            <div>
-                                                <div><img src={goldIcon}/></div>
-                                                <div><span style={{ color: 'coral' }}>{this.state.earnedGold}</span></div>
-                                            </div>
+                                        <div className="queue-footer-text">
+                                            LEAVE QUEUE
                                         </div>
-                                        <div>
-                                            <div>WAITED</div>
-                                            <div>
-                                                <span style={{ color: 'deepskyblue' }}>{this.state.waited}</span>&nbsp;Secs
-                                            </div>
-                                        </div>
-                                        {ENABLE_APPROX_WT && <div>
-                                            <div>APPROX WAITING TIME</div>
-                                            <div>
-                                                <span style={{ color: 'deepskyblue' }}>{this.state.queueData.estimatedWaitingTime == -1 ? '?' : this.state.queueData.estimatedWaitingTime}</span>&nbsp;
-                                                {this.state.queueData.estimatedWaitingTime == -1 ? '' : 'Secs'}
-                                            </div>
-                                        </div>}
                                     </div>
-
-                                    <Link href="/play">
-                                        <div className="queue-detail-footer">
-                                            <div className="queue-footer-exit">
-                                                <img src={exitIcon} />
-                                            </div>
-                                            <div className="queue-footer-text">
-                                                LEAVE QUEUE
-                                            </div>
-                                        </div>
-                                    </Link>
-                                    <div className="queue-detail-arrow">
-                                        <img src={blueTriangle} />
-                                    </div>
+                                </Link>
+                                <div className="queue-detail-arrow">
+                                    <img src={blueTriangle} />
                                 </div>
                             </div>
-                            <div className="queue-number">
+                        </div>
+                        <div className="queue-number">
 
+                        </div>
+                        <div className="queue-text">
+                            Waiting for players in {playModes[this.props.matches.mode]} mode…
+                        </div>
+                    </div>) : (
+                        <Skeleton
+                            height={350}
+                            width={350}
+                            count={1}
+                            highlightColor='#0000004d'
+                            baseColor='#0f1421'
+                            circle={true}
+                        />
+                    )}
+                </div>
+
+                {ENABLE_Q_NEWS && <div className="queue-news">
+                    {queueData.news.map(newsItem => (
+                        <div className="queue-news-container">
+                            <div class="queue-news-title">
+                                <div><span style={{ color: 'cyan' }}>{newsItem.title}</span></div>
+                                <div><span style={{ color: 'coral' }}>{newsItem.date}</span></div>
                             </div>
-                            <div className="queue-text">
-                                Waiting for players in {playModes[this.props.matches.mode]} mode…
+                            <div className="queue-news-content">
+                                {newsItem.text}
                             </div>
+                            <div className="queue-news-readmore">
+                                READ MORE &nbsp;&nbsp; <span style={{ color: 'coral' }}>▶</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>}
+
+                <div className="queue-tips">
+                    <div className="queue-tips-container">
+                        <div style="font-family: Kim;">Tips</div>
+                        <div>
+                            <span style={{ color: 'cyan' }}>
+                                {this.state.tips[this.state.tipCount]}
+                            </span>
                         </div>
                     </div>
-
-                    {ENABLE_Q_NEWS && <div className="queue-news">
-                        {queueData.news.map(newsItem => (
-                            <div className="queue-news-container">
-                                <div class="queue-news-title">
-                                    <div><span style={{ color: 'cyan' }}>{newsItem.title}</span></div>
-                                    <div><span style={{ color: 'coral' }}>{newsItem.date}</span></div>
-                                </div>
-                                <div className="queue-news-content">
-                                    {newsItem.text}
-                                </div>
-                                <div className="queue-news-readmore">
-                                    READ MORE &nbsp;&nbsp; <span style={{ color: 'coral' }}>▶</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>}
-
-                    <div className="queue-tips">
-                        <div className="queue-tips-container">
-                            <div style="font-family: Kim;">Tips</div>
-                            <div>
-                                <span style={{ color: 'cyan' }}>
-                                    {this.state.tips[this.state.tipCount]}
-                                </span>
-                            </div>
-                        </div>
-                        <div onClick={this.prevTip} className="queue-tips-arrow prev">
-                            ◀
-                        </div>
-                        <div onClick={this.nextTip} className="queue-tips-arrow next">
-                            ▶
-                        </div>
+                    <div onClick={this.prevTip} className="queue-tips-arrow prev">
+                        ◀
                     </div>
-                    <div className="queue-btns">
-                        <Link href="https://x.com/iolegion" target="_blank">
-                            <div className="btn-x">
-                                <img src={xIcon} />
-                            </div>
-                        </Link>
-                        <Link href="">
-                            <div className="btn-discord">
-                                <img src={discordIcon} />
-                            </div>
-                        </Link>
+                    <div onClick={this.nextTip} className="queue-tips-arrow next">
+                        ▶
                     </div>
-                </div >
-            );
-        }
+                </div>
+                <div className="queue-btns">
+                    <Link href="https://x.com/iolegion" target="_blank">
+                        <div className="btn-x">
+                            <img src={xIcon} />
+                        </div>
+                    </Link>
+                    <Link href="">
+                        <div className="btn-discord">
+                            <img src={discordIcon} />
+                        </div>
+                    </Link>
+                </div>
+            </div >
+        );
     }
 }
 
