@@ -135,6 +135,7 @@ io.on('connection', async (socket: any) => {
     }
 });
 
-server.listen(PORT, () => {
+const port = process.env.PORT || 3123;
+server.listen(port, () => {
     console.log(`Server is running on port ${PORT}`);
 });
