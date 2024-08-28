@@ -70,6 +70,7 @@ export interface ConsumableData {
     size?: number;
     effects: Effect[];
     statusRemovals?: StatusEffect[];
+    status?: StatusEffectData;
     effort: number;
 }
 

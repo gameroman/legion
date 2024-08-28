@@ -151,6 +151,7 @@ export class Player extends Phaser.GameObjects.Container {
             [StatusEffect.BURN]: 0,
             [StatusEffect.SLEEP]: 0,
             [StatusEffect.MUTE]: 0,
+            [StatusEffect.HASTE]: 0,
         };
 
         const yOffsets = {
