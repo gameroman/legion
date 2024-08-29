@@ -2,6 +2,14 @@ import { h, Component } from 'preact';
 import { PlayerProps, TeamMember, PlayerProfileData } from "@legion/shared/interfaces";
 import PlayerInfo from './PlayerInfo';
 import { PlayMode } from '@legion/shared/enums';
+import { getSpritePath } from '../utils';
+
+// Import assets
+import charProfileReady from '@assets/HUD/char_profile_ready.png';
+import charProfileActive from '@assets/HUD/char_profile_active.png';
+import charProfileIdle from '@assets/HUD/char_profile_idle.png';
+import charStatsBgActive from '@assets/HUD/char_stats_bg_Active.png';
+import charStatsBg from '@assets/HUD/char_stats_bg.png';
 
 interface Props {
   members: TeamMember[];
@@ -92,7 +100,7 @@ class Overview extends Component<Props, State> {
             const cooldown = cooldowns[cooldownIndex++];
 
             const portraitStyle = {
-              backgroundImage: `url(/sprites/${member.texture}.png)`,
+              backgroundImage: `url(${getSpritePath(member.texture)})`,
             };
 
             const charProfileStyle = (idx: number) => {
@@ -100,13 +108,13 @@ class Overview extends Component<Props, State> {
 
               if (cooldown === 0 && member.hp > 0) {
                 return {
-                  backgroundImage: 'url(/HUD/char_profile_ready.png)',
+                  backgroundImage: `url(${charProfileReady})`,
                   transform: 'scale(1.1)'
                 }
               }
 
               return {
-                backgroundImage: `url(/HUD/char_profile_${isSelected ? 'active' : 'idle'}.png)`,
+                backgroundImage: `url(${isSelected ? charProfileActive : charProfileIdle})`,
                 filter: `grayscale(${member.hp > 0 ? '0' : '1'})`
               }
             }
@@ -115,7 +123,7 @@ class Overview extends Component<Props, State> {
               const isSelected = this.props.selectedPlayer?.number === idx + 1 && this.props.isPlayerTeam;
 
               return {
-                backgroundImage: `url(/HUD/char_stats_bg${isSelected ? '_Active' : ''}.png)`,
+                backgroundImage: `url(${isSelected ? charStatsBgActive : charStatsBg})`,
               }
             }
 
