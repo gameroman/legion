@@ -693,7 +693,7 @@ export abstract class Game
         console.log(`[Game:processMagic] Casting spell [${spell.id}] ${spell.name}`);
 
         if (spell.cost > player.getMP()) {
-            console.log(`[Game:processMagic] Not enough MP!`);
+            console.log(`[Game:processMagic] Not enough MP, ${spell.cost} > ${player.getMP()}!`);
             return;
         }
         const mp = player.consumeMP(spell.cost);

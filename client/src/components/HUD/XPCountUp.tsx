@@ -1,8 +1,10 @@
 // XPCountUp.tsx
+import { h, Component } from 'preact';
+
 import { Class } from '@legion/shared/enums';
 import { CharacterUpdate } from '@legion/shared/interfaces';
 import { getXPThreshold } from '@legion/shared/levelling';
-import { h, Component } from 'preact';
+import { getSpritePath } from '../utils';
 
 interface CountUpProps {
     member: any;
@@ -68,7 +70,7 @@ class XPCountUp extends Component<CountUpProps, CountUpState> {
                 </div>}
                 <div className="endgame_character_profile">
                     <div className="char_portrait" style={{
-                        backgroundImage: `url(/sprites/${member.texture}.png)`,
+                        backgroundImage: `url(${getSpritePath(member.texture)})`,
                         marginLeft: 0,
                     }} />
                 </div>
