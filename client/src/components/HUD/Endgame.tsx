@@ -1,13 +1,12 @@
 import { h, Component } from 'preact';
 import { route } from 'preact-router';
-import Confetti from 'react-confetti'
 import { useWindowSize } from '@react-hook/window-size';
 import CountUp from 'react-countup';
 import { CharacterUpdate, GameOutcomeReward } from '@legion/shared/interfaces';
 import XPCountUp from './XPCountUp';
-import { mapFrameToCoordinates } from '../utils';
 import { RewardType } from '@legion/shared/chests';
 import { ChestColor } from '@legion/shared/enums';
+import OpenedChest from '../dailyLoot/OpenedChest';
 
 /* eslint-disable react/prefer-stateless-function */
 interface EndgameState {
@@ -127,7 +126,7 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
                     ))}
                 </div>
 
-                {this.props.isWinner && <div className="endgame_rewards_container">
+                {this.props.isWinner && this.props.chests.length && <div className="endgame_rewards_container">
                     <div className="endgame_rewards_heading_container">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="24" width="24"><path d="M18.353 10.252L6.471 3.65c-1.323-.736-1.985-1.103-2.478-.813S3.5 3.884 3.5 5.398V18.6c0 1.514 0 2.271.493 2.561s1.155-.077 2.478-.813l11.882-6.6c1.392-.774 2.088-1.16 2.088-1.749 0-.588-.696-.975-2.088-1.748z" fill="#FFA600" /></svg>
 
@@ -151,42 +150,13 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
                     <span>Leave</span>
                 </div>
 
-                {!!this.state.selectedChest && <div className="light_streak_container">
-                    <div className="light_streak" style={{ width: width * 0.5 }}>
-                        <Confetti
-                            width={width * 0.5}
-                            height={height}
-                        />
-                        <div className="light_streak_chest">
-                            <img src={`/shop/${this.state.selectedChest.color}_chest.png`} alt="" />
-                        </div>
-                        <div className="light_shining_bg">
-                            <img src="/game_end/shine_bg.png" alt="" />
-                        </div>
-                        <div className="streak_gold_list_container">
-                            {this.state.selectedChest.content.map((reward, idx) => {
-                                // console.log('rewardItem ', idx, reward); 
-                                const coordinates = mapFrameToCoordinates(reward?.frame);
-                                const backgroundImageUrl = this.getBgImageUrl(reward?.type);
-                                return (
-                                    <div key={idx} className="streak_gold_list">
-                                        <div style={{
-                                            backgroundImage: `url(${backgroundImageUrl})`,
-                                            backgroundPosition: reward.type === RewardType.GOLD ? '' : `-${coordinates.x}px -${coordinates.y}px`,
-                                            backgroundSize: reward.type === RewardType.GOLD && '84% 100%',
-                                        }}></div>
-                                        <div className="streak_gold_list_amount">
-                                            {reward.amount}
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                        <div className="streak_cofirm_container" style={{ width: width * 0.8 }} onClick={() => this.setState({ selectedChest: null })}>
-                            <div className="streak_confirm_btn"><span>Confirm</span></div>
-                        </div>
-                    </div>
-                </div>}
+                {!!this.state.selectedChest && <OpenedChest 
+                    width={width}
+                    height={height}
+                    color={this.state.selectedChest.color}
+                    content={this.state.selectedChest.content}
+                    onClick={() => this.setState({ selectedChest: null })}
+                />}
             </div>
         );
     }

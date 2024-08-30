@@ -887,6 +887,7 @@ export abstract class Game
     computeChests(score: number, mode: PlayMode): GameOutcomeReward[] {
         const chests: GameOutcomeReward[] = [];
         if (mode != PlayMode.PRACTICE) this.computeAudienceRewards(score, chests);
+
         return chests;
     }
     

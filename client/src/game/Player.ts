@@ -741,6 +741,7 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     hideAllStatusAnimations() {
+        if (!this.statusSprites) return;
         this.statusSprites.forEach(sprite => {
             sprite.setVisible(false);
             sprite.anims.stop();
