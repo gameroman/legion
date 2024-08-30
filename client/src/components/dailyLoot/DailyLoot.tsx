@@ -100,7 +100,6 @@ class DailyLoot extends Component<DailyLootProps, DailyLootState> {
         {data ? <div className="dailyLoots">
           {chestsOrder.map((color) => {
             const chest = data[color];
-            // console.log("dailyChest => ", chest); 
 
             if (chest) {
               return (
