@@ -77,7 +77,7 @@ export const completeGame = onRequest((request, response) => {
   corsMiddleware(request, response, async () => {
     try {
       const gameId = request.body.gameId;
-      const winnerUID = request.body.winnerUID;
+      const winnerUID = request.body.winnerUID || -1; // -1 for AI
       const results: EndGameData = request.body.results;
 
       const gameRef = await db.collection("games").where("gameId", "==", gameId).limit(1).get();
@@ -111,7 +111,7 @@ export const completeGame = onRequest((request, response) => {
       await gameDoc.ref.update(newGameData);
       response.status(200).send({status: 0});
     } catch (error) {
-      console.error("saveGameResult error:", error);
+      console.error("[saveGameResult] Error:", error);
       response.status(500).send("Error");
     }
   });

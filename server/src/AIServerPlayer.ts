@@ -1,5 +1,7 @@
 import { ServerPlayer, ActionType } from './ServerPlayer';
 import { Target } from "@legion/shared/enums";
+import { INITIAL_COOLDOWN } from "@legion/shared/config";
+
 
 type Comparator<T> = (a: T, b: T) => number;
 
@@ -30,8 +32,8 @@ export class AIServerPlayer extends ServerPlayer {
         this.retargetRate = Math.floor(Math.random() * 10) + 1;
         this.retargetCount = this.retargetRate;
 
-        const cooldown = this.getCooldown('move') + this.entranceTime * 1000;
-        this.setCooldown(cooldown, false);
+        this.setCooldown(INITIAL_COOLDOWN * 1000);
+
     }
 
     setArchetype() {

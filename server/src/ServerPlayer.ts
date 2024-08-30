@@ -6,7 +6,7 @@ import { getConsumableById } from '@legion/shared/Items';
 import { getSpellById } from '@legion/shared/Spells';
 import { getXPThreshold } from '@legion/shared/levelling';
 import { PlayerNetworkData, StatusEffects } from '@legion/shared/interfaces';
-import {TIME_COEFFICIENT} from "@legion/shared/config";
+import { INITIAL_COOLDOWN, TIME_COEFFICIENT } from "@legion/shared/config";
 
 
 const terrainDot = {
@@ -90,11 +90,7 @@ export class ServerPlayer {
             [StatusEffect.MUTE]: 0,
         };
         
-        this.cooldowns = {
-            'move': 400,
-            'attack': 800
-        };
-        this.setCooldown(this.cooldowns.move + this.entranceTime * 1000, false);
+        this.setCooldown(INITIAL_COOLDOWN * 1000);
         this.setStatusesTimer();
     }
 
@@ -354,15 +350,13 @@ export class ServerPlayer {
         }
     }
 
-    getCooldown(action: ActionType): number {
-        return this.cooldowns[action];
+    getCooldownMs(baseCooldown): number {
+        const speedModifier = 1;
+        return baseCooldown * speedModifier * TIME_COEFFICIENT * 1000;
     }
     
-    setCooldown(duration: number, applyCoefficient = true) {
-        this.cooldown = duration;
-        if (applyCoefficient) {
-            this.cooldown *= TIME_COEFFICIENT;
-        }
+    setCooldown(durationMs: number) {
+        this.cooldown = durationMs;
         if (this.cooldownTimer) {
             clearTimeout(this.cooldownTimer);
         }

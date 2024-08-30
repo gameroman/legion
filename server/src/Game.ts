@@ -8,7 +8,7 @@ import {apiFetch} from './API';
 import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League, GEN } from '@legion/shared/enums';
 import { OutcomeData, TerrainUpdate, APIPlayerData, GameOutcomeReward, GameData, EndGameDataResults } from '@legion/shared/interfaces';
 import { getChestContent } from '@legion/shared/chests';
-import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL } from '@legion/shared/config';
+import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL, MOVE_COOLDOWN, ATTACK_COOLDOWN } from '@legion/shared/config';
 import { TerrainManager } from './TerrainManager';
 
 enum GameAction {
@@ -364,7 +364,7 @@ export abstract class Game
         
         this.checkForStandingOnTerrain(player);
 
-        const cooldown = player.getCooldown('move');
+        const cooldown = player.getCooldownMs(MOVE_COOLDOWN);
         this.setCooldown(player, cooldown);
         
         this.broadcast('move', {
@@ -427,7 +427,7 @@ export abstract class Game
             opponent.removeStatusEffect(StatusEffect.FREEZE);
         }
         
-        const cooldown = player.getCooldown('attack');
+        const cooldown = player.getCooldownMs(ATTACK_COOLDOWN);
         this.setCooldown(player, cooldown);
 
         this.broadcast('attack', {
@@ -462,7 +462,7 @@ export abstract class Game
             !this.hasObstacle(x, y)
         ) return;
 
-        const cooldown = player.getCooldown('attack');
+        const cooldown = player.getCooldownMs(ATTACK_COOLDOWN);
         this.setCooldown(player, cooldown);
 
         const terrainUpdates = this.terrainManager.removeIce(x, y);
@@ -517,7 +517,7 @@ export abstract class Game
             player.team!.increaseScoreFromRevive(deadTargets_ - deadTargets);
         }
 
-        const cooldown = item?.cooldown * 1000;
+        const cooldown = player.getCooldownMs(item.cooldown);
         this.setCooldown(player, cooldown);
 
         player.removeItem(item);
@@ -611,7 +611,8 @@ export abstract class Game
         const nbFrozen_ = targets.filter(target => target.hasStatusEffect(StatusEffect.FREEZE)).length;
         const nbBurning_ = this.terrainManager.getNbBurning();
 
-        this.setCooldown(player, spell.cooldown * 1000);
+        const cooldown = player.getCooldownMs(spell.cooldown);
+        this.setCooldown(player, cooldown);
         
         this.broadcast('localanimation', {
             x,
