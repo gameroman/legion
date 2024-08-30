@@ -169,6 +169,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
           goldReward={this.state.goldReward} 
           characters={this.state.characters}
           chestKey={ChestColor.SILVER}
+          eventEmitter={events}
         />}
       </div>
     );

@@ -85,6 +85,7 @@ export class Arena extends Phaser.Scene
     killCamActive = false;
     pendingGEN: GEN;
     gameInitialized = false;
+    gameEnded = false;
 
     constructor() {
         super({ key: 'Arena' });
@@ -187,9 +188,7 @@ export class Arena extends Phaser.Scene
 
         this.socket.on('gameStatus', this.initializeGame.bind(this));
 
-        this.socket.on('move', (data) => {
-            this.processMove(data);
-        });
+        this.socket.on('move',this.processMove.bind(this));
 
         this.socket.on('attack', (data) => {
             this.processAttack(data);
@@ -698,6 +697,7 @@ export class Arena extends Phaser.Scene
     }
 
     processMove({team, tile, num}) {
+        if (this.gameEnded) return;
         const player = this.getPlayer(team, num);
 
         this.gridMap.set(serializeCoords(player.gridX, player.gridY), null);
@@ -708,6 +708,7 @@ export class Arena extends Phaser.Scene
     }
 
     processAttack({team, target, num, damage, hp, isKill}) {
+        if (this.gameEnded) return;
         const player = this.getPlayer(team, num);
         const otherTeam = this.getOtherTeam(team);
         const targetPlayer = this.getPlayer(otherTeam, target);
@@ -723,6 +724,7 @@ export class Arena extends Phaser.Scene
     }
 
     processObstacleAttack({team, num, x, y}) {
+        if (this.gameEnded) return;
         const player = this.getPlayer(team, num);
         this.playSound('slash');
         this.playSound('shatter');
@@ -731,39 +733,46 @@ export class Arena extends Phaser.Scene
     }
 
     processCooldown({num, cooldown}) {
+        if (this.gameEnded) return;
         const player = this.getPlayer(this.playerTeamId, num);
         player.setCooldown(cooldown);
     }
 
     processInventory({num, inventory}) {
+        if (this.gameEnded) return;
         const player = this.getPlayer(this.playerTeamId, num);
         player.setInventory(inventory);
         this.emitEvent('inventoryChange', {num});
     }
 
     processHPChange({team, num, hp, damage}) {
+        if (this.gameEnded) return;
         const player = this.getPlayer(team, num);
         player.setHP(hp);
         if (damage) player.displayDamage(damage);
     }
 
     processStatusChange({team, num, statuses}) {
+        if (this.gameEnded) return;
         const player = this.getPlayer(team, num);
         player.setStatuses(statuses);
     }
 
     processMPChange({num, mp}) {
+        if (this.gameEnded) return;
         const player = this.getPlayer(this.playerTeamId, num);
         player.setMP(mp);
     }
 
     processUseItem({team, num, animation, name, sfx}) {
+        if (this.gameEnded) return;
         const player = this.getPlayer(team, num);
         player.useItemAnimation(animation, name);
         this.playSound(sfx);
     }
 
     processCast(flag, {team, num, id, location,}) {
+        if (this.gameEnded) return;
         // console.log(`Processing cast: ${flag} ${team} ${num} ${id} ${location}`);
         const player = this.getPlayer(team, num);
         const spell = getSpellById(id);
@@ -772,6 +781,7 @@ export class Arena extends Phaser.Scene
     }
 
     processTerrain(updates: TerrainUpdate[]) {
+        if (this.gameEnded) return;
         updates.forEach(({x, y, terrain}) => {
             const {x: pixelX, y: pixelY} = this.gridToPixelCoords(x, y);
             switch (terrain) {
@@ -941,7 +951,6 @@ export class Arena extends Phaser.Scene
         const sound = this.SFX[key];
     
         sound.once('complete', () => {
-            // sound.destroy(); // Destroy the sound instance once done playing
             this.playSoundMultipleTimes(key, times - 1); // Play the sound again
         });
     
@@ -1369,6 +1378,10 @@ export class Arena extends Phaser.Scene
         events.on('abandonGame', () => {
             this.abandonGame();
         });
+
+        events.on('exitGame', () => {
+            this.destroy();
+        });
     }
 
     startAnimation() {
@@ -1585,6 +1598,7 @@ export class Arena extends Phaser.Scene
     }
 
     updateEnvironmentAudio() {
+        if (this.gameEnded) return;
         const flames = this.environmentalAudioSources.flames;
         if (flames > 0) {
             this.playSound('flames', 0.5, true);
@@ -1599,6 +1613,7 @@ export class Arena extends Phaser.Scene
     }
 
     destroy() {
+        this.gameEnded = true;
         this.socket.disconnect();
 
         Object.values(this.SFX).forEach(sound => {

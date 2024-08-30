@@ -28,8 +28,11 @@ interface EndgameProps {
     grade: string;
     chests: GameOutcomeReward[];
     chestKey: ChestColor;
+    eventEmitter: any;
 }
 export class Endgame extends Component<EndgameProps, EndgameState> {
+    events: any;
+
     constructor(props) {
         super(props);
         this.state = {
@@ -40,6 +43,7 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
             countedXP: 0,
             selectedChest: null,
         };
+        this.events = this.props.eventEmitter;
     }
 
     componentDidMount() {
@@ -70,6 +74,7 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
     }
 
     closeGame = () => {
+        this.events.emit('exitGame');
         route('/play');
     }
 
