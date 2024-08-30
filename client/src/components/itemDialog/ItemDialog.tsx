@@ -256,7 +256,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
           <div className="dialog-consumable-info-container">
             <div className="dialog-consumable-info">
               <img src={cdIcon} alt="cd" />
-              <span>{dialogData.cooldown}s</span>
+              <span>{dialogData.getCooldown()}</span>
             </div>
             <div className="dialog-consumable-info">
               <img src={targetIcon} alt="target" />
@@ -306,7 +306,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
             </div>
             <div className="dialog-spell-info">
               <img src={cdIcon} alt="cd" />
-              <span>{dialogData.cooldown}s</span>
+              <span>{dialogData.getCooldown()}</span>
             </div>
             <div className="dialog-spell-info">
               <img src={targetIcon} alt="target" />

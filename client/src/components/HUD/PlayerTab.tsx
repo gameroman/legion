@@ -207,8 +207,8 @@ class PlayerTab extends Component<Props, State> {
                 <span>{player.spells[player.pendingSpell]?.cost}</span>
               </div>
               <div className="dialog-spell-info">
-                <img src={cdIcon} alt="cd" />
-                <span>{player.spells[player.pendingSpell]?.cooldown}s</span>
+                <img src={cdIcon} alt="cd" className="cd-icon"/>
+                <span>{player.spells[player.pendingSpell]?.getCooldown()}s</span>
               </div>
               <div className="dialog-spell-info">
                 <img src={targetIcon} alt="target" />
@@ -226,8 +226,8 @@ class PlayerTab extends Component<Props, State> {
             }} />
             <div className="dialog-item-info-container">
               <div className="dialog-spell-info">
-                <img src={cdIcon} alt="cd" />
-                <span>{player.items[player.pendingItem]?.cooldown}s</span>
+                <img src={cdIcon} alt="cd"/>
+                <span>{player.items[player.pendingItem]?.getCooldown()}s</span>
               </div>
               <div className="dialog-spell-info">
                 <img src={targetIcon} alt="target" />

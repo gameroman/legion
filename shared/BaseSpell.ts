@@ -1,7 +1,7 @@
 import { Target, Terrain, Rarity, Class } from "./enums";
 import { Effect, SpellData, StatusEffectData } from "./interfaces";
 import { getPrice, getRarity } from "./economy";
-
+import { TIME_COEFFICIENT } from "@legion/shared/config";
 export class BaseSpell {
     id: number = -1;
     name: string = '';
@@ -63,5 +63,9 @@ export class BaseSpell {
 
         // Overrides
         if (props.cost) this.cost = props.cost;
+    }
+
+    getCooldown() {
+        return this.cooldown * TIME_COEFFICIENT;
     }
 }

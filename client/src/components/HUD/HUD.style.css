@@ -1334,6 +1334,10 @@
   gap: 2px;
 }
 
+.cd-icon {
+  margin-top: 1px;
+}
+
 .cooldown_bar_flash {
   animation: bgflash 0.3s linear infinite;
 }

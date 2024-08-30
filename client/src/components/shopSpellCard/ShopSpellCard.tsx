@@ -105,7 +105,7 @@ class ShopSpellCard extends Component<ShopCardProps> {
           </div>
           <div className="spell-card-effect">
             <img src={cdIcon} alt="cooldown" />
-            <span>{data.cooldown}</span>
+            <span>{data.getCooldown()}</span>
           </div>
           <div className="spell-card-effect">
             <img src={targetIcon} alt="target" />
