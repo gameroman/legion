@@ -317,6 +317,7 @@ export abstract class Game
 
         const results = {};
         let winnerUID;
+        if (!this.sockets.length) return;
         this.sockets.forEach(socket => {
             const team = this.socketMap.get(socket);
             const otherTeam = this.getOtherTeam(team!.id);
