@@ -25,6 +25,7 @@ interface TeamPageState {
     spells: number[];
   };
   carrying_capacity: number;
+  roster_data: APICharacterData[];
   character_id: string;
   character_sheet_data: APICharacterData;
   statsModifiers: Effect[]; 
@@ -53,6 +54,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
     statsModifiers: [], 
     selectedEquipmentSlot: -1, 
     isInventoryLoaded: false, 
+    roster_data: [],
   } 
 
   handleSelectedEquipmentSlot = (newValue) => { 
@@ -68,8 +70,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
   componentDidUpdate(prevProps: TeamPageProps) {
     if (prevProps.matches.id !== this.props.matches.id) {
       this.setState({ character_id: this.props.matches.id }, () => {
-        this.fetchCharacterData();
-        this.fetchInventoryData();
+        this.updateCharacterData();
       });
     }
   }
@@ -96,16 +97,26 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
   fetchCharacterData = async () => {
     try {
         const data = await apiFetch('rosterData');
-        const sheetData = this.state.character_id ? data.characters.filter((item: APICharacterData) => item.id === this.state.character_id)[0] : data.characters[0];
 
         this.setState({
-          character_sheet_data: sheetData,
-          character_id: sheetData.id,
+          roster_data: data.characters,
+          character_id: this.props.matches.id || data.characters[0].id,
+        }, () => {
+          this.updateCharacterData();
         });
       } catch (error) {
           errorToast(`Error: ${error}`);
       }
   }
+
+  updateCharacterData = () => {
+    const sheetData = this.state.character_id ? this.state.roster_data.filter((item: APICharacterData) => item.id === this.state.character_id)[0] : this.state.roster_data[0];
+
+    this.setState({
+      character_sheet_data: sheetData,
+    });
+  }
+    
 
   refreshCharacter = () => {
     this.fetchCharacterData();
