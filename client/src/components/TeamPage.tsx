@@ -29,7 +29,7 @@ interface TeamPageState {
   character_sheet_data: APICharacterData;
   statsModifiers: Effect[]; 
   selectedEquipmentSlot: number; 
-  setInventoryData: boolean; 
+  isInventoryLoaded: boolean; 
 }
 interface TeamPageProps {
   matches: {
@@ -52,7 +52,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
     character_sheet_data: null,
     statsModifiers: [], 
     selectedEquipmentSlot: -1, 
-    setInventoryData: false, 
+    isInventoryLoaded: false, 
   } 
 
   handleSelectedEquipmentSlot = (newValue) => { 
@@ -87,7 +87,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
           },
           carrying_capacity: data.carrying_capacity
         }); 
-        this.setState({ setInventoryData: true }); 
+        this.setState({ isInventoryLoaded: true }); 
     } catch (error) {
         errorToast(`Error: ${error}`);
     }
@@ -292,7 +292,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
               handleItemEffect={this.handleItemEffect}
               updateInventory={this.updateInventory.bind(this)} 
               handleSelectedEquipmentSlot={this.handleSelectedEquipmentSlot} 
-              setInventoryData={this.state.setInventoryData} 
+              isInventoryLoaded={this.state.isInventoryLoaded} 
             /> : <Skeleton 
             height={297} 
             count={1} 

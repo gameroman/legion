@@ -30,7 +30,7 @@ interface InventoryProps {
   handleItemEffect: (effects: Effect[], actionType: InventoryActionType, index?: number) => void;
   updateInventory?: (type: string, action: InventoryActionType, index: number) => void;
   handleSelectedEquipmentSlot: (newValue: number) => void;
-  setInventoryData: boolean;
+  isInventoryLoaded: boolean;
 }
 
 class Inventory extends Component<InventoryProps> {
@@ -162,7 +162,7 @@ class Inventory extends Component<InventoryProps> {
           </div>
           <div className="inventoryWrapper">
             {
-              !this.props.setInventoryData ?
+              !this.props.isInventoryLoaded ?
                 <div style={{ position: "absolute", display: "flex", gap: '6px' }}>
                   {[...Array(6)].map((_, index) => (
                     <Skeleton
