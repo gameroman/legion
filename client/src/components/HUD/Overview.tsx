@@ -118,7 +118,8 @@ class Overview extends Component<Props, State> {
             const isAlive = member.hp > 0;
             const cooldown = cooldowns[cooldownIndex++];
             let cooldownPct = cooldown / member.totalCooldown;
-            if (!isAlive) cooldownPct = 1;
+            const isParalyzed = member.statuses[StatusEffect.PARALYZE] != 0 || member.statuses[StatusEffect.FREEZE] != 0;
+            if (!isAlive || isParalyzed) cooldownPct = 1;
 
             const portraitStyle = {
               backgroundImage: `url(${getSpritePath(member.texture)})`,
@@ -173,7 +174,7 @@ class Overview extends Component<Props, State> {
                 {this.props.isPlayerTeam && 
                   <div className={
                     `char_stats_cooldown_bar
-                    ${member.isAlive && member.totalCooldown && cooldown === 0 ? 'cooldown_bar_flash' : ''}`
+                    ${member.isAlive && !isParalyzed && member.totalCooldown && cooldown === 0 ? 'cooldown_bar_flash' : ''}`
                     } 
                     style={position === 'left' && { justifyContent: 'flex-start', marginLeft: '40px' }}>
                       <div className="char_stats_cooldown" style={{ width: `${(1 - cooldownPct) * 100}%` }}></div>
