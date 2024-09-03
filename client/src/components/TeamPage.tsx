@@ -11,7 +11,7 @@ import { apiFetch } from '../services/apiService';
 import { errorToast, playSoundEffect } from './utils';
 import CharacterSheet from './characterSheet/CharacterSheet';
 import { APICharacterData, Effect } from '@legion/shared/interfaces';
-import { EquipmentSlot, InventoryActionType, equipmentFields, Stat } from '@legion/shared/enums';
+import { EquipmentSlot, InventoryActionType, equipmentFields, Stat, statFields } from '@legion/shared/enums';
 import { getEquipmentById } from '@legion/shared/Equipments';
 import { inventorySize } from '@legion/shared/utils';
 import { PlayerContext } from '../contexts/PlayerContext';
@@ -112,7 +112,10 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
   }
 
   updateCharacterData = () => {
-    const sheetData = this.state.character_id ? this.state.roster_data.filter((item: APICharacterData) => item.id === this.state.character_id)[0] : this.state.roster_data[0];
+    const sheetData = 
+      this.state.character_id ? 
+      this.state.roster_data.filter((item: APICharacterData) => item.id === this.state.character_id)[0] : 
+      this.state.roster_data[0];
 
     this.setState({
       character_sheet_data: sheetData,
@@ -121,8 +124,8 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
     
 
   refreshCharacter = () => {
-    this.fetchCharacterData();
-    this.fetchInventoryData();
+    // this.fetchCharacterData();
+    // this.fetchInventoryData();
   }
 
   handleItemEffect = (effects: Effect[], actionType: InventoryActionType,  index?: number) => {
@@ -164,6 +167,28 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
     this.setState({statsModifiers: result_effects});
   }
 
+  // Immediate feedback method to apply stats and SP changes without waiting for API response
+  updateStats(stat: Stat, amount: number) {
+    console.log('updateStats', stat, amount);
+    this.setState((prevState) => {
+      const newStats = { ...prevState.character_sheet_data.stats };
+      newStats[statFields[stat]] += getSPIncrement(stat)*amount;
+      return {
+        roster_data: prevState.roster_data.map((item: APICharacterData) => {
+          if (item.id === prevState.character_id) {
+            return { 
+              ...item, 
+              stats: newStats,
+              sp: item.sp - amount
+            };
+          }
+          return item;
+        })
+      }
+    }, () => {
+      this.updateCharacterData();
+    });
+  }
 
   // Immediate feedback method to apply inventory changes without waiting for API response
   updateInventory(type: string, action: InventoryActionType, index: number) {
@@ -271,21 +296,6 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
         break;
     }
     playSoundEffect('sfx/equip.wav');
-  }
-
-  // Immediate feedback method to apply stats and SP changes without waiting for API response
-  updateStats(stat: Stat, amount: number) {
-    this.setState((prevState) => {
-      const newStats = { ...prevState.character_sheet_data.stats };
-      newStats[stat] += getSPIncrement(stat)*amount;
-      return { 
-        character_sheet_data: { 
-          ...prevState.character_sheet_data,
-          stats: newStats,
-          sp: prevState.character_sheet_data.sp - amount
-        } 
-      };
-    });
   }
 
   render() {
