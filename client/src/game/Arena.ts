@@ -165,6 +165,7 @@ export class Arena extends Phaser.Scene
     }
 
     async connectToServer() {
+        console.log('Connecting to the server ...');
         const gameId = this.extractGameIdFromUrl();
         console.log('Game ID:', gameId);
 
@@ -458,7 +459,7 @@ export class Arena extends Phaser.Scene
              const gridX = Math.floor(pointerX / this.tileSize);
              const gridY = Math.floor(pointerY / this.tileSize);
  
-             this.cellsHighlight.move(gridX, gridY);
+             if (this.gameInitialized) this.cellsHighlight.move(gridX, gridY);
          }, this);
 
          // Add a pointer down handler to print the clicked tile coordinates
@@ -596,8 +597,8 @@ export class Arena extends Phaser.Scene
     }
     
     refreshOverview() {
-        const { team1, team2, general } = this.getOverview();
-        if (this.overviewReady) events.emit('updateOverview', team1, team2, general);
+        const { team1, team2, general, initialized } = this.getOverview();
+        if (this.overviewReady) events.emit('updateOverview', team1, team2, general, initialized);
     }
 
     showEndgameScreen(data: OutcomeData) {
@@ -1357,14 +1358,13 @@ export class Arena extends Phaser.Scene
         this.processTerrain(data.terrain); // Put after floatTiles() to allow for tilesMap to be intialized
 
         if (isReconnect) {
-            this.updateOverview();
-            this.gameInitialized = true;
+            this.setGameInitialized();
         } else {
             const delay = 3000;
             setTimeout(this.updateOverview.bind(this), delay + 1000);
             setTimeout(() => {
                 this.displayGEN(GEN.COMBAT_BEGINS);
-                this.gameInitialized = true;
+                this.setGameInitialized();
             }, delay);
         }
 
@@ -1380,6 +1380,11 @@ export class Arena extends Phaser.Scene
         events.on('exitGame', () => {
             this.destroy();
         });
+    }
+
+    setGameInitialized() {
+        this.gameInitialized = true;
+        this.updateOverview();
     }
 
     startAnimation() {
@@ -1528,6 +1533,7 @@ export class Arena extends Phaser.Scene
             team1: this.teamsMap.get(1).getOverview(),
             team2: this.teamsMap.get(2).getOverview(),
             general: this.gameSettings,
+            initialized: this.gameInitialized,
         };
         return overview;
     }

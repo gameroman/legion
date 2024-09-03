@@ -32,6 +32,7 @@ interface GameHUDState {
   grade: string;
   chests: GameOutcomeReward[];
   key: ChestColor;
+  gameInitialized: boolean;
 }
 
 const events = new EventEmitter();
@@ -55,6 +56,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     grade: null,
     chests: [],
     key: null,
+    gameInitialized: false,
   }
 
   componentDidMount() {
@@ -120,12 +122,13 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     this.setState({ playerVisible: false, player: null });
   }
 
-  updateOverview = (team1: TeamOverview, team2: TeamOverview, general: any) => {
+  updateOverview = (team1: TeamOverview, team2: TeamOverview, general: any, initialized: boolean) => {
     this.setState({ team1, team2 });
     this.setState({ 
       isTutorial: general.isTutorial,
       isSpectator: general.isSpectator,
-      mode : general.mode
+      mode : general.mode,
+      gameInitialized: initialized
     })
   }
 
@@ -148,9 +151,13 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   render() {
-    const { playerVisible, player, team1, team2, isTutorial, isSpectator, mode } = this.state; 
+    const { playerVisible, player, team1, team2, isTutorial, isSpectator, mode, gameInitialized } = this.state; 
     const members = team1?.members[0].isPlayer ? team1?.members : team2?.members; 
     const score = team1?.members[0].isPlayer? team1?.score : team2?.score; 
+
+    if (!gameInitialized) {
+      return null; // Or return a loading indicator if preferred
+    }
 
     return (
       <div className="gameCursor height_full flex flex_col justify_between padding_bottom_16">

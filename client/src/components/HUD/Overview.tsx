@@ -104,7 +104,6 @@ class Overview extends Component<Props, State> {
   }
 
   render({ members, position, selectedPlayer, isSpectator }: Props, { cooldowns, blinking }: State) {
-    console.log(`members: ${members}`);
     if (!members || !blinking.length) {
       return <div />;
     }
