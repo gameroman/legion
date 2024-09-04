@@ -152,19 +152,18 @@ class ShopContent extends Component<ShopContentProps> {
         this.props.updateInventory(id.toString(), quantity, this.state.curr_tab);
         this.context.setPlayerInfo({ gold: this.props.gold - price * quantity });
         playSoundEffect(purchaseSfx);
+        successToast('Purchase successful!');
 
         apiFetch(purchasingCharacter ? 'purchaseCharacter' : 'purchaseItem', {
             method: 'POST',
             body: payload
         })
             .then(data => {
-                console.log(data);
                 if (purchasingCharacter) {
                     this.props.fetchCharactersOnSale();
                 } else {
                     this.props.fetchInventoryData();
                 }
-                successToast('Purchase successful!');
             })
             .catch(error => errorToast(`Error: ${error}`));
 

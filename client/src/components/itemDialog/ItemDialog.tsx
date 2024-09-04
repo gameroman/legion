@@ -134,6 +134,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
 
     this.props.updateStats(stat, amount);
     this.props.handleClose();
+    successToast(`${statFields[stat].toUpperCase()} increased by ${getSPIncrement(stat)*amount}!`);
 
     apiFetch('spendSP', {
       method: 'POST',
@@ -141,8 +142,6 @@ class ItemDialog extends Component<DialogProps, DialogState> {
     })
       .then((data) => {
         if (data.status == 0) {
-          successToast(`${statFields[stat].toUpperCase()} increased by ${getSPIncrement(stat)*amount}!`);
-          
           this.props.refreshCharacter();
         } else {
           errorToast('Not enough SP!');
