@@ -169,10 +169,10 @@ class ItemDialog extends Component<DialogProps, DialogState> {
 
     const { dialogType, dialogData, position, dialogOpen, isEquipped, handleClose } = this.props;
 
-    let acceptBtn = this.props.actionType > 0 ? 'Remove' : 'Equip';
+    let acceptLabel = this.props.actionType > 0 ? 'Remove' : 'Equip';
     // If dialogData is of type spell , display "Learn" instead of "Equip"
     if (dialogType === ItemDialogType.SKILLS) {
-      acceptBtn = 'Learn';
+      acceptLabel = 'Learn';
     }
 
     if (!dialogData) {
@@ -230,7 +230,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
               onClick={() => this.AcceptAction(dialogType, this.props.index)}
             >
               <img src={confirmIcon} alt="confirm" />
-              {acceptBtn}
+              {acceptLabel}
             </button>
             <button className="dialog-decline" onClick={handleClose}>
               <img src={cancelIcon} alt="decline" />
@@ -283,14 +283,14 @@ class ItemDialog extends Component<DialogProps, DialogState> {
             }
           </div>
           <div className="dialog-button-container">
-            <button className="dialog-accept" onClick={() => this.AcceptAction(dialogType, this.props.index)}><img src={confirmIcon} alt="confirm" />{acceptBtn}</button>
+            <button className="dialog-accept" onClick={() => this.AcceptAction(dialogType, this.props.index)}><img src={confirmIcon} alt="confirm" />{acceptLabel}</button>
             <button className="dialog-decline" onClick={handleClose}><img src={cancelIcon} alt="decline" />Cancel</button>
           </div>
         </div>
       );
     };
 
-    const skillDialog = (dialogData: BaseSpell) => {
+    const spellDialog = (dialogData: BaseSpell) => {
       if (!dialogData) return;
 
       const coordinates = mapFrameToCoordinates(dialogData.frame);
@@ -322,8 +322,26 @@ class ItemDialog extends Component<DialogProps, DialogState> {
               <span>{Target[dialogData.target]}</span>
             </div>
           </div>
+          <div style={this.props.characterLevel >= dialogData.minLevel ? { backgroundColor: "#2f404d" } : { backgroundColor: "darkred" }} className="equip-dialog-lvl">
+            Lvl <span>{dialogData.minLevel}</span>
+          </div> 
+          <div className="equip-dialog-class-container">
+            {dialogData.classes?.map((item) =>
+              <div style={dialogData.classes.length > 0 && !dialogData.classes.includes(this.props.characterClass) && {backgroundColor: "darkred"}} className="equip-dialog-class">
+                {classEnumToString(item)}
+              </div>
+            )}
+          </div>
           <div className="dialog-button-container">
-            {!isEquipped && <button className="dialog-accept" onClick={() => this.setState({ dialogSpellModalShow: true })}><img src={confirmIcon} alt="confirm" />{acceptBtn}</button>}
+            {!isEquipped && <button
+              style={(this.props.characterLevel < dialogData.minLevel || (dialogData.classes.length > 0 && !dialogData.classes.includes(this.props.characterClass))) ? { backgroundColor: "grey", opacity: "0.5" } : {}}
+              className="dialog-accept"
+              disabled={(this.props.characterLevel < dialogData.minLevel || (dialogData.classes.length > 0 && !dialogData.classes.includes(this.props.characterClass)))}
+              onClick={() => this.AcceptAction(dialogType, this.props.index)}
+            >
+              <img src={confirmIcon} alt="confirm" />
+              {acceptLabel}
+            </button>}
             <button className="dialog-decline" onClick={handleClose}><img src={cancelIcon} alt="decline" />Cancel</button>
           </div>
           <div style={this.state.dialogSpellModalShow ? { display: 'block' } : { display: 'none' }} class="dialog-spell-modal">
@@ -377,7 +395,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
         case ItemDialogType.CONSUMABLES:
           return consumableDialog(dialogData as BaseItem);
         case ItemDialogType.SKILLS:
-          return skillDialog(dialogData as BaseSpell);
+          return spellDialog(dialogData as BaseSpell);
         case ItemDialogType.SP:
           return SPSpendDialog(dialogData as SPSPendingData);
         default: null;
