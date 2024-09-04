@@ -74,6 +74,7 @@ spells.push(new BaseSpell({
 
     score: 100,
     classes: [Class.BLACK_MAGE],
+    minLevel: 20,
 }));
 
 spells.push(new BaseSpell({

@@ -59,7 +59,31 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     gameInitialized: false,
   }
 
+  resetState = () => {
+    this.setState({
+      playerVisible: false,
+      player: null,
+      pendingSpell: false,
+      pendingItem: false,
+      team1: null,
+      team2: null,
+      isWinner: false,
+      gameOver: false,
+      isTutorial: false,
+      isSpectator: false,
+      mode: null,
+      xpReward: 0,
+      goldReward: 0,
+      characters: [],
+      grade: null,
+      chests: [],
+      key: null,
+      gameInitialized: false,
+    });
+  }
+
   componentDidMount() {
+    this.resetState();
     apiFetch('fetchGuideTip?combatTip=1', {
         method: 'GET',
     })
@@ -110,8 +134,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   componentWillUnmount() {
-    events.off('showPlayer', this.showPlayerBox);
-    events.off
+    events.removeAllListeners();
   }
 
   showPlayerBox = (playerData: PlayerProps) => {

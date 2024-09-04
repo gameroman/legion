@@ -305,6 +305,8 @@ export class ServerPlayer {
     }
 
     setUpCharacter(data, isAI = false) {
+        console.log(`[ServerPlayer:setUpCharacter] Setting up character ${data.name}`);
+        console.log(`[ServerPlayer:setUpCharacter] Spells: ${JSON.stringify(data.skills)}`);
         this.setHP(this.getStatValue(data, "hp"));
         this.setMP(this.getStatValue(data, "mp"));
         this.setStat(Stat.ATK, this.getStatValue(data, "atk"));
