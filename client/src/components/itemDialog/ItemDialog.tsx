@@ -75,6 +75,14 @@ class ItemDialog extends Component<DialogProps, DialogState> {
     await this.fetchInventoryData();
   }
 
+  componentDidUpdate(prevProps: DialogProps) {
+    // Check if the dialog is being opened
+    if (this.props.dialogOpen && !prevProps.dialogOpen) {
+      // Reset dialogValue to 1 when the dialog opens
+      this.setState({ dialogValue: 1 });
+    }
+  }
+
   fetchInventoryData = async () => {
     try {
       const data = await apiFetch('inventoryData');
