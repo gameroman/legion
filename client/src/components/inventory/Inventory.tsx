@@ -60,8 +60,7 @@ class Inventory extends Component<InventoryProps> {
     .reduce((acc, curr) => acc + curr, 0);
 
   render() {
-
-    const activeInventory = this.context.inventory[this.state.actionType];
+    const activeInventory = this.context.player.inventory[this.state.actionType];
     const isCategoryEmpty = !activeInventory || !activeInventory?.length;
 
     const getItem = (itemID: number) => {
@@ -139,7 +138,7 @@ class Inventory extends Component<InventoryProps> {
           </div>
           <div className="inventoryWrapper">
             {
-              !this.context.isInventoryLoaded ?
+              !this.context.player.isLoaded ?
                 <div style={{ position: "absolute", display: "flex", gap: '6px' }}>
                   {[...Array(6)].map((_, index) => (
                     <Skeleton

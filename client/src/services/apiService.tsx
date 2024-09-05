@@ -87,7 +87,9 @@ async function apiFetch(endpoint, options: ApiFetchOptions = {}, timeoutDuration
 
             return response.json();
         } catch (error) {
-            console.error(`Attempt ${attempt + 1} failed for API call to ${endpoint}:`, error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error(`Attempt ${attempt + 1} failed for API call to ${endpoint}:`, error);
+            }
             lastError = error;
 
             // If it's the last attempt, throw the error

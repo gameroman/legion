@@ -1,35 +1,12 @@
 import { createContext } from 'preact';
-import { DailyLootAllAPIData, APICharacterData } from '@legion/shared/interfaces';
+import { PlayerContextData, APICharacterData } from '@legion/shared/interfaces';
 import { League, Stat, InventoryActionType } from "@legion/shared/enums";
-
-export interface PlayerContextData {
-  uid: string;
-  name: string;
-  avatar: string;
-  lvl: number;
-  gold: number;
-  elo: number;
-  wins: number;
-  rank: number;
-  allTimeRank: number;
-  dailyloot: DailyLootAllAPIData;
-  league: League;
-  tours: string[];
-  isLoaded: boolean;
-}
 
 export interface PlayerContextState {
   player: PlayerContextData;
   characters: APICharacterData[];
   activeCharacterId: string;
   characterSheetIsDirty: boolean;
-  inventory: {
-    consumables: number[];
-    equipment: number[];
-    spells: number[];
-  };
-  carrying_capacity: number;
-  isInventoryLoaded: boolean;
 }
 
 export const PlayerContext = createContext<{
@@ -37,13 +14,6 @@ export const PlayerContext = createContext<{
   characters: APICharacterData[];
   activeCharacterId: string;
   characterSheetIsDirty: boolean;
-  inventory: {
-    consumables: number[];
-    equipment: number[];
-    spells: number[];
-  };
-  carrying_capacity: number;
-  isInventoryLoaded: boolean;
   setPlayerInfo: (updates: Partial<PlayerContextData>) => void;
   refreshPlayerData: () => void;
   fetchRosterData: () => Promise<void>;
@@ -66,17 +36,16 @@ export const PlayerContext = createContext<{
     league: League.BRONZE,
     tours: [],
     isLoaded: false,
+    inventory: {
+      consumables: [],
+      equipment: [],
+      spells: [],
+    },
+    carrying_capacity: 0,
   },
   characters: [],
   activeCharacterId: '',
   characterSheetIsDirty: false,
-  inventory: {
-    consumables: [],
-    equipment: [],
-    spells: [],
-  },
-  carrying_capacity: 0,
-  isInventoryLoaded: false,
   setPlayerInfo: () => {},
   refreshPlayerData: () => {},
   fetchRosterData: async () => {},
