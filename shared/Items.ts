@@ -79,7 +79,6 @@ items[5] = new BaseItem({
     target: Target.SELF,
     effects: [{stat: Stat.MP, value: 200}],
     effort: 12,
-
 });
 
 items[6] = new BaseItem({
