@@ -185,7 +185,7 @@ class PlayerTab extends Component<Props, State> {
                       action={player.spells[idx]}
                       index={idx}
                       canAct={canAct && !isMuted && player.spells[idx]?.cost <= player.mp}
-                      actionType={InventoryType.SKILLS}
+                      actionType={InventoryType.SPELLS}
                       key={idx}
                     />
                   </div>

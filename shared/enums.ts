@@ -97,11 +97,11 @@ export enum ChestColor {
 export enum InventoryType {
     CONSUMABLES = 'consumables',
     EQUIPMENTS = 'equipment',
-    SKILLS = 'spells',
+    SPELLS = 'spells',
     UTILITIES = 'utilities'
 }
 
-export enum ShopTabs {
+export enum ShopTab {
     CONSUMABLES,
     EQUIPMENTS,
     SPELLS,

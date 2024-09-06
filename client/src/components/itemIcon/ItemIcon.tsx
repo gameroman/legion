@@ -91,7 +91,7 @@ class ItemIcon extends Component<ItemIconProps> {
 
     const spriteSheetsMap = {
       [InventoryType.CONSUMABLES]: consumablesSpritesheet,
-      [InventoryType.SKILLS]: spellsSpritesheet,
+      [InventoryType.SPELLS]: spellsSpritesheet,
       [InventoryType.EQUIPMENTS]: equipmentSpritesheet,
     };
     const spritesheet = spriteSheetsMap[actionType];

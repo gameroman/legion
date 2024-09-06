@@ -240,7 +240,7 @@ class CharacterSheet extends Component<CharacterSheetProps> {
                     backgroundImageUrl = consumablesSpritesheet;
                     dataCallback = getConsumableById;
                     break;
-                case InventoryType.SKILLS:
+                case InventoryType.SPELLS:
                     capacity = characterData.skill_slots;
                     items = characterData.skills;
                     dialogType = ItemDialogType.SPELLS;
@@ -262,7 +262,7 @@ class CharacterSheet extends Component<CharacterSheetProps> {
                     }
 
                     return (
-                        <div className="team-item" key={i} style={(inventoryType === InventoryType.SKILLS || inventoryType === InventoryType.CONSUMABLES) && slotStyle} onClick={(e) => this.handleOpenModal(e, item, dialogType, i)}>
+                        <div className="team-item" key={i} style={(inventoryType === InventoryType.SPELLS || inventoryType === InventoryType.CONSUMABLES) && slotStyle} onClick={(e) => this.handleOpenModal(e, item, dialogType, i)}>
                             <div className="special-equip" style={{
                                 backgroundImage: `url(${backgroundImageUrl})`,
                                 backgroundPosition: `-${coordinates.x}px -${coordinates.y}px`,
@@ -324,7 +324,7 @@ class CharacterSheet extends Component<CharacterSheetProps> {
                         {characterData.skill_slots > 0 && <div className="team-item-container">
                             <p className="team-item-heading">SPELLS</p>
                             <div className="team-items">
-                                {renderInventoryItems(InventoryType.SKILLS)}
+                                {renderInventoryItems(InventoryType.SPELLS)}
                             </div>
                         </div>}
                         <div className="team-item-container">

@@ -88,7 +88,7 @@ class PlayPage extends Component {
 
     return (
       <div className="play-content">
-        <Roster characters={this.context.characters}/>
+        <Roster/>
         {data ? <PlayModes /> : <Skeleton
           height={50}
           count={2}

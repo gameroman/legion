@@ -52,7 +52,7 @@ function timeoutPromise(duration) {
     });
 }
 
-async function apiFetch(endpoint, options: ApiFetchOptions = {}, timeoutDuration = 15000, maxRetries = 3, retryDelay = 150) {
+async function apiFetch(endpoint, options: ApiFetchOptions = {}, timeoutDuration = 15000, maxRetries = 3, retryDelay = 200) {
     let lastError;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {

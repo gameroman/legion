@@ -7,21 +7,21 @@ import CharacterCard from '../characterCard/CharacterCard';
 import BottomBorderDivider from '../bottomBorderDivider/BottomBorderDivider';
 import { route } from 'preact-router';
 import PlusIcon from '@assets/plus.svg';
-import { ShopTabs } from '@legion/shared/enums';
+import { ShopTab } from '@legion/shared/enums';
 import Skeleton from 'react-loading-skeleton';
-import { APICharacterData } from '@legion/shared/interfaces';
+import { PlayerContext } from '../../contexts/PlayerContext';
+import { MAX_CHARACTERS } from "@legion/shared/config";
 
-interface RosterProps {
-  characters: APICharacterData[], 
-}
 
-class Roster extends Component<RosterProps, {}> {
+class Roster extends Component {
+  static contextType = PlayerContext; 
+
   handleCardClick = () => {
-    route(`/shop/${ShopTabs[3].toLowerCase()}`);
+    route(`/shop/${ShopTab[3].toLowerCase()}`);
   }
 
   render() {
-    const characters = this.props.characters;
+    const characters = this.context.characters;
 
     return (
       <div className="rosterContainer">
@@ -31,11 +31,11 @@ class Roster extends Component<RosterProps, {}> {
             {characters.map(character => (
               <CharacterCard {...character} key={character.id} />
             ))}
-            <div className="addCardContainer">
+            {this.context.characters.length < MAX_CHARACTERS && <div className="addCardContainer">
               <div className="addCard" onClick={this.handleCardClick}>
                 <img src={PlusIcon} alt="Plus" />
               </div>
-            </div>
+            </div>}
           </div>
         ) : (
           <Skeleton 

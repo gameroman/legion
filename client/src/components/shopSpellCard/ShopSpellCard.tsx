@@ -80,7 +80,7 @@ class ShopSpellCard extends Component<ShopCardProps> {
             </div>
             <div className="spell-card-info-box">
               <img src={itemCountIcon} alt="count icon" />
-              <span>{this.props.getItemAmount(data.id, InventoryType.SKILLS)}</span>
+              <span>{this.props.getItemAmount(data.id, InventoryType.SPELLS)}</span>
             </div>
           </div>
         </div>

@@ -61,7 +61,7 @@ class Inventory extends Component<InventoryProps> {
       switch (this.state.actionType) {
         case InventoryType.CONSUMABLES:
           return getConsumableById(itemID);
-        case InventoryType.SKILLS:
+        case InventoryType.SPELLS:
           return getSpellById(itemID);
         case InventoryType.EQUIPMENTS:
           return getEquipmentById(itemID);
@@ -121,7 +121,7 @@ class Inventory extends Component<InventoryProps> {
               <Link href='/shop' className="categoryBtn" style={{ backgroundImage: `url(${shopIcon})` }}></Link>
               <div className="inventoryCategory" style={this.state.actionType === InventoryType.CONSUMABLES && currCategoryStyle} onClick={() => this.handleActionType(InventoryType.CONSUMABLES)}>CONSUMABLES</div>
               <div className="inventoryCategory" style={this.state.actionType === InventoryType.EQUIPMENTS && currCategoryStyle} onClick={() => this.handleActionType(InventoryType.EQUIPMENTS)}>EQUIPMENT</div>
-              <div className="inventoryCategory" style={this.state.actionType === InventoryType.SKILLS && currCategoryStyle} onClick={() => this.handleActionType(InventoryType.SKILLS)}>SPELLS</div>
+              <div className="inventoryCategory" style={this.state.actionType === InventoryType.SPELLS && currCategoryStyle} onClick={() => this.handleActionType(InventoryType.SPELLS)}>SPELLS</div>
               <div className="categoryCount"><span>{inventorySize(this.context.player.inventory)} </span>&nbsp;/&nbsp;{this.context.player.carrying_capacity}</div>
               {/* <div className="categoryBtn" style={{ backgroundImage: `url(${helpIcon}` }} onClick={this.handleOpenModal}></div> */}
             </div>

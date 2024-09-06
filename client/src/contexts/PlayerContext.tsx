@@ -1,6 +1,6 @@
 import { createContext } from 'preact';
 import { PlayerContextData, APICharacterData } from '@legion/shared/interfaces';
-import { League, Stat, InventoryActionType } from "@legion/shared/enums";
+import { League, Stat, InventoryActionType, ShopTab } from "@legion/shared/enums";
 
 export interface PlayerContextState {
   player: PlayerContextData;
@@ -21,6 +21,7 @@ export const PlayerContext = createContext<{
   getCharacter: (characterId: string) => APICharacterData | undefined;
   getActiveCharacter: () => APICharacterData | undefined;
   updateInventory: (type: string, action: InventoryActionType, index: number) => void;
+  applyPurchase: (articleId: number, price: number, quantity: number, shoptab: ShopTab) => void;
   updateActiveCharacter: (characterId: string) => void;
 }>({
   player: {
@@ -54,5 +55,6 @@ export const PlayerContext = createContext<{
   getCharacter: () => undefined,
   getActiveCharacter: () => undefined,
   updateInventory: () => {},
+  applyPurchase: () => {},
   updateActiveCharacter: () => {},
 });

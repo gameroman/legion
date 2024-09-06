@@ -2,8 +2,8 @@ import { Component, h } from 'preact';
 import { PlayerContextState, PlayerContext } from '../contexts/PlayerContext';
 import { apiFetch } from '../services/apiService';
 import { successToast, errorToast } from '../components/utils';
-import { APICharacterData, PlayerContextData } from '@legion/shared/interfaces';
-import { League, Stat, StatFields, InventoryActionType,
+import { APICharacterData, PlayerContextData, PlayerInventory } from '@legion/shared/interfaces';
+import { League, Stat, StatFields, InventoryActionType, ShopTab
  } from "@legion/shared/enums";
  import { ItemDialogType } from '../components/itemDialog/ItemDialogType';
 import { firebaseAuth } from '../services/firebaseService'; 
@@ -61,6 +61,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       this.getCharacter = this.getCharacter.bind(this);
       this.getActiveCharacter = this.getActiveCharacter.bind(this);
       this.updateInventory = this.updateInventory.bind(this);
+      this.applyPurchase = this.applyPurchase.bind(this);
       this.updateActiveCharacter = this.updateActiveCharacter.bind(this);
     }
 
@@ -221,6 +222,57 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       });
     }
 
+    applyPurchase(articleId: number, price: number, quantity: number, shoptab: ShopTab) {
+      if (shoptab === ShopTab.CHARACTERS) {
+        // For character purchases, update gold and fetch roster data
+        this.setState(
+          prevState => ({
+            player: {
+              ...prevState.player,
+              gold: prevState.player.gold - price * quantity
+            }
+          }),
+          () => {
+            this.fetchRosterData();
+          }
+        );
+        return;
+      }
+    
+      const { inventory } = this.state.player;
+      let inventoryField: keyof PlayerInventory;
+      
+      switch (shoptab) {
+        case ShopTab.CONSUMABLES:
+          inventoryField = 'consumables';
+          break;
+        case ShopTab.EQUIPMENTS:
+          inventoryField = 'equipment';
+          break;
+        case ShopTab.SPELLS:
+          inventoryField = 'spells';
+          break;
+        default:
+          return;
+      }
+      
+      const updatedInventoryField = [...inventory[inventoryField]];
+      for (let i = 0; i < quantity; i++) {
+        updatedInventoryField.push(articleId);
+      }
+      
+      this.setState({
+        player: {
+          ...this.state.player,
+          gold: this.state.player.gold - price * quantity,
+          inventory: {
+            ...inventory,
+            [inventoryField]: updatedInventoryField.sort()
+          }
+        }
+      });
+    }
+
     getCharacter = (characterId: string): APICharacterData | undefined => {
       return this.state.characters.find(char => char.id === characterId);
     }
@@ -251,6 +303,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           getCharacter: this.getCharacter,
           getActiveCharacter: this.getActiveCharacter,
           updateInventory: this.updateInventory,
+          applyPurchase: this.applyPurchase,
           updateActiveCharacter: this.updateActiveCharacter,
         }}>
           {children}

@@ -4,7 +4,7 @@ import admin, {corsMiddleware, getUID} from "./APIsetup";
 import {getConsumableById} from "@legion/shared/Items";
 import {getSpellById} from "@legion/shared/Spells";
 import {getEquipmentById} from "@legion/shared/Equipments";
-import {InventoryType, InventoryActionType, ShopTabs, ChestColor}
+import {InventoryType, InventoryActionType, ShopTab, ChestColor}
   from "@legion/shared/enums";
 import {DBCharacterData, DBPlayerData} from "@legion/shared/interfaces";
 import {inventorySize} from "@legion/shared/utils";
@@ -60,7 +60,7 @@ export const purchaseItem = onRequest((request, response) => {
       if (docSnap.exists) {
         const itemId = request.body.articleId;
         const nb = request.body.quantity;
-        const inventoryType = request.body.inventoryType as ShopTabs;
+        const inventoryType = request.body.inventoryType as ShopTab;
         console.log(`itemId: ${itemId}, nb: ${nb}, inventoryType: ${inventoryType}`);
 
         // Check that the player has enough space in their inventory
@@ -72,13 +72,13 @@ export const purchaseItem = onRequest((request, response) => {
 
         let itemPrice = 0;
         switch (inventoryType) {
-          case ShopTabs.CONSUMABLES:
+          case ShopTab.CONSUMABLES:
             itemPrice = getConsumableById(itemId)?.price || 0;
             break;
-          case ShopTabs.SPELLS:
+          case ShopTab.SPELLS:
             itemPrice = getSpellById(itemId)?.price || 0;
             break;
-          case ShopTabs.EQUIPMENTS:
+          case ShopTab.EQUIPMENTS:
             itemPrice = getEquipmentById(itemId)?.price || 0;
             break;
           default:
@@ -97,13 +97,13 @@ export const purchaseItem = onRequest((request, response) => {
 
         const inventoryUpdate = { ...inventory };
         switch (inventoryType) {
-          case ShopTabs.CONSUMABLES:
+          case ShopTab.CONSUMABLES:
             inventoryUpdate.consumables = [...inventory.consumables, ...Array(nb).fill(itemId)];
             break;
-          case ShopTabs.SPELLS:
+          case ShopTab.SPELLS:
             inventoryUpdate.spells = [...inventory.spells, ...Array(nb).fill(itemId)];
             break;
-          case ShopTabs.EQUIPMENTS:
+          case ShopTab.EQUIPMENTS:
             inventoryUpdate.equipment = [...inventory.equipment, ...Array(nb).fill(itemId)];
             break;
         }
@@ -173,7 +173,7 @@ export const inventoryTransaction = onRequest(async (request, response) => {
           case InventoryType.CONSUMABLES:
             canDo = canEquipConsumable(characterData);
             break;
-          case InventoryType.SKILLS:
+          case InventoryType.SPELLS:
             canDo = canLearnSpell(characterData, playerData.inventory.spells[index]);
             break;
           case InventoryType.EQUIPMENTS:
@@ -199,7 +199,7 @@ export const inventoryTransaction = onRequest(async (request, response) => {
           case InventoryType.CONSUMABLES:
             update = equipConsumable(playerData, characterData, index);
             break;
-          case InventoryType.SKILLS:
+          case InventoryType.SPELLS:
             update = learnSpell(playerData, characterData, index);
             break;
           case InventoryType.EQUIPMENTS:

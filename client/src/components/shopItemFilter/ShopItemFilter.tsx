@@ -1,5 +1,5 @@
 // ShopItemFilter.tsx
-import { Class, ClassLabels, EquipmentSlot, ShopTabs } from '@legion/shared/enums';
+import { Class, ClassLabels, EquipmentSlot, ShopTab } from '@legion/shared/enums';
 import './ShopItemFilter.style.css'
 import { h, Component } from 'preact';
 import { ShopItems } from '@legion/shared/interfaces';
@@ -31,7 +31,7 @@ const equipmentSlotIcons = {
 };
 
 interface ShopItemFilterProps {
-    curr_tab: ShopTabs;
+    curr_tab: ShopTab;
     shopItems: ShopItems;
     handleInventory: (inventory: ShopItems) => void;
 }

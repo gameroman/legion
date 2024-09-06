@@ -179,6 +179,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
     const { index } = this.props;
     const backgroundPosition = this.getSpritePosition(dialogData.frame);
     const activeCharacter = this.context.getActiveCharacter() as APICharacterData;
+    if (!activeCharacter) return null;
     const isDisabled = !canEquipEquipment(activeCharacter, dialogData.id);
 
     return (

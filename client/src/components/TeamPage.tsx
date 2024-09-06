@@ -67,6 +67,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
   }
 
   updateCharacterData = () => {
+    if (!this.context.characters.length) return;
     const characterData = this.context.getCharacter(this.context.activeCharacterId || this.context.characters[0].id);
     this.setState({ character_sheet_data: characterData });
     this.context.characterSheetIsDirty = false;
@@ -115,7 +116,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
 
     return (
         <div className="team-content">
-          <Roster characters={this.context.characters}/>
+          <Roster/>
           <div className="character-inventory-container">
             {this.state.character_sheet_data ? <CharacterSheet 
               characterId={this.state.character_id} 
