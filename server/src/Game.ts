@@ -544,7 +544,6 @@ export abstract class Game
 
         targets.forEach(target => {
             if (target.HPHasChanged()) {
-                this.broadcastHPchange(target.team!, target.num, target.getHP(), target.getHPDelta());
                 target.team.incrementHealing(target.getHPDelta());
             }
             if (target.MPHasChanged()) {

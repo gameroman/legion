@@ -6,7 +6,7 @@ import { getConsumableById } from '@legion/shared/Items';
 import { getSpellById } from '@legion/shared/Spells';
 import { getXPThreshold } from '@legion/shared/levelling';
 import { PlayerNetworkData, StatusEffects } from '@legion/shared/interfaces';
-import { INITIAL_COOLDOWN, TIME_COEFFICIENT } from "@legion/shared/config";
+import { INITIAL_COOLDOWN, TIME_COEFFICIENT, INJURED_MODE } from "@legion/shared/config";
 import { CooldownManager } from './CooldownManager';
 import { paralyzingStatuses } from '@legion/shared/utils';
 
@@ -279,7 +279,7 @@ export class ServerPlayer {
 
     setHP(hp: number) {
         this.maxHP = hp;
-        this.hp = this.maxHP;
+        this.hp = INJURED_MODE ? this.maxHP / 2 : this.maxHP;
         this._hp = this.maxHP;
     }
 

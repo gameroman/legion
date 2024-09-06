@@ -57,6 +57,7 @@ export class Player extends Phaser.GameObjects.Container {
     class: Class;
     xp: number;
     level: number;
+    lastOverheadMessage: number;
 
     constructor(
         scene: Phaser.Scene, arenaScene: Arena, team: Team, name: string, gridX: number, gridY: number, x: number, y: number,
@@ -587,13 +588,18 @@ export class Player extends Phaser.GameObjects.Container {
 
     displayOverheadText(text, duration, color) {
         const randomXOffset = 0; //(Math.random() - 0.5) * 30; 
-        const randomYOffset = 0; // (Math.random() - 0.5) * 10; 
+        let randomYOffset = 0; // (Math.random() - 0.5) * 10; 
+
+        if (Date.now() - this.lastOverheadMessage < 100) {
+            randomYOffset -= 30;
+        }
 
         const textObject = this.scene.add.text(
             randomXOffset,( -this.sprite.height / 2) + 15 + randomYOffset, `${String(text)}`, 
             { fontSize: '24px', color, stroke: '#000', strokeThickness: 3, fontFamily: 'Kim',}
             ).setOrigin(0.5).setDepth(10)   ;
         this.add(textObject);
+        this.lastOverheadMessage = Date.now();
     
         // Create a tween to animate the damage text
         this.scene.tweens.add({
@@ -610,6 +616,7 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     displayDamage(damage) {
+        console.log(`Displaying damage ${damage}`);
         const txt = damage > 0 ? `+${Math.round(damage)}` : `${Math.round(damage)}`;
         this.displayOverheadText(txt, 4000, '#fff');
     }
