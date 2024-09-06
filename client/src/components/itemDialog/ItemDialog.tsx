@@ -98,11 +98,10 @@ class ItemDialog extends Component<DialogProps, DialogState> {
   }
 
   AcceptAction = (type: ItemDialogType, index: number) => {
-    if (!this.context.activeCharacterId) return;
 
     const payload = {
       index,
-      characterId: this.context.activeCharacterId,
+      characterId: this.context.getActiveCharacter().id,
       inventoryType: type,
       action: this.props.actionType
     };
@@ -121,16 +120,14 @@ class ItemDialog extends Component<DialogProps, DialogState> {
       .catch(error => errorToast(`Error: ${error}`));
   }
 
-  spendSP = async (stat: Stat, amount: number) => {
-    if (!this.context.activeCharacterId) return;
-  
+  spendSP = async (stat: Stat, amount: number) => {  
     const payload = {
       stat,
       amount,
-      characterId: this.context.activeCharacterId,
+      characterId: this.context.getActiveCharacter().id,
     };
 
-    this.context.updateCharacterStats(this.context.activeCharacterId, stat, amount);
+    this.context.updateCharacterStats(this.context.getActiveCharacter().id, stat, amount);
 
     this.props.updateCharacterData();
     this.props.handleClose();

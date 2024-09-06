@@ -148,7 +148,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
 
     updateInventory(type: ItemDialogType, action: InventoryActionType, index: number) {
       this.setState((prevState) => {
-        const activeCharacter = prevState.characters.find(char => char.id === prevState.activeCharacterId);
+        const activeCharacter = this.getActiveCharacter();
         if (!activeCharacter) {
           errorToast('No active character selected!');
           return prevState;
@@ -278,7 +278,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
     }
 
     getActiveCharacter = (): APICharacterData | undefined => {
-      return this.getCharacter(this.state.activeCharacterId);
+      return this.getCharacter(this.state.activeCharacterId) || this.state.characters[0];
     }
 
     setPlayerInfo = (updates: Partial<PlayerContextData>) => {
