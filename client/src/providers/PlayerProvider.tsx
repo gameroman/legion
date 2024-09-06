@@ -63,6 +63,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       this.updateInventory = this.updateInventory.bind(this);
       this.applyPurchase = this.applyPurchase.bind(this);
       this.updateActiveCharacter = this.updateActiveCharacter.bind(this);
+      this.fetchAllData = this.fetchAllData.bind(this);
     }
 
     componentDidMount() {
@@ -70,6 +71,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
     }
 
     fetchAllData() {
+      console.log('Fetching all data...');
       this.fetchPlayerData();
       this.fetchRosterData();
     }
@@ -298,6 +300,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           characterSheetIsDirty: this.state.characterSheetIsDirty,
           setPlayerInfo: this.setPlayerInfo,
           refreshPlayerData: this.fetchPlayerData,
+          refreshAllData: this.fetchAllData,
           fetchRosterData: this.fetchRosterData,
           updateCharacterStats: this.updateCharacterStats,
           getCharacter: this.getCharacter,

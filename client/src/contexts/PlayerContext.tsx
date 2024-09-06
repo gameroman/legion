@@ -23,6 +23,7 @@ export const PlayerContext = createContext<{
   updateInventory: (type: string, action: InventoryActionType, index: number) => void;
   applyPurchase: (articleId: number, price: number, quantity: number, shoptab: ShopTab) => void;
   updateActiveCharacter: (characterId: string) => void;
+  refreshAllData: () => void;
 }>({
   player: {
     uid: '',
@@ -57,4 +58,5 @@ export const PlayerContext = createContext<{
   updateInventory: () => {},
   applyPurchase: () => {},
   updateActiveCharacter: () => {},
+  refreshAllData: () => {},
 });

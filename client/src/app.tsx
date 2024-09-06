@@ -29,11 +29,12 @@ class App extends Component<{}, AppState> {
         return parts[1] || '/'; // Return the first part after the initial slash, or '/' if it's the root
     }
 
-    handleRoute = (e: RouterOnChangeArgs, refreshPlayerData: () => void, updateActiveCharacter: (id: string | null) => void) => {
+    handleRoute = (e: RouterOnChangeArgs, refreshAllData: () => void, updateActiveCharacter: (id: string | null) => void) => {
         const newMainRoute = this.getMainRoute(e.url);
         
-        if (newMainRoute !== this.state.currentMainRoute) {
-            refreshPlayerData();
+        if (this.state.currentMainRoute === 'game' && newMainRoute !== 'game') 
+        {
+            refreshAllData();
         }
 
         if (newMainRoute === 'team') {
@@ -54,8 +55,8 @@ class App extends Component<{}, AppState> {
             <AuthProvider>
                 <PlayerProvider>
                     <PlayerContext.Consumer>
-                        {({ refreshPlayerData, updateActiveCharacter }) => (
-                            <Router onChange={(e: RouterOnChangeArgs) => this.handleRoute(e, refreshPlayerData, updateActiveCharacter)}>
+                        {({ refreshAllData, updateActiveCharacter }) => (
+                            <Router onChange={(e: RouterOnChangeArgs) => this.handleRoute(e, refreshAllData, updateActiveCharacter)}>
                                 <Route path="/" component={withNoAuth(LandingPage)} />
                                 <Route path="/game/:id" component={AuthenticatedGamePage} />
                                 <Route path="/play" component={AuthenticatedHomePage} />
