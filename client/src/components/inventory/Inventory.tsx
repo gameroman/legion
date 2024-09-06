@@ -14,7 +14,7 @@ import Skeleton from 'react-loading-skeleton';
 
 import { Link } from 'preact-router';
 import Modal from 'react-modal';
-import { Effect, PlayerInventory } from '@legion/shared/interfaces';
+import { Effect } from '@legion/shared/interfaces';
 
 import shopIcon from '@assets/inventory/shop_btn.png';
 import helpIcon from '@assets/inventory/info_btn.png';
@@ -79,10 +79,6 @@ class Inventory extends Component<InventoryProps> {
 
       return <div key={i} className="item" style={slotStyle}>
         <ItemIcon
-          characterId={this.props.id}
-          characterName={this.props.name}
-          characterLevel={this.props.level}
-          characterClass={this.props.class}
           action={item}
           index={i}
           hideHotKey={true}

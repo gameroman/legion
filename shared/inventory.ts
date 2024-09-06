@@ -1,10 +1,16 @@
 import { APICharacterData, DBCharacterData, DBPlayerData, PlayerContextData, Equipment } from './interfaces';
-import { EquipmentSlot, equipmentFields } from "./enums";
+import { EquipmentSlot, equipmentFields, Class } from "./enums";
 import { getSpellById } from "./Spells";
 import { getEquipmentById } from "./Equipments";
+import { inventorySize } from '@legion/shared/utils';
+import { getConsumableById } from './Items';
 
 export function numericalSort(a: number, b: number): number {
     return a - b;
+}
+
+export function roomInInventory(playerData: PlayerContextData | DBPlayerData): boolean {
+    return inventorySize(playerData.inventory) < playerData.carrying_capacity;
 }
 
 export function canEquipConsumable(characterData: DBCharacterData | APICharacterData): boolean {
@@ -19,10 +25,18 @@ export function canLearnSpell(characterData: DBCharacterData | APICharacterData,
     return false;
   }
   return (
-    spell.minLevel <= characterData.level &&
-    (!spell.classes.length || spell.classes.includes(characterData.class)) &&
+    hasMinLevel(characterData, spell.minLevel) &&
+    hasRequiredClass(characterData, spell.classes) &&
     characterData.skills.length < characterData.skill_slots
   );
+}
+
+export function hasMinLevel(characterData: DBCharacterData | APICharacterData, level: number): boolean {
+    return characterData.level >= level;
+}
+
+export function hasRequiredClass(characterData: DBCharacterData | APICharacterData, classes: Class[]): boolean {
+    return !classes.length || classes.includes(characterData.class);
 }
 
 export function canEquipEquipment(characterData: DBCharacterData | APICharacterData, equipmentId: number): boolean {
@@ -34,8 +48,8 @@ export function canEquipEquipment(characterData: DBCharacterData | APICharacterD
   console.log(`[canEquipEquipment] equipmentId: ${equipmentId}, equipment: ${equipment.name}`);
 
   return (
-    equipment.minLevel <= characterData.level &&
-    (!equipment.classes.length || equipment.classes.includes(characterData.class))
+    hasMinLevel(characterData, equipment.minLevel) &&
+    hasRequiredClass(characterData, equipment.classes)
   );
 }
 
@@ -49,10 +63,11 @@ export function equipConsumable(playerData: PlayerContextData | DBPlayerData, ch
   }
 
   const item = consumables[index];
+  console.log(`[equipConsumable] index: ${index}, item: ${item}, name: ${getConsumableById(item)?.name}`);
   consumables.splice(index, 1);
   inventory.push(item);
 
-  playerInventory.consumables = consumables;
+  playerInventory.consumables = consumables.sort(numericalSort);
   return {
     playerUpdate: { inventory: playerInventory },
     characterUpdate: { inventory },
@@ -72,7 +87,7 @@ export function unequipConsumable(playerData: PlayerContextData | DBPlayerData, 
   inventory.splice(index, 1);
   consumables.push(item);
 
-  playerInventory.consumables = consumables;
+  playerInventory.consumables = consumables.sort(numericalSort);
   return {
     playerUpdate: { inventory: playerInventory },
     characterUpdate: { inventory },
@@ -164,7 +179,7 @@ export function unequipEquipment(playerData: PlayerContextData | DBPlayerData, c
   if (item != -1) {
     equipped[field as keyof Equipment] = -1;
     equipment.push(item);
-    playerInventory.equipment = equipment;
+    playerInventory.equipment = equipment.sort(numericalSort);
   }
 
   return {

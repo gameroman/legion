@@ -8,7 +8,6 @@ import { League, Stat, StatFields, InventoryActionType,
  import { ItemDialogType } from '../components/itemDialog/ItemDialogType';
 import { firebaseAuth } from '../services/firebaseService'; 
 import { getSPIncrement } from '@legion/shared/levelling';
-import { inventorySize } from '@legion/shared/utils';
 import { playSoundEffect } from '../components/utils';
 
 import {
@@ -19,7 +18,8 @@ import {
   unequipConsumable,
   learnSpell,
   equipEquipment,
-  unequipEquipment
+  unequipEquipment,
+  roomInInventory
 } from '@legion/shared/inventory';
 
 import equipSfx from "@assets/sfx/equip.wav";
@@ -168,7 +168,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
               }
               result = equipConsumable(newState.player, updatedCharacter, index);
             } else {
-              if (inventorySize(updatedInventory) >= newState.player.carrying_capacity) {
+              if (!roomInInventory(newState.player)) {
                 errorToast('Player inventory is full!');
                 return prevState;
               }
@@ -183,7 +183,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
               }
               result = equipEquipment(newState.player, updatedCharacter, index);
             } else {
-              if (inventorySize(updatedInventory) >= newState.player.carrying_capacity) {
+              if (!roomInInventory(newState.player)) {
                 errorToast('Player inventory is full!');
                 return prevState;
               }

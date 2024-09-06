@@ -16,11 +16,9 @@ import {
   canEquipConsumable,
   canLearnSpell,
   canEquipEquipment,
-  equipConsumable,
-  unequipConsumable,
-  learnSpell,
-  equipEquipment,
-  unequipEquipment
+  roomInInventory,
+  hasMinLevel,
+  hasRequiredClass
 } from '@legion/shared/inventory';
 
 import equipmentSpritesheet from '@assets/equipment.png';
@@ -32,14 +30,10 @@ import cancelIcon from '@assets/inventory/cancel_icon.png';
 import mpIcon from '@assets/inventory/mp_icon.png';
 import cdIcon from '@assets/inventory/cd_icon.png';
 import targetIcon from '@assets/inventory/target_icon.png';
+import { APICharacterData } from '@legion/shared/interfaces';
 
 Modal.setAppElement('#root');
 interface DialogProps {
-  characterId?: string;
-  characterSp?: number;
-  characterName?: string;
-  characterLevel?: number; 
-  characterClass?: number; 
   index?: number;
   isEquipped?: boolean;
   actionType: InventoryActionType;
@@ -95,6 +89,14 @@ class ItemDialog extends Component<DialogProps, DialogState> {
     }
   }
 
+  handleClose = () => {
+    this.setState({ 
+      dialogSPModalShow: false,
+      dialogValue: 1  // Reset dialogValue when closing
+    });
+    this.props.handleClose();
+  }
+
   AcceptAction = (type: ItemDialogType, index: number) => {
     if (!this.context.activeCharacterId) return;
 
@@ -147,8 +149,11 @@ class ItemDialog extends Component<DialogProps, DialogState> {
   }
 
   renderDialogButtons(acceptAction: () => void, isDisabled: boolean = false) {
-    const { handleClose, actionType } = this.props;
-    const acceptLabel = actionType > 0 ? 'Remove' : 'Equip';
+    const { actionType } = this.props;
+    let acceptLabel = actionType == InventoryActionType.UNEQUIP ? 'Remove' : 'Equip';
+    if (this.props.dialogType === ItemDialogType.SP) {
+      acceptLabel = 'Spend';
+    }
 
     return (
       <div className="dialog-button-container">
@@ -161,7 +166,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
           <img src={confirmIcon} alt="confirm" />
           {acceptLabel}
         </button>
-        <button className="dialog-decline" onClick={handleClose}>
+        <button className="dialog-decline" onClick={this.handleClose}>
           <img src={cancelIcon} alt="decline" />
           Cancel
         </button>
@@ -171,9 +176,10 @@ class ItemDialog extends Component<DialogProps, DialogState> {
 
   renderEquipmentDialog(dialogData: BaseEquipment) {
     if (!dialogData) return null;
-    const { characterLevel, characterClass, index } = this.props;
+    const { index } = this.props;
     const backgroundPosition = this.getSpritePosition(dialogData.frame);
-    const isDisabled = characterLevel < dialogData.minLevel || (dialogData.classes.length > 0 && !dialogData.classes.includes(characterClass));
+    const activeCharacter = this.context.getActiveCharacter() as APICharacterData;
+    const isDisabled = !canEquipEquipment(activeCharacter, dialogData.id);
 
     return (
       <div className="equip-dialog-container">
@@ -182,12 +188,12 @@ class ItemDialog extends Component<DialogProps, DialogState> {
           backgroundPosition,
         }} />
         <p className="equip-dialog-name">{dialogData.name}</p>
-        <div style={{ backgroundColor: characterLevel >= dialogData.minLevel ? "#2f404d" : "darkred" }} className="equip-dialog-lvl">
+        <div style={{ backgroundColor: hasMinLevel(activeCharacter, dialogData.minLevel) ? "#2f404d" : "darkred" }} className="equip-dialog-lvl">
           Lvl <span>{dialogData.minLevel}</span>
         </div>
         <div className="equip-dialog-class-container">
           {dialogData.classes?.map((item) => (
-            <div style={isDisabled ? { backgroundColor: "darkred" } : {}} className="equip-dialog-class">
+            <div style={!hasRequiredClass(activeCharacter, dialogData.classes) ? { backgroundColor: "darkred" } : {}} className="equip-dialog-class">
               {classEnumToString(item)}
             </div>
           ))}
@@ -201,6 +207,12 @@ class ItemDialog extends Component<DialogProps, DialogState> {
   renderConsumableDialog(dialogData: BaseItem) {
     const { index } = this.props;
     const backgroundPosition = this.getSpritePosition(dialogData.frame);
+    const activeCharacter = this.context.getActiveCharacter() as APICharacterData;
+
+    const actionAllowed = 
+      this.props.actionType === InventoryActionType.EQUIP ?
+      canEquipConsumable(activeCharacter) :
+      roomInInventory(this.context.player);
 
     return (
       <div className="dialog-item-container">
@@ -236,15 +248,19 @@ class ItemDialog extends Component<DialogProps, DialogState> {
             </div>
           ))}
         </div>
-        {this.renderDialogButtons(() => this.AcceptAction(ItemDialogType.CONSUMABLES, index))}
+        {this.renderDialogButtons(
+            () => this.AcceptAction(ItemDialogType.CONSUMABLES, index),
+            !actionAllowed
+          )}
       </div>
     );
   }
 
   renderSpellDialog(dialogData: BaseSpell) {
-    const { characterLevel, characterClass, characterName, index, isEquipped } = this.props;
+    const { index, isEquipped } = this.props;
     const backgroundPosition = this.getSpritePosition(dialogData.frame);
-    const isDisabled = characterLevel < dialogData.minLevel || (dialogData.classes.length > 0 && !dialogData.classes.includes(characterClass));
+    const activeCharacter = this.context.getActiveCharacter() as APICharacterData;
+    const isDisabled = canLearnSpell(activeCharacter, dialogData.id);
 
     return (
       <div className="dialog-spell-container">
@@ -270,18 +286,18 @@ class ItemDialog extends Component<DialogProps, DialogState> {
             <span>{Target[dialogData.target]}</span>
           </div>
         </div>
-        <div style={{ backgroundColor: characterLevel >= dialogData.minLevel ? "#2f404d" : "darkred" }} className="equip-dialog-lvl">
+        <div style={{ backgroundColor: hasMinLevel(activeCharacter, dialogData.minLevel) ? "#2f404d" : "darkred" }} className="equip-dialog-lvl">
           Lvl <span>{dialogData.minLevel}</span>
         </div> 
         <div className="equip-dialog-class-container">
           {dialogData.classes?.map((item) => (
-            <div style={isDisabled ? { backgroundColor: "darkred" } : {}} className="equip-dialog-class">
+            <div style={!hasRequiredClass(activeCharacter, dialogData.classes) ? { backgroundColor: "darkred" } : {}} className="equip-dialog-class">
               {classEnumToString(item)}
             </div>
           ))}
         </div>
         {!isEquipped && this.renderDialogButtons(() => this.AcceptAction(ItemDialogType.SPELLS, index), isDisabled)}
-        {this.renderSpellConfirmationModal(dialogData, characterName)}
+        {this.renderSpellConfirmationModal(dialogData, activeCharacter.name)}
       </div>
     );
   }
@@ -302,7 +318,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
 
   renderSPSpendDialog(dialogData: SPSPendingData) {
     const { dialogValue } = this.state;
-    const { handleClose } = this.props;
+    const activeCharacter = this.context.getActiveCharacter() as APICharacterData;
 
     return (
       <div className="character-info-dialog-container">
@@ -320,7 +336,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
         <div className="character-info-dialog-control">
           <div className="character-info-dialog-control-btn" onClick={() => this.setState(prevState => ({ dialogValue: Math.max(1, prevState.dialogValue - 1) }))}>-</div>
           <div className="character-info-dialog-control-val">{dialogValue}</div>
-          <div className="character-info-dialog-control-btn" onClick={() => this.setState(prevState => ({ dialogValue: Math.min(this.props.characterSp, prevState.dialogValue + 1) }))}>+</div>
+          <div className="character-info-dialog-control-btn" onClick={() => this.setState(prevState => ({ dialogValue: Math.min(activeCharacter.sp, prevState.dialogValue + 1) }))}>+</div>
         </div>
         {this.renderDialogButtons(() => this.setState({ dialogSPModalShow: true }))}
         {this.renderSPConfirmationModal(dialogData)}
@@ -360,7 +376,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
   }
 
   render() {
-    const { position, dialogOpen, handleClose } = this.props;
+    const { position, dialogOpen } = this.props;
 
     const customStyles = {
       content: {
@@ -380,7 +396,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
     };
 
     return (
-      <Modal isOpen={dialogOpen} style={customStyles} onRequestClose={handleClose}>
+      <Modal isOpen={dialogOpen} style={customStyles} onRequestClose={this.handleClose}>
         {this.renderDialogContent()}
       </Modal>
     );

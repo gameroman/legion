@@ -341,11 +341,6 @@ class CharacterSheet extends Component<CharacterSheetProps> {
                 <ItemDialog
                     isEquipped={true}
                     actionType={InventoryActionType.UNEQUIP}
-                    characterId={characterId} 
-                    characterSp={characterData?.sp}
-                    characterName={characterData.name} 
-                    characterLevel={characterData.level} 
-                    characterClass={characterData.class} 
                     index={this.state.itemIndex}
                     dialogOpen={this.state.openModal}
                     dialogType={this.state.modalType}

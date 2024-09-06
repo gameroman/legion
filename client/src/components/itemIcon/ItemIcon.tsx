@@ -14,10 +14,6 @@ import consumablesSpritesheet from '@assets/consumables.png';
 import spellsSpritesheet from '@assets/spells.png';
 
 interface ItemIconProps {
-  characterId?: string,
-  characterName?: string,
-  characterLevel?: number, 
-  characterClass?: number, 
   action: BaseItem | BaseSpell | BaseEquipment | null;
   index: number;
   actionType: InventoryType;
@@ -116,10 +112,6 @@ class ItemIcon extends Component<ItemIconProps> {
         <ItemDialog
           index={index}
           isEquipped={false}
-          characterId={this.props.characterId}
-          characterName={this.props.characterName}
-          characterLevel={this.props.characterLevel} 
-          characterClass={this.props.characterClass} 
           actionType={InventoryActionType.EQUIP}
           dialogOpen={this.state.openModal}
           dialogType={this.state.modalType}
