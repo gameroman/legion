@@ -718,7 +718,6 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     showStatusAnimation(status: StatusEffect) {
-        console.log(`Showing status animation for ${status}`);
         const keys = {
             [StatusEffect.FREEZE]: 'freeze',
             [StatusEffect.PARALYZE]: 'paralyzed',

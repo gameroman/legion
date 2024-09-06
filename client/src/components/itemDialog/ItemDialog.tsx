@@ -261,7 +261,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
     const { index, isEquipped } = this.props;
     const backgroundPosition = this.getSpritePosition(dialogData.frame);
     const activeCharacter = this.context.getActiveCharacter() as APICharacterData;
-    const isDisabled = canLearnSpell(activeCharacter, dialogData.id);
+    const isDisabled = !canLearnSpell(activeCharacter, dialogData.id);
 
     return (
       <div className="dialog-spell-container">

@@ -598,7 +598,10 @@ export class Arena extends Phaser.Scene
     
     refreshOverview() {
         const { team1, team2, general, initialized } = this.getOverview();
-        if (this.overviewReady) events.emit('updateOverview', team1, team2, general, initialized);
+        if (this.overviewReady) {
+            // console.log('Emitting updateOverview', team1, team2, general, initialized);
+            events.emit('updateOverview', team1, team2, general, initialized);
+        }
     }
 
     showEndgameScreen(data: OutcomeData) {
@@ -898,7 +901,6 @@ export class Arena extends Phaser.Scene
     }
 
     processGameEnd(data: OutcomeData) {
-        console.log(`Game ended: ${JSON.stringify(data)}`);
         this.musicManager.playEnd();
         const winningTeam = data.isWinner ? this.teamsMap.get(this.playerTeamId) : this.teamsMap.get(this.getOtherTeam(this.playerTeamId));
         setTimeout(() => {
@@ -1378,6 +1380,7 @@ export class Arena extends Phaser.Scene
         });
 
         events.on('exitGame', () => {
+            console.log('Exit game event received');
             this.destroy();
         });
     }
@@ -1617,6 +1620,7 @@ export class Arena extends Phaser.Scene
     }
 
     destroy() {
+        console.log('Destroying game');
         this.gameEnded = true;
         this.socket.disconnect();
 

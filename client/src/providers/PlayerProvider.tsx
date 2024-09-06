@@ -113,7 +113,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           characters: data.characters
         });
       } catch (error) {
-        errorToast(`Error: ${error}`);
+        // errorToast(`Error: ${error}`);
       }
     }
 

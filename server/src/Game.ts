@@ -6,7 +6,7 @@ import { Spell } from './Spell';
 import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import {apiFetch} from './API';
 import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League, GEN } from '@legion/shared/enums';
-import { OutcomeData, TerrainUpdate, APIPlayerData, GameOutcomeReward, GameData, EndGameDataResults } from '@legion/shared/interfaces';
+import { OutcomeData, TerrainUpdate, PlayerContextData, GameOutcomeReward, GameData, EndGameDataResults } from '@legion/shared/interfaces';
 import { getChestContent } from '@legion/shared/chests';
 import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL, MOVE_COOLDOWN, ATTACK_COOLDOWN,
     PRACTICE_XP_COEF, PRACTICE_GOLD_COEF, RANKED_XP_COEF, RANKED_GOLD_COEF } from '@legion/shared/config';
@@ -56,7 +56,7 @@ export abstract class Game
         socket.join(this.id);
     }
 
-    addPlayer(socket: Socket, playerData: APIPlayerData) {
+    addPlayer(socket: Socket, playerData: PlayerContextData) {
         try {
             if (this.sockets.length === 2) return;
             this.addSocket(socket);
@@ -307,6 +307,7 @@ export abstract class Game
     }
 
     endGame(winnerTeamID: number) {
+        console.log(`[Game:endGame] Game ${this.id} ended!`);
         this.duration = Date.now() - this.startTime;
         this.gameOver = true;
 
@@ -489,7 +490,6 @@ export abstract class Game
     }
 
     processUseItem({num, x, y, index, targetTeam, target}: {num: number, x: number, y: number, index: number,  targetTeam: number, target: number | null}, team: Team) {
-        console.log(`Processing item for team ${team.id}, player ${num}, item ${index}, target team ${targetTeam}, target ${target}`)
         const player = team.getMembers()[num - 1];
         if (!player.canAct()) return;
 
@@ -876,7 +876,6 @@ export abstract class Game
         const isWinner = team.id === winnerTeamId;
         const eloUpdate = this.mode == PlayMode.RANKED ? this.updateElo(isWinner ? team : otherTeam, isWinner ? otherTeam : team) : {winnerUpdate: 0, loserUpdate: 0};
         const grade = this.computeGrade(team, otherTeam);
-        console.log(`Game grade for team ${team.id}: ${grade}, ${this.computeLetterGrade(grade)}`);
         return {
             isWinner,
             rawGrade: grade,
@@ -940,7 +939,7 @@ export abstract class Game
         }
 
         const levelFactor = 1 - (team.getTotalLevel() / (team.getTotalLevel() + otherTeam.getTotalLevel()));
-        console.log(`HP: ${hpFactor}, Healing: ${healingFactor}, Offense: ${offenseFactor}, Level: ${levelFactor}`);
+        // console.log(`HP: ${hpFactor}, Healing: ${healingFactor}, Offense: ${offenseFactor}, Level: ${levelFactor}`);
 
         const hpCoefficient = 1.5;
         const healingCoefficient = 1;

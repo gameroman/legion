@@ -95,7 +95,7 @@ class PlayPage extends Component {
           highlightColor='#0000004d'
           baseColor='#0f1421'
           style={{ margin: '2px 146px', width: '1024px'}} />}
-        <DailyLoot data={this.context.  player.dailyloot} />
+        <DailyLoot data={this.context.player.dailyloot} />
         {ENABLE_QUESTS && <DailyQuest questData={data.dailyQuests} />}
         {ENABLE_SPECTATOR_MODE && <OnGoingArena ongoingGameData={data.ongoingGames} />}
       </div>

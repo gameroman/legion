@@ -35,7 +35,6 @@ export class MusicManager {
             this.intensity++;
         }
         if (this.intensity > this.nbIntensities) this.intensity = this.nbIntensities;
-        console.log(`Intensity: ${this.intensity}`);
     }
 
     playBeginning() {
