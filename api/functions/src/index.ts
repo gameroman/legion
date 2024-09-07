@@ -10,7 +10,7 @@ import {rosterData, characterData, postGameUpdate,
   deleteOnSaleCharacters, purchaseCharacter, spendSP} from "./characterAPI";
 import {createPlayer, getPlayerData, queuingData,
   saveGoldReward, claimChest, completeTour, fetchGuideTip} from "./playerAPI";
-import {createGame, gameData, completeGame} from "./gameAPI";
+import {createGame, gameData, completeGame, getRemoteConfig} from "./gameAPI";
 import {getDashboardData, getActionLog, logQueuingActivity, insertGameAction,
   getGameLog} from "./dashboardAPI";
 export {
@@ -21,7 +21,7 @@ export {
   gameData, inventorySave, inventoryTransaction, saveGoldReward, spendSP,
   getReward, claimChest, updateRanksOnEloChange, updateRanksOnPlayerCreation,
   completeGame, getDashboardData, getActionLog, logQueuingActivity, insertGameAction,
-  getGameLog, completeTour, fetchGuideTip, manualLeaguesUpdate,
+  getGameLog, completeTour, fetchGuideTip, manualLeaguesUpdate, getRemoteConfig,
 };
 
 export const helloWorld = onRequest((request, response) => {

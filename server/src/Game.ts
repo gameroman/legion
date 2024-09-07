@@ -9,7 +9,7 @@ import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League, GEN } from
 import { OutcomeData, TerrainUpdate, PlayerContextData, GameOutcomeReward, GameData, EndGameDataResults } from '@legion/shared/interfaces';
 import { getChestContent } from '@legion/shared/chests';
 import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL, MOVE_COOLDOWN, ATTACK_COOLDOWN,
-    PRACTICE_XP_COEF, PRACTICE_GOLD_COEF, RANKED_XP_COEF, RANKED_GOLD_COEF } from '@legion/shared/config';
+    PRACTICE_XP_COEF, PRACTICE_GOLD_COEF, RANKED_XP_COEF, RANKED_GOLD_COEF, AUTO_DEFEAT } from '@legion/shared/config';
 import { TerrainManager } from './TerrainManager';
 
 enum GameAction {
@@ -168,6 +168,12 @@ export abstract class Game
         this.checkEndTimer = setInterval(() => {
             this.checkEndGame();
         }, 1000);
+
+        if (AUTO_DEFEAT) {
+            setTimeout(() => {
+                this.endGame(2);
+            }, 5000);
+        }
     }
 
     sendGameStatus(socket: Socket, reconnect: boolean = false) {

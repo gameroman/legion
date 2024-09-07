@@ -118,3 +118,28 @@ export const completeGame = onRequest((request, response) => {
   });
 });
 
+export const getRemoteConfig = onRequest((request, response) => {
+  const remoteConfig = admin.remoteConfig();
+
+  corsMiddleware(request, response, async () => {
+    try {
+       // Fetch the Remote Config template
+      const template = await remoteConfig.getTemplate();
+
+      // Extract parameter values from the template
+      const configValues: { [key: string]: any } = {};
+      for (const [key, parameter] of Object.entries(template.parameters)) {
+        console.log(`Parameter ${key}: ${JSON.stringify(parameter)}`);
+        // @ts-expect-error
+        configValues[key] = parameter.defaultValue?.value;
+      }
+
+      // Send the config values as the response
+      response.status(200).json(configValues);
+    } catch (error) {
+      console.error("getRemoteConfig error:", error);
+      response.status(500).send("Error fetching remote config");
+    }
+  });
+});
+

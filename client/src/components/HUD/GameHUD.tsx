@@ -146,7 +146,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   updateOverview = (team1: TeamOverview, team2: TeamOverview, general: any, initialized: boolean) => {
-    // console.log('Receiving updateOverview', team1, team2, general, initialized);
+    console.log('Receiving updateOverview', team1, team2, general, initialized);
     this.setState({ team1, team2 });
     this.setState({ 
       isTutorial: general.isTutorial,

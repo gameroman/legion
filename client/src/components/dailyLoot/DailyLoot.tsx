@@ -16,7 +16,6 @@ import LootBox from "./LootBox";
 import { PlayerContext } from '../../contexts/PlayerContext';
 import OpenedChest from '../dailyLoot/OpenedChest';
 
-
 interface DailyLootProps {
   data: DailyLootAllAPIData, 
 }
@@ -39,25 +38,11 @@ class DailyLoot extends Component<DailyLootProps, DailyLootState> {
 
   static contextType = PlayerContext;
 
-  getBgImageUrl = (rewardType: RewardType) => {
-    switch (rewardType) {
-      case RewardType.EQUIPMENT:
-        return '/equipment.png';
-      case RewardType.SPELL:
-        return '/spells.png';
-      case RewardType.CONSUMABLES:
-        return '/consumables.png';
-      case RewardType.GOLD:
-        return '/gold_icon.png';
-    }
-  }
-
   render() {
     const { data } = this.props;
     const chestsOrder = [ChestColor.BRONZE, ChestColor.SILVER, ChestColor.GOLD];
 
     const handleOpen = async (color: ChestColor, countdown: number, hasKey: boolean) => {
-      // console.log("dailyPropsData => ", data); 
 
       // Check if countdown is over and if key is owned
       if (countdown > 0) {
@@ -70,7 +55,6 @@ class DailyLoot extends Component<DailyLootProps, DailyLootState> {
       }
       try {
         const data = await apiFetch(`claimChest?chestType=${color}`);
-        console.log("successData => ", data);
 
         this.setState({ chestColor: color });
         this.setState({ chestContent: data.content }); 
@@ -88,7 +72,7 @@ class DailyLoot extends Component<DailyLootProps, DailyLootState> {
         chestContent: [], 
         chestDailyLoot: null, 
       });
-      successToast("You got the daily loot successfully!"); 
+      successToast("Chest claimed successfully!"); 
     }
 
     const [width, height] = useWindowSize()

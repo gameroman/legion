@@ -71,7 +71,6 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
     }
 
     fetchAllData() {
-      console.log('Fetching all data...');
       this.fetchPlayerData();
       this.fetchRosterData();
     }

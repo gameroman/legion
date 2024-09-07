@@ -600,7 +600,7 @@ export class Arena extends Phaser.Scene
     refreshOverview() {
         const { team1, team2, general, initialized } = this.getOverview();
         if (this.overviewReady) {
-            // console.log('Emitting updateOverview', team1, team2, general, initialized);
+            console.log('Emitting updateOverview', team1, team2, general, initialized);
             events.emit('updateOverview', team1, team2, general, initialized);
         }
     }
