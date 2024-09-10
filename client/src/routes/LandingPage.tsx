@@ -35,6 +35,9 @@ class LandingPage extends Component<{}, LandingPageState> {
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         firebase.auth.EmailAuthProvider.PROVIDER_ID,
       ],
+      callbacks: {
+        signInSuccessWithAuthResult: this.onSignInSuccess
+      }
     };
 
     if (this.firebaseUIContainer) {
@@ -45,6 +48,27 @@ class LandingPage extends Component<{}, LandingPageState> {
         console.error('Error initializing Firebase UI: ', error);
       }
     }
+  };
+
+  onSignInSuccess = (authResult: any): boolean => {
+    const user = firebase.auth().currentUser;
+    if (user?.isAnonymous) {
+      // The user was previously signed in anonymously
+      const credential = authResult.credential;
+      
+      user.linkWithCredential(credential)
+        .then((usercred) => {
+          const user = usercred.user;
+          console.log("Anonymous account successfully upgraded", user);
+          // You might want to update the user's data in your database here
+        }).catch((error) => {
+          console.error("Error upgrading anonymous account", error);
+        });
+    }
+    
+    // Navigate to the play page
+    route('/play');
+    return false;  // Prevent FirebaseUI from redirecting
   };
 
   clearFirebaseUI = (): void => {
@@ -61,7 +85,7 @@ class LandingPage extends Component<{}, LandingPageState> {
         <p>Assemble your team and become the strongest of the arena!</p>
       </div>
       <div className="login-buttons">
-        <button className="get-started" onClick={() => route('/tutorial')}>Get Started</button>
+        <button className="get-started" onClick={() => route('/game/tutorial')}>Get Started</button>
         <button className="already-account" onClick={this.showLoginOptions}>Already have an account?</button>
       </div>
     </div>

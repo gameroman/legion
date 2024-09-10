@@ -1,6 +1,6 @@
 import { h, Component } from 'preact';
 import AuthContext from '../contexts/AuthContext';
-import { firebaseAuth } from '../services/firebaseService'; 
+import { firebaseAuth } from '../services/firebaseService';
 
 class AuthProvider extends Component {
     state = {
@@ -27,9 +27,23 @@ class AuthProvider extends Component {
         this.unregisterAuthObserver();
     }
 
+    signInAsGuest = async () => {
+        try {
+            const guestUser = await firebaseAuth.signInAnonymously();
+            return guestUser;
+        } catch (error) {
+            console.error("Error signing in as guest:", error);
+            throw error;
+        }
+    };
+
     render({ children }) {
         return (
-            <AuthContext.Provider value={{ ...this.state, firebaseAuth }}>
+            <AuthContext.Provider value={{ 
+                ...this.state, 
+                firebaseAuth,
+                signInAsGuest: this.signInAsGuest
+            }}>
                 {!this.state.isLoading && children}
             </AuthContext.Provider>
         );
