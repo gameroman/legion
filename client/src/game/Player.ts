@@ -777,4 +777,18 @@ export class Player extends Phaser.GameObjects.Container {
             this.hideStatusAnimation(StatusEffect.POISON);
         }
     }
+
+    destroy() {
+        this.clearStatusTimer();
+
+        // Stop all tweens related to this player
+        this.scene.tweens.killTweensOf(this);
+    
+        // Stop any ongoing animations
+        this.sprite.anims.stop();
+        this.animationSprite.anims.stop();
+    
+        // Call the parent class's destroy method
+        super.destroy();
+      }
 }

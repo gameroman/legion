@@ -109,8 +109,8 @@ module.exports = {
       hash: true,
     }),
     new Dotenv({
-      path: path.resolve(__dirname, `.production.env`),
-      systemvars: true // Load all system variables as well to get those defined in docker-compose.yml
+      path: isDocker ? false : path.resolve(__dirname, isProduction ? '.production.env' : '.env'),
+      systemvars: isDocker // Set systemvars to true when in Docker mode to get vars from docker-compose.ym;
     }),
     new CopyWebpackPlugin({
       patterns: [

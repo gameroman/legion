@@ -181,7 +181,7 @@ export const inventoryTransaction = onRequest(async (request, response) => {
             break;
         }
         if (!canDo) {
-          logger.info("Conditions not fulfilled to equip item");
+          logger.info("[inventoryTransaction] Conditions not fulfilled to equip item");
           response.send({ status: 1 });
           return;
         }

@@ -370,6 +370,7 @@ export class ServerPlayer {
     }
     
     setCooldown(durationMs: number) {
+        if (this.team?.game.config.FAST_MODE) durationMs = this.team?.game.config.COOLDOWN_OVERRIDE;
         this.cooldownManager.setCooldown(durationMs);
     }
 

@@ -600,7 +600,6 @@ export class Arena extends Phaser.Scene
     refreshOverview() {
         const { team1, team2, general, initialized } = this.getOverview();
         if (this.overviewReady) {
-            console.log('Emitting updateOverview', team1, team2, general, initialized);
             events.emit('updateOverview', team1, team2, general, initialized);
         }
     }
@@ -1622,6 +1621,12 @@ export class Arena extends Phaser.Scene
         console.log('Destroying game');
         this.gameEnded = true;
         this.socket.disconnect();
+
+        this.teamsMap.forEach((team) => {
+            team.members.forEach((player) => {
+                player.destroy();
+            });
+        });
 
         Object.values(this.SFX).forEach(sound => {
             // @ts-ignore

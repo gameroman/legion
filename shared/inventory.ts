@@ -4,6 +4,7 @@ import { getSpellById } from "./Spells";
 import { getEquipmentById } from "./Equipments";
 import { inventorySize } from '@legion/shared/utils';
 import { getConsumableById } from './Items';
+import { SKIP_LEVEL_RESTRICTIONS } from '@legion/shared/config';
 
 const dev = process.env.NODE_ENV === "development";
 
@@ -34,7 +35,7 @@ export function canLearnSpell(characterData: DBCharacterData | APICharacterData,
 }
 
 export function hasMinLevel(characterData: DBCharacterData | APICharacterData, level: number): boolean {
-    return characterData.level >= level;
+    return SKIP_LEVEL_RESTRICTIONS || characterData.level >= level;
 }
 
 export function hasRequiredClass(characterData: DBCharacterData | APICharacterData, classes: Class[]): boolean {
