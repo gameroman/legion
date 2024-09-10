@@ -520,7 +520,7 @@ export abstract class Game
         if (item.target === Target.SINGLE) {
             targetPlayer = this.teams.get(targetTeam)?.getMembers()[target - 1];
             if (!targetPlayer) {
-                console.log('Invalid target!');
+                console.log('[Game:processUseItem] Invalid target!');
                 return;
             }
         }
@@ -528,7 +528,7 @@ export abstract class Game
 
         // Only check if the item is applicable if there is a single target
         if (targets.length == 1 && !item.effectsAreApplicable(targets[0])) {
-            console.log(`Item ${item.name} is not applicable!`);
+            console.log(`[Game:processUseItem] Item ${item.name} is not applicable!`);
             return;
         };
 

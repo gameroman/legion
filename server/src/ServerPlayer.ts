@@ -88,6 +88,7 @@ export class ServerPlayer {
             [StatusEffect.BURN]: 0,
             [StatusEffect.SLEEP]: 0,
             [StatusEffect.MUTE]: 0,
+            [StatusEffect.HASTE]: 0,
         };
 
         this.cooldownManager = new CooldownManager();
