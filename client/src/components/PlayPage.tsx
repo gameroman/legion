@@ -10,11 +10,17 @@ import 'react-loading-skeleton/dist/skeleton.css'
 import { PlayerContext } from '../contexts/PlayerContext';
 import { manageHelp } from './utils';
 import { ENABLE_QUESTS, ENABLE_SPECTATOR_MODE } from "@legion/shared/config";
+import { firebaseAuth } from '../services/firebaseService'; 
 
 
 /* eslint-disable react/prefer-stateless-function */
 class PlayPage extends Component {
   static contextType = PlayerContext; 
+
+  componentDidMount() {
+    const user = firebaseAuth.currentUser;
+    console.log(`ANONYMOUS? ${user?.isAnonymous}`);
+  }
   
   componentDidUpdate() {
     if (!this.context.player.isLoaded) return;

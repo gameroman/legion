@@ -54,6 +54,7 @@ export const STARTING_EQUIPMENT_ADMIN = [2];
 export let INJURED_MODE = false;
 export let SKIP_LEVEL_RESTRICTIONS = true;
 export let IMMEDIATE_LOOT = true;
+export let LOTSA_MP = true;
 
 export const remoteConfig = {
     AUTO_DEFEAT: false,
@@ -62,9 +63,14 @@ export const remoteConfig = {
     COOLDOWN_OVERRIDE: 500,
 }
 
+if (isDev) {
+    STARTING_BLACK_MAGE_SPELLS.push(2);
+}
+
 if (!isDev) {
     FREEZE_AI = false;
     INJURED_MODE = false;
     SKIP_LEVEL_RESTRICTIONS = false;
     IMMEDIATE_LOOT = false;
+    LOTSA_MP = false;
 }

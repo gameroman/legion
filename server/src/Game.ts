@@ -209,7 +209,6 @@ export abstract class Game
         const data = {
             general: {
                 reconnect,
-                tutorial: false,
                 spectator: false,
                 mode: this.mode,
             },

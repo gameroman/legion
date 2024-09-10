@@ -7,7 +7,7 @@ import {selectStatToLevelUp, increaseStat} from "./levelling";
 import { getPrice } from "./economy";
 import { getStarterConsumables } from "./Items";
 
-import { STARTING_BLACK_MAGE_SPELLS, STARTING_WHITE_MAGE_SPELLS} from "@legion/shared/config";
+import { STARTING_BLACK_MAGE_SPELLS, STARTING_WHITE_MAGE_SPELLS, LOTSA_MP} from "@legion/shared/config";
 
 enum Gender {
   M,
@@ -194,7 +194,7 @@ export class NewCharacter {
     case Class.WHITE_MAGE:
       return 30;
     case Class.BLACK_MAGE:
-      return 40;
+      return LOTSA_MP ? 1000 : 40;
     case Class.THIEF:
       return 20;
     }

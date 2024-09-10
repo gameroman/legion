@@ -1298,7 +1298,7 @@ export class Arena extends Phaser.Scene
         }
 
         this.gameSettings = {
-            tutorial: false,
+            // tutorial: false,
             spectator: false,
             mode: null,
         }
@@ -1342,7 +1342,7 @@ export class Arena extends Phaser.Scene
             console.error('Player team id is undefined');
         }
 
-        this.gameSettings.tutorial = data.general.tutorial;
+        // this.gameSettings.tutorial = data.general.tutorial;
         this.gameSettings.spectator = data.general.spectator;
         this.gameSettings.mode = data.general.mode;
 
