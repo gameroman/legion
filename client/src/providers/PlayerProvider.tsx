@@ -27,7 +27,24 @@ import equipSfx from "@assets/sfx/equip.wav";
 class PlayerProvider extends Component<{}, PlayerContextState> {
     constructor(props: {}) {
       super(props);
-      this.state = {
+      this.state = this.getInitialState();
+
+      // Bind the methods to ensure 'this' refers to the class instance
+      this.fetchPlayerData = this.fetchPlayerData.bind(this);
+      this.setPlayerInfo = this.setPlayerInfo.bind(this);
+      this.fetchRosterData = this.fetchRosterData.bind(this);
+      this.updateCharacterStats = this.updateCharacterStats.bind(this);
+      this.getCharacter = this.getCharacter.bind(this);
+      this.getActiveCharacter = this.getActiveCharacter.bind(this);
+      this.updateInventory = this.updateInventory.bind(this);
+      this.applyPurchase = this.applyPurchase.bind(this);
+      this.updateActiveCharacter = this.updateActiveCharacter.bind(this);
+      this.fetchAllData = this.fetchAllData.bind(this);
+      this.markShownWelcome = this.markShownWelcome.bind(this);
+    }
+
+    getInitialState(): PlayerContextState {
+      return {
         player: {
           uid: '',
           name: '',
@@ -54,34 +71,31 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
         characterSheetIsDirty: false,
         welcomeShown: false,
       };
+    }
 
-      // Bind the methods to ensure 'this' refers to the class instance
-      this.fetchPlayerData = this.fetchPlayerData.bind(this);
-      this.setPlayerInfo = this.setPlayerInfo.bind(this);
-      this.fetchRosterData = this.fetchRosterData.bind(this);
-      this.updateCharacterStats = this.updateCharacterStats.bind(this);
-      this.getCharacter = this.getCharacter.bind(this);
-      this.getActiveCharacter = this.getActiveCharacter.bind(this);
-      this.updateInventory = this.updateInventory.bind(this);
-      this.applyPurchase = this.applyPurchase.bind(this);
-      this.updateActiveCharacter = this.updateActiveCharacter.bind(this);
-      this.fetchAllData = this.fetchAllData.bind(this);
-      this.markShownWelcome = this.markShownWelcome.bind(this);
+    resetState = () => {
+      this.setState(this.getInitialState());
     }
 
     componentDidMount() {
       this.fetchAllData();
     }
 
+    componentDidUpdate() {
+      const user = firebaseAuth.currentUser;
+      if (!user && this.state.player.isLoaded) this.resetState();
+      if (user && !this.state.player.isLoaded) this.fetchAllData();
+    }
+
     componentWillUnmount(): void {
-      this.setState({
-        welcomeShown: false,
-      });
+      this.resetState();
     }
 
     fetchAllData() {
       const user = firebaseAuth.currentUser;
-      if (!user) return;
+      if (!user) {
+        return;
+      }
 
       this.fetchPlayerData();
       this.fetchRosterData();
@@ -89,10 +103,8 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
     
     async fetchPlayerData() {
       const user = firebaseAuth.currentUser;
-      if (!user) {
-          return;
-          // throw new Error("No authenticated user found");
-      }
+      if (!user) return;
+    
       try {
           const data = await apiFetch('getPlayerData') as PlayerContextData;
           this.setState({ 
@@ -331,6 +343,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           applyPurchase: this.applyPurchase,
           updateActiveCharacter: this.updateActiveCharacter,
           markWelcomeShown: this.markShownWelcome,
+          resetState: this.resetState,
         }}>
           {children}
         </PlayerContext.Provider>

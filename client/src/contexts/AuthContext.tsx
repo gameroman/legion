@@ -21,6 +21,7 @@ interface AuthContextType {
     resetUI: () => void;
     addSignInCallback: (callback: SignInCallback) => void;
     removeSignInCallback: (callback: SignInCallback) => void;
+    logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -42,6 +43,9 @@ const AuthContext = createContext<AuthContextType>({
     },
     removeSignInCallback: () => {
         throw new Error('removeSignInCallback not implemented');
+    },
+    logout: () => {
+        throw new Error('logout not implemented');
     },
 });
 

@@ -27,6 +27,7 @@ export const PlayerContext = createContext<{
   updateActiveCharacter: (characterId: string) => void;
   refreshAllData: () => void;
   markWelcomeShown: () => void;
+  resetState: () => void;
 }>({
   player: {
     uid: '',
@@ -64,4 +65,5 @@ export const PlayerContext = createContext<{
   updateActiveCharacter: () => {},
   refreshAllData: () => {},
   markWelcomeShown: () => {},
+  resetState: () => {},
 });

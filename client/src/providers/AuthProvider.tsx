@@ -24,10 +24,6 @@ class AuthProvider extends Component {
                     isAuthenticated: !!user,
                     isLoading: false,
                 });
-                if (!user) {
-                    // User has signed out, destroy the UI
-                    AuthUIService.destroyUI();
-                }
             }
         );
     }
@@ -106,6 +102,14 @@ class AuthProvider extends Component {
         this.signInCallbacks.forEach(callback => callback());
     };
 
+    logout = () => {
+        firebaseAuth.signOut().then(() => {
+            AuthUIService.destroyUI();
+        }).catch((error) => {
+            console.error('Error signing out: ', error);
+        });
+    }
+
     render({ children }) {
         return (
             <AuthContext.Provider value={{ 
@@ -115,7 +119,8 @@ class AuthProvider extends Component {
                 initFirebaseUI: this.initFirebaseUI,
                 resetUI: this.resetUI,
                 addSignInCallback: this.addSignInCallback,
-                removeSignInCallback: this.removeSignInCallback
+                removeSignInCallback: this.removeSignInCallback,
+                logout: this.logout,
             }}>
                 {!this.state.isLoading && children}
             </AuthContext.Provider>
