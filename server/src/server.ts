@@ -103,6 +103,9 @@ io.on('connection', async (socket: any) => {
         const playerData = await apiFetch(
           `getPlayerData`,
           socket.firebaseToken,
+          {},
+          3,
+          500,
         );
   
         game.addPlayer(socket, playerData);

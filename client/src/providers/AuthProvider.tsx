@@ -58,7 +58,7 @@ class AuthProvider extends Component {
             try {
                 const usercred = await initialUser.linkWithPopup(); 
                 const user = usercred.user;
-                // console.log("Anonymous account successfully upgraded", user);
+                console.log("Anonymous account successfully upgraded", user);
                 successToast("Account successfully created!");
             } catch (error: any) {
                 console.error("Error upgrading anonymous account", error);
@@ -78,7 +78,7 @@ class AuthProvider extends Component {
                 }
             }
         } else {
-            // console.log("User signed in (not an upgrade from anonymous)");
+            console.log("User signed in (not an upgrade from anonymous)");
             // successToast("Sign-in successful!");
         }
         

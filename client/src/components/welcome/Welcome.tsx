@@ -61,7 +61,7 @@ class Welcome extends Component<WelcomeProps, WelcomeState> {
             {!showLoginOptions ? (
               <Fragment>
                 <div className="login-header">
-                  Play freely without an account, or create one at any time to save your progress.
+                  Play freely without an account, or create one at any time to save your progress!
                 </div>
                 <div className="login-buttons">
                   <button className="sign-up-btn" onClick={this.showLoginOptions}>Sign Up</button>
