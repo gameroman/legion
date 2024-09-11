@@ -29,7 +29,6 @@ class AuthProvider extends Component {
     }
 
     signInAsGuest = async (): Promise<firebase.User | null> => {
-        console.trace();
         try {
             if (firebaseAuth.currentUser && firebaseAuth.currentUser.isAnonymous) {
                 return firebaseAuth.currentUser;

@@ -36,6 +36,7 @@ class Welcome extends Component<WelcomeProps, WelcomeState> {
 
   initFirebaseUI = (): void => {
     const uiConfig: firebaseui.auth.Config = {
+      autoUpgradeAnonymousUsers: true,
       signInFlow: 'popup',
       signInSuccessUrl: '/play',
       signInOptions: [
@@ -43,13 +44,18 @@ class Welcome extends Component<WelcomeProps, WelcomeState> {
         firebase.auth.EmailAuthProvider.PROVIDER_ID,
       ],
       callbacks: {
-        signInSuccessWithAuthResult: this.onSignInSuccess
+        signInSuccessWithAuthResult: this.onSignInSuccess,
+        signInFailure: (error: any) => {
+            console.error("Sign-in error:", error);
+            errorToast("An error occurred during sign-in. Please try again.");
+        }
       }
     };
 
     if (this.firebaseUIContainer) {
       try {
-        this.firebaseUI = firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(firebase.auth());
+        // this.firebaseUI = firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(firebase.auth());
+        this.firebaseUI = new firebaseui.auth.AuthUI(firebase.auth());
         this.firebaseUI.start(this.firebaseUIContainer, uiConfig);
       } catch (error) {
         console.error('Error initializing Firebase UI: ', error);
@@ -74,11 +80,14 @@ class Welcome extends Component<WelcomeProps, WelcomeState> {
   };
 
   handleSignInProcess = async (authResult: any): Promise<void> => {
+    console.log(`Auth result: ${JSON.stringify(authResult)}`);
     if (this.initialUser?.isAnonymous) {
+      const googleProvider = new firebase.auth.GoogleAuthProvider();
       const credential = authResult.credential;
       
       try {
-        const usercred = await this.initialUser.linkWithCredential(credential);
+        // const usercred = await this.initialUser.linkWithCredential(credential);
+        const usercred = await this.initialUser.linkWithPopup(googleProvider);
         const user = usercred.user;
         console.log("Anonymous account successfully upgraded", user);
         successToast("Account successfully created!");
