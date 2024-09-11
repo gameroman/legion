@@ -4,6 +4,7 @@ import { firebaseAuth } from '../services/firebaseService';
 import firebase from 'firebase/compat/app';
 import AuthUIService from '../services/AuthUIService';
 import { successToast, errorToast } from '../components/utils';
+import { SignInCallback } from '../contexts/AuthContext';
 
 class AuthProvider extends Component {
     state = {
@@ -13,6 +14,7 @@ class AuthProvider extends Component {
     };
 
     unregisterAuthObserver: () => void;
+    signInCallbacks: Set<SignInCallback> = new Set();
 
     componentDidMount() {
         this.unregisterAuthObserver = firebaseAuth.onAuthStateChanged(
@@ -51,11 +53,10 @@ class AuthProvider extends Component {
         const initialUser = this.state.user;
         
         if (initialUser?.isAnonymous) {
-            const googleProvider = new firebase.auth.GoogleAuthProvider();
             const credential = authResult.credential;
             
             try {
-                const usercred = await initialUser.linkWithPopup(googleProvider);
+                const usercred = await initialUser.linkWithPopup(); 
                 const user = usercred.user;
                 console.log("Anonymous account successfully upgraded", user);
                 successToast("Account successfully created!");
@@ -82,10 +83,23 @@ class AuthProvider extends Component {
         }
         
         console.log("Sign-in process completed");
+        this.notifySignInCallbacks();
     };
 
     resetUI = (): void => {
         AuthUIService.resetUI();
+    };
+
+    addSignInCallback = (callback: SignInCallback): void => {
+        this.signInCallbacks.add(callback);
+    };
+
+    removeSignInCallback = (callback: SignInCallback): void => {
+        this.signInCallbacks.delete(callback);
+    };
+
+    notifySignInCallbacks = (): void => {
+        this.signInCallbacks.forEach(callback => callback());
     };
 
     render({ children }) {
@@ -95,7 +109,9 @@ class AuthProvider extends Component {
                 firebaseAuth,
                 signInAsGuest: this.signInAsGuest,
                 initFirebaseUI: this.initFirebaseUI,
-                resetUI: this.resetUI
+                resetUI: this.resetUI,
+                addSignInCallback: this.addSignInCallback,
+                removeSignInCallback: this.removeSignInCallback
             }}>
                 {!this.state.isLoading && children}
             </AuthContext.Provider>

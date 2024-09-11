@@ -20,6 +20,18 @@ class Welcome extends Component<WelcomeProps, WelcomeState> {
 
   private firebaseUIContainer: HTMLDivElement | null = null;
 
+  componentDidMount() {
+    this.context.addSignInCallback(this.handleSignInSuccess);
+  }
+
+  componentWillUnmount() {
+    this.context.removeSignInCallback(this.handleSignInSuccess);
+  }
+  
+  handleSignInSuccess = () => {
+    this.props.onHide();
+  };
+
   showLoginOptions = (): void => {
     this.setState({ showLoginOptions: true }, () => {
       if (this.firebaseUIContainer) {

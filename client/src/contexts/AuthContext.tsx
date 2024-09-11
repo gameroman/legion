@@ -9,6 +9,8 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
+export type SignInCallback = () => void;
+
 interface AuthContextType {
     user: firebase.User | null;
     isAuthenticated: boolean;
@@ -17,6 +19,8 @@ interface AuthContextType {
     signInAsGuest: () => Promise<firebase.User | null>;
     initFirebaseUI: (container: HTMLElement) => void;
     resetUI: () => void;
+    addSignInCallback: (callback: SignInCallback) => void;
+    removeSignInCallback: (callback: SignInCallback) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -32,6 +36,12 @@ const AuthContext = createContext<AuthContextType>({
     },
     resetUI: () => {
         throw new Error('resetUI not implemented');
+    },
+    addSignInCallback: () => {
+        throw new Error('addSignInCallback not implemented');
+    },
+    removeSignInCallback: () => {
+        throw new Error('removeSignInCallback not implemented');
     },
 });
 
