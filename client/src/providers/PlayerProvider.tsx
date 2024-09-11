@@ -126,6 +126,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           characters: data.characters
         });
       } catch (error) {
+        console.error('Error fetching roster data:', error);
         // errorToast(`Error: ${error}`);
       }
     }

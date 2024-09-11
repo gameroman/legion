@@ -24,6 +24,10 @@ class AuthProvider extends Component {
                     isAuthenticated: !!user,
                     isLoading: false,
                 });
+                if (!user) {
+                    // User has signed out, destroy the UI
+                    AuthUIService.destroyUI();
+                }
             }
         );
     }
@@ -58,16 +62,16 @@ class AuthProvider extends Component {
             try {
                 const usercred = await initialUser.linkWithPopup(); 
                 const user = usercred.user;
-                console.log("Anonymous account successfully upgraded", user);
+                // console.log("Anonymous account successfully upgraded", user);
                 successToast("Account successfully created!");
             } catch (error: any) {
                 console.error("Error upgrading anonymous account", error);
                 
                 if (error.code === 'auth/credential-already-in-use') {
-                    console.warn("Credential already in use. This might be due to emulator behavior.");
+                    console.warn("Credential already in use.");
                     try {
                         await firebase.auth().signInWithCredential(credential);
-                        console.log("Signed in with existing credential");
+                        // console.log("Signed in with existing credential");
                         successToast("Signed in successfully!");
                     } catch (signInError) {
                         console.error("Error signing in with existing credential", signInError);
@@ -78,11 +82,11 @@ class AuthProvider extends Component {
                 }
             }
         } else {
-            console.log("User signed in (not an upgrade from anonymous)");
+            // console.log("User signed in (not an upgrade from anonymous)");
             // successToast("Sign-in successful!");
         }
         
-        console.log("Sign-in process completed");
+        // console.log("Sign-in process completed");
         this.notifySignInCallbacks();
     };
 
