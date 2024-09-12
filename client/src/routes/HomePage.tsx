@@ -1,4 +1,3 @@
-// HomePage.tsx
 import { h, Component } from 'preact';
 import { Router, Route } from 'preact-router';
 import AuthContext from '../contexts/AuthContext';
@@ -11,16 +10,16 @@ import RankPage from '../components/RankPage';
 import Navbar from '../components/navbar/Navbar';
 import QueuePage from '../components/QueuePage';
 
-class HomePage extends Component<object, {}> {
+class HomePage extends Component {
     static contextType = AuthContext;
 
     render() {
         const { user } = this.context;
-        if (!user) return;
+        if (!user) return null;
 
         return (
-            <PlayerContext.Consumer> 
-                {({ player }) => (
+            <PlayerContext.Consumer>
+                {({ player, welcomeShown }) => (
                     <div className="homePage">
                         <Navbar user={user} playerData={player} logout={this.context.logout} />
                         <div className="content">
@@ -34,6 +33,12 @@ class HomePage extends Component<object, {}> {
                                 </Router>
                             </div>
                         </div>
+                        {user.isAnonymous && welcomeShown && (
+                            <div className="anonymous-warning">
+                                You are playing as a guest. Sign up to save your progress!
+                                <button className="sign-up-btn-smol">Sign up</button>
+                            </div>
+                        )}
                     </div>
                 )}
             </PlayerContext.Consumer>
