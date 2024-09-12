@@ -10,6 +10,7 @@ import {DBCharacterData, DBPlayerData} from "@legion/shared/interfaces";
 import {inventorySize} from "@legion/shared/utils";
 import {getChestContent} from "@legion/shared/chests";
 import {logPlayerAction} from "./dashboardAPI";
+import { numericalSort } from "@legion/shared/inventory";
 
 import {
   canEquipConsumable,
@@ -61,7 +62,6 @@ export const purchaseItem = onRequest((request, response) => {
         const itemId = request.body.articleId;
         const nb = request.body.quantity;
         const inventoryType = request.body.inventoryType as ShopTab;
-        console.log(`itemId: ${itemId}, nb: ${nb}, inventoryType: ${inventoryType}`);
 
         // Check that the player has enough space in their inventory
         const inventory = docSnap.data()?.inventory;
@@ -98,13 +98,13 @@ export const purchaseItem = onRequest((request, response) => {
         const inventoryUpdate = { ...inventory };
         switch (inventoryType) {
           case ShopTab.CONSUMABLES:
-            inventoryUpdate.consumables = [...inventory.consumables, ...Array(nb).fill(itemId)];
+            inventoryUpdate.consumables = [...inventory.consumables, ...Array(nb).fill(itemId)].sort(numericalSort);
             break;
           case ShopTab.SPELLS:
-            inventoryUpdate.spells = [...inventory.spells, ...Array(nb).fill(itemId)];
+            inventoryUpdate.spells = [...inventory.spells, ...Array(nb).fill(itemId)].sort(numericalSort);
             break;
           case ShopTab.EQUIPMENTS:
-            inventoryUpdate.equipment = [...inventory.equipment, ...Array(nb).fill(itemId)];
+            inventoryUpdate.equipment = [...inventory.equipment, ...Array(nb).fill(itemId)].sort(numericalSort);
             break;
         }
 

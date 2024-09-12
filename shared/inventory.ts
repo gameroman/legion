@@ -114,7 +114,7 @@ export function learnSpell(playerData: PlayerContextData | DBPlayerData, charact
   spells.splice(index, 1);
   skills.push(item);
 
-  playerInventory.spells = spells;
+  playerInventory.spells = spells.sort(numericalSort);
   return {
     playerUpdate: { inventory: playerInventory },
     characterUpdate: { skills },

@@ -20,7 +20,8 @@ import {
   learnSpell,
   equipEquipment,
   unequipEquipment,
-  roomInInventory
+  roomInInventory,
+  numericalSort
 } from '@legion/shared/inventory';
 
 import equipSfx from "@assets/sfx/equip.wav";
@@ -293,7 +294,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           gold: this.state.player.gold - price * quantity,
           inventory: {
             ...inventory,
-            [inventoryField]: updatedInventoryField.sort()
+            [inventoryField]: updatedInventoryField.sort(numericalSort)
           }
         }
       });
