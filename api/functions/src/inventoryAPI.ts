@@ -238,7 +238,6 @@ export const inventoryTransaction = onRequest(async (request, response) => {
 
 
 export const inventorySave = onRequest((request, response) => {
-  logger.info("Saving inventory");
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {

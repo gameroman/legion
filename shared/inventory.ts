@@ -125,8 +125,11 @@ export function equipEquipment(playerData: PlayerContextData | DBPlayerData, cha
   const playerInventory = playerData.inventory;
   if (dev) console.log(`[equipEquipment] player inventory: ${playerInventory.equipment}`);
   const equipment = playerInventory.equipment.sort(numericalSort);
+  const consumables = playerInventory.consumables.sort(numericalSort);
   if (dev) console.log(`[equipEquipment] equipment inventory: ${equipment}, index: ${index}`);
   const equipped = characterData.equipment as Equipment;
+  let carrying_capacity_bonus = characterData.carrying_capacity_bonus;
+  const characterInventory = characterData.inventory as number[];
 
   if (index < 0 || index >= equipment.length) {
     return null;
@@ -156,12 +159,26 @@ export function equipEquipment(playerData: PlayerContextData | DBPlayerData, cha
   }
   equipped[field as keyof Equipment] = item;
 
+  if (slotNumber == EquipmentSlot.BELT) {
+    carrying_capacity_bonus = data.beltSize || 0;
+
+    while (characterInventory.length >
+      characterData.carrying_capacity + carrying_capacity_bonus) {
+      const excess = characterInventory.pop();
+      if (excess) consumables.push(excess);
+    }
+    playerInventory.consumables = consumables;
+  }
+
   playerInventory.equipment = equipment.sort(numericalSort);
+  playerInventory.consumables = consumables.sort(numericalSort);
   return {
     playerUpdate: { inventory: playerInventory },
     characterUpdate: {
       equipment: equipped,
+      inventory: characterInventory,
       equipment_bonuses: applyEquipmentBonuses(equipped),
+      carrying_capacity_bonus,
     },
   };
 }
@@ -170,7 +187,10 @@ export function unequipEquipment(playerData: PlayerContextData | DBPlayerData, c
   if (dev) console.log(`[unequipEquipment] index: ${index}`);
   const playerInventory = playerData.inventory;
   const equipment = playerInventory.equipment.sort(numericalSort);
+  const consumables = playerInventory.consumables.sort(numericalSort);
   const equipped = characterData.equipment as Equipment;
+  let carrying_capacity_bonus = characterData.carrying_capacity_bonus;
+  const characterInventory = characterData.inventory as number[];
 
   if (index < 0 || index >= Object.keys(equipmentSlotFields).length) {
     if (dev) console.log(`[unequipEquipment] invalid index: ${index} not in range 0-${Object.keys(equipmentSlotFields).length}`);
@@ -183,9 +203,20 @@ export function unequipEquipment(playerData: PlayerContextData | DBPlayerData, c
   if (dev) console.log(`[unequipEquipment] slotNumber: ${slotNumber}, field: ${field}, item: ${item}`);
 
   if (item != -1) {
+    if (slotNumber == EquipmentSlot.BELT) {
+      carrying_capacity_bonus = 0;
+      // if characterData.inventory has more elements than carrying_capacity,
+      // remove the excess elements and push them to consumables
+      while (characterInventory.length > characterData.carrying_capacity) {
+        const excess = characterInventory.pop();
+        if (excess) consumables.push(excess);
+      }
+      playerInventory.consumables = consumables;
+    }
     equipped[field as keyof Equipment] = -1;
     equipment.push(item);
     playerInventory.equipment = equipment.sort(numericalSort);
+    playerInventory.consumables = consumables.sort(numericalSort);
   }
 
   return {
@@ -193,6 +224,8 @@ export function unequipEquipment(playerData: PlayerContextData | DBPlayerData, c
     characterUpdate: {
       equipment: equipped,
       equipment_bonuses: applyEquipmentBonuses(equipped),
+      inventory: characterInventory,
+      carrying_capacity_bonus
     },
   };
 }
