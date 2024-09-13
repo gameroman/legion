@@ -5,7 +5,7 @@ const isAdmin = (process.env.ADMIN_MODE == 'true');
 export const MAX_CHARACTERS = 10;
 export const BASE_INVENTORY_SIZE = 20;
 export const BASE_CARRYING_CAPACITY = 3;
-export const STARTING_GOLD = 100;
+export const STARTING_GOLD = 1000;
 export const STARTING_CONSUMABLES = [0,0,1];
 export const STARTING_WHITE_MAGE_SPELLS = [9];
 export const STARTING_BLACK_MAGE_SPELLS = [0];

@@ -236,7 +236,7 @@ spells.push(new BaseSpell({
     target: Target.AOE,
     effects: [],
     status: {effect: StatusEffect.POISON, chance: 1, duration: 180},
-    effort: 7,
+    effort: 5,
 
     score: 10,
     classes: [Class.WHITE_MAGE],
@@ -257,7 +257,7 @@ spells.push(new BaseSpell({
     target: Target.AOE,
     effects: [],
     status: {effect: StatusEffect.MUTE, chance: 1, duration: 180},
-    effort: 5,
+    effort: 4,
 
     score: 10,
     classes: [Class.WHITE_MAGE],
