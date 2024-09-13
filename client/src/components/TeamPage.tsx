@@ -12,7 +12,6 @@ import { APICharacterData, Effect } from '@legion/shared/interfaces';
 import { EquipmentSlot, InventoryActionType } from '@legion/shared/enums';
 import { getEquipmentById } from '@legion/shared/Equipments';
 import { PlayerContext } from '../contexts/PlayerContext';
-import { manageHelp } from './utils';
 
 interface TeamPageState {
   carrying_capacity: number;
@@ -57,7 +56,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
       await this.context.fetchRosterData();
     }
     await this.updateCharacterData();
-    manageHelp('team', this.context);
+    this.context.manageHelp('team');
   }
 
   componentDidUpdate(prevProps) {

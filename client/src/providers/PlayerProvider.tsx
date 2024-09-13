@@ -8,8 +8,9 @@ import { League, Stat, StatFields, InventoryActionType, ShopTab
  import { ItemDialogType } from '../components/itemDialog/ItemDialogType';
 import { firebaseAuth } from '../services/firebaseService'; 
 import { getSPIncrement } from '@legion/shared/levelling';
-import { playSoundEffect } from '../components/utils';
+import { playSoundEffect, fetchGuideTip } from '../components/utils';
 import { ChestReward } from "@legion/shared/chests";
+import { startTour } from '../components/tours';  
 
 import {
   canEquipConsumable,
@@ -42,6 +43,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       this.updateActiveCharacter = this.updateActiveCharacter.bind(this);
       this.fetchAllData = this.fetchAllData.bind(this);
       this.markShownWelcome = this.markShownWelcome.bind(this);
+      this.manageHelp = this.manageHelp.bind(this);
     }
 
     getInitialState(): PlayerContextState {
@@ -322,6 +324,21 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
     markShownWelcome = () => {
       this.setState({ welcomeShown: true });
     }
+
+    manageHelp = (page: string) => {
+      const todoTours = this.state.player.tours;
+      if (todoTours.includes(page)) {
+        startTour(page);
+        this.setState({
+          player: {
+            ...this.state.player,
+            tours: todoTours.filter(tour => tour !== page)
+          }
+        });
+      } else {
+        fetchGuideTip();
+      }
+    }
   
     render() {
       const { children } = this.props;
@@ -345,6 +362,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           updateActiveCharacter: this.updateActiveCharacter,
           markWelcomeShown: this.markShownWelcome,
           resetState: this.resetState,
+          manageHelp: this.manageHelp
         }}>
           {children}
         </PlayerContext.Provider>

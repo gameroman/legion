@@ -4,7 +4,6 @@ import LeaderboardTable from './leaderboardTable/LeaderboardTable';
 import SeasonCard from './seasonCard/SeasonCard';
 import AwardedPlayer from './awardedPlayer/AwardedPlayer';
 import { PlayerContext } from '../contexts/PlayerContext';
-import { manageHelp } from './utils';
 import 'react-loading-skeleton/dist/skeleton.css'
 import Skeleton from 'react-loading-skeleton';
 
@@ -75,7 +74,7 @@ class RankPage extends Component {
 
   async componentDidMount() {
     await this.fetchLeaderboard();
-    manageHelp('rank', this.context);
+    this.context.manageHelp('rank');
   }
 
   handleCurrTab = (index: number) => {

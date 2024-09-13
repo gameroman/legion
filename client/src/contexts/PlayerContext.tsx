@@ -28,6 +28,7 @@ export const PlayerContext = createContext<{
   refreshAllData: () => void;
   markWelcomeShown: () => void;
   resetState: () => void;
+  manageHelp: (page: string) => void;
 }>({
   player: {
     uid: '',
@@ -66,4 +67,5 @@ export const PlayerContext = createContext<{
   refreshAllData: () => {},
   markWelcomeShown: () => {},
   resetState: () => {},
+  manageHelp: () => {},
 });

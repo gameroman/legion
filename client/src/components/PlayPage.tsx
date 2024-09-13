@@ -8,7 +8,6 @@ import DailyLoot from './dailyLoot/DailyLoot';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css'
 import { PlayerContext } from '../contexts/PlayerContext';
-import { manageHelp } from './utils';
 import { ENABLE_QUESTS, ENABLE_SPECTATOR_MODE } from "@legion/shared/config";
 import { firebaseAuth } from '../services/firebaseService'; 
 import Welcome from './welcome/Welcome';
@@ -32,14 +31,14 @@ class PlayPage extends Component {
   componentDidUpdate() {
     if (!this.context.player.isLoaded) return;
     if (!this.state.showWelcome) {
-      manageHelp('play', this.context);
+      this.context.manageHelp('play');
     }
   }
 
   hideWelcome = () => {
     this.setState({ showWelcome: false });
     this.context.markWelcomeShown();
-    manageHelp('play', this.context);
+    this.context.manageHelp('play');
   };
 
   render() {

@@ -1,7 +1,6 @@
 import {Class, Stat} from "@legion/shared/enums";
 import { apiFetch } from '../services/apiService';
 import { guide } from './tips';
-import { startTour } from './tours';  
 import { LeaguesNames } from "@legion/shared/enums";
 
 import guideIcon from '@assets/guide.png';
@@ -66,7 +65,8 @@ export function showGuideToast(text: string, destination: string, duration: numb
       backgroundRepeat: "no-repeat",
       backgroundPosition: "12px center",
       backgroundSize: "24px",
-      paddingLeft: "44px"
+      paddingLeft: "44px",
+      borderRadius: "5px",
     },
   }).showToast();
 }
@@ -92,18 +92,8 @@ export function playSoundEffect(src: string) {
   audio.play().catch(error => console.error('Error playing sound:', error));
 }
 
-export function manageHelp(page: string, context: any) {
-  const todoTours = context.player.tours;
-  if (todoTours.includes(page)) {
-    startTour(page);
-    context.setPlayerInfo({ tours: todoTours.filter(tour => tour !== page) });
-  } else {
-    fetchGuideTip();
-  }
-}
-
 let tipLock = false;
-function fetchGuideTip() {
+export function fetchGuideTip() {
   if (tipLock) return;
   tipLock = true;
   apiFetch('fetchGuideTip', {
