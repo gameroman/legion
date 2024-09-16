@@ -28,7 +28,7 @@ import {
 import equipSfx from "@assets/sfx/equip.wav";
 class PlayerProvider extends Component<{}, PlayerContextState> {
     private fetchAllDataTimeout: NodeJS.Timeout | null = null;
-    private fetchAllDataDelay: number = 200; 
+    private fetchAllDataDelay: number = 400; 
 
     constructor(props: {}) {
       super(props);
