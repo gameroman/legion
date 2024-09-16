@@ -19,9 +19,23 @@ const getTokenWithRetry = async (user: firebase.User, maxAttempts = 3, delay = 1
     }
 };
 
+async function getUserWithRetry(maxRetries, interval) {
+    for (let i = 0; i < maxRetries; i++) {
+        // errorToast(`Attempt ${i + 1} of ${maxRetries} (${interval}ms): Getting current user...`);
+        const user = firebaseAuth.currentUser;
+        if (user) {
+            return user;
+        }
+        if (i < maxRetries - 1) {
+            await new Promise(resolve => setTimeout(resolve, interval));
+        }
+    }
+    return null;
+}
+
 export async function getFirebaseIdToken() {
     try {
-        const user = firebaseAuth.currentUser;
+        const user = await getUserWithRetry(3, 250);
         if (!user) {
             errorToast('Cannot get ID token: no active user');
             return;

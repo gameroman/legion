@@ -19,6 +19,7 @@ class AuthProvider extends Component {
     componentDidMount() {
         this.unregisterAuthObserver = firebaseAuth.onAuthStateChanged(
             (user) => {
+                // console.log(`Auth state changed: ${user ? 'logged in' : 'logged out'}`);
                 this.setState({
                     user,
                     isAuthenticated: !!user,
