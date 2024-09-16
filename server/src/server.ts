@@ -47,7 +47,7 @@ const socketMap = new Map<Socket, Game>();
 const gamesMap = new Map<string, Game>();
 
 io.on('connection', async (socket: any) => {
-    // console.log(`Connected user ${socket.handshake.auth.token}`);
+    console.log(`[server:connection] Connected with token ${socket.handshake.auth.token}`);
     try {
       socket.firebaseToken = socket.handshake.auth.token.toString();
       const decodedToken = await admin.auth().verifyIdToken(socket.firebaseToken);
