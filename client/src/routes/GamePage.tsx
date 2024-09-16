@@ -1,5 +1,5 @@
 import { h, Component } from 'preact';
-import { GameHUD } from '../components/HUD/GameHUD';
+import { GameHUD, events } from '../components/HUD/GameHUD';
 import { startGame } from '../game/game';
 import './GamePage.style.css';
 
@@ -27,6 +27,11 @@ class GamePage extends Component<GamePageProps, GamePageState> {
 
   componentDidMount() {
     startGame();
+
+
+    events.on('progressUpdate', (progress: number) => {
+      this.updateProgress(progress);
+    });
   }
 
   changeMainDivClass = (newClass: string) => {
@@ -45,7 +50,6 @@ class GamePage extends Component<GamePageProps, GamePageState> {
       <div className={this.state.mainDivClass}>
         <GameHUD 
           changeMainDivClass={this.changeMainDivClass}
-          updateProgress={this.updateProgress}
         />
         <div id="scene" />
         {this.state.loading && <div className="loading-div">

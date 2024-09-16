@@ -1319,17 +1319,6 @@ export class Arena extends Phaser.Scene
             this.load.audio(`bgm_loop_${i}`, require(`@assets/music/bgm_loop_${i}.wav`));
         }
         this.load.audio('bgm_end', bgmEndSFX);
-
-    
-        // Optional: Set up progress or completion events
-        // this.load.on('filecomplete', (key, type, data) => {
-        //     console.log(`Loaded: ${key}`);
-        // });
-    
-        // this.load.on('complete', () => {
-        //     console.log('All background music loaded');
-        //     // Now you can use the loaded music tracks
-        // });
     
         // Start the loader
         this.load.start();
