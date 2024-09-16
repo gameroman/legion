@@ -232,7 +232,7 @@ equipments[19] = new BaseEquipment({
     name: "Knight's armor",
     description: "",
     frame: 92,
-    effects: [{stat: Stat.DEF, value: 50}, {stat: Stat.DEF, value: 25}],
+    effects: [{stat: Stat.DEF, value: 50}, {stat: Stat.SPDEF, value: 25}],
     slot: EquipmentSlot.ARMOR,
     effort: 23,
     minLevel: 10,
@@ -301,11 +301,34 @@ equipments[25] = new BaseEquipment({
     name: "Novice Wizard's Hat",
     description: "",
     frame: 74,
-    effects: [{stat: Stat.MP, value: 15}, {stat: Stat.DEF, value: 3}, {stat: Stat.SPATK, value: 5}, {stat: Stat.SPDEF, value: 5}],
+    effects: [{stat: Stat.MP, value: 15}, {stat: Stat.DEF, value: 5}, {stat: Stat.SPATK, value: 5}, {stat: Stat.SPDEF, value: 5}],
     slot: EquipmentSlot.HELMET,
     effort: 9,
     minLevel: 1,
     classes: [Class.WHITE_MAGE, Class.BLACK_MAGE],
+});
+
+equipments[26] = new BaseEquipment({
+    id: 26,
+    name: "Acolyte's Tunic",
+    description: "",
+    frame: 93,
+    effects: [{stat: Stat.DEF, value: 5}, {stat: Stat.SPDEF, value: 10}, {stat: Stat.SPATK, value: 5}, {stat: Stat.MP, value: 10}],
+    slot: EquipmentSlot.ARMOR,
+    effort: 9,
+    minLevel: 1,
+    classes: [Class.WHITE_MAGE, Class.BLACK_MAGE],
+});
+
+equipments[27] = new BaseEquipment({
+    id: 27,
+    name: "Traveler's gloves",
+    description: "",
+    frame: 113,
+    effects: [{stat: Stat.HP, value: 5}, {stat: Stat.DEF, value: 5}, {stat: Stat.ATK, value: 5}, {stat: Stat.SPDEF, value: 5}],
+    slot: EquipmentSlot.GLOVES,
+    effort: 8,
+    minLevel: 1,
 });
 
 export function getEquipmentById(id:number): BaseEquipment | undefined {

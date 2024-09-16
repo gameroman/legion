@@ -8,10 +8,10 @@ import { getSpellById } from '@legion/shared/Spells';
 import { lineOfSight, serializeCoords } from '@legion/shared/utils';
 import { getFirebaseIdToken } from '../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
-import { Target, Terrain, GEN } from "@legion/shared/enums";
+import { Target, Terrain, GEN, PlayMode } from "@legion/shared/enums";
 import { TerrainUpdate, GameData, OutcomeData, PlayerNetworkData } from '@legion/shared/interfaces';
+import { Tutorial } from './tutorial';
 
-import bgImage from '@assets/aarena_bg.png';
 import killzoneImage from '@assets/killzone.png';
 import iceblockImage from '@assets/iceblock.png';
 
@@ -48,6 +48,9 @@ import poisonSoundSFX from '@assets/sfx/spells/poison.wav';
 import muteSoundSFX from '@assets/sfx/spells/mute.wav';
 import bgmStartSFX from '@assets/music/bgm_start.wav';
 import bgmEndSFX from '@assets/music/bgm_end.wav';
+
+import speechBubble from '@assets/speech_bubble.png';
+import speechTail from '@assets/speech_tail.png';
 
 // Static imports for tile atlas
 import groundTilesImage from '@assets/tiles2.png';
@@ -86,6 +89,7 @@ export class Arena extends Phaser.Scene
     pendingGEN: GEN;
     gameInitialized = false;
     gameEnded = false;
+    tutorial;
 
     constructor() {
         super({ key: 'Arena' });
@@ -95,13 +99,13 @@ export class Arena extends Phaser.Scene
     {
         this.gamehud = new GameHUD();
         
-        this.load.image('bg',  bgImage);
         this.load.image('killzone',  killzoneImage);
         this.load.image('iceblock',  iceblockImage);
+        this.load.image('speech_bubble', speechBubble);
+        this.load.image('speech_tail', speechTail);
         const frameConfig = { frameWidth: 144, frameHeight: 144};
         // Iterate over assetsMap and load spritesheets
         allSprites.forEach((sprite) => {
-            // this.load.spritesheet(sprite, `sprites/${sprite}.png`, frameConfig);
             this.load.spritesheet(sprite, require(`@assets/sprites/${sprite}.png`), frameConfig);
         });
         this.load.spritesheet('potion_heal', potionHealImage, { frameWidth: 48, frameHeight: 64});
@@ -115,7 +119,6 @@ export class Arena extends Phaser.Scene
         this.load.spritesheet('impact', impactImage, { frameWidth: 291, frameHeight: 291});
         this.load.spritesheet('poison', poisonImage, { frameWidth: 64, frameHeight: 64});
         this.load.spritesheet('mute', muteImage, { frameWidth: 64, frameHeight: 64});
-
         this.load.spritesheet('statuses', statusesImage, { frameWidth: 96, frameHeight: 96});
 
         this.load.audio('click', clickSFX);
@@ -140,21 +143,23 @@ export class Arena extends Phaser.Scene
 
         // Load music
         this.load.audio('bgm_start', bgmStartSFX);
-        this.load.audio('bgm_end', bgmEndSFX);
-
-        for (let i = 1; i <= 12; i++) {
-            // this.load.audio(`bgm_loop_${i}`, `music/bgm_loop_${i}.wav`);
-            this.load.audio(`bgm_loop_${i}`, require(`@assets/music/bgm_loop_${i}.wav`));
-        }
+        this.load.audio(`bgm_loop_1`, require(`@assets/music/bgm_loop_1.wav`));
 
         this.load.atlas('groundTiles', groundTilesImage, groundTilesAtlas);
     
         const GEN = ['gen_bg', 'begins', 'blood', 'blue_bang', 'combat', 'first', 'orange_bang', 'multi', 'kill', 
-            'hit', 'one', 'shot', 'frozen', 'stuff-is', 'on-fire'];
+            'hit', 'one', 'shot', 'frozen', 'stuff-is', 'on-fire', 'tutorial'];
         GEN.forEach((name) => {
             this.load.image(name, require(`@assets/GEN/${name}.png`));
         });
 
+        this.load.on('progress', (value) => {
+            this.emitEvent('progressUpdate', Math.floor(value * 100));
+        });
+
+        this.load.on('complete', () => {
+            this.emitEvent('progressUpdate', 100);
+        });
     }
 
     extractGameIdFromUrl() {
@@ -167,7 +172,6 @@ export class Arena extends Phaser.Scene
     async connectToServer() {
         console.log('Connecting to the server ...');
         const gameId = this.extractGameIdFromUrl();
-        console.log('Game ID:', gameId);
 
         this.socket = io(
             process.env.GAME_SERVER_URL,
@@ -268,6 +272,7 @@ export class Arena extends Phaser.Scene
             sameTeam: player.team.id === this.selectedPlayer.team.id,
         };
         this.send('attack', data);
+        if (this.gameSettings.tutorial) events.emit('playerAttacked');
     }
 
     sendObstacleAttack(x, y) {
@@ -293,6 +298,7 @@ export class Arena extends Phaser.Scene
         this.send('spell', data);
         this.toggleTargetMode(false);
         this.selectedPlayer.pendingSpell = null;
+        if (this.gameSettings.tutorial) events.emit('playerCastSpell');
     }
 
     sendUseItem(index: number, x: number, y: number, player: Player | null) {
@@ -308,6 +314,12 @@ export class Arena extends Phaser.Scene
         this.send('useitem', data);
         this.toggleItemMode(false);
         this.selectedPlayer.pendingItem = null;
+    }
+
+    endTutorial() {
+        if (this.socket) {
+            this.socket.emit('endTutorial');
+        }
     }
 
     send(channel, data) {
@@ -485,13 +497,6 @@ export class Arena extends Phaser.Scene
             }
         }, this);
 
-        // const bg = this.add.image(0, -230, 'bg').setOrigin(0, 0);
-
-        // const scaleX = gameWidth / bg.width;
-        // const scaleY = gameHeight / bg.height;
-        // const scale = Math.max(scaleX, scaleY);
-        // bg.setScale(scale).setAlpha(0.7);
-
         this.input.keyboard.on('keydown', this.handleKeyDown, this);
     }
 
@@ -553,7 +558,6 @@ export class Arena extends Phaser.Scene
 
     handleTileClick(gridX, gridY) {
         console.log(`Clicked tile at grid coordinates (${gridX}, ${gridY})`);
-        if (!this.selectedPlayer) return;
         const player = this.gridMap.get(serializeCoords(gridX, gridY));
         const pendingSpell = this.selectedPlayer?.spells[this.selectedPlayer?.pendingSpell];
         const pendingItem = this.selectedPlayer?.inventory[this.selectedPlayer?.pendingItem];
@@ -589,6 +593,7 @@ export class Arena extends Phaser.Scene
         this.playSound('click');
         this.sendMove(gridX, gridY);
         this.clearHighlight();
+        if (this.gameSettings.tutorial) events.emit('playerMoved');
     }
 
     refreshBox() {
@@ -664,6 +669,9 @@ export class Arena extends Phaser.Scene
                 break;
             case 'clearPendingItem':
                 events.emit('clearPendingItem');
+                break;
+            case 'progressUpdate':
+                events.emit('progressUpdate', data);
                 break;
             default:
                 break;
@@ -1278,6 +1286,7 @@ export class Arena extends Phaser.Scene
     // PhaserCreate
     create()
     {
+        this.loadBackgroundMusic();
         this.setUpBackground();
         this.setUpArena();
         this.createAnims();
@@ -1303,6 +1312,29 @@ export class Arena extends Phaser.Scene
             mode: null,
         }
     }
+
+    loadBackgroundMusic() {
+        // Add the music files to the loader
+        for (let i = 2; i <= 12; i++) {
+            this.load.audio(`bgm_loop_${i}`, require(`@assets/music/bgm_loop_${i}.wav`));
+        }
+        this.load.audio('bgm_end', bgmEndSFX);
+
+    
+        // Optional: Set up progress or completion events
+        // this.load.on('filecomplete', (key, type, data) => {
+        //     console.log(`Loaded: ${key}`);
+        // });
+    
+        // this.load.on('complete', () => {
+        //     console.log('All background music loaded');
+        //     // Now you can use the loaded music tracks
+        // });
+    
+        // Start the loader
+        this.load.start();
+    }
+    
 
     displaySpellArea(location, size, duration) {
         if (size % 2 === 0) {
@@ -1342,7 +1374,7 @@ export class Arena extends Phaser.Scene
             console.error('Player team id is undefined');
         }
 
-        this.gameSettings.tutorial = data.general.tutorial;
+        this.gameSettings.tutorial = (data.general.mode == PlayMode.TUTORIAL);
         this.gameSettings.spectator = data.general.spectator;
         this.gameSettings.mode = data.general.mode;
 
@@ -1357,6 +1389,8 @@ export class Arena extends Phaser.Scene
 
         this.processTerrain(data.terrain); // Put after floatTiles() to allow for tilesMap to be intialized
 
+        this.tutorial = new Tutorial(this);
+
         if (isReconnect) {
             this.setGameInitialized();
         } else {
@@ -1366,6 +1400,10 @@ export class Arena extends Phaser.Scene
                 this.displayGEN(GEN.COMBAT_BEGINS);
                 this.setGameInitialized();
             }, delay);
+
+            if (this.gameSettings.tutorial) {
+                setTimeout(() => events.emit('tutorialStarted'), delay + 3000);
+            }
         }
 
         // Events from the HUD
@@ -1383,6 +1421,12 @@ export class Arena extends Phaser.Scene
         });
     }
 
+    sleep(duration) {
+        return new Promise(resolve => {
+            this.time.delayedCall(duration, resolve, [], this);
+        });
+    }
+    
     setGameInitialized() {
         this.gameInitialized = true;
         this.updateOverview();
@@ -1474,6 +1518,9 @@ export class Arena extends Phaser.Scene
                 text1 = 'stuff-is';
                 text2 = 'on-fire';
                 break;
+            case GEN.TUTORIAL:
+                text1 = 'tutorial';
+                break;
             default:
                 return;
         }
@@ -1495,7 +1542,7 @@ export class Arena extends Phaser.Scene
         });
 
         const targets = [
-            this.add.image(-300, yPosition, text1).setDepth(10),
+            this.add.image(-350, yPosition, text1).setDepth(10),
             this.add.image(this.cameras.main.width + 100, yPosition, 'blue_bang').setDepth(10)
         ];
         if (text2) {

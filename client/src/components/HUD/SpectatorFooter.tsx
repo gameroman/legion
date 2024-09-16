@@ -1,42 +1,46 @@
 // SpectatorFooter.tsx
 import { h, Component } from 'preact';
+import { route } from 'preact-router';
 import { PlayMode } from '@legion/shared/enums';
 interface SpectatorFooterProps {
-  isTutorial: boolean; 
+  isTutorial: boolean;
   score: number;
   mode: PlayMode;
+  closeGame: () => void;
 }
 
 class SpectatorFooter extends Component<SpectatorFooterProps> {
-  render() { 
-    return (
-      <div className="spectator_footer_container"> 
-        <div className="spectator_progress">
-            <div className="spectator_progress_bar_bg">
-              <div className="spectator_progress_fill">
-                <div className="spectator_progress_fill_mask" style={{width: `${100 - this.props.score / 1500 * 100}%`}}>
+  render() {
+    const showChests = this.props.mode != PlayMode.PRACTICE && this.props.mode != PlayMode.TUTORIAL;
 
-                </div>
+    return (
+      <div className="spectator_footer_container">
+        {this.props.mode != PlayMode.TUTORIAL && <div className="spectator_progress">
+          <div className="spectator_progress_bar_bg">
+            <div className="spectator_progress_fill">
+              <div className="spectator_progress_fill_mask" style={{ width: `${100 - this.props.score / 1500 * 100}%` }}>
+
               </div>
             </div>
-            {this.props.mode != PlayMode.PRACTICE &&
-              <div className="progress_ches_mark">
-                <img src="/shop/bronze_chest.png" alt="" />
-              </div>
-            }
-            {  this.props.mode != PlayMode.PRACTICE &&
-              <div className="progress_chest_bronze">
-                <img src="/shop/bronze_chest.png" alt="" />
-              </div>
-            }
-            { this.props.mode != PlayMode.PRACTICE &&
-              <div className="progress_chest_silver">
-                <img src="/shop/bronze_chest.png" alt="" />
-              </div> 
-            }
-            
-        </div>
-        {this.props.isTutorial && <div className="skip_tutorial">
+          </div>
+          {showChests &&
+            <div className="progress_ches_mark">
+              <img src="/shop/bronze_chest.png" alt="" />
+            </div>
+          }
+          {showChests &&
+            <div className="progress_chest_bronze">
+              <img src="/shop/bronze_chest.png" alt="" />
+            </div>
+          }
+          {showChests &&
+            <div className="progress_chest_silver">
+              <img src="/shop/bronze_chest.png" alt="" />
+            </div>
+          }
+
+        </div>}
+        {this.props.isTutorial && <div className="skip_tutorial" onClick={this.props.closeGame}>
           <span>Skip Tutorial</span>
         </div>}
       </div>

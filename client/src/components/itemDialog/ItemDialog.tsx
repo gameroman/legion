@@ -106,6 +106,10 @@ class ItemDialog extends Component<DialogProps, DialogState> {
       action: this.props.actionType
     };
 
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[ItemDialog] AcceptAction: type: ${type} action: ${this.props.actionType} index: ${index}`);
+    }
+
     this.context.updateInventory(type, this.props.actionType, index)
     this.props.handleClose();
 

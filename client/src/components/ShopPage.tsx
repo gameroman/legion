@@ -5,7 +5,6 @@ import { DBCharacterData } from '@legion/shared/interfaces';
 import ShopContent from './shopContent/ShopContent';
 import { ShopTab } from '@legion/shared/enums';
 import { PlayerContext } from '../contexts/PlayerContext';
-import { manageHelp } from './utils';
 
 enum DialogType {
   ITEM_PURCHASE,
@@ -37,7 +36,7 @@ class ShopPage extends Component<ShopPageProps, State> {
 
   async componentDidMount() {
     this.fetchCharactersOnSale();
-    manageHelp('shop', this.context);
+    this.context.manageHelp('shop');
   }
 
   async fetchCharactersOnSale() { 

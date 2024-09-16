@@ -281,7 +281,6 @@ interface GamePlayerData {
 export interface GameData {
     general: {
         reconnect: boolean;
-        tutorial: boolean;
         spectator: boolean;
         mode: PlayMode;
     },

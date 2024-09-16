@@ -127,7 +127,7 @@ class Navbar extends Component<Props, State> {
                     <div className="avatarContainer">
                         {this.state.isLoading ? (
                             <div className="avatar spinner-container">
-                                <div className=" loading-spinner"></div>
+                                <div className="loading-spinner"></div>
                             </div>
                         ) : (
                             <div className="avatar" style={{ backgroundImage: this.state.avatarUrl ? `url(${this.state.avatarUrl})` : 'none' }}></div>
@@ -179,8 +179,8 @@ class Navbar extends Component<Props, State> {
                     <UserInfoBar label={this.state.isLoading ? 'Loading...' : `#${this.props.playerData?.rank}`} isLeague={true} bigLabel={!this.state.isLoading} league={this.props.playerData?.league} />
                     <div className="expand_btn" style={{backgroundImage: `url(${expandBtn})`}} onClick={() => this.setState({ openDropdown: !this.state.openDropdown })} onMouseEnter={() => this.setState({ openDropdown: true })}>
                         <div className="dropdown-content" style={dropdownContentStyle} onMouseLeave={() => this.setState({ openDropdown: false })}>
-                            <div onClick={() => window.open('', '_blank')}>
-                                <img src={helpIcon} alt="Help" /> How to play
+                            <div onClick={() => window.open('https://guide.play-legion.io', '_blank')}>
+                                <img src={helpIcon} alt="How to play" /> How to play
                             </div>
                             <div onClick={() => window.open('https://x.com/iolegion', '_blank')}>
                                 <img src={xIcon} alt="X.com" /> X.com

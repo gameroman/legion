@@ -1,4 +1,3 @@
-// HomePage.tsx
 import { h, Component } from 'preact';
 import { Router, Route } from 'preact-router';
 import AuthContext from '../contexts/AuthContext';
@@ -11,55 +10,84 @@ import RankPage from '../components/RankPage';
 import Navbar from '../components/navbar/Navbar';
 import QueuePage from '../components/QueuePage';
 
-class HomePage extends Component<object, {}> {
-    static contextType = AuthContext;
+interface HomePageState {
+  showLoginOptions: boolean;
+}
 
+class HomePage extends Component<{}, HomePageState> {
+  static contextType = AuthContext;
 
-    // handleRouteChange = (e) => {
+  state: HomePageState = {
+    showLoginOptions: false,
+  };
 
-    //     const showFirebaseUI = false;
+  private firebaseUIContainer: HTMLDivElement | null = null;
 
-    //     this.setState({
-    //         showFirebaseUI,
-    //     });
-    // };
+  componentDidMount() {
+    this.context.addSignInCallback(this.handleSignInSuccess);
+  }
 
-    logout = () => {
-        // Use context to handle logout
-        const { firebaseAuth } = this.context;
-        firebaseAuth.signOut().then(() => {
-            // No need to update state here since AuthProvider will handle it
-        }).catch((error) => {
-            console.error('Error signing out: ', error);
-        });
-    }
+  componentWillUnmount() {
+    this.context.removeSignInCallback(this.handleSignInSuccess);
+  }
 
-    render() {
-        const { user } = this.context;
-        if (!user) return;
+  handleSignInSuccess = () => {
+    this.setState({ showLoginOptions: false });
+  };
 
-        return (
-            <PlayerContext.Consumer> 
-                {({ player }) => (
-                    <div className="homePage">
-                        <Navbar user={user} playerData={player} logout={this.logout} />
-                        <div className="content">
-                            <div className="mainContent">
-                                {/* <Router onChange={this.handleRouteChange}> */}
-                                <Router>
-                                    <Route path="/play" component={PlayPage} />
-                                    <Route path="/queue/:mode" component={QueuePage} />
-                                    <Route path="/team/:id?" component={TeamPage} />
-                                    <Route path="/shop/:id?" component={ShopPage} />
-                                    <Route path="/rank" component={RankPage} />
-                                </Router>
-                            </div>
-                        </div>
+  showLoginOptions = (): void => {
+    this.setState({ showLoginOptions: true }, () => {
+      if (this.firebaseUIContainer) {
+        this.context.initFirebaseUI(this.firebaseUIContainer);
+      }
+    });
+  };
+
+  render() {
+    const { user } = this.context;
+    if (!user) return null;
+
+    return (
+      <PlayerContext.Consumer>
+        {({ player, welcomeShown }) => (
+          <div className="homePage">
+            <Navbar user={user} playerData={player} logout={this.context.logout} />
+            <div className="content">
+              <div className="mainContent">
+                <Router>
+                  <Route path="/play" component={PlayPage} />
+                  <Route path="/queue/:mode" component={QueuePage} />
+                  <Route path="/team/:id?" component={TeamPage} />
+                  <Route path="/shop/:id?" component={ShopPage} />
+                  <Route path="/rank" component={RankPage} />
+                </Router>
+              </div>
+            </div>
+            {user.isAnonymous && welcomeShown && (
+              <div className="anonymous-warning">
+                You are playing as a guest. Sign up to save your progress!
+                <button className="sign-up-btn-smol" onClick={this.showLoginOptions}>Sign up</button>
+              </div>
+            )}
+            {this.state.showLoginOptions && (
+              <div className="login-modal-overlay">
+                <div className="login-modal-dialog">
+                  <div className="dialog-content">
+                    <h2>Sign Up</h2>
+                    <div className="login-header">
+                      Choose your sign up method
                     </div>
-                )}
-            </PlayerContext.Consumer>
-        );
-    }
+                    <div ref={(ref) => this.firebaseUIContainer = ref} id="firebaseui-auth-container"></div>
+                    <button className="back-button" onClick={() => this.setState({ showLoginOptions: false })}>Close</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </PlayerContext.Consumer>
+    );
+  }
 }
 
 export default HomePage;

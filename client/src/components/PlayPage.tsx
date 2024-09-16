@@ -8,18 +8,38 @@ import DailyLoot from './dailyLoot/DailyLoot';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css'
 import { PlayerContext } from '../contexts/PlayerContext';
-import { manageHelp } from './utils';
 import { ENABLE_QUESTS, ENABLE_SPECTATOR_MODE } from "@legion/shared/config";
-
+import { firebaseAuth } from '../services/firebaseService'; 
+import Welcome from './welcome/Welcome';
 
 /* eslint-disable react/prefer-stateless-function */
 class PlayPage extends Component {
   static contextType = PlayerContext; 
+
+  state = {
+    showWelcome: false,
+  };
+
+  componentDidMount() {
+    const user = firebaseAuth.currentUser;
+    
+    this.setState({
+      showWelcome: user?.isAnonymous && !this.context.welcomeShown,
+    });
+  }
   
   componentDidUpdate() {
     if (!this.context.player.isLoaded) return;
-    manageHelp('play', this.context);
+    if (!this.state.showWelcome) {
+      this.context.manageHelp('play');
+    }
   }
+
+  hideWelcome = () => {
+    this.setState({ showWelcome: false });
+    this.context.markWelcomeShown();
+    this.context.manageHelp('play');
+  };
 
   render() {
     const data = {
@@ -88,6 +108,7 @@ class PlayPage extends Component {
 
     return (
       <div className="play-content">
+        {this.state.showWelcome && <Welcome onHide={this.hideWelcome} />}
         <Roster/>
         {data ? <PlayModes /> : <Skeleton
           height={50}

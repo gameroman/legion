@@ -7,6 +7,8 @@ export interface PlayerContextState {
   characters: APICharacterData[];
   activeCharacterId: string;
   characterSheetIsDirty: boolean;
+  welcomeShown: boolean;
+  lastHelp: number;
 }
 
 export const PlayerContext = createContext<{
@@ -14,6 +16,7 @@ export const PlayerContext = createContext<{
   characters: APICharacterData[];
   activeCharacterId: string;
   characterSheetIsDirty: boolean;
+  welcomeShown: boolean;
   setPlayerInfo: (updates: Partial<PlayerContextData>) => void;
   refreshPlayerData: () => void;
   fetchRosterData: () => Promise<void>;
@@ -24,6 +27,9 @@ export const PlayerContext = createContext<{
   applyPurchase: (articleId: number, price: number, quantity: number, shoptab: ShopTab) => void;
   updateActiveCharacter: (characterId: string) => void;
   refreshAllData: () => void;
+  markWelcomeShown: () => void;
+  resetState: () => void;
+  manageHelp: (page: string) => void;
 }>({
   player: {
     uid: '',
@@ -49,6 +55,7 @@ export const PlayerContext = createContext<{
   characters: [],
   activeCharacterId: '',
   characterSheetIsDirty: false,
+  welcomeShown: false,
   setPlayerInfo: () => {},
   refreshPlayerData: () => {},
   fetchRosterData: async () => {},
@@ -59,4 +66,7 @@ export const PlayerContext = createContext<{
   applyPurchase: () => {},
   updateActiveCharacter: () => {},
   refreshAllData: () => {},
+  markWelcomeShown: () => {},
+  resetState: () => {},
+  manageHelp: () => {},
 });

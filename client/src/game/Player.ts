@@ -9,6 +9,7 @@ import { Target, StatusEffect, Class } from "@legion/shared/enums";
 import { Arena } from "./Arena";
 import { PlayerProps, StatusEffects } from "@legion/shared/interfaces";
 import { paralyzingStatuses } from '@legion/shared/utils';
+import { SpeechBubble } from "./SpeechBubble";
 
 enum GlowColors {
     Enemy = 0xff0000,
@@ -58,6 +59,7 @@ export class Player extends Phaser.GameObjects.Container {
     xp: number;
     level: number;
     lastOverheadMessage: number;
+    speechBubble: SpeechBubble;
 
     constructor(
         scene: Phaser.Scene, arenaScene: Arena, team: Team, name: string, gridX: number, gridY: number, x: number, y: number,
@@ -141,6 +143,9 @@ export class Player extends Phaser.GameObjects.Container {
 
         this.sprite.on('pointerover', this.onPointerOver, this);
         this.sprite.on('pointerout', this.onPointerOut, this);
+
+        this.speechBubble = new SpeechBubble(this.scene, -15, (this.height / 2) - 10, 'Hello!').setVisible(false);
+        this.add(this.speechBubble);
     }
 
     setUpStatusEffects() {
@@ -777,6 +782,30 @@ export class Player extends Phaser.GameObjects.Container {
             this.statuses[StatusEffect.POISON] = 0;
             this.hideStatusAnimation(StatusEffect.POISON);
         }
+    }
+
+    calculateDisplayDuration(text) {
+        const wordsPerMinute = 150; // Average reading speed
+        const words = text.split(' ').length;
+        const minutes = words / wordsPerMinute;
+        const duration = minutes * 60 * 1000; // Convert minutes to milliseconds
+        return Math.max(1000, duration);
+    }
+
+    talk(text: string, sticky = false) {
+        this.speechBubble.setVisible(true);
+        this.speechBubble.setText(text);
+        const duration = this.calculateDisplayDuration(text);
+        if (!sticky) {
+            this.scene.time.delayedCall(duration, () => {
+                this.hideBubble();
+            });
+        }
+        return duration;
+    }
+
+    hideBubble() {
+        this.speechBubble.setVisible(false);
     }
 
     destroy() {
