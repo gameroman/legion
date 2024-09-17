@@ -517,10 +517,17 @@ export abstract class Game
 
     processUseItem({num, x, y, index, targetTeam, target}: {num: number, x: number, y: number, index: number,  targetTeam: number, target: number | null}, team: Team) {
         const player = team.getMembers()[num - 1];
-        if (!player.canAct()) return;
+        console.log(`[Game:processUseItem] Player ${num} using item ${index}`);
+        if (!player.canAct()) {
+            console.log(`[Game:processUseItem] Player ${num} cannot act!`);
+            return;
+        }
 
         const item = player.getItemAtIndex(index);
-        if (!item) return;
+        if (!item) {
+            console.log(`[Game:processUseItem] Invalid item index ${index}!`);
+            return;
+        }
 
         let targetPlayer: ServerPlayer | null = null;
         if (item.target === Target.SINGLE) {

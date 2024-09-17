@@ -485,6 +485,7 @@ export class ServerPlayer {
     addStatusEffect(status: StatusEffect, duration: number, chance: number = 1) {
         if (this.isDead()) return false;
         if (Math.random() > chance) return false;
+        console.log(`[ServerPlayer:addStatusEffect] Adding status ${status} for ${duration} seconds`);
         this.statuses[status] = duration;
         
         if (DoTStatuses.includes(status)) {
