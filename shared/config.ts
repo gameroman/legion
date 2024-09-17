@@ -58,6 +58,9 @@ export let SKIP_LEVEL_RESTRICTIONS = true;
 export let IMMEDIATE_LOOT = true;
 export let LOTSA_MP = true;
 
+export const DISCORD_LINK = 'https://discord.gg/s2XZhYCK2m';
+export const X_LINK = 'https://x.com/iolegion';
+
 export const remoteConfig = {
     AUTO_DEFEAT: false,
     HIGH_DAMAGE: false,

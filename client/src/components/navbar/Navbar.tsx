@@ -7,7 +7,7 @@ import firebase from 'firebase/compat/app'
 import UserInfoBar from '../userInfoBar/UserInfoBar';
 import { PlayerContextData } from '@legion/shared/interfaces';
 import { successToast, avatarContext } from '../utils';
-import { ENABLE_PLAYER_LEVEL } from '@legion/shared/config';
+import { ENABLE_PLAYER_LEVEL, DISCORD_LINK, X_LINK } from '@legion/shared/config';
 
 import legionLogo from '@assets/logo.png';
 import playIcon from '@assets/play_btn_idle.png';
@@ -182,10 +182,10 @@ class Navbar extends Component<Props, State> {
                             <div onClick={() => window.open('https://guide.play-legion.io', '_blank')}>
                                 <img src={helpIcon} alt="How to play" /> How to play
                             </div>
-                            <div onClick={() => window.open('https://x.com/iolegion', '_blank')}>
+                            <div onClick={() => window.open(X_LINK, '_blank')}>
                                 <img src={xIcon} alt="X.com" /> X.com
                             </div>
-                            <div onClick={() => window.open('', '_blank')}>
+                            <div onClick={() => window.open(DISCORD_LINK, '_blank')}>
                                 <img src={discordIcon} alt="Discord" /> Discord
                             </div>
                             <div onClick={this.copyIDtoClipboard}>

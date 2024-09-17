@@ -5,7 +5,7 @@ import { Link, useRouter } from 'preact-router';
 import Skeleton from 'react-loading-skeleton';
 
 import { getFirebaseIdToken } from '../services/apiService';
-import { ENABLE_APPROX_WT, ENABLE_MM_TOGGLE, ENABLE_Q_NEWS } from '@legion/shared/config';
+import { ENABLE_APPROX_WT, ENABLE_MM_TOGGLE, ENABLE_Q_NEWS, DISCORD_LINK, X_LINK } from '@legion/shared/config';
 import { tips } from './tips'
 import { PlayerContext } from '../contexts/PlayerContext';
 
@@ -293,12 +293,12 @@ class QueuePage extends Component<QPageProps, QpageState> {
                     </div>
                 </div>
                 <div className="queue-btns">
-                    <Link href="https://x.com/iolegion" target="_blank">
+                    <Link href={X_LINK} target="_blank">
                         <div className="btn-x">
                             <img src={xIcon} />
                         </div>
                     </Link>
-                    <Link href="">
+                    <Link href={DISCORD_LINK} target="_blank">
                         <div className="btn-discord">
                             <img src={discordIcon} />
                         </div>
