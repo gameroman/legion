@@ -170,6 +170,7 @@ export class Arena extends Phaser.Scene
     }
 
     async connectToServer() {
+        return;
         console.log('Connecting to the server ...');
         const gameId = this.extractGameIdFromUrl();
 

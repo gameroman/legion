@@ -82,6 +82,7 @@ class GamePage extends Component<GamePageProps, GamePageState> {
               </div>
             </div>
           )}
+          {!this.state.loading && <div className='waiting-div'>Waiting for server ...</div>}
         </div>
         {this.state.isPortraitMode && <OrientationOverlay />}
       </Fragment>
