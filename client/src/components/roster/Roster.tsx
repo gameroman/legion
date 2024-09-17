@@ -26,7 +26,7 @@ class Roster extends Component {
     return (
       <div className="rosterContainer">
         <BottomBorderDivider label="TEAM COMPOSITION" />
-        {characters ? (
+        {characters.length > 0 ? (
           <div className="rosters">
             {characters.map(character => (
               <CharacterCard {...character} key={character.id} />
