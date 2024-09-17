@@ -14,6 +14,11 @@ import defeatTitle from '@assets/game_end/defeat.png';
 import gradeA from '@assets/game_end/A.png';
 import gradeB from '@assets/game_end/B.png';
 import gradeC from '@assets/game_end/C.png';
+import gradeD from '@assets/game_end/D.png';
+import gradeE from '@assets/game_end/E.png';
+import gradeF from '@assets/game_end/F.png';
+import gradeS from '@assets/game_end/S.png';
+import gradeSp from '@assets/game_end/S+.png';
 import xpIcon from '@assets/game_end/XP_icon.png';
 import goldIcon from '@assets/gold_icon.png';
 import bronzeChest from '@assets/shop/bronze_chest.png';
@@ -101,6 +106,11 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
             case 'A': return gradeA;
             case 'B': return gradeB;
             case 'C': return gradeC;
+            case 'D': return gradeD;
+            case 'E': return gradeE;
+            case 'F': return gradeF;
+            case 'S': return gradeS;
+            case 'S+': return gradeSp;
             default: return '';
         }
     }

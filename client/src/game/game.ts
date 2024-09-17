@@ -8,9 +8,6 @@ const config = {
         mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    // audio: {
-    //     disableWebAudio: false // Ensure Web Audio is enabled
-    // },
     backgroundColor: '#000',
     parent: 'scene',
     dom: {
