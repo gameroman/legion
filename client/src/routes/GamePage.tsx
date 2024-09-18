@@ -12,6 +12,7 @@ interface GamePageProps {
 interface GamePageState {
   mainDivClass: string;
   loading: boolean;
+  initialized: boolean;
   progress: number;
   isPortraitMode: boolean;
 }
@@ -23,6 +24,7 @@ class GamePage extends Component<GamePageProps, GamePageState> {
       mainDivClass: 'normalCursor',
       progress: 0,
       loading: true,
+      initialized: false,
       isPortraitMode: false, // Initialize the isPortraitMode state
     };
   }
@@ -32,6 +34,10 @@ class GamePage extends Component<GamePageProps, GamePageState> {
 
     events.on('progressUpdate', (progress: number) => {
       this.updateProgress(progress);
+    });
+
+    events.on('gameInitialized', () => {
+      this.setState({ initialized: true });
     });
 
     // Check initial orientation
@@ -82,7 +88,7 @@ class GamePage extends Component<GamePageProps, GamePageState> {
               </div>
             </div>
           )}
-          {!this.state.loading && <div className='waiting-div'>Waiting for server ...</div>}
+          {!this.state.loading && !this.state.initialized && <div className='waiting-div'>Waiting for server ...</div>}
         </div>
         {this.state.isPortraitMode && <OrientationOverlay />}
       </Fragment>
