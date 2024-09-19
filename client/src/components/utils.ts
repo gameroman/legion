@@ -75,7 +75,7 @@ export function successToast(text: string, duration: number = 3000) {
   showToast(text, duration, successIcon);
 }
 
-export function errorToast(text: string, duration: number = 3000) {
+export function errorToast(text: string, duration: number = -1) {
   showToast(text, duration, errorIcon);
 }
  

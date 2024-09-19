@@ -8,6 +8,7 @@ import { getFirebaseIdToken } from '../services/apiService';
 import { ENABLE_APPROX_WT, ENABLE_MM_TOGGLE, ENABLE_Q_NEWS, DISCORD_LINK, X_LINK } from '@legion/shared/config';
 import { tips } from './tips'
 import { PlayerContext } from '../contexts/PlayerContext';
+import { errorToast } from './utils';
 
 import goldIcon from '@assets/gold_icon.png';
 import exitIcon from '@assets/queue/exit_icon.png';
@@ -53,6 +54,8 @@ class QueuePage extends Component<QPageProps, QpageState> {
     static contextType = PlayerContext; 
     interval = null;
     intervalWaited = null;
+    manualDisconnect = false;
+
     constructor(props: QPageProps) {
         super(props);
         this.state = {
@@ -103,6 +106,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
 
         this.socket.on('matchFound', ({ gameId }) => {
             console.log(`Found game ${gameId}!`);
+            this.manualDisconnect = true;
             this.socket.disconnect();
             route(`/game/${gameId}`);
         });
@@ -119,6 +123,12 @@ class QueuePage extends Component<QPageProps, QpageState> {
         });
 
         this.socket.emit('joinQueue', { mode: this.props.matches.mode || 0 });
+
+        this.socket.on('disconnect', () => {
+            if (!this.manualDisconnect) {
+                errorToast('Disconnected from matchmaker, please refresh the page to queue again.');
+            }
+        });
     }
 
     handleQuickFind = () => {
