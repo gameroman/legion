@@ -692,7 +692,7 @@ export class Player extends Phaser.GameObjects.Container {
                 this.cooldownDuration = 0;
                 if (this.isSelected()) this.displayMovementRange();
                 this.arena.emitEvent('cooldownEnded', {num: this.num})
-                if (this.selected) this.arena.playSound('cooldown');
+                this.arena.playSound('cooldown');
             }
         });
     }
