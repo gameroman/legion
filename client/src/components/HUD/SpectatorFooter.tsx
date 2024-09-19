@@ -1,7 +1,8 @@
 // SpectatorFooter.tsx
 import { h, Component } from 'preact';
-import { route } from 'preact-router';
 import { PlayMode } from '@legion/shared/enums';
+
+import chestIcon from '@assets/shop/bronze_chest.png';
 interface SpectatorFooterProps {
   isTutorial: boolean;
   score: number;
@@ -25,17 +26,17 @@ class SpectatorFooter extends Component<SpectatorFooterProps> {
           </div>
           {showChests &&
             <div className="progress_ches_mark">
-              <img src="/shop/bronze_chest.png" alt="" />
+              <img src={chestIcon} alt="" />
             </div>
           }
           {showChests &&
             <div className="progress_chest_bronze">
-              <img src="/shop/bronze_chest.png" alt="" />
+              <img src={chestIcon} alt="" />
             </div>
           }
           {showChests &&
             <div className="progress_chest_silver">
-              <img src="/shop/bronze_chest.png" alt="" />
+              <img src={chestIcon} alt="" />
             </div>
           }
 
