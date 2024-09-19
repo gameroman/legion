@@ -123,8 +123,8 @@ export class Player extends Phaser.GameObjects.Container {
             this.add(this.cooldown);
         } 
 
-        this.baseSquare.lineStyle(4, isPlayer ? 0x0000ff : 0xff0000); // Must be called before strokeRect
-        this.baseSquare.strokeRect(-30, 10, 60, 60);  
+        this.baseSquare.fillStyle(isPlayer ? 0x0000ff : 0xff0000); // Must be called before strokeRect
+        this.baseSquare.fillRect(-30, 10, 60, 60);  
 
         if (gridX < this.arena.gridWidth/2) this.sprite.flipX = true;
 
