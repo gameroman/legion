@@ -567,6 +567,18 @@ export class Player extends Phaser.GameObjects.Container {
         this.hideAllStatusAnimations();
         this.playAnim('die');
         if (this.arena.selectedPlayer == this) this.arena.deselectPlayer();
+
+        const deathPhrases: string[] = [
+            "Not like this...",
+            "You'll regret that!",
+            "Avenge me!",
+            "I'll be back",
+            "Curse you!",
+            "Into the void...",
+            "Remember my name...",
+            "This isn't over!",
+          ];
+        this.talk(deathPhrases[Math.floor(Math.random() * deathPhrases.length)]);
     }
 
     attack(targetX: number) {
@@ -788,10 +800,14 @@ export class Player extends Phaser.GameObjects.Container {
         const words = text.split(' ').length;
         const minutes = words / wordsPerMinute;
         const duration = minutes * 60 * 1000; // Convert minutes to milliseconds
-        return Math.max(1000, duration);
+        return Math.max(2000, duration);
     }
 
     talk(text: string, sticky = false) {
+        if (!this.speechBubble) return;
+        if (this.speechBubble.visible) {
+            this.hideBubble();
+        }
         this.speechBubble.setVisible(true);
         this.speechBubble.setText(text);
         const duration = this.calculateDisplayDuration(text);
