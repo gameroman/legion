@@ -37,6 +37,9 @@ export class Item extends BaseItem {
                 }
             });
             this.statusRemovals.forEach(status => target.removeStatusEffect(status));
+            if (this.status) {
+                target.addStatusEffect(this.status.effect, this.status.duration, this.status.chance)
+            }
         });
     }
 
