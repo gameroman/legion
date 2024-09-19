@@ -17,6 +17,8 @@ enum GlowColors {
     Selected = 0xffffff,
 }
 
+const BASE_SQUARE_ALPHA = 0.5;
+
 export class Player extends Phaser.GameObjects.Container {
     sprite: Phaser.GameObjects.Sprite;
     numKey: Phaser.GameObjects.Text;
@@ -60,6 +62,9 @@ export class Player extends Phaser.GameObjects.Container {
     level: number;
     lastOverheadMessage: number;
     speechBubble: SpeechBubble;
+    normalColor: number;
+    goldenColor: number = 0xDAA520;
+    blinkTween: Phaser.Tweens.Tween | null = null;
 
     constructor(
         scene: Phaser.Scene, arenaScene: Arena, team: Team, name: string, gridX: number, gridY: number, x: number, y: number,
@@ -84,7 +89,9 @@ export class Player extends Phaser.GameObjects.Container {
         this.xp = xp;
         this.level = level;
 
-        this.baseSquare = scene.add.graphics().setAlpha(0.6);
+        this.normalColor = isPlayer ? 0x0000ff : 0xff0000;
+        this.baseSquare = scene.add.graphics().setAlpha(BASE_SQUARE_ALPHA);
+        this.setBaseSquareColor(this.normalColor); // Use method to set color
         this.add(this.baseSquare);
 
         // Create the sprite using the given key and add it to the container
@@ -210,6 +217,41 @@ export class Player extends Phaser.GameObjects.Container {
             pendingItem: this.pendingItem,
             isParalyzed: this.isParalyzed(),
           }
+    }
+
+    setBaseSquareColor(color: number) {
+        this.baseSquare.clear();
+        this.baseSquare.fillStyle(color, 0.6);
+        this.baseSquare.fillRect(-30, 10, 60, 60);
+    }
+
+    hideBaseSquare() {
+        this.baseSquare.setVisible(false);
+    }
+
+    showBaseSquare() {
+        this.baseSquare.setVisible(true);
+        this.baseSquare.setAlpha(BASE_SQUARE_ALPHA);
+    }
+
+    startBlinkingBaseSquare() {
+        this.setBaseSquareColor(this.goldenColor);
+        this.blinkTween = this.scene.tweens.add({
+            targets: this.baseSquare,
+            alpha: { from: 1, to: 0 },
+            duration: 150,
+            yoyo: true,
+            repeat: -1
+        });
+    }
+
+    stopBlinkingBaseSquare() {
+        if (this.blinkTween) {
+            this.blinkTween.stop();
+            this.blinkTween = null;
+        }
+        this.setBaseSquareColor(this.normalColor);
+        this.baseSquare.setAlpha(1);
     }
 
     makeEntrance() {
@@ -555,6 +597,12 @@ export class Player extends Phaser.GameObjects.Container {
         if (this.hp <= 0) {
             this.die();
         } else {
+            this.showBaseSquare(); // Show baseSquare when alive
+            
+            if (!(this.isPlayer && this.cooldownDuration === 0)) {
+                this.setBaseSquareColor(this.normalColor); // Ensure normal color
+            }
+
             if (!this.casting) this.playAnim('hurt', true);
             this.healthBar.setVisible(true);
             this.MPBar?.setVisible(true);
@@ -585,6 +633,8 @@ export class Player extends Phaser.GameObjects.Container {
         this.MPBar?.setVisible(false);
         this.hideAllStatusAnimations();
         this.playAnim('die');
+        this.hideBaseSquare(); // Hide baseSquare when dead
+        this.stopBlinkingBaseSquare(); // Stop blinking if any
         if (this.arena.selectedPlayer == this) this.arena.deselectPlayer();
 
         const deathPhrases: string[] = [
@@ -675,8 +725,11 @@ export class Player extends Phaser.GameObjects.Container {
         this.totalCooldownDuration = duration;
         this.arena.emitEvent('cooldownStarted', {num: this.num})
         this.cooldown.setVisible(true);
+        
         if (this.isSelected()) this.hideMovementRange();
         if (this.cooldownTween) this.cooldownTween.stop();
+        if (this.isPlayer) this.stopBlinkingBaseSquare();
+
         this.cooldownTween = this.scene.tweens.add({
             targets: this.cooldown,
             progress: { from: 0, to: 1 }, // Start at 0 progress and tween to 1
@@ -693,6 +746,10 @@ export class Player extends Phaser.GameObjects.Container {
                 if (this.isSelected()) this.displayMovementRange();
                 this.arena.emitEvent('cooldownEnded', {num: this.num})
                 this.arena.playSound('cooldown');
+
+                if (this.isPlayer) {
+                    this.startBlinkingBaseSquare();
+                }
             }
         });
     }
@@ -847,7 +904,13 @@ export class Player extends Phaser.GameObjects.Container {
 
         // Stop all tweens related to this player
         this.scene.tweens.killTweensOf(this);
+        this.scene.tweens.killTweensOf(this.baseSquare);
     
+        if (this.blinkTween) {
+            this.blinkTween.stop();
+            this.blinkTween = null;
+        }
+
         // Stop any ongoing animations
         this.sprite.anims.stop();
         this.animationSprite.anims.stop();
