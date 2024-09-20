@@ -161,7 +161,42 @@ io.on('connection', async (socket: any) => {
     }
 });
 
+// Basic HTTP endpoint for health checks
+app.get('/', (req, res) => {
+  res.send('Game server is running');
+});
+
 const port = process.env.PORT || 3123;
 server.listen(port, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  // Optionally perform cleanup
+  process.exit(1); // Exit to allow Cloud Run to restart the container
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Optionally perform cleanup
+  process.exit(1); // Exit to allow Cloud Run to restart the container
+});
+
+const shutdown = () => {
+  console.log('Received kill signal, shutting down gracefully.');
+  server.close(() => {
+    console.log('Closed out remaining connections.');
+    process.exit(0);
+  });
+
+  // Force shutdown after 10 seconds
+  setTimeout(() => {
+    console.error('Could not close connections in time, forcefully shutting down.');
+    process.exit(1);
+  }, 10000);
+};
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
+

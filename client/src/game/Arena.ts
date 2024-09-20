@@ -55,6 +55,7 @@ import speechTail from '@assets/speech_tail.png';
 // Static imports for tile atlas
 import groundTilesImage from '@assets/tiles2.png';
 import groundTilesAtlas from '@assets/tiles2.json';
+import { errorToast } from '../components/utils';
 
 
 const LOCAL_ANIMATION_SCALE = 3;
@@ -97,6 +98,7 @@ export class Arena extends Phaser.Scene
 
     preload ()
     {
+        console.log('Preloading assets ...');
         this.gamehud = new GameHUD();
         
         this.load.image('killzone',  killzoneImage);
@@ -190,6 +192,11 @@ export class Arena extends Phaser.Scene
         this.socket.on('disconnect', () => {
             console.log('Disconnected from the server');
         }); 
+
+        this.socket.on('error', (error) => {
+            console.error('Error:', error);
+            errorToast(`An error occurred: ${error}`);
+        });
 
         this.socket.on('gameStatus', this.initializeGame.bind(this));
 
@@ -1286,6 +1293,7 @@ export class Arena extends Phaser.Scene
     // PhaserCreate
     create()
     {
+        console.log('Creating scene ...');
         this.loadBackgroundMusic();
         this.setUpBackground();
         this.setUpArena();
