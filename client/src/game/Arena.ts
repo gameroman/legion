@@ -88,6 +88,9 @@ export class Arena extends Phaser.Scene
     gameSettings;
     killCamActive = false;
     pendingGEN: GEN;
+    eventsQueue = [];
+    isLateToTheParty = false;
+    sceneCreated = false;
     gameInitialized = false;
     gameEnded = false;
     tutorial;
@@ -96,7 +99,7 @@ export class Arena extends Phaser.Scene
         super({ key: 'Arena' });
     }
 
-    preload ()
+    preload()
     {
         console.log('Preloading assets ...');
         this.gamehud = new GameHUD();
@@ -161,7 +164,9 @@ export class Arena extends Phaser.Scene
 
         this.load.on('complete', () => {
             this.emitEvent('progressUpdate', 100);
+            console.log('Assets preloaded');
         });
+        this.connectToServer();
     }
 
     extractGameIdFromUrl() {
@@ -184,6 +189,18 @@ export class Arena extends Phaser.Scene
                 },
             }
         );
+
+        // Queue socket events until the scene is created
+        var onevent = this.socket.onevent;
+        const scene = this;
+        this.socket.onevent = function (packet) {
+            if (!scene.sceneCreated){
+                console.warn('queueing ',packet.data[0]);
+                scene.eventsQueue.push(packet);
+            } else {
+                onevent.call(this, packet);    // original call
+            }
+        };
 
         this.socket.on('connect', () => {
             console.log('Connected to the server');
@@ -1293,13 +1310,13 @@ export class Arena extends Phaser.Scene
     // PhaserCreate
     create()
     {
-        console.log('Creating scene ...');
+        console.log('Creating scene...');
         this.loadBackgroundMusic();
         this.setUpBackground();
         this.setUpArena();
         this.createAnims();
         this.createSounds();
-        this.connectToServer();
+        // this.connectToServer();
 
         this.localAnimationSprite = this.add.sprite(0, 0, '').setScale(LOCAL_ANIMATION_SCALE).setOrigin(0.5, 0.7).setVisible(false);
         this.localAnimationSprite.on('animationcomplete', () => this.localAnimationSprite.setVisible(false), this);
@@ -1319,7 +1336,17 @@ export class Arena extends Phaser.Scene
             spectator: false,
             mode: null,
         }
+
+        this.sceneCreated = true;
+        this.emptyQueue();
     }
+
+    emptyQueue(){ // Process the events that have been queued during initialization
+        if (this.eventsQueue.length > 1) this.isLateToTheParty = true;
+        this.eventsQueue.forEach((event) => {
+            this.socket.onevent.call(this.socket, event);
+        });
+    };
 
     loadBackgroundMusic() {
         // Add the music files to the loader
@@ -1363,7 +1390,7 @@ export class Arena extends Phaser.Scene
     }
 
     initializeGame(data: GameData): void {
-        const isReconnect = data.general.reconnect;
+        const isReconnect = data.general.reconnect || this.isLateToTheParty;
 
         this.playerTeamId = data.player.teamId;
 
