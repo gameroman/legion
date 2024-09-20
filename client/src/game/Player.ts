@@ -740,6 +740,7 @@ export class Player extends Phaser.GameObjects.Container {
             [StatusEffect.SLEEP]: 'sleep',
             [StatusEffect.MUTE]: 'muted',
         };
+        if (!keys[status]) return;
         const sprite = this.statusSprites.get(status);
         if (sprite) {
             sprite.setVisible(true);

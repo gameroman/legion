@@ -14,6 +14,7 @@ import blindIcon from '@assets/HUD/blind_icon.png';
 import sleepIcon from '@assets/HUD/sleep_icon.png';
 import poisonIcon from '@assets/HUD/poison_icon.png';
 import burnIcon from '@assets/HUD/burn_icon.png';
+import hasteIcon from '@assets/HUD/haste_icon.png';
 
 import Toastify from 'toastify-js'
 
@@ -151,4 +152,5 @@ export const statusIcons = {
   'Sleep': sleepIcon,
   'Poison': poisonIcon,
   'Burn': burnIcon,
+  'Haste': hasteIcon,
 }
