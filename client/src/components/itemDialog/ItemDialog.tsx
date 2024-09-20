@@ -152,7 +152,9 @@ class ItemDialog extends Component<DialogProps, DialogState> {
   renderDialogButtons(acceptAction: () => void, isDisabled: boolean = false) {
     const { actionType } = this.props;
     let acceptLabel = actionType == InventoryActionType.UNEQUIP ? 'Remove' : 'Equip';
-    if (this.props.dialogType === ItemDialogType.SP) {
+    if (this.props.dialogType === ItemDialogType.SPELLS) {
+      acceptLabel = 'Learn';
+    } else if (this.props.dialogType === ItemDialogType.SP) {
       acceptLabel = 'Spend';
     }
 
