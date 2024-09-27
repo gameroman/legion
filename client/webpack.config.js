@@ -1,3 +1,7 @@
+const {
+  sentryWebpackPlugin
+} = require("@sentry/webpack-plugin");
+
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -11,9 +15,11 @@ const sharedPrefix = isDocker ? '' : '../';
 module.exports = {
   mode: 'development',
   entry: './src/index.tsx',
+
   devServer: {
     historyApiFallback: true,
   },
+
   module: {
     rules: [
       {
@@ -89,6 +95,7 @@ module.exports = {
       }
     ]
   },
+
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx'],
     alias: {
@@ -99,23 +106,27 @@ module.exports = {
       'phaser': path.resolve(__dirname, 'node_modules/phaser/dist/phaser.js'),
     }
   },
+
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: 'src/index.html',
-      hash: true,
-    }),
-    new Dotenv({
-      path: isDocker ? false : path.resolve(__dirname, isProduction ? '.production.env' : '.env'),
-      systemvars: isDocker // Set systemvars to true when in Docker mode to get vars from docker-compose.ym;
-    }),
-    new CopyWebpackPlugin({
-      patterns: [
-        { from: 'public/favicon.ico', to: 'favicon.ico' }
-      ],
-    }),
-  ]
+
+  plugins: [new HtmlWebpackPlugin({
+    template: 'src/index.html',
+    hash: true,
+  }), new Dotenv({
+    path: isDocker ? false : path.resolve(__dirname, isProduction ? '.production.env' : '.env'),
+    systemvars: isDocker // Set systemvars to true when in Docker mode to get vars from docker-compose.ym;
+  }), new CopyWebpackPlugin({
+    patterns: [
+      { from: 'public/favicon.ico', to: 'favicon.ico' }
+    ],
+  }), sentryWebpackPlugin({
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    org: "dynetis-games",
+    project: "javascript-react"
+  })],
+
+  devtool: "source-map"
 };

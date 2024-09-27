@@ -26,6 +26,8 @@ class PlayPage extends Component {
     this.setState({
       showWelcome: user?.isAnonymous && !this.context.welcomeShown,
     });
+
+    throw new Error('Not implemented');
   }
   
   componentDidUpdate() {
