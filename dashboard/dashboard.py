@@ -220,6 +220,7 @@ def get_player_log(player_id):
         data = response.json()
         pretty_print_action_log(data['actionLog'])
         pretty_print_player_summary(data['playerSummary'])
+        pretty_print_games(data['gamesPlayed'])
     except requests.exceptions.RequestException as e:
         print(f"Error fetching action log for player {player_id}: {e}")
 
@@ -233,11 +234,21 @@ def pretty_print_action_log(action_log):
         print(Style.RESET_ALL)
 
 def pretty_print_player_summary(player_summary):
+    # Parse the ISO date strings into datetime objects
+    join_date = datetime.fromisoformat(player_summary['joinDate'].replace('Z', '+00:00'))
+    last_active_date = datetime.fromisoformat(player_summary['lastActiveDate'].replace('Z', '+00:00'))
+
+    # Format the dates into a readable format, e.g., "January 15, 2023"
+    join_date_formatted = join_date.strftime('%B %d, %Y at %H:%M:%S')
+    last_active_date_formatted = last_active_date.strftime('%B %d, %Y at %H:%M:%S')
+
     print("\nPlayer Summary:")
+    print(f"Join Date: {join_date_formatted}")
+    print(f"Last Active Date: {last_active_date_formatted}")
     print(f"Gold: {player_summary['gold']}")
     print(f"Rank: {player_summary['rank']}")
     print(f"All Time Rank: {player_summary['allTimeRank']}")
-    print(f"Losses streak: {player_summary['lossesStreak']}")
+    print(f"Losses Streak: {player_summary['lossesStreak']}")
     print("\nCharacters:")
     for character in player_summary['characters']:
         print(f"  Character ID: {character['id']}")
@@ -252,6 +263,11 @@ def pretty_print_player_summary(player_summary):
     # Utilization stats
     print(f"\nUtilization Stats: {player_summary['utilizationStats']}")
 
+def pretty_print_games(games):
+    print("\nGames Played:")
+    for game in games:
+        print(f"Game ID: {game}")
+        print()
 
 def get_game_log(game_id):
     endpoint = f"{API_URL}/getGameLog?gameId={game_id}"

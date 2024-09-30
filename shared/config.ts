@@ -55,7 +55,7 @@ export const STARTING_SPELLS_ADMIN = [2];
 export const STARTING_EQUIPMENT_ADMIN = [2];
 export let INJURED_MODE = false;
 export let SKIP_LEVEL_RESTRICTIONS = true;
-export let IMMEDIATE_LOOT = true;
+export let IMMEDIATE_LOOT = false;
 export let LOTSA_MP = true;
 
 export const DISCORD_LINK = 'https://discord.gg/s2XZhYCK2m';

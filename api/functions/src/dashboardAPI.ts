@@ -253,6 +253,18 @@ export const getActionLog = onRequest(async (request, response) => {
                 id: doc.id,
             }));
 
+            // Extract game IDs from the action log
+            const gameIdSet = new Set();
+            actionLog.forEach((action) => {
+                // @ts-ignore
+                const details = action.details || {};
+                const gameId = details.gameId;
+                if (gameId) {
+                    gameIdSet.add(gameId);
+                }
+            });
+            const gamesPlayed = Array.from(gameIdSet);
+
             // Fetch the player's summary data
             const playerDoc = await db.collection("players").doc(playerId.toString()).get();
             if (!playerDoc.exists) {
@@ -261,7 +273,7 @@ export const getActionLog = onRequest(async (request, response) => {
             }
             const playerData = playerDoc.data();
             // @ts-ignore
-            const { gold, rank, leagueStats, allTimeStats, characters, lossesStreak, utilizationStats } = playerData;
+            const { gold, rank, leagueStats, allTimeStats, characters, lossesStreak, utilizationStats, joinDate, lastActiveDate } = playerData;
 
             // Fetch character details
             const characterDetails = [];
@@ -290,12 +302,15 @@ export const getActionLog = onRequest(async (request, response) => {
                 lossesStreak: allTimeStats.lossesStreak,
                 characters: characterDetails,
                 utilizationStats,
+                joinDate,
+                lastActiveDate,
             };
 
-            // Send the response
+            // Send the response including joinDate, lastActiveDate, and gamesPlayed
             response.send({
                 actionLog,
                 playerSummary,
+                gamesPlayed,
             });
         } catch (error) {
             console.error("getActionLog error:", error);
@@ -303,7 +318,6 @@ export const getActionLog = onRequest(async (request, response) => {
         }
     });
 });
-
 
 export const getGameLog = onRequest(async (request, response) => {
     const db = admin.firestore();
