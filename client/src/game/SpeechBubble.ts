@@ -6,6 +6,8 @@ export class SpeechBubble extends Phaser.GameObjects.Container {
     private bubble: Phaser.GameObjects.NineSlice;
     private content: Phaser.GameObjects.DOMElement;
     private tail: Phaser.GameObjects.Image;
+    private text: string;
+    private timer: Phaser.Time.TimerEvent;
 
     constructor(scene: Phaser.Scene, x: number, y: number, text: string) {
         super(scene, x, y);
@@ -58,6 +60,7 @@ export class SpeechBubble extends Phaser.GameObjects.Container {
             const contentY = this.bubble.y - textHeight + 10;
     
             this.content.setPosition(contentX, contentY);
+            this.content.setOrigin(0.5);
     
             // Set the container size to match the entire speech bubble (including tail)
             this.setSize(Math.max(this.bubble.width, this.tail.width), this.bubble.height + tailHeight);
@@ -66,12 +69,38 @@ export class SpeechBubble extends Phaser.GameObjects.Container {
     
 
     public setText(text: string): void {
+        this.text = text;
         this.content.setText(text);
         this.layout();
+    }
+
+    public getText(): string {
+        return this.text;
     }
 
     public setVisible(visible: boolean): this {
         super.setVisible(visible);
         return this;
+    }
+
+    private calculateDisplayDuration() {
+        const wordsPerMinute = 100; // Average reading speed
+        const words = this.text.split(' ').length;
+        const minutes = words / wordsPerMinute;
+        const duration = minutes * 60 * 1000; // Convert minutes to milliseconds
+        return Math.max(2500, duration);
+    }
+
+    public setDuration(sticky: boolean) {
+        if (this.timer) {
+            this.timer.destroy();
+        }
+        const duration = this.calculateDisplayDuration();
+        if (!sticky) {
+            this.timer = this.scene.time.delayedCall(duration, () => {
+                this.setVisible(false);
+            });
+        }
+        return duration;
     }
 }

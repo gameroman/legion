@@ -265,7 +265,6 @@ export class Arena extends Phaser.Scene
         });
 
         this.socket.on('gen', (data) => {
-            console.log('Received GEN:', data);
             if (Array.isArray(data)) {
                 data.forEach(g => this.enqueueGEN(g));
             } else {
@@ -1235,7 +1234,7 @@ export class Arena extends Phaser.Scene
             player.setStatuses(character.statuses);
 
             if (!isReconnect) {
-                this.time.delayedCall(750, player.makeEntrance, [], player);
+                this.time.delayedCall(750, player.makeEntrance, [this.gameSettings.tutorial], player);
             }
 
             this.gridMap.set(serializeCoords(character.x, character.y), player);
@@ -1452,7 +1451,7 @@ export class Arena extends Phaser.Scene
         events.emit('gameInitialized');
     }
 
-    sleep(duration) {
+    sleep(duration: number): Promise<void> {
         return new Promise(resolve => {
             this.time.delayedCall(duration, resolve, [], this);
         });
@@ -1519,7 +1518,6 @@ export class Arena extends Phaser.Scene
     }
 
     enqueueGEN(gen: GEN) {
-        console.log(`Enqueueing GEN: ${gen}`);
         this.genQueue.push(gen);
         this.processGENQueue();
     }

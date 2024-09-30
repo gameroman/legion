@@ -254,7 +254,7 @@ export class Player extends Phaser.GameObjects.Container {
         this.baseSquare.setAlpha(1);
     }
 
-    makeEntrance() {
+    makeEntrance(isTutorial = false) {
         const combatStartPhrases: string[] = [
             "Let's dance!",
             "Prepare to fall!",
@@ -269,7 +269,7 @@ export class Player extends Phaser.GameObjects.Container {
         const callback = () => { 
             this.playAnim('boast', true);
             // Say the phrase with a random delay
-            if (this.isPlayer) {
+            if (this.isPlayer && !isTutorial) {
                 setTimeout(() => {
                     this.talk(combatStartPhrases[Math.floor(Math.random() * combatStartPhrases.length)]);
                 }, Math.random() * 600);
@@ -875,29 +875,22 @@ export class Player extends Phaser.GameObjects.Container {
         }
     }
 
-    calculateDisplayDuration(text) {
-        const wordsPerMinute = 150; // Average reading speed
-        const words = text.split(' ').length;
-        const minutes = words / wordsPerMinute;
-        const duration = minutes * 60 * 1000; // Convert minutes to milliseconds
-        return Math.max(2000, duration);
-    }
-
-    talk(text: string, sticky = false) {
+    async talk(text: string, sticky = false) {
         if (!this.speechBubble) return;
+        if (this.speechBubble.visible && this.speechBubble.getText() == text) return;
         if (this.speechBubble.visible) {
             this.hideBubble();
         }
-        this.speechBubble.setVisible(true);
+        
+        // @ts-ignore
+        await this.scene.sleep(10);
         this.speechBubble.setText(text);
-        const duration = this.calculateDisplayDuration(text);
-        if (!sticky) {
-            this.scene.time.delayedCall(duration, () => {
-                this.hideBubble();
-            });
-        }
+        this.speechBubble.setVisible(true);
+        const duration = this.speechBubble.setDuration(sticky);
+        console.log(`Duration: ${duration}`);
         return duration;
     }
+
 
     hideBubble() {
         this.speechBubble.setVisible(false);

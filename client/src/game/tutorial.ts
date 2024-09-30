@@ -20,12 +20,12 @@ export class Tutorial {
             this.p1.talk('Hi!');
             await game.sleep(1000);
             this.p2.talk('Hello!');
-            await game.sleep(500);
+            await game.sleep(750);
             this. p3.talk('Hey!');
-            await game.sleep(500);
-            await game.sleep(this.p1.talk('We\'re your team!'));
-            await game.sleep(this.p3.talk('We need to defeat the other team!'));
-            await game.sleep(this.p1.talk('Let me show you how to move!'));
+            await game.sleep(1000);
+            await game.sleep(await this.p1.talk('We\'re your team!'));
+            await game.sleep(await this.p3.talk('We need to defeat the other team!'));
+            await game.sleep(await this.p1.talk('Let me show you how to move!'));
             this.p1.talk('Click on me, then click on a yellow tile to move!', true);
             this.introFinished = true;
         });
@@ -37,9 +37,9 @@ export class Tutorial {
             await game.sleep(500);
             this.p2.talk('Impressive!');
             await game.sleep(1000);
-            await game.sleep(this.p1.talk('See the yellow bar filling up in the top menu?'));
-            await game.sleep(this.p1.talk('It\'s my cooldown bar. After each action, I need to wait for it to fill up before I can act again!'));
-            await game.sleep(this.p1.talk('Now let\'s see how to attack!'));
+            await game.sleep(await this.p1.talk('See the yellow bar filling up in the top menu?'));
+            await game.sleep(await this.p1.talk('It\'s my cooldown bar. After each action, I need to wait for it to fill up before I can act again!'));
+            await game.sleep(await this.p1.talk('Now let\'s see how to attack!'));
             this.p1.talk('Move me next to an enemy and click on them to attack!', true);
         });
         
@@ -50,8 +50,8 @@ export class Tutorial {
             await game.sleep(500);
             this.p2.talk('Nice hit!');
             await game.sleep(1000);
-            await game.sleep(this.p3.talk('Now let\'s see how to use spells!'));
-            await game.sleep(this.p3.talk('I\'m a black mage, so I can cast spells!'));
+            await game.sleep(await this.p3.talk('Now let\'s see how to use spells!'));
+            await game.sleep(await this.p3.talk('I\'m a black mage, so I can cast spells!'));
             this.p3.talk('Select me, click on the fireball in the top menu, and click where you want to launch it!', true);
         });
 
@@ -62,9 +62,9 @@ export class Tutorial {
             await game.sleep(2000);
             this.p2.talk('Great job!');
             await game.sleep(1500);
-            await game.sleep(this.p2.talk('Now you know the basics!'));
-            await game.sleep(this.p2.talk('The enemy wasn\'t reacting, but in normal games they will attack you!'));
-            await game.sleep(this.p2.talk('Now the enemy will start attacking! Good luck!'));
+            await game.sleep(await this.p2.talk('Now you know the basics!'));
+            await game.sleep(await this.p2.talk('The enemy wasn\'t reacting, but in normal games they will attack you!'));
+            await game.sleep(await this.p2.talk('Now the enemy will start attacking! Good luck!'));
             await game.sleep(3000);
             game.endTutorial();
         });
