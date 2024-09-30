@@ -1,4 +1,3 @@
-// require("./instrument");
 import express from 'express';
 import { Socket, Server } from 'socket.io';
 import { createServer } from 'http';
@@ -48,7 +47,6 @@ const socketMap = new Map<Socket, Game>();
 const gamesMap = new Map<string, Game>();
 
 io.on('connection', async (socket: any) => {
-    console.error('Connection');
     try {
       console.log(`[server:connection] Connected with token ${socket.handshake.auth.token}`);
       // throw an exception if the token is not provided

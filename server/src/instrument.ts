@@ -1,5 +1,5 @@
-const Sentry = require("@sentry/node");
-const { nodeProfilingIntegration } = require("@sentry/profiling-node");
+import * as Sentry from "@sentry/node";
+import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 // Ensure to call this before requiring any other modules!
 Sentry.init({
@@ -8,7 +8,7 @@ Sentry.init({
     // Add our Profiling integration
     nodeProfilingIntegration(),
     Sentry.captureConsoleIntegration({
-        levels: ['error']
+      levels: ['error']
     }),
   ],
 
@@ -20,3 +20,5 @@ Sentry.init({
   // This is relative to tracesSampleRate
   profilesSampleRate: 1.0,
 });
+
+console.log("Sentry initialized");
