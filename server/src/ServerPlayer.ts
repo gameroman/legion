@@ -143,6 +143,10 @@ export class ServerPlayer {
         return (this.statuses[StatusEffect.PARALYZE] != 0) || this.isFrozen();
     }
 
+    isHasted() {
+        return this.statuses[StatusEffect.HASTE] != 0;
+    }
+
     isMuted() {
         return this.statuses[StatusEffect.MUTE] != 0;
     }
@@ -372,6 +376,7 @@ export class ServerPlayer {
     
     setCooldown(durationMs: number) {
         if (this.team?.game.config.FAST_MODE) durationMs = this.team?.game.config.COOLDOWN_OVERRIDE;
+        if (this.isHasted()) durationMs /= 2;
         this.cooldownManager.setCooldown(durationMs);
     }
 

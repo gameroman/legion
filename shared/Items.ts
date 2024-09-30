@@ -184,10 +184,10 @@ items[13] = new BaseItem({
     frame: 13,
     animation: "potion_heal",
     sfx: "healing",
-    cooldown: 7,
+    cooldown: 0.2,
     target: Target.SELF,
     effects: [],
-    status: {effect: StatusEffect.HASTE, chance: 1, duration: 180},
+    status: {effect: StatusEffect.HASTE, chance: 1, duration: 10},
     effort: 6,
 });
 
