@@ -1,4 +1,4 @@
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'docker';
 const isAdmin = (process.env.ADMIN_MODE == 'true');
 
 // Gameplay
@@ -56,7 +56,7 @@ export const STARTING_EQUIPMENT_ADMIN = [2];
 export let INJURED_MODE = false;
 export let SKIP_LEVEL_RESTRICTIONS = true;
 export let IMMEDIATE_LOOT = false;
-export let LOTSA_MP = true;
+export let LOTSA_MP = false;
 
 export const DISCORD_LINK = 'https://discord.gg/s2XZhYCK2m';
 export const X_LINK = 'https://x.com/iolegion';
@@ -71,6 +71,9 @@ export const remoteConfig = {
 if (isDev) {
     STARTING_BLACK_MAGE_SPELLS.push(2);
 }
+
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`[config] isDev: ${isDev}, isAdmin: ${isAdmin}`);
 
 if (!isDev) {
     FREEZE_AI = false;

@@ -39,8 +39,12 @@ module.exports = {
     libraryTarget: 'commonjs', // !! Important for Firebase functions
   },
   plugins: [
+    // new Dotenv({
+    //   path: path.resolve(__dirname, '.production.env'),
+    // })
     new Dotenv({
-      path: path.resolve(__dirname, '.production.env'),
+      path: isDocker ? false : path.resolve(__dirname, isProduction ? '.production.env' : '.env'),
+      systemvars: isDocker // Set systemvars to true when in Docker mode to get vars from docker-compose.yml
     })
   ],
   devtool: 'inline-source-map', // For development mode

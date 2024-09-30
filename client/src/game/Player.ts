@@ -474,11 +474,9 @@ export class Player extends Phaser.GameObjects.Container {
         }
         const item = this.getItemAtSlot(index);
         if (!item) {
-            console.error(`No item at slot ${index}`);
             return;
         }
         if (!this.canAct()) {
-            console.error(`Can't act`);
             this.arena.playSound('nope', 0.2);
             return;
         }
@@ -529,7 +527,7 @@ export class Player extends Phaser.GameObjects.Container {
     useSkill(index) {
         const spell = this.spells[index];
         if (!spell) {
-            console.error(`No spell at slot ${index}`);
+            // console.error(`No spell at slot ${index}`);
             return;
         }
         if (this.pendingSpell == index) {
@@ -541,6 +539,12 @@ export class Player extends Phaser.GameObjects.Container {
         }
         if (!this.canAct() || spell.cost > this.mp || this.isMuted()) {
             this.arena.playSound('nope', 0.2);
+            if (this.isMuted()) {
+                this.talk('I\'m silenced! I can\'t cast spells!');
+            }
+            if (this.mp < spell.cost) {
+                this.talk('Not enough MP!');
+            }
             return;
         }
         

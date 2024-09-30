@@ -27,6 +27,7 @@ export function canLearnSpell(characterData: DBCharacterData | APICharacterData,
     console.error("Invalid spell ID");
     return false;
   }
+  if (dev) console.log(`[canLearnSpell] spellId: ${spellId}, spell: ${spell.name}, minLevel: ${spell.minLevel}, hasMinlevel: ${hasMinLevel(characterData, spell.minLevel)}, classes: ${spell.classes}, ${hasRequiredClass(characterData, spell.classes)}`);
   return (
     hasMinLevel(characterData, spell.minLevel) &&
     hasRequiredClass(characterData, spell.classes) &&
@@ -35,6 +36,7 @@ export function canLearnSpell(characterData: DBCharacterData | APICharacterData,
 }
 
 export function hasMinLevel(characterData: DBCharacterData | APICharacterData, level: number): boolean {
+  if (dev) console.log(`[hasMinLevel] level: ${level}, characterData.level: ${characterData.level}, SKIP_LEVEL_RESTRICTIONS: ${SKIP_LEVEL_RESTRICTIONS}`);
     return SKIP_LEVEL_RESTRICTIONS || characterData.level >= level;
 }
 

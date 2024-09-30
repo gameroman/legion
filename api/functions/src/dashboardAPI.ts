@@ -240,7 +240,7 @@ export const getActionLog = onRequest(async (request, response) => {
         try {
             const playerId = request.query.playerId;
             if (!playerId) {
-                response.status(400).send("Bad Request: Missing player ID");
+                response.status(400).send(" Bad Request: Missing player ID");
                 return;
             }
 
