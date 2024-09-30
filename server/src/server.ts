@@ -1,17 +1,19 @@
+// server.ts
+
 import express from 'express';
 import { Socket, Server } from 'socket.io';
 import { createServer } from 'http';
 import dotenv from 'dotenv';
 import * as admin from "firebase-admin";
 import { v4 as uuidv4 } from "uuid";
+import cors from 'cors'; // Import the cors package
 
-import {apiFetch} from './API';
+import { apiFetch } from './API';
 import { Game } from './Game';
 import { AIGame } from './AIGame';
 import { PvPGame } from './PvPGame';
 import firebaseConfig from '@legion/shared/firebaseConfig';
 import { PlayMode } from '@legion/shared/enums';
-
 
 dotenv.config();
 
@@ -25,13 +27,20 @@ const PORT = process.env.PORT || 3123;
 // Create a new express application instance
 const app: express.Application = express();
 
+// Use the cors middleware
+app.use(cors({
+  origin: process.env.CLIENT_ORIGIN || "http://localhost:8080", // Adjust as needed
+  methods: ["GET", "POST"],
+  credentials: true
+}));
+
 // Create a new http server instance
 const server = createServer(app);
 
 // Create a new socket.io instance
 const io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_ORIGIN || "http://0.0.0.0:8080",
+      origin: process.env.CLIENT_ORIGIN || "http://localhost:8080", // Ensure this matches the client origin
       methods: ["GET", "POST"],
       credentials: true
     }
@@ -49,7 +58,7 @@ const gamesMap = new Map<string, Game>();
 io.on('connection', async (socket: any) => {
     try {
       console.log(`[server:connection] Connected with token ${socket.handshake.auth.token}`);
-      // throw an exception if the token is not provided
+      // Throw an exception if the token is not provided
       if (!socket.handshake.auth.token) {
         throw new Error('No token provided');
       }
@@ -65,7 +74,6 @@ io.on('connection', async (socket: any) => {
       }
       const isTutorial = gameId === 'tutorial';
       console.log(`[server:connection] User ${shortToken(socket.uid)} connecting to game ${gameId}, [isTutorial: ${isTutorial}]`);
-
 
       let gameData;
       if (isTutorial) {
@@ -159,7 +167,7 @@ io.on('connection', async (socket: any) => {
         if(game instanceof AIGame) {
           game.endTutorial();
         }
-      })
+      });
     } catch (error) {
         console.error(`[server:connection] Error joining game server: ${error}`);
     }
@@ -167,6 +175,7 @@ io.on('connection', async (socket: any) => {
 
 // Basic HTTP endpoint for health checks
 app.get('/', (req, res) => {
+  console.log(`[server] Health check / warm up request`);
   res.send('Game server is running');
 });
 
@@ -203,4 +212,3 @@ const shutdown = () => {
 
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
-

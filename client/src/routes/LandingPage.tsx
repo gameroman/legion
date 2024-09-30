@@ -2,6 +2,7 @@ import { h, Component } from 'preact';
 import { route } from 'preact-router';
 import AuthContext from '../contexts/AuthContext';
 import logoBig from '@assets/logobig.png';
+import axios from 'axios';
 import './LandingPage.style.css';
 interface LandingPageState {
   showLoginOptions: boolean;
@@ -15,6 +16,19 @@ class LandingPage extends Component<{}, LandingPageState> {
   };
 
   private firebaseUIContainer: HTMLDivElement | null = null;
+
+  componentDidMount(): void {
+    if (!this.context.isAuthenticated) {
+      // console.log(`Warming up the server at ${process.env.GAME_SERVER_URL}...`);
+      axios.get(process.env.GAME_SERVER_URL)
+        .then(response => {
+          // console.log(`Server warmed up: ${response.data}`);
+        })
+        .catch(error => {
+          console.error(`Error warming up the server: ${error}`);
+        });
+    }
+  }
 
   showLoginOptions = (): void => {
     this.setState({ showLoginOptions: true }, () => {
