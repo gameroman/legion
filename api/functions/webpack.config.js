@@ -43,7 +43,7 @@ module.exports = {
     //   path: path.resolve(__dirname, '.production.env'),
     // })
     new Dotenv({
-      path: isDocker ? false : path.resolve(__dirname, isProduction ? '.production.env' : '.env'),
+      path: isDocker ? false : path.resolve(__dirname, '.production.env'),
       systemvars: isDocker // Set systemvars to true when in Docker mode to get vars from docker-compose.yml
     })
   ],

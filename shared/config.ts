@@ -72,9 +72,6 @@ if (isDev) {
     STARTING_BLACK_MAGE_SPELLS.push(2);
 }
 
-console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
-console.log(`[config] isDev: ${isDev}, isAdmin: ${isAdmin}`);
-
 if (!isDev) {
     FREEZE_AI = false;
     INJURED_MODE = false;
