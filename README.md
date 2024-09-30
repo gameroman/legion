@@ -16,6 +16,7 @@ Regardless of the method you use below, the apps will be available at the follow
 ### Using Docker
 
 Run `docker-compose up --build` at the root of the repository to launch all the apps locally.
+Running `npm install` in `client`, `server` and `matchmaker` might still be necessary for your IDE to resolve the dependencies correctly.
 
 ### Bare-metal
 

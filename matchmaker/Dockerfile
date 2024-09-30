@@ -2,7 +2,9 @@ FROM node:20
 
 WORKDIR /usr/src/app
 
-COPY matchmaker/package*.json ./
+COPY matchmaker/*.json ./
+COPY matchmaker/*.js ./
+COPY matchmaker/*.env ./
 
 RUN npm install
 
