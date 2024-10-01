@@ -8,7 +8,7 @@ import { getFirebaseIdToken } from '../services/apiService';
 import { ENABLE_APPROX_WT, ENABLE_MM_TOGGLE, ENABLE_Q_NEWS, DISCORD_LINK, X_LINK } from '@legion/shared/config';
 import { tips } from './tips'
 import { PlayerContext } from '../contexts/PlayerContext';
-import { errorToast } from './utils';
+import { errorToast, playSoundEffect } from './utils';
 import { QueueTips } from './queueTips/QueueTips';
 
 import goldIcon from '@assets/gold_icon.png';
@@ -16,6 +16,7 @@ import exitIcon from '@assets/queue/exit_icon.png';
 import discordIcon from '@assets/queue/discord_btn.png';
 import xIcon from '@assets/queue/x_btn.png';
 import blueTriangle from '@assets/queue/blue_triangle.png';
+import matchFound from "@assets/sfx/match_found.wav";
 
 interface QPageProps {
     matches: {
@@ -139,7 +140,9 @@ class QueuePage extends Component<QPageProps, QpageState> {
         );
 
         this.socket.on('matchFound', ({ gameId }) => {
-            console.log(`Found game ${gameId}!`);
+            if (this.props.matches.mode != 0) {
+                playSoundEffect(matchFound, 0.5);
+            }
             this.manualDisconnect = true;
             this.socket.disconnect();
             route(`/game/${gameId}`);

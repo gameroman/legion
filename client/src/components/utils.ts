@@ -92,8 +92,9 @@ export function mapFrameToCoordinates(frame: number) {
   }
 }
 
-export function playSoundEffect(src: string) {
+export function playSoundEffect(src: string, volume: number = 1.0) {
   const audio = new Audio(src);
+  audio.volume = Math.min(Math.max(volume, 0), 1); // Ensure volume is between 0 and 1
   audio.play().catch(error => console.error('Error playing sound:', error));
 }
 
