@@ -1,7 +1,7 @@
 // Navbar.tsx
 
 import './navbar.style.css';
-import { h, Component } from 'preact';
+import { h, Component, Fragment } from 'preact';
 import { Link, useRouter } from 'preact-router';
 import firebase from 'firebase/compat/app'
 import UserInfoBar from '../userInfoBar/UserInfoBar';
@@ -24,7 +24,21 @@ import xIcon from '@assets/svg/x.svg';
 import discordIcon from '@assets/svg/discord.svg';
 import copyIcon from '@assets/svg/copy.svg';
 import logoutIcon from '@assets/svg/logout.svg';
+import walletIcon from '@assets/svg/wallet.svg';
 
+declare global {
+    interface Window {
+      solana?: {
+        isPhantom?: boolean;
+        connect: () => Promise<{ publicKey: { toString: () => string } }>;
+        disconnect: () => Promise<void>;
+        on: (event: string, callback: () => void) => void;
+        off: (event: string, callback: () => void) => void;
+        isConnected: boolean;
+        getBalance: () => Promise<number>;
+      };
+    }
+  }
 
 enum MenuItems {
     PLAY = 'PLAY',
@@ -52,6 +66,9 @@ interface State {
     openDropdown: boolean;
     avatarUrl: string | null;
     isLoading: boolean;
+    isSolanaWalletPresent: boolean;
+    isSolanaWalletConnected: boolean;
+    solanaBalance: number | null;
 }
 
 class Navbar extends Component<Props, State> {
@@ -60,10 +77,19 @@ class Navbar extends Component<Props, State> {
         openDropdown: false,
         avatarUrl: null,
         isLoading: true,
+        isSolanaWalletPresent: false,
+        isSolanaWalletConnected: false,
+        solanaBalance: null
     }
 
     componentDidMount() {
         this.loadAvatar();
+        this.checkSolanaWallet();
+        this.addWalletListeners();
+    }
+
+    componentWillUnmount() {
+        this.removeWalletListeners();
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
@@ -71,6 +97,81 @@ class Navbar extends Component<Props, State> {
             this.loadAvatar();
         }
     }
+
+    addWalletListeners = () => {
+        if (window.solana) {
+            window.solana.on('connect', this.handleWalletConnect);
+            window.solana.on('disconnect', this.handleWalletDisconnect);
+        }
+    }
+
+    removeWalletListeners = () => {
+        if (window.solana) {
+            window.solana.off('connect', this.handleWalletConnect);
+            window.solana.off('disconnect', this.handleWalletDisconnect);
+        }
+    }
+
+    handleWalletConnect = () => {
+        this.setState({ isSolanaWalletConnected: true });
+        this.updateSolanaBalance();
+    }
+
+    handleWalletDisconnect = () => {
+        this.setState({ isSolanaWalletConnected: false, solanaBalance: null });
+    }
+
+    checkSolanaWallet = async () => {
+        const isSolanaPresent = typeof window.solana !== 'undefined';
+        this.setState({ isSolanaWalletPresent: isSolanaPresent });
+
+        if (isSolanaPresent && window.solana) {
+            try {
+                const connected = window.solana.isConnected;
+                this.setState({ isSolanaWalletConnected: connected });
+
+                if (connected) {
+                    await this.updateSolanaBalance();
+                }
+            } catch (error) {
+                console.error('Error checking Solana wallet:', error);
+            }
+        }
+    };
+
+    connectSolanaWallet = async () => {
+        if (this.state.isSolanaWalletPresent && window.solana) {
+            try {
+                await window.solana.connect();
+                this.setState({ isSolanaWalletConnected: true });
+                await this.updateSolanaBalance();
+            } catch (error) {
+                console.error('Error connecting to Solana wallet:', error);
+            }
+        }
+    };
+
+    disconnectSolanaWallet = async () => {
+        if (this.state.isSolanaWalletPresent && this.state.isSolanaWalletConnected && window.solana) {
+            try {
+                await window.solana.disconnect();
+                this.setState({ isSolanaWalletConnected: false, solanaBalance: null });
+            } catch (error) {
+                console.error('Error disconnecting Solana wallet:', error);
+            }
+        }
+    };
+
+    updateSolanaBalance = async () => {
+        if (this.state.isSolanaWalletConnected && window.solana) {
+            try {
+                const balance = await window.solana.getBalance();
+                this.setState({ solanaBalance: balance / 1e9 }); // Convert lamports to SOL
+            } catch (error) {
+                console.error('Error fetching Solana balance:', error);
+            }
+        }
+    };
 
     loadAvatar = () => {
         this.setState({ isLoading: true });
@@ -175,8 +276,14 @@ class Navbar extends Component<Props, State> {
                 </div>
 
                 <div className="flexContainer" id="goldEloArea">
-                    <UserInfoBar label={`${this.state.isLoading ? 'Loading...' : this.formatNumber(Math.round(this.props.playerData?.gold))}`}  />
-                    <UserInfoBar label={this.state.isLoading ? 'Loading...' : `#${this.props.playerData?.rank}`} isLeague={true} bigLabel={!this.state.isLoading} league={this.props.playerData?.league} />
+                    {this.state.isSolanaWalletPresent && this.state.isSolanaWalletConnected && (
+                        <UserInfoBar 
+                            icon='solana' 
+                            label={`${this.state.solanaBalance !== null ? this.formatNumber(this.state.solanaBalance) : 'Loading...'} SOL`} 
+                        />
+                    )}
+                    <UserInfoBar icon='gold' label={`${this.state.isLoading ? 'Loading...' : this.formatNumber(Math.round(this.props.playerData?.gold))}`}  />
+                    <UserInfoBar icon='league' label={this.state.isLoading ? 'Loading...' : `#${this.props.playerData?.rank}`} isLeague={true} bigLabel={!this.state.isLoading} league={this.props.playerData?.league} />
                     <div className="expand_btn" style={{backgroundImage: `url(${expandBtn})`}} onClick={() => this.setState({ openDropdown: !this.state.openDropdown })} onMouseEnter={() => this.setState({ openDropdown: true })}>
                         <div className="dropdown-content" style={dropdownContentStyle} onMouseLeave={() => this.setState({ openDropdown: false })}>
                             <div onClick={() => window.open('https://guide.play-legion.io', '_blank')}>
@@ -191,6 +298,17 @@ class Navbar extends Component<Props, State> {
                             <div onClick={this.copyIDtoClipboard}>
                                 <img src={copyIcon} alt="Copy" /> Player ID
                             </div>
+                            {this.state.isSolanaWalletPresent && (
+                                this.state.isSolanaWalletConnected ? (
+                                    <div onClick={this.disconnectSolanaWallet}>
+                                        <img src={logoutIcon} alt="Disconnect Wallet" /> Disconnect Wallet
+                                    </div>
+                                ) : (
+                                    <div onClick={this.connectSolanaWallet}>
+                                        <img src={walletIcon} alt="Connect Wallet" /> Connect Wallet
+                                    </div>
+                                )
+                            )}
                             <div onClick={this.props.logout}>
                                 <img src={logoutIcon} alt="Logout" /> Log out
                             </div>

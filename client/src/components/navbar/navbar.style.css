@@ -61,8 +61,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .userInfo {
@@ -147,7 +152,7 @@
 }
 
 .dropdown-content a span {
-    font-size: 14px;
+  font-size: 14px;
 }
 
 .menuItems {
@@ -169,4 +174,51 @@
 
 .activeFlag {
   padding-top: 10px;
+}
+
+login-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.wallet-btn {
+  border-radius: 8px;
+  /* Rounded corners */
+  color: #ffffff;
+  margin: 10px 0;
+  /* Vertical margin for spacing between buttons */
+  cursor: pointer;
+  /* Adjust width as needed */
+  text-align: center;
+  transition: all 0.3s ease;
+  /* Smooth hover and active transition */
+  font-family: Kim;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  background-color: #ffcc00;
+  /* Golden color */
+  border: 2px solid #ffaa00;
+  /* Slightly darker border for depth */
+  font-size: 16px;
+  padding: 6px 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-right: 10px;
+}
+
+
+.wallet-btn:hover {
+  background-color: #ffaa00;
+  /* Slightly darker on hover */
+  border-color: #ff9900;
+  /* Darker border on hover */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  /* Deeper shadow on hover */
+}
+
+.wallet-btn:active {
+  transform: scale(0.95);
+  /* Scale down on press */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  /* Less shadow on press */
 }

@@ -1,6 +1,7 @@
 import { h, Component } from 'preact';
 import './UserInfoBar.style.css';
 import GoldIcon from '@assets/gold_icon.png';
+import SolanaIcon from '@assets/solana.png';
 import {League} from "@legion/shared/enums";
 import {getLeagueIcon} from "../utils";
 
@@ -9,6 +10,7 @@ interface BarProps {
     league?: League;
     label: string;
     isLeague?: boolean;
+    icon: string;
 }
 
 const leagueMap = new Map([
@@ -18,6 +20,11 @@ const leagueMap = new Map([
     [League.ZENITH, 'Zenith'],
     [League.APEX, 'Apex'],
 ]);
+
+const iconsMap = {
+    'gold': GoldIcon,
+    'solana': SolanaIcon
+};
 
 class UserInfoBar extends Component<BarProps> {
     
@@ -29,7 +36,7 @@ class UserInfoBar extends Component<BarProps> {
             <div className="userInfoBar">
                 <div className="barLogo">
                     <img 
-                        src={this.props.isLeague ? leagueIcon : GoldIcon}
+                        src={this.props.isLeague ? leagueIcon : iconsMap[this.props.icon]}
                     />
                 </div>
                 <div className="userInfoLabel">
