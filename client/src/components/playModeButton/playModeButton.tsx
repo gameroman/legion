@@ -5,6 +5,7 @@ import { route } from 'preact-router';
 import PracticeIcon from '@assets/practice_icon.png';
 import CasualIcon from '@assets/casual_icon.png';
 import RankedIcon from '@assets/ranked_icon.png';
+import SolanaIcon from '@assets/solana.png';
 import specialBtnBgActive from '@assets/special_btn_bg_active.png';
 import specialBtnBgIdle from '@assets/special_btn_bg_idle.png';
 import middlePlayActive from '@assets/middle_play_active.png';
@@ -28,7 +29,7 @@ class PlayModeButton extends Component<ButtonProps> {
     
     render() {
         const btnBg = {
-            backgroundImage: `url(${this.props.label === 'ranked' 
+            backgroundImage: `url(${this.props.label === 'ranked'  || this.props.label === 'elysium'
                 ? (this.state.active ? specialBtnBgActive : specialBtnBgIdle)
                 : (this.state.active ? middlePlayActive : middlePlayIdle)
                 })`,
@@ -42,7 +43,8 @@ class PlayModeButton extends Component<ButtonProps> {
         const btnIcons = {
             practice: PracticeIcon,
             casual: CasualIcon,
-            ranked: RankedIcon
+            ranked: RankedIcon,
+            elysium: SolanaIcon
         }
 
         return (
