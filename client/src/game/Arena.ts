@@ -1728,7 +1728,6 @@ export class Arena extends Phaser.Scene
     }
 
     destroy() {
-        console.log('Destroying game');
         this.gameEnded = true;
         this.socket.disconnect();
 

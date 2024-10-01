@@ -17,16 +17,19 @@ class LandingPage extends Component<{}, LandingPageState> {
 
   private firebaseUIContainer: HTMLDivElement | null = null;
 
+  warmUpServer = (): void => {
+    axios.get(process.env.GAME_SERVER_URL)
+      .then(response => {
+        // console.log(`Server warmed up: ${response.data}`);
+      })
+      .catch(error => {
+        console.error(`Error warming up the server: ${error}`);
+      });
+  }
+
   componentDidMount(): void {
     if (!this.context.isAuthenticated) {
-      // console.log(`Warming up the server at ${process.env.GAME_SERVER_URL}...`);
-      axios.get(process.env.GAME_SERVER_URL)
-        .then(response => {
-          // console.log(`Server warmed up: ${response.data}`);
-        })
-        .catch(error => {
-          console.error(`Error warming up the server: ${error}`);
-        });
+      this.warmUpServer();
     }
   }
 

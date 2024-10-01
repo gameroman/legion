@@ -6,7 +6,7 @@ import { createServer } from 'http';
 import dotenv from 'dotenv';
 import * as admin from "firebase-admin";
 import { v4 as uuidv4 } from "uuid";
-import cors from 'cors'; // Import the cors package
+import cors from 'cors';
 
 import { apiFetch } from './API';
 import { Game } from './Game';
@@ -27,23 +27,21 @@ const PORT = process.env.PORT || 3123;
 // Create a new express application instance
 const app: express.Application = express();
 
-// Use the cors middleware
-app.use(cors({
+const corsSettings = {
   origin: process.env.CLIENT_ORIGIN || "http://localhost:8080", // Adjust as needed
   methods: ["GET", "POST"],
   credentials: true
-}));
+};
+
+// Use the cors middleware
+app.use(cors(corsSettings));
 
 // Create a new http server instance
 const server = createServer(app);
 
 // Create a new socket.io instance
 const io = new Server(server, {
-    cors: {
-      origin: process.env.CLIENT_ORIGIN || "http://localhost:8080", // Ensure this matches the client origin
-      methods: ["GET", "POST"],
-      credentials: true
-    }
+    cors: corsSettings
   });
 
 function shortToken(token: string) {

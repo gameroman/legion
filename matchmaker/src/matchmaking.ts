@@ -69,6 +69,11 @@ function emitQueueCount() {
 }
 
 function removePlayerFromQ(player: Player) {
+    if (!player) {
+        console.error(`[matchmaker:removePlayerFromQ] Player not found`);
+        return;
+    }
+    console.log(`[matchmaker:removePlayerFromQ] Removing ID ${player.socket.id}`);
     const index = playersQueue.findIndex(p => p.socket.id === player.socket.id);
     if (index !== -1) {
         savePlayerGold(player);
@@ -311,8 +316,9 @@ export async function processJoinQueue(socket, data: { mode: PlayMode }) {
 }
 
 export async function processDisconnect(socket) {
-    console.log(`Player disconnected`);
+    console.log(`Player ${socket.id} disconnected`);
     const player = playersQueue.find(player => player.socket.id === socket.id);
+    if (!player) return;
     removePlayerFromQ(player);
     logQueuingActivity(socket.uid, 'leaveQueue', null);
 }

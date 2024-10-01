@@ -47,6 +47,14 @@ class App extends Component<{}, AppState> {
         currentMainRoute: '/'
     };
 
+    warmUpMatchmaker = () => {
+        fetch(`${process.env.MATCHMAKER_URL}`).then(() => {
+            // console.log('Matchmaker warmed up');
+        }).catch((err) => {
+            console.error('Error warming up matchmaker:', err);
+        });
+    }
+
     getMainRoute(url: string): string {
         const parts = url.split('/');
         return parts[1] || '/'; // Return the first part after the initial slash, or '/' if it's the root
@@ -57,6 +65,7 @@ class App extends Component<{}, AppState> {
 
         if (this.state.currentMainRoute === 'game' && newMainRoute !== 'game') {
             refreshAllData();
+            this.warmUpMatchmaker();
         }
 
         if (newMainRoute === 'team') {
