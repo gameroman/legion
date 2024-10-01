@@ -1,5 +1,6 @@
 import { h, Component } from 'preact';
 import { tips } from '../tips'
+import './QueueTips.style.css';
 
 export interface QueueTipsState {
     tipCount: number;
