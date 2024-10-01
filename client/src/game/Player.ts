@@ -651,7 +651,8 @@ export class Player extends Phaser.GameObjects.Container {
             "Remember my name...",
             "This isn't over!",
           ];
-        this.talk(deathPhrases[Math.floor(Math.random() * deathPhrases.length)]);
+        const phrase = deathPhrases[Math.floor(Math.random() * deathPhrases.length)];
+        // this.talk(phrase);
     }
 
     attack(targetX: number) {

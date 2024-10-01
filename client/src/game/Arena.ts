@@ -11,6 +11,7 @@ import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain, GEN, PlayMode } from "@legion/shared/enums";
 import { TerrainUpdate, GameData, OutcomeData, PlayerNetworkData } from '@legion/shared/interfaces';
 import { Tutorial } from './tutorial';
+import { KILL_CAM_DURATION } from '@legion/shared/config';
 
 import killzoneImage from '@assets/killzone.png';
 import iceblockImage from '@assets/iceblock.png';
@@ -59,6 +60,7 @@ import { errorToast } from '../components/utils';
 
 
 const LOCAL_ANIMATION_SCALE = 3;
+
 export class Arena extends Phaser.Scene
 {
     gamehud;
@@ -1672,7 +1674,7 @@ export class Arena extends Phaser.Scene
         });
 
         const firstDelay = 0;
-        const secondDelay = firstDelay + 3000;
+        const secondDelay = firstDelay + KILL_CAM_DURATION;
         const cameraSpeed = 200;
 
         this.time.delayedCall(firstDelay, () => {
@@ -1693,10 +1695,6 @@ export class Arena extends Phaser.Scene
                 sprite.anims.timeScale = originalTimeScale;
             });
             this.killCamActive = false;
-            // if (this.pendingGEN !== null && this.pendingGEN !== undefined) {
-            //     this.displayGEN(this.pendingGEN);
-            //     this.pendingGEN = null;
-            // }
             this.processGENQueue(); // Trigger processing of GEN queue after kill cam
         });
     }
