@@ -12,8 +12,6 @@ import withNoAuth from './components/withNoAuth';
 
 import * as Sentry from "@sentry/react";
 
-console.log('NODE_ENV:', process.env.NODE_ENV);
-
 Sentry.init({
     environment: process.env.NODE_ENV,
     dsn: "https://c3c72f4dedb26b85b58c0eb82feea9c1@o4508024644567040.ingest.de.sentry.io/4508024650268752",
