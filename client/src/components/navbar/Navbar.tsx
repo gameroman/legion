@@ -9,6 +9,7 @@ import { PlayerContextData } from '@legion/shared/interfaces';
 import { successToast, avatarContext } from '../utils';
 import { ENABLE_PLAYER_LEVEL, DISCORD_LINK, X_LINK } from '@legion/shared/config';
 import { apiFetch } from '../../services/apiService';
+import { Token } from "@legion/shared/enums";
 import * as solanaWeb3 from '@solana/web3.js';
 
 import legionLogo from '@assets/logo.png';
@@ -328,7 +329,7 @@ class Navbar extends Component<Props, State> {
                     {this.state.isSolanaWalletPresent && this.state.isSolanaWalletConnected && (
                         <UserInfoBar 
                             icon='solana' 
-                            label={`${this.state.solanaBalance !== null ? this.formatNumber(this.state.solanaBalance) : 'Loading...'} SOL`} 
+                            label={`${this.props.playerData.tokens !== null ? this.formatNumber(this.props.playerData.tokens[Token.SOL] || 0) : 'Loading...'} SOL`} 
                         />
                     )}
                     <UserInfoBar icon='gold' label={`${this.state.isLoading ? 'Loading...' : this.formatNumber(Math.round(this.props.playerData?.gold))}`}  />

@@ -361,4 +361,5 @@ export interface EndGameData {
     isLoaded: boolean;
     inventory: PlayerInventory;
     carrying_capacity: number;
+    tokens: any;
   }

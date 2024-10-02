@@ -179,3 +179,7 @@ export enum GEN {
     KILL_STREAK,
     TUTORIAL,
 }
+
+export enum Token {
+    SOL,
+}

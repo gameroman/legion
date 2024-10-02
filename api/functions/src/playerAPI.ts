@@ -6,8 +6,9 @@ import admin, { corsMiddleware, getUID } from "./APIsetup";
 import { uniqueNamesGenerator }
   from "unique-names-generator";
 
-import { Class, ChestColor, League } from "@legion/shared/enums";
-import { PlayerContextData, DailyLootAllDBData, DailyLootAllAPIData, DBPlayerData, PlayerInventory } from "@legion/shared/interfaces";
+import { Class, ChestColor, League, Token } from "@legion/shared/enums";
+import { PlayerContextData, DailyLootAllDBData, DailyLootAllAPIData, DBPlayerData,
+  PlayerInventory } from "@legion/shared/interfaces";
 import { NewCharacter } from "@legion/shared/NewCharacter";
 import { getChestContent, ChestReward } from "@legion/shared/chests";
 import { STARTING_CONSUMABLES, STARTING_GOLD, BASE_INVENTORY_SIZE, STARTING_GOLD_ADMIN,
@@ -145,6 +146,9 @@ export const createPlayer = functions.auth.user().onCreate(async (user) => {
       everPlayedCasual: false,
       everPlayedRanked: false,
     },
+    tokens: {
+      [Token.SOL]: 0,
+    },
     // isGuest: user.providerData.length === 0,
   } as DBPlayerData;
 
@@ -252,6 +256,7 @@ export const getPlayerData = onRequest((request, response) => {
           inventory: sortedInventory,
           carrying_capacity: playerData.carrying_capacity,
           isLoaded: false,
+          tokens: playerData.tokens,
         } as PlayerContextData);
       } else {
         response.status(404).send("Not Found: Invalid player ID");

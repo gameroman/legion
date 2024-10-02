@@ -9,8 +9,6 @@ import { League, Stat, StatFields, InventoryActionType, ShopTab
 import { firebaseAuth } from '../services/firebaseService'; 
 import { getSPIncrement } from '@legion/shared/levelling';
 import { playSoundEffect, fetchGuideTip } from '../components/utils';
-import { ChestReward } from "@legion/shared/chests";
-import { startTour } from '../components/tours';  
 
 import {
   canEquipConsumable,
@@ -71,6 +69,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
             spells: [],
           },
           carrying_capacity: 0,
+          tokens: null,
         },
         characters: [],
         activeCharacterId: '',
@@ -146,6 +145,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
                   isLoaded: true,
                   inventory: data.inventory,
                   carrying_capacity: data.carrying_capacity,
+                  tokens: data.tokens || {}
               }
           });
       } catch (error) {

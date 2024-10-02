@@ -51,6 +51,7 @@ export const PlayerContext = createContext<{
       spells: [],
     },
     carrying_capacity: 0,
+    tokens: null,
   },
   characters: [],
   activeCharacterId: '',
