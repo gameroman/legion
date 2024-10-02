@@ -1,11 +1,14 @@
 import { apiFetch } from './apiService';
 import * as solanaWeb3 from '@solana/web3.js';
 
+type WalletEventCallback = () => void;
+
 class SolanaWalletService {
   private static instance: SolanaWalletService;
   private connection: solanaWeb3.Connection | null = null;
   private walletAddress: string | null = null;
   private balance: number | null = null;
+  private listeners: WalletEventCallback[] = [];
 
   private constructor() {
     this.initializeConnection();
@@ -32,6 +35,7 @@ class SolanaWalletService {
           await window.solana.connect();
           this.walletAddress = savedWalletAddress;
           await this.updateBalance();
+          this.emitWalletStateChange();
           return true;
         }
       } catch (error) {
@@ -59,6 +63,7 @@ class SolanaWalletService {
         localStorage.setItem('walletAddress', this.walletAddress);
         this.registerAddress(publicKey.toString());
         await this.updateBalance();
+        this.emitWalletStateChange();
         return true;
       } catch (error) {
         console.error('Error connecting to Solana wallet:', error);
@@ -75,6 +80,7 @@ class SolanaWalletService {
         this.walletAddress = null;
         this.balance = null;
         localStorage.removeItem('walletAddress');
+        this.emitWalletStateChange();
       } catch (error) {
         console.error('Error disconnecting Solana wallet:', error);
       }
@@ -107,6 +113,18 @@ class SolanaWalletService {
 
   public isWalletDetected(): boolean {
     return typeof window.solana !== 'undefined';
+  }
+
+  public addWalletStateListener(callback: WalletEventCallback): void {
+    this.listeners.push(callback);
+  }
+
+  public removeWalletStateListener(callback: WalletEventCallback): void {
+    this.listeners = this.listeners.filter(listener => listener !== callback);
+  }
+
+  private emitWalletStateChange(): void {
+    this.listeners.forEach(listener => listener());
   }
 }
 

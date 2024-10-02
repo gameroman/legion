@@ -81,7 +81,19 @@ class Navbar extends Component<Props, State> {
     async componentDidMount() {
         this.loadAvatar();
         await this.checkSolanaWallet();
+        this.walletService.addWalletStateListener(this.handleWalletStateChange);
     }
+
+    componentWillUnmount() {
+        this.walletService.removeWalletStateListener(this.handleWalletStateChange);
+    }
+
+    handleWalletStateChange = () => {
+        this.setState({
+          isSolanaWalletConnected: this.walletService.isWalletConnected(),
+          solanaBalance: this.walletService.getBalance(),
+        });
+    };
 
     componentDidUpdate(prevProps: Readonly<Props>) {
         if (prevProps.playerData?.avatar !== this.props.playerData?.avatar) {
