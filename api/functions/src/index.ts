@@ -13,6 +13,7 @@ import {createPlayer, getPlayerData, queuingData,
 import {createGame, gameData, completeGame, getRemoteConfig} from "./gameAPI";
 import {getDashboardData, getActionLog, logQueuingActivity, insertGameAction,
   getGameLog} from "./dashboardAPI";
+import { createLobby, joinLobby, cancelLobby, listLobbies } from "./lobbyAPI";
 export {
   fetchLeaderboard, inventoryData, purchaseItem,
   createPlayer, rosterData, characterData, postGameUpdate,
@@ -22,7 +23,7 @@ export {
   getReward, claimChest, updateRanksOnEloChange, updateRanksOnPlayerCreation,
   completeGame, getDashboardData, getActionLog, logQueuingActivity, insertGameAction,
   getGameLog, completeTour, fetchGuideTip, manualLeaguesUpdate, getRemoteConfig,
-  registerAddress,
+  registerAddress, createLobby, joinLobby, cancelLobby, listLobbies,
 };
 
 export const helloWorld = onRequest((request, response) => {
