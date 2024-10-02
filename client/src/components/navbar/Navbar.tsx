@@ -88,11 +88,12 @@ class Navbar extends Component<Props, State> {
         walletAddress: null,
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         this.loadAvatar();
         this.checkSolanaWallet();
         this.addWalletListeners();
         this.initializeSolanaConnection();
+        await this.checkSavedWalletConnection();
     }
 
     componentWillUnmount() {
@@ -129,9 +130,28 @@ class Navbar extends Component<Props, State> {
     }
 
     initializeSolanaConnection = () => {
+        // #TODO MAinnet
         const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'), 'confirmed');
         this.setState({ solanaConnection: connection });
-        this.checkSolanaWallet();
+    }
+
+    checkSavedWalletConnection = async () => {
+        const savedWalletAddress = localStorage.getItem('walletAddress');
+        if (savedWalletAddress && window.solana) {
+            try {
+                // Try to reconnect
+                await window.solana.connect();
+                this.setState({
+                    isSolanaWalletConnected: true,
+                    walletAddress: savedWalletAddress
+                });
+                await this.updateSolanaBalance();
+            } catch (error) {
+                console.error('Error reconnecting to saved wallet:', error);
+                // Clear saved data if reconnection fails
+                localStorage.removeItem('walletAddress');
+            }
+        }
     }
 
     checkSolanaWallet = async () => {
@@ -156,9 +176,10 @@ class Navbar extends Component<Props, State> {
         if (this.state.isSolanaWalletPresent && window.solana) {
             try {
                 const { publicKey } = await window.solana.connect();
+                const walletAddress = publicKey.toString();
                 this.setState({ 
                     isSolanaWalletConnected: true,
-                    walletAddress: publicKey.toString()
+                    walletAddress: walletAddress
                 });
                 apiFetch('registerAddress', {
                     method: 'POST',
@@ -166,17 +187,7 @@ class Navbar extends Component<Props, State> {
                         address: publicKey.toString()
                     }
                 });
-                // apiFetch('completeTour', {
-                //     method: 'POST',
-                //     body: {
-                //         page: publicKey.toString()
-                //     }
-                // });
-                // .then(() => {
-                //     // successToast('Wallet connected successfully!');
-                // }).catch((error) => {
-                //     console.error('Error connecting wallet:', error);
-                // });
+                localStorage.setItem('walletAddress', walletAddress);
                 await this.updateSolanaBalance();
             } catch (error) {
                 console.error('Error connecting to Solana wallet:', error);
@@ -193,6 +204,7 @@ class Navbar extends Component<Props, State> {
                     solanaBalance: null,
                     walletAddress: null
                 });
+                localStorage.removeItem('walletAddress');
             } catch (error) {
                 console.error('Error disconnecting Solana wallet:', error);
             }
