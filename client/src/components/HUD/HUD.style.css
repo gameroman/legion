@@ -63,7 +63,6 @@
 }
 
 
-
 .member {
   position: relative;
   display: flex;
@@ -140,6 +139,15 @@
 
 .overview {
   position: relative;
+
+  @media screen and (max-width: 1250px) and (orientation: landscape) {
+    transform: scale(0.8);
+    transform-origin: top left;
+  }
+
+  @media screen and (max-width: 980px) and (orientation: landscape) {
+    transform: scale(0.6);
+  }
 }
 
 .overview_right {
@@ -147,7 +155,16 @@
 }
 
 .overview_playerteam {
-  cursor: var(--game-pointer)
+  cursor: var(--game-pointer);
+
+  @media screen and (max-width: 1250px) and (orientation: landscape) {
+    transform: scale(0.8);
+    transform-origin: top right;
+  }
+
+  @media screen and (max-width: 980px) and (orientation: landscape) {
+    transform: scale(0.6);
+  }
 }
 
 .member_container {
@@ -476,6 +493,15 @@
   z-index: 2;
   margin-top: 0;
   margin-left: 0;
+
+  @media screen and (max-width: 1250px) and (orientation: landscape) {
+    transform: scale(0.8) translateX(-50%);
+    transform-origin: top left;
+  }
+
+  @media screen and (max-width: 980px) and (orientation: landscape) {
+    transform: scale(0.6) translateX(-50%);
+  }
 }
 
 .player_content_container {
@@ -718,6 +744,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
+
+  @media screen and (max-width: 1250px) and (orientation: landscape) {
+    transform: scale(0.7);
+    transform-origin: bottom center;
+  }
+
+  @media screen and (max-width: 980px) and (orientation: landscape) {
+    transform: scale(0.5);
+  }
 }
 
 .spectator_progress {
@@ -1348,6 +1383,15 @@
 
 .spell_target_container {
   z-index: 10;
+
+  @media screen and (max-width: 1250px) and (orientation: landscape) {
+    transform: scale(0.8);
+    transform-origin: top center;
+  }
+
+  @media screen and (max-width: 980px) and (orientation: landscape) {
+    transform: scale(0.6);
+  }
 }
 
 .spell_target {
