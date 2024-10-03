@@ -139,14 +139,23 @@
 
 .overview {
   position: relative;
+  transition:  all .2s;
 
-  @media screen and (max-width: 1250px) and (orientation: landscape) {
-    transform: scale(0.8);
+  @media screen and (max-width: 1500px) and (orientation: landscape) {
+    transform: scale(0.9);
     transform-origin: top left;
   }
 
+  @media screen and (max-width: 1400px) and (orientation: landscape) {
+    transform: scale(0.75);
+  }
+
+  @media screen and (max-width: 1100px) and (orientation: landscape) {
+    transform: scale(0.65);
+  }
+
   @media screen and (max-width: 980px) and (orientation: landscape) {
-    transform: scale(0.6);
+    transform: scale(0.55);
   }
 }
 
@@ -156,14 +165,23 @@
 
 .overview_playerteam {
   cursor: var(--game-pointer);
+  transition: all .2s;
 
-  @media screen and (max-width: 1250px) and (orientation: landscape) {
-    transform: scale(0.8);
+  @media screen and (max-width: 1500px) and (orientation: landscape) {
+    transform: scale(0.9);
     transform-origin: top right;
   }
 
+  @media screen and (max-width: 1400px) and (orientation: landscape) {
+    transform: scale(0.75);
+  }
+
+  @media screen and (max-width: 1100px) and (orientation: landscape) {
+    transform: scale(0.65);
+  }
+
   @media screen and (max-width: 980px) and (orientation: landscape) {
-    transform: scale(0.6);
+    transform: scale(0.55);
   }
 }
 
@@ -473,7 +491,7 @@
 .player_tab_container {
   background-image: url("@assets/HUD/char_info_bg.png");
   background-size: 100% 100%;
-  width: 54vw;
+  width: 100%;
   max-width: 800px;
   height: 158px;
   display: flex;
@@ -493,14 +511,23 @@
   z-index: 2;
   margin-top: 0;
   margin-left: 0;
+  transition: all .2s;
 
-  @media screen and (max-width: 1250px) and (orientation: landscape) {
-    transform: scale(0.8) translateX(-50%);
+  @media screen and (max-width: 1500px) and (orientation: landscape) {
+    transform: scale(0.9) translateX(-50%);
     transform-origin: top left;
   }
 
+  @media screen and (max-width: 1400px) and (orientation: landscape) {
+    transform: scale(0.75) translateX(-50%);
+  }
+
+  @media screen and (max-width: 1100px) and (orientation: landscape) {
+    transform: scale(0.65) translateX(-50%);
+  }
+
   @media screen and (max-width: 980px) and (orientation: landscape) {
-    transform: scale(0.6) translateX(-50%);
+    transform: scale(0.55) translateX(-50%);
   }
 }
 
@@ -676,6 +703,7 @@
   width: 100%;
   max-width: 48px;
   height: 48px;
+  flex-shrink: 0;
   background-color: #1c1f25;
   border: 1px solid #274c57;
   border-radius: 4px;
@@ -744,14 +772,23 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: .2s;
 
-  @media screen and (max-width: 1250px) and (orientation: landscape) {
-    transform: scale(0.7);
+  @media screen and (max-width: 1500px) and (orientation: landscape) {
+    transform: scale(0.9);
     transform-origin: bottom center;
   }
 
+  @media screen and (max-width: 1400px) and (orientation: landscape) {
+    transform: scale(0.75);
+  }
+
+  @media screen and (max-width: 1100px) and (orientation: landscape) {
+    transform: scale(0.65);
+  }
+
   @media screen and (max-width: 980px) and (orientation: landscape) {
-    transform: scale(0.5);
+    transform: scale(0.55);
   }
 }
 
@@ -1383,14 +1420,23 @@
 
 .spell_target_container {
   z-index: 10;
+  transition: all .2s;
 
-  @media screen and (max-width: 1250px) and (orientation: landscape) {
-    transform: scale(0.8);
+  @media screen and (max-width: 1500px) and (orientation: landscape) {
+    transform: scale(0.9);
     transform-origin: top center;
   }
 
+  @media screen and (max-width: 1400px) and (orientation: landscape) {
+    transform: scale(0.75);
+  }
+
+  @media screen and (max-width: 1100px) and (orientation: landscape) {
+    transform: scale(0.65);
+  }
+
   @media screen and (max-width: 980px) and (orientation: landscape) {
-    transform: scale(0.6);
+    transform: scale(0.55);
   }
 }
 
