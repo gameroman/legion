@@ -10,8 +10,10 @@ import { Class, ChestColor, League } from "@legion/shared/enums";
 import { PlayerContextData, DailyLootAllDBData, DailyLootAllAPIData, DBPlayerData, PlayerInventory } from "@legion/shared/interfaces";
 import { NewCharacter } from "@legion/shared/NewCharacter";
 import { getChestContent, ChestReward } from "@legion/shared/chests";
-import { STARTING_CONSUMABLES, STARTING_GOLD, BASE_INVENTORY_SIZE, STARTING_GOLD_ADMIN,
-  STARTING_SPELLS_ADMIN, STARTING_EQUIPMENT_ADMIN, IMMEDIATE_LOOT } from "@legion/shared/config";
+import {
+  STARTING_CONSUMABLES, STARTING_GOLD, BASE_INVENTORY_SIZE, STARTING_GOLD_ADMIN,
+  STARTING_SPELLS_ADMIN, STARTING_EQUIPMENT_ADMIN, IMMEDIATE_LOOT,
+} from "@legion/shared/config";
 import { logPlayerAction, updateDAU } from "./dashboardAPI";
 import { getEmptyLeagueStats } from "./leaderboardsAPI";
 import { numericalSort } from "@legion/shared/inventory";
@@ -660,6 +662,112 @@ export const fetchGuideTip = onRequest((request, response) => {
     } catch (error) {
       console.error("fetchGuideTip error:", error);
       response.status(500).send("Error");
+    }
+  });
+});
+
+export const setPlayerOnSteroids = onRequest((request, response) => {
+  const db = admin.firestore();
+
+  corsMiddleware(request, response, async () => {
+    try {
+      const { uid } = request.body;
+
+      // Start a new transaction
+      await db.runTransaction(async (transaction) => {
+        const playerRef = db.collection("players").doc(uid);
+        const playerDoc = await transaction.get(playerRef);
+
+        if (!playerDoc.exists) {
+          throw new Error("Invalid player ID");
+        }
+
+        const playerData = playerDoc.data();
+        if (!playerData) {
+          throw new Error("playerData is null");
+        }
+
+        // Delete existing characters
+        for (const characterRef of playerData.characters) {
+          transaction.delete(characterRef);
+        }
+
+        // Create new characters
+        const levelBase = 10;
+        const newCharacters = [
+          new NewCharacter(Class.WARRIOR, Math.floor(Math.random() * 20) + levelBase),
+          new NewCharacter(Class.WHITE_MAGE, Math.floor(Math.random() * 20) + levelBase),
+          new NewCharacter(Class.BLACK_MAGE, Math.floor(Math.random() * 20) + levelBase),
+          new NewCharacter(Class.BLACK_MAGE, Math.floor(Math.random() * 20) + levelBase),
+        ];
+
+        const newCharacterRefs = [];
+        for (const character of newCharacters) {
+          const characterRef = db.collection("characters").doc();
+          const characterData = character.getCharacterData();
+
+          // Add some SP
+          characterData.sp = Math.floor(Math.random() * 10) + 1;
+          characterData.allTimeSP = characterData.sp;
+
+          // Adjust spells for white mage and black mages
+          if (character.characterClass === Class.WHITE_MAGE) {
+            characterData.skills = [9, 10, 11];
+          } else if (character.characterClass === Class.BLACK_MAGE) {
+            characterData.skill_slots = 5;
+            characterData.skills = [];
+          }
+
+          transaction.set(characterRef, characterData);
+          newCharacterRefs.push(characterRef);
+        }
+
+        // Distribute spells 1-8 among black mages
+        const blackMageRefs = newCharacterRefs.filter((_, index) => index > 1);
+        const spells = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        for (const spell of spells) {
+          const randomBlackMage = blackMageRefs[Math.floor(Math.random() * blackMageRefs.length)];
+          transaction.update(randomBlackMage, {
+            skills: admin.firestore.FieldValue.arrayUnion(spell),
+          });
+        }
+
+        // Update player data
+        const newInventory = {
+          consumables: [],
+          equipment: [],
+          spells: [],
+        };
+
+        // Add random amounts of consumables
+        for (let i = 0; i <= 12; i++) {
+          const amount = Math.floor(Math.random() * 3) + 1;
+          for (let j = 0; j < amount; j++) {
+            // @ts-ignore
+            newInventory.consumables.push(i);
+          }
+        }
+
+        // Add random amounts of equipment
+        for (let i = 0; i <= 31; i++) {
+          const amount = Math.floor(Math.random() * 2) + 1;
+          for (let j = 0; j < amount; j++) {
+            // @ts-ignore
+            newInventory.equipment.push(i);
+          }
+        }
+
+        transaction.update(playerRef, {
+          characters: newCharacterRefs,
+          gold: 35000,
+          inventory: newInventory,
+        });
+      });
+
+      response.send({ message: "Player reset successfully" });
+    } catch (error) {
+      console.error("resetPlayer error:", error);
+      response.status(500).send("Error resetting player");
     }
   });
 });
