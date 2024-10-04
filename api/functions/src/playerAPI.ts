@@ -73,7 +73,7 @@ function generateName() {
   return base.length > 16 ? base.slice(0, 16) : base;
 }
 
-export const createPlayer = functions.auth.user().onCreate(async (user) => {
+export const createPlayer = functions.runWith({ memory: '512MB' }).auth.user().onCreate(async (user) => {
   const db = admin.firestore();
   const playerRef = db.collection("players").doc(user.uid);
   const now = Date.now() / 1000;
@@ -254,7 +254,7 @@ export const getPlayerData = onRequest((request, response) => {
           isLoaded: false,
         } as PlayerContextData);
       } else {
-        response.status(404).send("Not Found: Invalid player ID");
+        response.status(404).send(`Player ID ${uid} not found`);
       }
     } catch (error) {
       console.error("playerData error:", error);
