@@ -86,16 +86,16 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
       
     this.resetState();
 
-    if (user) {
-      apiFetch('fetchGuideTip?combatTip=1', {
-          method: 'GET',
-      })
-      .then((data) => {
-          if (data.guideId == -1) return;
-          showGuideToast(guide[data.guideId], data.route);
-      })
-      .catch(error => console.error(`Fetching tip error: ${error}`));
-    }
+    // if (user) {
+    //   apiFetch('fetchGuideTip?combatTip=1', {
+    //       method: 'GET',
+    //   })
+    //   .then((data) => {
+    //       if (data.guideId == -1) return;
+    //       showGuideToast(guide[data.guideId], data.route);
+    //   })
+    //   .catch(error => console.error(`Fetching tip error: ${error}`));
+    // }
     
     events.on('showPlayerBox', this.showPlayerBox);
     events.on('hidePlayerBox', this.hidePlayerBox);
