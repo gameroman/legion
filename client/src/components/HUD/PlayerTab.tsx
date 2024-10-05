@@ -2,7 +2,7 @@ import { h, Component, Fragment } from 'preact';
 import ItemIcon from './ItemIcon';
 import { InventoryType, StatusEffect, Target } from '@legion/shared/enums';
 import TabBar from './TabBar';
-import { mapFrameToCoordinates, getSpritePath } from '../utils';
+import { mapFrameToCoordinates, getSpritePath, cropFrame } from '../utils';
 import { PlayerProps } from '@legion/shared/interfaces';
 import { BaseSpell } from '@legion/shared/BaseSpell';
 
@@ -29,6 +29,9 @@ interface Props {
 
 interface State {
   player: PlayerProps;
+  croppedImages: {
+    [key: string]: string;
+  };
 }
 
 class PlayerTab extends Component<Props, State> {
@@ -39,6 +42,7 @@ class PlayerTab extends Component<Props, State> {
     super(props);
     this.state = {
       player: this.props.player,
+      croppedImages: {},
     };
     this.events = this.props.eventEmitter;
   }
@@ -54,11 +58,46 @@ class PlayerTab extends Component<Props, State> {
   }
 
   componentDidMount() {
-    // this.timerID = setInterval(() => this.tick(), 1000); 
+    this.cropAllSprites();
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps.player !== this.props.player) {
+      this.cropAllSprites();
+    }
   }
 
   componentWillUnmount() {
-    clearInterval(this.timerID); 
+    clearInterval(this.timerID);
+  }
+
+  cropAllSprites = async () => {
+    const { player } = this.props;
+    const newCroppedImages = { ...this.state.croppedImages };
+
+    for (const item of player.items) {
+      if (item && !newCroppedImages[`item-${item.id}`]) {
+        newCroppedImages[`item-${item.id}`] = await this.cropSprite(consumablesSpritesheet, item.frame);
+      }
+    }
+
+    for (const spell of player.spells) {
+      if (spell && !newCroppedImages[`spell-${spell.id}`]) {
+        newCroppedImages[`spell-${spell.id}`] = await this.cropSprite(spellsSpritesheet, spell.frame);
+      }
+    }
+
+    this.setState({ croppedImages: newCroppedImages });
+  }
+
+  cropSprite = async (spritesheet: string, frame: number): Promise<string> => {
+    const { x, y } = mapFrameToCoordinates(frame);
+    try {
+      return await cropFrame(spritesheet, x, y, 32, 32); // Assuming 32x32 sprite size
+    } catch (error) {
+      console.error('Error cropping spritesheet:', error);
+      return '';
+    }
   }
 
   actionClick(index: number) {
@@ -72,13 +111,6 @@ class PlayerTab extends Component<Props, State> {
 
   getCooldownRatio(player: PlayerProps): number {
     return (player.maxCooldown - player.cooldown) / player.maxCooldown;
-  }
-
-  getBackgroundPosition(frame: number) {
-    const coordinates = mapFrameToCoordinates(frame);
-    coordinates.x = -coordinates.x + 0;
-    coordinates.y = -coordinates.y + 1;
-    return `${coordinates.x}px ${coordinates.y}px`;
   }
 
   renderActionContainer(title: string, actions: any[], canAct: boolean, isMuted: boolean, startIndex: number, inventoryType: InventoryType) {
@@ -117,15 +149,15 @@ class PlayerTab extends Component<Props, State> {
   renderTargetContainer(type: 'spell' | 'item', index: number) {
     const { player } = this.props;
     const action = type === 'spell' ? player.spells[index] : player.items[index];
-    const spritesheet = type === 'spell' ? spellsSpritesheet : consumablesSpritesheet;
+    const croppedImage = this.state.croppedImages[`${type}-${action.id}`];
 
     return (
       <div className="spell_target_container">
         <p className="spell_target_title">Select a target</p>
         <div className="spell_target">
           <div className="equip-dialog-image" style={{
-            backgroundImage: `url(${spritesheet})`,
-            backgroundPosition: this.getBackgroundPosition(action.frame),
+            backgroundImage: `url(${croppedImage})`,
+            backgroundSize: 'cover',
           }} />
           <div className={`dialog-${type}-info-container`}>
             {type === 'spell' && 'cost' in action && (
