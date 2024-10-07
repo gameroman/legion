@@ -1,7 +1,7 @@
 import { onRequest } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import * as functions from "firebase-functions";
-import admin, { corsMiddleware, getUID } from "./APIsetup";
+import admin, { corsMiddleware, getUID, checkAPIKey } from "./APIsetup";
 
 import { uniqueNamesGenerator }
   from "unique-names-generator";
@@ -666,11 +666,16 @@ export const fetchGuideTip = onRequest((request, response) => {
   });
 });
 
-export const setPlayerOnSteroids = onRequest((request, response) => {
+export const setPlayerOnSteroids = onRequest({ secrets: ["API_KEY"] }, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
     try {
+      if (!checkAPIKey(request)) {
+        response.status(401).send('Unauthorized');
+        return;
+      }
+
       const { uid } = request.body;
 
       // Start a new transaction
@@ -767,7 +772,7 @@ export const setPlayerOnSteroids = onRequest((request, response) => {
       response.send({ message: "Player reset successfully" });
     } catch (error) {
       console.error("resetPlayer error:", error);
-      response.status(500).send("Error resetting player");
+      response.status(500).send(`Error resetting player: ${error}`);
     }
   });
 });
