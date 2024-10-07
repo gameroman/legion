@@ -10,6 +10,7 @@ import { Arena } from "./Arena";
 import { PlayerProps, StatusEffects } from "@legion/shared/interfaces";
 import { paralyzingStatuses } from '@legion/shared/utils';
 import { SpeechBubble } from "./SpeechBubble";
+import { BASE_ANIM_FRAME_RATE } from '@legion/shared/config';
 
 enum GlowColors {
     Enemy = 0xff0000,
@@ -235,6 +236,11 @@ export class Player extends Phaser.GameObjects.Container {
         return this.statuses[StatusEffect.MUTE] != 0;
     }
 
+    isHasted() {
+        if (!this.statuses) return false;
+        return this.statuses[StatusEffect.HASTE] != 0;
+    }
+
     canAct() {
         return this.cooldownDuration == 0 && this.isAlive() && !this.casting && !this.isParalyzed();
     }
@@ -269,7 +275,10 @@ export class Player extends Phaser.GameObjects.Container {
         }
 
         // console.log(`Playing animation ${key}`);
-        this.sprite.play(`${this.texture}_anim_${key}`);
+        this.sprite.play({
+            key: `${this.texture}_anim_${key}`,
+            frameRate: this.isHasted() ? BASE_ANIM_FRAME_RATE * 1.5 : BASE_ANIM_FRAME_RATE,
+        });
         if (revertToIdle) {
             this.sprite.once('animationcomplete', this.handleAnimationComplete, this);
         }
