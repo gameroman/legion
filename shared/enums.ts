@@ -152,6 +152,7 @@ export enum StatusEffect {
     SLEEP = "Sleep",
     PARALYZE = "Paralyze",
     MUTE = "Mute",
+    HASTE = "Haste",
 }
 
 export enum League {

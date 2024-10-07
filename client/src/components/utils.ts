@@ -7,6 +7,15 @@ import guideIcon from '@assets/guide.png';
 import successIcon from '@assets/svg/success.svg';
 import errorIcon from '@assets/svg/error.svg';
 
+import freezeIcon from '@assets/HUD/freeze_icon.png';
+import muteIcon from '@assets/HUD/mute_icon.png';
+import paralyzeIcon from '@assets/HUD/paralyze_icon.png';
+import blindIcon from '@assets/HUD/blind_icon.png';
+import sleepIcon from '@assets/HUD/sleep_icon.png';
+import poisonIcon from '@assets/HUD/poison_icon.png';
+import burnIcon from '@assets/HUD/burn_icon.png';
+import hasteIcon from '@assets/HUD/haste_icon.png';
+
 import Toastify from 'toastify-js'
 
 const spriteContext = require.context('@assets/sprites', false, /\.(png|jpe?g|svg)$/);
@@ -171,3 +180,14 @@ export function cropFrame(
     img.src = spriteSheetUrl;
   });
 }
+
+export const statusIcons = {
+  'Freeze': freezeIcon,
+  'Mute': muteIcon,
+  'Paralyze': paralyzeIcon,
+  'Blind': blindIcon,
+  'Sleep': sleepIcon,
+  'Poison': poisonIcon,
+  'Burn': burnIcon,
+  'Haste': hasteIcon,
+};

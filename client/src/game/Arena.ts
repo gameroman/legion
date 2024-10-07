@@ -11,7 +11,7 @@ import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain, GEN, PlayMode } from "@legion/shared/enums";
 import { TerrainUpdate, GameData, OutcomeData, PlayerNetworkData } from '@legion/shared/interfaces';
 import { Tutorial } from './tutorial';
-import { KILL_CAM_DURATION } from '@legion/shared/config';
+import { KILL_CAM_DURATION, BASE_ANIM_FRAME_RATE } from '@legion/shared/config';
 
 import killzoneImage from '@assets/killzone.png';
 import iceblockImage from '@assets/iceblock.png';
@@ -1005,7 +1005,7 @@ export class Arena extends Phaser.Scene
             this.anims.create({
                 key: `${asset}_anim_idle`, 
                 frames: this.anims.generateFrameNumbers(asset, { start: 9, end: 11 }), 
-                frameRate: 5, 
+                frameRate: BASE_ANIM_FRAME_RATE, 
                 repeat: -1,
                 yoyo: true 
             });
@@ -1013,7 +1013,7 @@ export class Arena extends Phaser.Scene
             this.anims.create({
                 key: `${asset}_anim_idle_hurt`, 
                 frames: this.anims.generateFrameNumbers(asset, { start: 33, end: 35 }), 
-                frameRate: 5, 
+                frameRate: BASE_ANIM_FRAME_RATE, 
                 repeat: -1, // Loop indefinitely,
                 yoyo: true
             });
@@ -1021,50 +1021,50 @@ export class Arena extends Phaser.Scene
             this.anims.create({
                 key: `${asset}_anim_walk`, 
                 frames: this.anims.generateFrameNumbers(asset, { start: 6, end: 8 }), 
-                frameRate: 5, 
+                frameRate: BASE_ANIM_FRAME_RATE, 
                 repeat: -1 // Loop indefinitely
             });
 
             this.anims.create({
                 key: `${asset}_anim_attack`, 
                 frames: this.anims.generateFrameNumbers(asset, { start: 12, end: 14 }), 
-                frameRate: 10, 
+                frameRate: BASE_ANIM_FRAME_RATE * 2, 
             });
 
             this.anims.create({
                 key: `${asset}_anim_dodge`, 
                 frames: this.anims.generateFrameNumbers(asset, { start: 45, end: 47 }), 
-                frameRate: 10, 
+                frameRate: BASE_ANIM_FRAME_RATE * 2, 
             });
 
             this.anims.create({
                 key: `${asset}_anim_item`, 
                 frames: this.anims.generateFrameNumbers(asset, { start: 48, end: 50 }), 
-                frameRate: 5, 
+                frameRate: BASE_ANIM_FRAME_RATE, 
             });
 
             this.anims.create({
                 key: `${asset}_anim_hurt`, 
                 frames: this.anims.generateFrameNumbers(asset, { start: 42, end: 44 }), 
-                frameRate: 5, 
+                frameRate: BASE_ANIM_FRAME_RATE, 
             });
 
             this.anims.create({
                 key: `${asset}_anim_cast`, 
                 frames: this.anims.generateFrameNumbers(asset, { start: 39, end: 41 }), 
-                frameRate: 5, 
+                frameRate: BASE_ANIM_FRAME_RATE, 
             });
 
             this.anims.create({
                 key: `${asset}_anim_die`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [51, 52, 53] }), 
-                frameRate: 10, 
+                frameRate: BASE_ANIM_FRAME_RATE * 2, 
             });
 
             this.anims.create({
                 key: `${asset}_anim_victory`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [15, 16, 17] }), 
-                frameRate: 5, 
+                frameRate: BASE_ANIM_FRAME_RATE, 
                 repeat: -1,
                 yoyo: true 
             });
@@ -1072,7 +1072,7 @@ export class Arena extends Phaser.Scene
             this.anims.create({
                 key: `${asset}_anim_boast`, 
                 frames: this.anims.generateFrameNumbers(asset, { frames: [15, 16, 17] }), 
-                frameRate: 10, 
+                frameRate: BASE_ANIM_FRAME_RATE * 2, 
                 repeat: 2,
                 yoyo: true 
             });

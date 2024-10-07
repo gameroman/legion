@@ -2,7 +2,7 @@ import { h, Component, Fragment } from 'preact';
 import ItemIcon from './ItemIcon';
 import { InventoryType, StatusEffect, Target } from '@legion/shared/enums';
 import TabBar from './TabBar';
-import { mapFrameToCoordinates, getSpritePath, cropFrame } from '../utils';
+import { mapFrameToCoordinates, getSpritePath, cropFrame, statusIcons } from '../utils';
 import { PlayerProps } from '@legion/shared/interfaces';
 import { BaseSpell } from '@legion/shared/BaseSpell';
 
@@ -14,13 +14,6 @@ import mpIcon from '@assets/inventory/mp_icon.png';
 import cdIcon from '@assets/inventory/cd_icon.png';
 import targetIcon from '@assets/inventory/target_icon.png';
 
-import freezeIcon from '@assets/HUD/freeze_icon.png';
-import muteIcon from '@assets/HUD/mute_icon.png';
-import paralyzeIcon from '@assets/HUD/paralyze_icon.png';
-import blindIcon from '@assets/HUD/blind_icon.png';
-import sleepIcon from '@assets/HUD/sleep_icon.png';
-import poisonIcon from '@assets/HUD/poison_icon.png';
-import burnIcon from '@assets/HUD/burn_icon.png';
 
 interface Props {
   player: PlayerProps;
@@ -45,16 +38,6 @@ class PlayerTab extends Component<Props, State> {
       croppedImages: {},
     };
     this.events = this.props.eventEmitter;
-  }
-
-  statusIcons = {
-    'Freeze': freezeIcon,
-    'Mute': muteIcon,
-    'Paralyze': paralyzeIcon,
-    'Blind': blindIcon,
-    'Sleep': sleepIcon,
-    'Poison': poisonIcon,
-    'Burn': burnIcon,
   }
 
   componentDidMount() {
@@ -227,12 +210,11 @@ class PlayerTab extends Component<Props, State> {
                   <TabBar title="HP" value={player.mp} maxValue={player.maxMp} barClass="char_stats_mp" />
                 </div>
                 <div className="player_content_statuses">
-                  {Object.keys(player.statuses).map((status: string) => player?.statuses[status] !== 0 && (
-                    <div key={status}>
-                      <img src={this.statusIcons[status]} alt="" />
-                      <span>{player.statuses[status] == -1 ? '∞' : player.statuses[status]}</span>
-                    </div>
-                  ))}
+                  {Object.keys(player.statuses).map((status: string) => player?.statuses[status] !== 0 && <div>
+                    <img key={status} src={statusIcons[status]} alt="" />
+                    <span>{player.statuses[status] == -1 ? '∞' : player.statuses[status] }</span>
+                  </div>
+                  )}
                 </div>
               </div>
             </div>
