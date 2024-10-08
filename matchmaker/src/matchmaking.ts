@@ -11,7 +11,7 @@ import {
 import firebaseConfig from '@legion/shared/firebaseConfig';
 import { apiFetch } from "./API";
 import {eloRangeIncreaseInterval, eloRangeStart, eloRangeStep, goldRewardInterval,
-    goldReward, casualModeThresholdTime, maxWaitTimeForPractice} from '@legion/shared/config';
+    goldReward, casualModeThresholdTime, maxWaitTimeForPractice, ALLOW_SWITCHEROO_RANKED} from '@legion/shared/config';
 import { PlayMode, League } from '@legion/shared/enums';
 import { sendMessageToAdmin } from '@legion/shared/utils';
 
@@ -104,15 +104,17 @@ function queueTimeUpdate() {
 }
 
 function switcherooCheck(player: Player) {
-    // console.log(`[matchmaker:switcherooCheck] isCasual: ${player.mode == PlayMode.CASUAL}, waitingTime: ${player.waitingTime}, threshold: ${casualModeThresholdTime}`);
-    if (player.mode == PlayMode.CASUAL && player.waitingTime > casualModeThresholdTime) {
+    if ((player.mode == PlayMode.CASUAL 
+        || (ALLOW_SWITCHEROO_RANKED && player.mode == PlayMode.RANKED)) 
+        && player.waitingTime > casualModeThresholdTime) {
         // Calculate the probability of redirecting to a PRACTICE game
         const waitTimeBeyondThreshold = player.waitingTime - casualModeThresholdTime;
         const redirectionProbability = Math.min(1, waitTimeBeyondThreshold / (maxWaitTimeForPractice - casualModeThresholdTime));
 
         if (Math.random() < redirectionProbability) {
             console.log(`Redirecting ${player.socket.id} to a CASUAL_VS_AI game due to long wait.`);
-            createGame(player.socket, null, PlayMode.CASUAL_VS_AI, null);
+            const mode = player.mode == PlayMode.CASUAL ? PlayMode.CASUAL_VS_AI : PlayMode.RANKED_VS_AI
+            createGame(player.socket, null, mode, null);
             removePlayerFromQ(player);
             return true;
         }

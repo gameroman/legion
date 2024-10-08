@@ -187,7 +187,7 @@ items[13] = new BaseItem({
     cooldown: 0.2,
     target: Target.SELF,
     effects: [],
-    status: {effect: StatusEffect.HASTE, chance: 1, duration: 10},
+    status: {effect: StatusEffect.HASTE, chance: 1, duration: 180},
     effort: 6,
 });
 

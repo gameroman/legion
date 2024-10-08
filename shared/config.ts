@@ -1,3 +1,5 @@
+import { PlayMode } from "./enums";
+
 const isDev = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'docker';
 const isAdmin = (process.env.ADMIN_MODE == 'true');
 
@@ -38,8 +40,9 @@ export const eloRangeStart = 50;
 export const eloRangeStep = 50; // Increase range by 50 points every interval
 export const goldRewardInterval = 15;
 export const goldReward = 1;
-export const casualModeThresholdTime = 60; // seconds after which redirection probability starts increasing
-export const maxWaitTimeForPractice = 300; // maximum wait time after which a player is guaranteed to be redirected
+export const casualModeThresholdTime = 1; // seconds after which redirection probability starts increasing
+export const maxWaitTimeForPractice = 15; // maximum wait time after which a player is guaranteed to be redirected
+export const ALLOW_SWITCHEROO_RANKED = true;
 
 // Feature flags
 export const ENABLE_PLAYER_LEVEL = false;
@@ -52,7 +55,7 @@ export const ENABLE_SPECTATOR_MODE = false;
 export const ENABLE_SETTINGS = false;
 
 // Admin
-export let FREEZE_AI = true;
+export let FREEZE_AI = false;
 export const STARTING_GOLD_ADMIN = 100000;
 export const STARTING_SPELLS_ADMIN = [2];
 export const STARTING_EQUIPMENT_ADMIN = [2];
