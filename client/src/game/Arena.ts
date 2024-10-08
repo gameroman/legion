@@ -1635,7 +1635,7 @@ export class Arena extends Phaser.Scene
         
         // For every sprites in this.sprites, set anims.timeScale to slowMotionScale
         this.sprites.forEach((sprite) => {
-            sprite.anims.timeScale = slowMotionScale;
+            if (sprite.anims) sprite.anims.timeScale = slowMotionScale;
         });
 
         const firstDelay = 0;
