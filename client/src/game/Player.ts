@@ -922,7 +922,7 @@ export class Player extends Phaser.GameObjects.Container {
         }
 
         // Stop any ongoing animations
-        this.sprite.anims.stop();
+        this.sprite.anims?.stop();
         this.animationSprite.anims.stop();
     
         // Call the parent class's destroy method

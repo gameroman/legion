@@ -6,7 +6,7 @@ let gameWidth;
 let gameHeight;
 
 gameWidth = 1800;
-gameHeight = 900;
+gameHeight = 1200;
 
 const config = {
     type: Phaser.WEBGL,

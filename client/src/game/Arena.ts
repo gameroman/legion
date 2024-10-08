@@ -56,7 +56,7 @@ import speechTail from '@assets/speech_tail.png';
 // Static imports for tile atlas
 import groundTilesImage from '@assets/tiles2.png';
 import groundTilesAtlas from '@assets/tiles2.json';
-import { errorToast } from '../components/utils';
+import { errorToast, silentErrorToast } from '../components/utils';
 
 
 const LOCAL_ANIMATION_SCALE = 3;
@@ -205,11 +205,20 @@ export class Arena extends Phaser.Scene
         };
 
         this.socket.on('connect', () => {
-            console.log('Connected to the server');
+            // console.log('Connected to the server');
         });
         
-        this.socket.on('disconnect', () => {
-            console.log('Disconnected from the server');
+        this.socket.on('disconnect', (reason) => {
+            console.log(`Disconnected from the server, ${reason}`);
+            if (reason != 'io client disconnect') {
+                // The disconnection was initiated by the server
+                console.error(`Server disconnect during game: ${reason}`);
+                const isTutorial = gameId === 'tutorial';
+                console.log(`isTutorial: ${isTutorial}`);
+                silentErrorToast('Disconnected from server. Reconnecting...');
+                events.emit('serverDisconnect');
+                this.destroy();
+            } 
         }); 
 
         this.socket.on('error', (error) => {

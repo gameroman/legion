@@ -151,11 +151,9 @@ class QueuePage extends Component<QPageProps, QpageState> {
         this.socket.on('updateGold', ({ gold }) => {
             this.setState({ earnedGold: gold });
             this.context.setPlayerInfo({ gold: this.context.player.gold + 1 });
-            console.log(`Received gold update: ${gold}`);
         });
 
         this.socket.on('queueData', (data) => {
-            console.log(`Received queue data: ${data.nbInQueue}`);
             this.setState({ 
                 queueDataLoaded: true,
                 queueData: { ...data }
@@ -163,7 +161,6 @@ class QueuePage extends Component<QPageProps, QpageState> {
         });
 
         this.socket.on('queueCount', (data) => {
-            console.log(`Received queue count: ${data.count}`);
             this.setState({
                 queueData: {
                     ...this.state.queueData,
