@@ -48,19 +48,25 @@ export class AIGame extends Game {
         return levels;
     }
 
-    async fetchZombieTeam(team: Team, elo: number) {
+    async fetchZombieTeam(team: Team, elo: number, nb: number, levels: number[]) {
         // console.log(`[AIGame:fetchZombieTeam] mode = ${this.mode}, league = ${this.league}, elo = ${elo}`);
         const league = this.mode == PlayMode.RANKED_VS_AI ? this.league : -1;
         const data = await apiFetch(`zombieData?league=${league}&elo=${elo}`, ''); // TODO: Add API key
         console.log(`[AIGame:fetchZombieTeam] Zombie player data: ${JSON.stringify(data.playerData)}`);
-        team.setPlayerData(data.playerData);
-        data.rosterData.characters.forEach((character: any, index) => {
-            const position = this.getPosition(index, true);
-            const newCharacter = new AIServerPlayer(index + 1, character.name, character.portrait, position.x, position.y);
-            newCharacter.setTeam(team);
-            newCharacter.setUpCharacter(character);
-            team.addMember(newCharacter);
-        });
+        
+        if (data.playerData === undefined) {
+            console.log('[AIGame:fetchZombieTeam] Failed to fetch zombie data. Falling back to createAITeam.');
+            this.createAITeam(team, nb, levels);
+        } else {
+            team.setPlayerData(data.playerData);
+            data.rosterData.characters.forEach((character: any, index) => {
+                const position = this.getPosition(index, true);
+                const newCharacter = new AIServerPlayer(index + 1, character.name, character.portrait, position.x, position.y);
+                newCharacter.setTeam(team);
+                newCharacter.setUpCharacter(character);
+                team.addMember(newCharacter);
+            });
+        }
     }
 
     async populateTeams() {
@@ -87,7 +93,7 @@ export class AIGame extends Game {
         }
 
         if (this.mode === PlayMode.CASUAL_VS_AI || this.mode === PlayMode.RANKED_VS_AI) {
-            await this.fetchZombieTeam(aiTeam!, playerTeam.teamData.elo);
+            await this.fetchZombieTeam(aiTeam!, playerTeam.teamData.elo, nb, levels);
         } else {
             this.createAITeam(aiTeam!, nb, levels);
         }

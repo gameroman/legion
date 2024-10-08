@@ -340,7 +340,7 @@ export async function processDisconnect(socket) {
     console.log(`Player ${socket.id} disconnected`);
     const player = playersQueue.find(player => player.socket.id === socket.id);
     if (!player) return;
-    notifyAdmin(socket.id, null, player.mode, 'left');
+    notifyAdmin(socket.uid, null, player.mode, 'left');
     removePlayerFromQ(player);
     logQueuingActivity(socket.uid, 'leaveQueue', null);
 }

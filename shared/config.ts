@@ -40,8 +40,8 @@ export const eloRangeStart = 50;
 export const eloRangeStep = 50; // Increase range by 50 points every interval
 export const goldRewardInterval = 15;
 export const goldReward = 1;
-export const casualModeThresholdTime = 1; // seconds after which redirection probability starts increasing
-export const maxWaitTimeForPractice = 15; // maximum wait time after which a player is guaranteed to be redirected
+export const casualModeThresholdTime = 5; // seconds after which redirection probability starts increasing
+export const maxWaitTimeForPractice = 60; // maximum wait time after which a player is guaranteed to be redirected
 export const ALLOW_SWITCHEROO_RANKED = true;
 
 // Feature flags
