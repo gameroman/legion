@@ -151,6 +151,7 @@ export class Player extends Phaser.GameObjects.Container {
 
         this.sprite.on('pointerover', this.onPointerOver, this);
         this.sprite.on('pointerout', this.onPointerOut, this);
+        this.sprite.on('pointerdown', this.onPointerDown, this);
 
         this.speechBubble = new SpeechBubble(this.scene, -15, (this.height / 2) - 10, 'Hello!').setVisible(false);
         this.add(this.speechBubble);
@@ -335,6 +336,11 @@ export class Player extends Phaser.GameObjects.Container {
             return;
         }
 
+         // Check if there is another player on the cell above
+         if (this.arena.hasPlayer(this.gridX, this.gridY - 1)) {
+            if (key == 'idle') key = 'hurt';
+         };
+
         // console.log(`Playing animation ${key}`);
         this.sprite.play({
             key: `${this.texture}_anim_${key}`,
@@ -436,11 +442,26 @@ export class Player extends Phaser.GameObjects.Container {
         this.glowFx.setActive(false);
     }
 
+    onPointerDown() {
+        // const selectedPlayer = this.arena.selectedPlayer;
+        // if (!selectedPlayer || (!selectedPlayer?.hasPendingSpell() && !selectedPlayer?.hasPendingItem())) {
+        //     console.log('Relaying pointer down to handle click');
+        //     this.arena.handleTileClick(this.gridX, this.gridY);
+        // }
+    }
+
+    hasPendingSpell() {
+        return this.pendingSpell != null;
+    }
+
+    hasPendingItem() {
+        return this.pendingItem != null;
+    }
+
     isInIce() {
         return this.arena.hasObstacle(this.gridX, this.gridY);
     }
     
-
     onClick() {
         this.arena.playSound('click');
         if (this.isPlayer && !this.isInIce()) { // If clicking on a player of your team

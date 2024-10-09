@@ -177,6 +177,8 @@ class GamePage extends Component<GamePageProps, GamePageState> {
   };
 
   updateProgress = (progress: number) => {
+    console.log(`[GamePage:updateProgress] Progress: ${progress}`);
+    if (this.state.progress === 100) return;
     this.setState({ progress, loading: progress !== 100 });
   };
 
@@ -194,6 +196,7 @@ class GamePage extends Component<GamePageProps, GamePageState> {
         this.initializeGame();
       });
     } else {
+      if (process.env.NODE_ENV === 'development') return;
       // If not in tutorial, route to home page
       route('/');
     }

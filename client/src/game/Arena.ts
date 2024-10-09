@@ -214,8 +214,11 @@ export class Arena extends Phaser.Scene
                 // The disconnection was initiated by the server
                 console.error(`Server disconnect during game: ${reason}`);
                 const isTutorial = gameId === 'tutorial';
-                console.log(`isTutorial: ${isTutorial}`);
-                silentErrorToast('Disconnected from server. Reconnecting...');
+                if (isTutorial) {
+                    silentErrorToast('Disconnected from server');
+                } else {
+                    silentErrorToast('Disconnected from server. Restarting tutorial...');
+                }
                 events.emit('serverDisconnect');
                 this.destroy();
             } 
@@ -593,6 +596,10 @@ export class Arena extends Phaser.Scene
         return !this.gridMap.get(serializeCoords(gridX, gridY)) && !this.obstaclesMap.get(serializeCoords(gridX, gridY));
     }
 
+    hasPlayer(gridX, gridY) {
+        return this.gridMap.has(serializeCoords(gridX, gridY));
+    }
+
     hasObstacle(gridX, gridY) {
         return this.obstaclesMap.has(serializeCoords(gridX, gridY));
     }
@@ -753,7 +760,8 @@ export class Arena extends Phaser.Scene
         if (this.gameEnded) return;
         const player = this.getPlayer(team, num);
 
-        this.gridMap.set(serializeCoords(player.gridX, player.gridY), null);
+        // this.gridMap.set(serializeCoords(player.gridX, player.gridY), null);
+        this.gridMap.delete(serializeCoords(player.gridX, player.gridY));
         this.gridMap.set(serializeCoords(tile.x, tile.y), player);
 
         player.walkTo(tile.x, tile.y);
@@ -1400,7 +1408,7 @@ export class Arena extends Phaser.Scene
             const delay = 3000;
             setTimeout(this.updateOverview.bind(this), delay + 1000);
             setTimeout(() => {
-                this.displayGEN(GEN.COMBAT_BEGINS);
+                if (!this.gameSettings.tutorial) this.displayGEN(GEN.COMBAT_BEGINS);
                 this.setGameInitialized();
             }, delay);
 
