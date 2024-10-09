@@ -1,6 +1,11 @@
 import { apiFetch } from './apiService';
 import * as solanaWeb3 from '@solana/web3.js';
 
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
+
 type WalletEventCallback = () => void;
 
 class SolanaWalletService {
