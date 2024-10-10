@@ -10,7 +10,6 @@ import RankPage from '../components/RankPage';
 import Navbar from '../components/navbar/Navbar';
 import QueuePage from '../components/QueuePage';
 import ElysiumPage from '../components/ElysiumPage';
-
 interface HomePageState {
   showLoginOptions: boolean;
 }

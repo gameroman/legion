@@ -115,6 +115,7 @@ async function apiFetch(endpoint, options: ApiFetchOptions = {}, timeoutDuration
 
             // If it's the last attempt, throw the error
             if (attempt === maxRetries - 1) {
+                errorToast(`${error.message}`);
                 throw error;
             }
 

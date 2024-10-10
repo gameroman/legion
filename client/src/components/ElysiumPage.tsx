@@ -1,12 +1,15 @@
-import { h, Component, Fragment } from 'preact';
+// ElysiumPage.tsx
+import { h, Fragment } from 'preact';
+import { useState, useEffect, useContext } from 'preact/hooks';
 import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css'
+import 'react-loading-skeleton/dist/skeleton.css';
 import { PlayerContext } from '../contexts/PlayerContext';
-import SolanaWalletService from '../services/SolanaWalletService';
 import { apiFetch } from '../services/apiService';
 import { Token } from "@legion/shared/enums";
 import { errorToast } from './utils';
-
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 interface Lobby {
     id: string;
@@ -18,79 +21,45 @@ interface Lobby {
     stake: number;
 }
 
-interface State {
-    isWalletDetected: boolean;
-    isWalletConnected: boolean;
-    lobbies: Lobby[] | null;
-    isLoadingLobbies: boolean;
-    isCreatingLobby: boolean;
-    isModalOpen: boolean;
-    stakeAmount: string;
-}
+const ElysiumPage = () => {
+    const [lobbies, setLobbies] = useState<Lobby[] | null>(null);
+    const [isLoadingLobbies, setIsLoadingLobbies] = useState(false);
+    const [isCreatingLobby, setIsCreatingLobby] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [stakeAmount, setStakeAmount] = useState('0.01');
+    const [onchainBalance, setOnchainBalance] = useState(0);
 
-class ElysiumPage extends Component<{}, State> {
-    static contextType = PlayerContext;
-    private walletService: SolanaWalletService;
+    const { connected, publicKey, wallets } = useWallet();
+    const { connection } = useConnection();
+    const playerContext = useContext(PlayerContext);
 
-    state: State = {
-        isWalletDetected: false,
-        isWalletConnected: false,
-        lobbies: null,
-        isLoadingLobbies: false,
-        isCreatingLobby: false,
-        isModalOpen: false,
-        stakeAmount: '0.01',
-    }
+    const ingameBalance = playerContext.player.tokens?.[Token.SOL] || 0;
 
-    constructor(props: {}) {
-        super(props);
-        this.walletService = SolanaWalletService.getInstance();
-    }
-
-    async componentDidMount() {
-        const isWalletDetected = this.walletService.isWalletDetected();
-        const isWalletConnected = await this.walletService.checkWalletConnection();
-        this.setState({ isWalletDetected, isWalletConnected });
-        this.walletService.addWalletStateListener(this.handleWalletStateChange);
-
-        if (isWalletConnected) {
-            this.fetchLobbies();
+    useEffect(() => {
+        if (connected && publicKey) {
+            fetchLobbies();
+            // Fetch on-chain balance
+            connection.getBalance(publicKey).then(balance => {
+                setOnchainBalance(balance / LAMPORTS_PER_SOL);
+            }).catch(error => {
+                console.error('Failed to get balance:', error);
+            });
         }
-    }
+    }, [connected, publicKey, connection]);
 
-    componentWillUnmount() {
-        this.walletService.removeWalletStateListener(this.handleWalletStateChange);
-    }
-
-    handleWalletStateChange = () => {
-        const isWalletConnected = this.walletService.isWalletConnected();
-        this.setState({ isWalletConnected });
-        if (isWalletConnected) {
-            this.fetchLobbies();
+    const fetchLobbies = async () => {
+        setIsLoadingLobbies(true);
+        try {
+            const data = await apiFetch('listLobbies');
+            setLobbies(data);
+            setIsLoadingLobbies(false);
+        } catch (error) {
+            console.error('Error fetching lobbies:', error);
+            setIsLoadingLobbies(false);
         }
     };
 
-
-    handleConnectWallet = async () => {
-        const connected = await this.walletService.connectWallet();
-        if (connected) {
-            this.setState({ isWalletConnected: true });
-            this.fetchLobbies();
-        }
-    }
-
-    fetchLobbies = async () => {
-        this.setState({ isLoadingLobbies: true });
-        try {
-            const data = await apiFetch('listLobbies');
-            this.setState({ lobbies: data, isLoadingLobbies: false });
-        } catch (error) {
-            console.error('Error fetching lobbies:', error);
-            this.setState({ isLoadingLobbies: false });
-        }
-    }
-
-    renderLobbySkeletons() {
+    const renderLobbySkeletons = () => {
         return Array(5).fill(null).map((_, index) => (
             <div key={index} className="lobby-skeleton">
                 <Skeleton circle={true} height={50} width={50} />
@@ -101,10 +70,9 @@ class ElysiumPage extends Component<{}, State> {
                 </div>
             </div>
         ));
-    }
+    };
 
-    renderLobbies() {
-        const { lobbies } = this.state;
+    const renderLobbies = () => {
         if (!lobbies || lobbies.length === 0) {
             return <div className="no-lobbies-message">No lobbies are currently available.</div>;
         }
@@ -120,128 +88,128 @@ class ElysiumPage extends Component<{}, State> {
                 </div>
             </div>
         ));
-    }
+    };
 
-    handleOpenModal = () => {
-        this.setState({ isModalOpen: true, stakeAmount: '0.01' });
-      }
-    
-      handleCloseModal = () => {
-        this.setState({ isModalOpen: false });
-      }
-    
-      handleStakeChange = (e: Event) => {
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+        setStakeAmount('0.01');
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
+
+    const handleStakeChange = (e: Event) => {
         const input = e.target as HTMLInputElement;
-        this.setState({ stakeAmount: input.value });
-      }
-    
-      handleCreateLobby = async () => {
-        const { stakeAmount } = this.state;
+        setStakeAmount(input.value);
+    };
+
+    const handleCreateLobby = async () => {
         const stake = parseFloat(stakeAmount);
 
-        this.setState({ isCreatingLobby: true });
-    
+        setIsCreatingLobby(true);
+
         try {
-          await apiFetch('createLobby', 
-            { 
-                method: 'POST', 
-                body: {
-                    stake
+            await apiFetch('createLobby',
+                {
+                    method: 'POST',
+                    body: {
+                        stake
+                    }
                 }
-            });
-          this.setState({ isModalOpen: false, isCreatingLobby: false });
-          this.context.refreshPlayerData(); 
-          this.fetchLobbies(); // Refresh the lobby list
-        } catch (error) {
-          errorToast('Error creating lobby:', error);
-          this.setState({ isCreatingLobby: false })
-        }
-      }
-
-    render() {
-        const { isWalletDetected, isWalletConnected, isLoadingLobbies, isModalOpen, stakeAmount, isCreatingLobby } = this.state;
-        const tokens = this.context.player.tokens || {};
-        const ingameBalance = tokens[Token.SOL] || 0;
-        const onchainBalance = this.walletService.getBalance();
-        const maxStake = ingameBalance + onchainBalance;
-        const minStake = 0.01;
-        const currentStake = parseFloat(stakeAmount);
-        const isStakeValid = currentStake >= minStake && currentStake <= maxStake;
-
-        if (!isWalletDetected) {
-            return <div>No wallet detected</div>;
-        }
-
-        if (!isWalletConnected) {
-            return (
-                <div>
-                    <button onClick={this.handleConnectWallet}>Connect Wallet</button>
-                </div>
             );
+            setIsModalOpen(false);
+            setIsCreatingLobby(false);
+            playerContext.refreshPlayerData();
+            fetchLobbies();
+        } catch (error) {
+            errorToast('Error creating lobby:', error);
+            setIsCreatingLobby(false);
         }
+    };
 
-        return (
-            <div className="elysium-page">
-                <h2 className="lobbies-header">Available Lobbies</h2>
-                <button onClick={this.handleOpenModal} className="create-lobby-btn">Create Lobby</button>
-                <div className="lobbies-container">
-                    {isLoadingLobbies ? this.renderLobbySkeletons() : this.renderLobbies()}
-                </div>
+    const minStake = 0.01;
+    const maxStake = ingameBalance + onchainBalance;
+    const currentStake = parseFloat(stakeAmount);
+    const isStakeValid = currentStake >= minStake && currentStake <= maxStake;
+
+    if (!wallets || wallets.length === 0) {
+        return <div>No wallets available. Please install a Solana wallet extension like Phantom.</div>;
+    }
+
+    return (
+        <div className="elysium-page">
+            {/* Always display the WalletMultiButton */}
+            <div className="wallet-button-container">
+                <WalletMultiButton />
+            </div>
+
+            {/* Rest of your page content */}
+            <h2 className="lobbies-header">Available Lobbies</h2>
+            {/* Disable the "Create Lobby" button if not connected */}
+            <button onClick={handleOpenModal} className="create-lobby-btn" disabled={!connected}>
+                Create Lobby
+            </button>
+            <div className="lobbies-container">
+                {isLoadingLobbies ? renderLobbySkeletons() : renderLobbies()}
+            </div>
+
+            {connected && (
                 <div className="wallet-info">
-                    <p>Address: {this.walletService.getWalletAddress()}</p>
+                    <p>Address: {publicKey?.toBase58()}</p>
                     <p>In-game balance: {ingameBalance} SOL</p>
                     <p>On-chain balance: {onchainBalance} SOL</p>
                 </div>
+            )}
 
-                {isModalOpen && (
-                    <div className="modal-overlay">
-                        <div className="modal">
+            {isModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal">
                         <h3>Create a New Lobby</h3>
                         <p>Set the stake amount for your new lobby.</p>
                         <div className="modal-content">
                             <label htmlFor="stake">Stake (SOL)</label>
                             <input
-                            id="stake"
-                            type="number"
-                            value={stakeAmount}
-                            onChange={this.handleStakeChange}
-                            min={minStake}
-                            max={maxStake}
-                            step={0.01}
-                            disabled={isCreatingLobby}  // Disable input while creating lobby
+                                id="stake"
+                                type="number"
+                                value={stakeAmount}
+                                onChange={handleStakeChange}
+                                min={minStake}
+                                max={maxStake}
+                                step={0.01}
+                                disabled={isCreatingLobby}
                             />
                             <div className="stake-limits">
-                            <p className={currentStake < minStake ? 'invalid' : ''}>
-                                Min stake: {minStake} SOL
-                            </p>
-                            <p className={currentStake > maxStake ? 'invalid' : ''}>
-                                Max stake: {maxStake} SOL
-                            </p>
-                            <small>(Max stake is the sum of in-game and browser wallet balances)</small>
+                                <p className={currentStake < minStake ? 'invalid' : ''}>
+                                    Min stake: {minStake} SOL
+                                </p>
+                                <p className={currentStake > maxStake ? 'invalid' : ''}>
+                                    Max stake: {maxStake} SOL
+                                </p>
+                                <small>(Max stake is the sum of in-game and browser wallet balances)</small>
                             </div>
                         </div>
                         <div className="modal-footer">
                             {isCreatingLobby ? (
-                            <div className="lobby-spinner"></div>
+                                <div className="lobby-spinner"></div>
                             ) : (
-                            <Fragment>
-                                <button onClick={this.handleCloseModal} className="cancel-btn">Cancel</button>
-                                <button 
-                                onClick={this.handleCreateLobby} 
-                                disabled={!isStakeValid}
-                                className={`confirm-btn ${!isStakeValid ? 'disabled' : ''}`}
-                                >
-                                Create Lobby
-                                </button>
-                            </Fragment>
+                                <Fragment>
+                                    <button onClick={handleCloseModal} className="cancel-btn">Cancel</button>
+                                    <button
+                                        onClick={handleCreateLobby}
+                                        disabled={!isStakeValid}
+                                        className={`confirm-btn ${!isStakeValid ? 'disabled' : ''}`}
+                                    >
+                                        Create Lobby
+                                    </button>
+                                </Fragment>
                             )}
                         </div>
-                        </div>
                     </div>
-                    )}
-            </div>
-        );
-    }
-}
+                </div>
+            )}
+        </div>
+    );
+};
 
 export default ElysiumPage;

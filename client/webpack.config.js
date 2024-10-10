@@ -5,6 +5,7 @@ const {
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 
 const isDocker = process.env.IS_DOCKER;
@@ -38,9 +39,9 @@ module.exports = {
                     }
                     return str;
                   };
-      
+
                   let errorMessage = '';
-      
+
                   // Add file location
                   if (error.file) {
                     errorMessage += colors.cyan(replaceAbsolutePath(error.file));
@@ -52,10 +53,10 @@ module.exports = {
                     }
                     errorMessage += '\n';
                   }
-      
+
                   // Add error severity and content
                   errorMessage += colors.red(error.severity.toUpperCase() + ': ') + error.content;
-      
+
                   return errorMessage;
                 } catch (formattingError) {
                   console.error('Error in errorFormatter:', formattingError);
@@ -112,21 +113,27 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
   },
 
-  plugins: [new HtmlWebpackPlugin({
-    template: 'src/index.html',
-    hash: true,
-  }), new Dotenv({
-    path: isDocker ? false : path.resolve(__dirname, isProduction ? '.production.env' : '.env'),
-    systemvars: isDocker // Set systemvars to true when in Docker mode to get vars from docker-compose.ym;
-  }), new CopyWebpackPlugin({
-    patterns: [
-      { from: 'public/favicon.ico', to: 'favicon.ico' }
-    ],
-  }), sentryWebpackPlugin({
-    authToken: process.env.SENTRY_AUTH_TOKEN,
-    org: "dynetis-games",
-    project: "javascript-react"
-  })],
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: 'src/index.html',
+      hash: true,
+    }),
+    new Dotenv({
+      path: isDocker ? false : path.resolve(__dirname, isProduction ? '.production.env' : '.env'),
+      systemvars: isDocker // Set systemvars to true when in Docker mode to get vars from docker-compose.ym;
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'public/favicon.ico', to: 'favicon.ico' }
+      ],
+    }),
+    sentryWebpackPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: "dynetis-games",
+      project: "javascript-react"
+    }),
+    new NodePolyfillPlugin(),
+  ],
 
   devtool: "source-map"
 };

@@ -4,6 +4,7 @@ import { PlayerContext } from './contexts/PlayerContext';
 
 import AuthProvider from './providers/AuthProvider';
 import PlayerProvider from './providers/PlayerProvider';
+import WalletContextProvider from './providers/WalletContextProvider';
 import HomePage from './routes/HomePage';
 import GamePage from './routes/GamePage';
 import LandingPage from './routes/LandingPage';
@@ -89,17 +90,19 @@ class App extends Component<{}, AppState> {
                 <PlayerProvider>
                     <PlayerContext.Consumer>
                         {({ refreshAllData, updateActiveCharacter }) => (
-                            <Router onChange={(e: RouterOnChangeArgs) => this.handleRoute(e, refreshAllData, updateActiveCharacter)}>
-                                <Route path="/" component={withNoAuth(LandingPage)} />
-                                <Route path="/game/:id" component={AuthenticatedGamePage} />
-                                <Route path="/play" component={AuthenticatedHomePage} />
-                                <Route path="/team/:id?" component={AuthenticatedHomePage} />
-                                <Route path="/shop/:id?" component={AuthenticatedHomePage} />
-                                <Route path="/rank" component={AuthenticatedHomePage} />
-                                <Route path="/queue/:mode" component={AuthenticatedHomePage} />
-                                <Route path="/elysium" component={AuthenticatedHomePage} />
-                                <Route default component={AuthenticatedHomePage} />
-                            </Router>
+                            <WalletContextProvider>
+                                <Router onChange={(e: RouterOnChangeArgs) => this.handleRoute(e, refreshAllData, updateActiveCharacter)}>
+                                    <Route path="/" component={withNoAuth(LandingPage)} />
+                                    <Route path="/game/:id" component={AuthenticatedGamePage} />
+                                    <Route path="/play" component={AuthenticatedHomePage} />
+                                    <Route path="/team/:id?" component={AuthenticatedHomePage} />
+                                    <Route path="/shop/:id?" component={AuthenticatedHomePage} />
+                                    <Route path="/rank" component={AuthenticatedHomePage} />
+                                    <Route path="/queue/:mode" component={AuthenticatedHomePage} />
+                                    <Route path="/elysium" component={AuthenticatedHomePage} />
+                                    <Route default component={AuthenticatedHomePage} />
+                                </Router>
+                            </WalletContextProvider>
                         )}
                     </PlayerContext.Consumer>
                 </PlayerProvider>
