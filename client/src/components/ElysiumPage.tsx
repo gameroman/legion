@@ -1,12 +1,13 @@
 // ElysiumPage.tsx
 import { h, Fragment } from 'preact';
+import { route } from 'preact-router';
 import { useState, useEffect, useContext } from 'preact/hooks';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { PlayerContext } from '../contexts/PlayerContext';
 import { apiFetch } from '../services/apiService';
 import { Token } from '@legion/shared/enums';
-import { errorToast } from './utils';
+import { errorToast, successToast } from './utils';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import {
     LAMPORTS_PER_SOL,
@@ -15,8 +16,7 @@ import {
     SystemProgram,
 } from '@solana/web3.js';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { GAME_WALLET } from '@legion/shared/config';
-
+import { GAME_WALLET, MIN_WITHDRAW } from '@legion/shared/config';
 
 interface Lobby {
     id: string;
@@ -38,6 +38,11 @@ const ElysiumPage = () => {
     const [onchainBalance, setOnchainBalance] = useState(0);
     const [registeredAddress, setRegisteredAddress] = useState<string | null>(null);
     const [amountNeededFromOnchain, setAmountNeededFromOnchain] = useState(0);
+
+    // New state variables for withdrawal
+    const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+    const [withdrawAmount, setWithdrawAmount] = useState('0.01');
+    const [isWithdrawing, setIsWithdrawing] = useState(false);
 
     const { connected, publicKey, wallets, sendTransaction } = useWallet();
     const { connection } = useConnection();
@@ -191,7 +196,7 @@ const ElysiumPage = () => {
                 playerContext.refreshPlayerData();
             }
 
-            await apiFetch('createLobby', {
+            const { lobbyId } = await apiFetch('createLobby', {
                 method: 'POST',
                 body: {
                     stake: parseFloat(stakeAmount),
@@ -200,15 +205,59 @@ const ElysiumPage = () => {
                 },
             });
 
-            setIsModalOpen(false);
-            setIsCreatingLobby(false);
-            setShowConfirmationModal(false);
-            playerContext.refreshPlayerData();
-            fetchLobbies();
+            route(`/lobby/${lobbyId}`);
         } catch (error) {
             errorToast('Error creating lobby: ' + (error.message || error));
             setIsCreatingLobby(false);
             setShowConfirmationModal(false);
+        }
+    };
+
+    // New functions for withdrawal
+    const handleOpenWithdrawModal = () => {
+        setWithdrawAmount('0.01');
+        setIsWithdrawModalOpen(true);
+    };
+
+    const handleCloseWithdrawModal = () => {
+        setIsWithdrawModalOpen(false);
+    };
+
+    const handleWithdrawAmountChange = (e: Event) => {
+        const input = e.target as HTMLInputElement;
+        setWithdrawAmount(input.value);
+    };
+
+    const handleWithdraw = async () => {
+        const amount = parseFloat(withdrawAmount);
+        const maxWithdraw = ingameBalance;
+
+        if (isNaN(amount) || amount < MIN_WITHDRAW || amount > maxWithdraw) {
+            errorToast(`Invalid amount. Please enter an amount between ${minWithdraw} and ${maxWithdraw} SOL.`);
+            return;
+        }
+
+        setIsWithdrawing(true);
+
+        try {
+            const response = await apiFetch('withdrawSOL', {
+                method: 'POST',
+                body: {
+                    amount,
+                },
+            });
+
+            if (response.success) {
+                successToast(`Withdrawal successful. Transaction signature: ${response.signature}`);
+                setIsWithdrawModalOpen(false);
+                playerContext.refreshPlayerData();
+            } else {
+                errorToast(`Withdrawal failed: ${response.error}`);
+            }
+        } catch (error) {
+            errorToast('Error during withdrawal: ' + (error.message || error));
+        } finally {
+            setIsWithdrawing(false);
         }
     };
 
@@ -219,6 +268,15 @@ const ElysiumPage = () => {
         currentStake >= minStake &&
         currentStake <= maxStake &&
         !isNaN(currentStake);
+
+    // For withdrawal
+    const minWithdraw = MIN_WITHDRAW;
+    const maxWithdraw = ingameBalance;
+    const currentWithdrawAmount = parseFloat(withdrawAmount);
+    const isWithdrawAmountValid =
+        currentWithdrawAmount >= minWithdraw &&
+        currentWithdrawAmount <= maxWithdraw &&
+        !isNaN(currentWithdrawAmount);
 
     if (!wallets || wallets.length === 0) {
         return (
@@ -231,14 +289,18 @@ const ElysiumPage = () => {
 
     return (
         <div className="elysium-page">
-            {/* Always display the WalletMultiButton */}
             <div className="wallet-button-container">
                 <WalletMultiButton />
+                <button
+                    onClick={handleOpenWithdrawModal}
+                    className="withdraw-btn"
+                    disabled={!connected || ingameBalance < minWithdraw}
+                >
+                    Withdraw
+                </button>
             </div>
 
-            {/* Rest of your page content */}
             <h2 className="lobbies-header">Available Lobbies</h2>
-            {/* Disable the "Create Lobby" button if not connected */}
             <button
                 onClick={handleOpenModal}
                 className="create-lobby-btn"
@@ -258,6 +320,7 @@ const ElysiumPage = () => {
                 </div>
             )}
 
+            {/* Create Lobby Modal */}
             {isModalOpen && (
                 <div className="modal-overlay">
                     <div className="modal">
@@ -323,24 +386,110 @@ const ElysiumPage = () => {
                 </div>
             )}
 
+            {/* Confirmation Modal for Lobby Creation */}
             {showConfirmationModal && (
                 <div className="modal-overlay">
                     <div className="modal confirmation-modal">
                         <h3>Confirm Lobby Creation</h3>
                         <div className="modal-content">
                             <p>
-                                Your in-game balance is insufficient to create this lobby.
-                                An additional {amountNeededFromOnchain.toFixed(4)} SOL will be transferred from your wallet to cover the stake.
+                                Your in-game balance is insufficient to create
+                                this lobby. An additional{' '}
+                                {amountNeededFromOnchain.toFixed(4)} SOL will be
+                                transferred from your wallet to cover the stake.
                             </p>
                             <p>Do you want to proceed?</p>
                         </div>
                         <div className="modal-footer">
-                            <button onClick={() => setShowConfirmationModal(false)} className="cancel-btn">
+                            <button
+                                onClick={() => setShowConfirmationModal(false)}
+                                className="cancel-btn"
+                            >
                                 Cancel
                             </button>
-                            <button onClick={createLobbyTransaction} className="confirm-btn">
+                            <button
+                                onClick={createLobbyTransaction}
+                                className="confirm-btn"
+                            >
                                 Confirm
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Withdraw Modal */}
+            {isWithdrawModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <h3>Withdraw SOL</h3>
+                        <p>
+                            Enter the amount of SOL you wish to withdraw to your
+                            wallet.
+                        </p>
+                        <div className="modal-content">
+                            <label htmlFor="withdraw-amount">Amount (SOL)</label>
+                            <input
+                                id="withdraw-amount"
+                                type="number"
+                                value={withdrawAmount}
+                                onChange={handleWithdrawAmountChange}
+                                min={minWithdraw}
+                                max={maxWithdraw}
+                                step={0.01}
+                                disabled={isWithdrawing}
+                            />
+                            <div className="withdraw-limits">
+                                <p
+                                    className={
+                                        currentWithdrawAmount < minWithdraw
+                                            ? 'invalid'
+                                            : ''
+                                    }
+                                >
+                                    Min withdraw: {minWithdraw} SOL
+                                </p>
+                                <p
+                                    className={
+                                        currentWithdrawAmount > maxWithdraw
+                                            ? 'invalid'
+                                            : ''
+                                    }
+                                >
+                                    Max withdraw: {maxWithdraw} SOL
+                                </p>
+                            </div>
+                            <p>
+                                Funds will be sent to your wallet address:{' '}
+                                <strong>
+                                    {publicKey?.toBase58()}
+                                </strong>
+                            </p>
+                        </div>
+                        <div className="modal-footer">
+                            {isWithdrawing ? (
+                                <div className="lobby-spinner"></div>
+                            ) : (
+                                <Fragment>
+                                    <button
+                                        onClick={handleCloseWithdrawModal}
+                                        className="cancel-btn"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleWithdraw}
+                                        disabled={!isWithdrawAmountValid}
+                                        className={`confirm-btn ${
+                                            !isWithdrawAmountValid
+                                                ? 'disabled'
+                                                : ''
+                                        }`}
+                                    >
+                                        Withdraw
+                                    </button>
+                                </Fragment>
+                            )}
                         </div>
                     </div>
                 </div>

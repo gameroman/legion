@@ -99,6 +99,7 @@ class App extends Component<{}, AppState> {
                                     <Route path="/shop/:id?" component={AuthenticatedHomePage} />
                                     <Route path="/rank" component={AuthenticatedHomePage} />
                                     <Route path="/queue/:mode" component={AuthenticatedHomePage} />
+                                    <Route path="/lobby/:id" component={AuthenticatedHomePage} />
                                     <Route path="/elysium" component={AuthenticatedHomePage} />
                                     <Route default component={AuthenticatedHomePage} />
                                 </Router>

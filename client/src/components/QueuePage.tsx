@@ -21,6 +21,7 @@ import matchFound from "@assets/sfx/match_found.wav";
 interface QPageProps {
     matches: {
         mode?: number;
+        id?: string;
     };
 }
 
@@ -99,10 +100,6 @@ class QueuePage extends Component<QPageProps, QpageState> {
         }, 1000);
     }
 
-    // componentWillMount() {
-    //     this.joinQueue();
-    // }
-
     componentWillUnmount() {
         if (this.socket) {
             this.manualDisconnect = true;
@@ -169,7 +166,13 @@ class QueuePage extends Component<QPageProps, QpageState> {
             });
         });
 
-        this.socket.emit('joinQueue', { mode: this.props.matches.mode || 0 });
+        const isLobbyMode = this.props.matches.id !== undefined;
+
+        if (isLobbyMode) {
+            this.socket.emit('joinQueue', { lobbyId: this.props.matches.id, isLobby: true });
+        } else {
+            this.socket.emit('joinQueue', { mode: this.props.matches.mode || 0, isLobby: false });
+        }
 
         // this.socket.on('disconnect', () => {
         //     if (!this.manualDisconnect) {
@@ -191,123 +194,169 @@ class QueuePage extends Component<QPageProps, QpageState> {
 
     render() {
         const { progress, queueData } = this.state;
+        const isLobbyMode = this.props.matches.id !== undefined;
+    
         return (
             <div className="queue-container">
                 <div className="queue-body">
-                    {this.state.queueDataLoaded ? (<div className="queue-info">
-                        <div class="queue-spinner">
-                            <div className="queue-spinner-loader"></div>
-                        </div>
-                        <div className="queue-count">
-                            <div role="progressbar" style={`--value: ${progress}`}>
-                                <div>
-                                    <div className="queue-count-number">
-                                        {queueData.nbInQueue}
-                                    </div>
-                                    <div className="queue-count-text">
-                                        Queueing
-                                    </div>
+                    {this.state.queueDataLoaded ? (
+                        isLobbyMode ? (
+                            // Render lobby mode UI
+                            <div className="queue-info">
+                                <div className="queue-spinner-centered">
+                                    <div className="queue-spinner-loader"></div>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="queue-detail">
-                            <div>
-                                {ENABLE_MM_TOGGLE && <div className="queue-detail-header">
-                                    <div
-                                        className={this.state.findState == 'quick' ? 'queue-detail-btn active' : 'queue-detail-btn'}
-                                        onClickCapture={this.handleQuickFind}
-                                    >
-                                        Quick find
-                                    </div>
-                                    <div
-                                        className={this.state.findState == 'accurate' ? 'queue-detail-btn active' : 'queue-detail-btn'}
-                                        onClick={this.handleAccurateFind}
-                                    >
-                                        Accurate find
-                                    </div>
-                                </div>}
-                                <div className="queue-detail-body">
-                                    <div>
-                                        <div>EARNINGS</div>
-                                        <div>
-                                            <div><img src={goldIcon} /></div>
-                                            <div><span style={{ color: 'coral' }}>{queueData.goldReward}</span>/<span style={{ color: 'deepskyblue' }}>{queueData.goldRewardInterval}</span>&nbsp;Sec</div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div>EARNED</div>
-                                        <div>
-                                            <div><img src={goldIcon}/></div>
-                                            <div><span style={{ color: 'coral' }}>{this.state.earnedGold}</span></div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div>WAITED</div>
-                                        <div>
-                                            <span style={{ color: 'deepskyblue' }}>{this.state.waited}</span>&nbsp;Secs
-                                        </div>
-                                    </div>
-                                    {ENABLE_APPROX_WT && <div>
-                                        <div>APPROX WAITING TIME</div>
-                                        <div>
-                                            <span style={{ color: 'deepskyblue' }}>{this.state.queueData.estimatedWaitingTime == -1 ? '?' : this.state.queueData.estimatedWaitingTime}</span>&nbsp;
-                                            {this.state.queueData.estimatedWaitingTime == -1 ? '' : 'Secs'}
-                                        </div>
-                                    </div>}
+                                <div className="queue-text">
+                                    Waiting for other player for duel...
                                 </div>
-
+                                <div className="lobby-info-text">
+                                    <p>The stake has been deducted from your in-game wallet.</p>
+                                    <p>If you leave the lobby, it will be refunded to your in-game wallet.</p>
+                                    <p>If you win the game, the proceeds will go to your in-game wallet.</p>
+                                </div>
                                 <Link href="/play">
                                     <div className="queue-detail-footer">
                                         <div className="queue-footer-exit">
                                             <img src={exitIcon} />
                                         </div>
                                         <div className="queue-footer-text">
-                                            LEAVE QUEUE
+                                            CANCEL DUEL
                                         </div>
                                     </div>
                                 </Link>
-                                <div className="queue-detail-arrow">
-                                    <img src={blueTriangle} />
+                            </div>
+                        ) : (
+                            // Render queue mode UI (existing code)
+                            <div className="queue-info">
+                                <div className="queue-spinner">
+                                    <div className="queue-spinner-loader"></div>
+                                </div>
+                                <div className="queue-count">
+                                    <div role="progressbar" style={`--value: ${progress}`}>
+                                        <div>
+                                            <div className="queue-count-number">
+                                                {queueData.nbInQueue}
+                                            </div>
+                                            <div className="queue-count-text">
+                                                Queueing
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="queue-detail">
+                                    <div>
+                                        {ENABLE_MM_TOGGLE && (
+                                            <div className="queue-detail-header">
+                                                <div
+                                                    className={this.state.findState === 'quick' ? 'queue-detail-btn active' : 'queue-detail-btn'}
+                                                    onClickCapture={this.handleQuickFind}
+                                                >
+                                                    Quick find
+                                                </div>
+                                                <div
+                                                    className={this.state.findState === 'accurate' ? 'queue-detail-btn active' : 'queue-detail-btn'}
+                                                    onClick={this.handleAccurateFind}
+                                                >
+                                                    Accurate find
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="queue-detail-body">
+                                            <div>
+                                                <div>EARNINGS</div>
+                                                <div>
+                                                    <div><img src={goldIcon} /></div>
+                                                    <div>
+                                                        <span style={{ color: 'coral' }}>{queueData.goldReward}</span>/
+                                                        <span style={{ color: 'deepskyblue' }}>{queueData.goldRewardInterval}</span>&nbsp;Sec
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div>EARNED</div>
+                                                <div>
+                                                    <div><img src={goldIcon} /></div>
+                                                    <div><span style={{ color: 'coral' }}>{this.state.earnedGold}</span></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div>WAITED</div>
+                                                <div>
+                                                    <span style={{ color: 'deepskyblue' }}>{this.state.waited}</span>&nbsp;Secs
+                                                </div>
+                                            </div>
+                                            {ENABLE_APPROX_WT && (
+                                                <div>
+                                                    <div>APPROX WAITING TIME</div>
+                                                    <div>
+                                                        <span style={{ color: 'deepskyblue' }}>
+                                                            {this.state.queueData.estimatedWaitingTime === -1 ? '?' : this.state.queueData.estimatedWaitingTime}
+                                                        </span>&nbsp;
+                                                        {this.state.queueData.estimatedWaitingTime === -1 ? '' : 'Secs'}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+    
+                                        <Link href="/play">
+                                            <div className="queue-detail-footer">
+                                                <div className="queue-footer-exit">
+                                                    <img src={exitIcon} />
+                                                </div>
+                                                <div className="queue-footer-text">
+                                                    LEAVE QUEUE
+                                                </div>
+                                            </div>
+                                        </Link>
+                                        <div className="queue-detail-arrow">
+                                            <img src={blueTriangle} />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="queue-number"></div>
+                                <div className="queue-text">
+                                    Waiting for players in {playModes[this.props.matches.mode]} mode…
                                 </div>
                             </div>
-                        </div>
-                        <div className="queue-number">
-
-                        </div>
-                        <div className="queue-text">
-                            Waiting for players in {playModes[this.props.matches.mode]} mode…
-                        </div>
-                    </div>) : (
+                        )
+                    ) : (
+                        // Skeleton loader
                         <Skeleton
                             height={350}
                             width={350}
                             count={1}
-                            highlightColor='#0000004d'
-                            baseColor='#0f1421'
+                            highlightColor="#0000004d"
+                            baseColor="#0f1421"
                             circle={true}
                         />
                     )}
                 </div>
-
-                {ENABLE_Q_NEWS && <div className="queue-news">
-                    {queueData.news.map(newsItem => (
-                        <div className="queue-news-container">
-                            <div class="queue-news-title">
-                                <div><span style={{ color: 'cyan' }}>{newsItem.title}</span></div>
-                                <div class='queue-news-date'><span style={{ color: 'coral' }}>{newsItem.date}</span></div>
+    
+                {/* Conditionally render QueueNews and QueueTips */}
+                {!isLobbyMode && ENABLE_Q_NEWS && (
+                    <div className="queue-news">
+                        {queueData.news.map((newsItem) => (
+                            <div className="queue-news-container" key={newsItem.title}>
+                                <div className="queue-news-title">
+                                    <div><span style={{ color: 'cyan' }}>{newsItem.title}</span></div>
+                                    <div className="queue-news-date"><span style={{ color: 'coral' }}>{newsItem.date}</span></div>
+                                </div>
+                                <div className="queue-news-content">
+                                    {newsItem.text}
+                                </div>
+                                <div
+                                    className="queue-news-readmore"
+                                    onClick={() => window.open(newsItem.link, '_blank')}
+                                >
+                                    READ MORE &nbsp;&nbsp; <span style={{ color: 'coral' }}>▶</span>
+                                </div>
                             </div>
-                            <div className="queue-news-content">
-                                {newsItem.text}
-                            </div>
-                            <div className="queue-news-readmore"  onClick={() => window.open(newsItem.link, '_blank')}>
-                                READ MORE &nbsp;&nbsp; <span style={{ color: 'coral' }}>▶</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>}
-
-                <QueueTips />
-
+                        ))}
+                    </div>
+                )}
+    
+                {!isLobbyMode && <QueueTips />}
+    
                 <div className="queue-btns">
                     <Link href={X_LINK} target="_blank">
                         <div className="btn-x">
@@ -320,9 +369,10 @@ class QueuePage extends Component<QPageProps, QpageState> {
                         </div>
                     </Link>
                 </div>
-            </div >
+            </div>
         );
     }
+    
 }
 
 export default QueuePage;

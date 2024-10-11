@@ -14,7 +14,7 @@ import { NewCharacter } from "@legion/shared/NewCharacter";
 import { getChestContent, ChestReward } from "@legion/shared/chests";
 import {
   STARTING_CONSUMABLES, STARTING_GOLD, BASE_INVENTORY_SIZE, STARTING_GOLD_ADMIN,
-  STARTING_SPELLS_ADMIN, STARTING_EQUIPMENT_ADMIN, IMMEDIATE_LOOT, RPC,
+  STARTING_SPELLS_ADMIN, STARTING_EQUIPMENT_ADMIN, IMMEDIATE_LOOT, RPC, MIN_WITHDRAW,
 } from "@legion/shared/config";
 import { logPlayerAction, updateDAU } from "./dashboardAPI";
 import { getEmptyLeagueStats } from "./leaderboardsAPI";
@@ -952,12 +952,17 @@ export const withdrawSOL = onRequest(async (request, response) => {
 
   return corsMiddleware(request, response, async () => {
     try {
+      if (!checkAPIKey(request)) {
+        response.status(401).send('Unauthorized');
+        return;
+      }
+
       const uid = await getUID(request);
       const amount = parseFloat(request.body.amount);
 
       // Validate amount
-      if (isNaN(amount) || amount < 0.01) {
-        return response.status(400).send({ error: 'Invalid withdrawal amount. Minimum is 0.01 SOL.' });
+      if (isNaN(amount) || amount < MIN_WITHDRAW) {
+        return response.status(400).send({ error: `Invalid withdrawal amount. Minimum is ${MIN_WITHDRAW} SOL.` });
       }
 
       // Fetch player data

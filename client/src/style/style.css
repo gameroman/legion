@@ -1612,6 +1612,14 @@ canvas {
   left: 1vw;
 }
 
+.queue-spinner-centered {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+}
+
 .queue-spinner-loader {
   width: 14vw;
   height: 14vw;

@@ -42,7 +42,7 @@ export const goldRewardInterval = 15;
 export const goldReward = 1;
 export const casualModeThresholdTime = 5; // seconds after which redirection probability starts increasing
 export const maxWaitTimeForPractice = 60; // maximum wait time after which a player is guaranteed to be redirected
-export const ALLOW_SWITCHEROO_RANKED = true;
+export const ALLOW_SWITCHEROO_RANKED = false;
 
 // Feature flags
 export const ENABLE_PLAYER_LEVEL = false;
@@ -67,6 +67,7 @@ export let LOTSA_MP = false;
 // Web3
 export const RPC = 'https://solana-devnet.g.alchemy.com/v2/7aGAP4QZtAC0FxXqFvVSTz0X4jPLFSd4';
 export const GAME_WALLET = '5sbSbXRifoT3TyZn98Vt2k9pXE59PbcKBewfVYco6HUY';
+export const MIN_WITHDRAW = 0.01;
 
 // Social
 export const DISCORD_LINK = 'https://discord.gg/s2XZhYCK2m';
