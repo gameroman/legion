@@ -15,6 +15,7 @@
   "dependencies": {
     "@firebase/firestore-compat": "^0.3.23",
     "@solana/web3.js": "^1.95.3",
+    "bs58": "^6.0.0",
     "cors": "^2.8.5",
     "date-fns": "^3.6.0",
     "discord.js": "^14.14.1",

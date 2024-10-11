@@ -22,6 +22,7 @@ import { numericalSort } from "@legion/shared/inventory";
 import {
   Connection, LAMPORTS_PER_SOL, Keypair, Transaction, SystemProgram, PublicKey,
 } from '@solana/web3.js';
+import bs58 from 'bs58';
 
 const NB_START_CHARACTERS = 3;
 
@@ -986,14 +987,16 @@ export const withdrawSOL = onRequest(async (request, response) => {
       }
 
       // Load the game wallet keypair from the environment variable
-      const secretKeyString = process.env.GAME_WALLET_PRIVATE_KEY;
+      const secretKeyString = process.env.GAME_WALLET_PRIVATE_KEY || 'fNG99mSMeVZeK5UgKvKFqbiPAuSbNs2DjH3EQCrjSRnzRRKchYmTMpeuJV4yCW3FRNPEpR1LH2nsxdnAtLsZakc';
       if (!secretKeyString) {
         console.error('Game wallet private key not set in environment variables.');
         return response.status(500).send({ error: 'Server configuration error.' });
       }
 
-      const secretKey = Uint8Array.from(JSON.parse(secretKeyString));
+      const secretKey = bs58.decode(secretKeyString);
       const gameWalletKeypair = Keypair.fromSecretKey(secretKey);
+      // const secretKey = Uint8Array.from(JSON.parse(secretKeyString));
+      // const gameWalletKeypair = Keypair.fromSecretKey(secretKey);
 
       // Create a connection to the Solana cluster
       const connection = new Connection(RPC, 'confirmed');
