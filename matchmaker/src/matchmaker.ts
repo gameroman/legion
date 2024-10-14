@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 
 dotenv.config();
-import { setupMatchmaking, processJoinQueue, processDisconnect } from './matchmaking';
+import { setupMatchmaking, processJoinQueue, processJoinLobby, processDisconnect } from './matchmaking';
 
 const allowedOrigins = [process.env.CLIENT_ORIGIN, 'https://legion-32c6d.firebaseapp.com'];
 console.log(`Allowed client origins: ${allowedOrigins}`);
@@ -49,6 +49,7 @@ io.on("connection", (socket: any) => {
     socket.firebaseToken = socket.handshake.auth.token;
 
     socket.on("joinQueue", (data) => processJoinQueue(socket, data));
+    socket.on("joinLobby", (data) => processJoinLobby(socket, data));
     socket.on("disconnect", () => processDisconnect(socket));
 });
 

@@ -169,9 +169,9 @@ class QueuePage extends Component<QPageProps, QpageState> {
         const isLobbyMode = this.props.matches.id !== undefined;
 
         if (isLobbyMode) {
-            this.socket.emit('joinQueue', { lobbyId: this.props.matches.id, isLobby: true });
+            this.socket.emit('joinLobby', { lobbyId: this.props.matches.id });
         } else {
-            this.socket.emit('joinQueue', { mode: this.props.matches.mode || 0, isLobby: false });
+            this.socket.emit('joinQueue', { mode: this.props.matches.mode || 0 });
         }
 
         // this.socket.on('disconnect', () => {

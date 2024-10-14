@@ -336,6 +336,25 @@ export async function processJoinQueue(socket, data: { mode: PlayMode }) {
     }
 }
 
+export async function processJoinLobby(socket, data: { lobbyId: string }) {
+    try {
+        socket.uid = await getUID(socket.firebaseToken);
+
+        notifyAdmin(socket.uid, null, PlayMode.STAKED, 'joined');
+
+        // ...
+        logQueuingActivity(socket.uid, 'joinQueue', PlayMode.STAKED);
+    } catch (error) {
+        if (error.code === 'auth/id-token-revoked') {
+            console.log('The Firebase ID token has been revoked.');
+            socket.emit('authError', { message: 'Your session has expired. Please log in again.' });
+        } else {
+            console.error('Error verifying Firebase ID token:', error);
+            socket.emit('authError', { message: 'Authentication failed. Please try again.' });
+        }
+    }
+}
+
 export async function processDisconnect(socket) {
     console.log(`Player ${socket.id} disconnected`);
     const player = playersQueue.find(player => player.socket.id === socket.id);
