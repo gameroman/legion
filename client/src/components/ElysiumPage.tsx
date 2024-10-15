@@ -54,7 +54,6 @@ const ElysiumPage = () => {
 
     const [selectedLobby, setSelectedLobby] = useState<Lobby | null>(null);
     const [showJoinConfirmationModal, setShowJoinConfirmationModal] = useState(false);
-    const [showJoinTransactionModal, setShowJoinTransactionModal] = useState(false);
     const [isJoiningLobby, setIsJoiningLobby] = useState(false);
 
     const [lobbyAvatars, setLobbyAvatars] = useState<{ [key: string]: string | null }>({});
@@ -203,47 +202,35 @@ const ElysiumPage = () => {
     };
 
     const handleJoinLobbyConfirmation = () => {
-        setShowJoinConfirmationModal(false);
-        const amountNeeded = selectedLobby.stake - ingameBalance;
-
-        if (amountNeeded > 0) {
-            if (onchainBalance >= amountNeeded) {
-                setAmountNeededFromOnchain(amountNeeded);
-                setShowJoinTransactionModal(true);
-            } else {
-                errorToast('Not enough balance in your wallet to cover the stake difference.');
-            }
-        } else {
-            joinLobbyTransaction();
-        }
+        // setShowJoinConfirmationModal(false);
+        joinLobbyTransaction();
     };
 
-    // New function to handle join lobby transaction
     const joinLobbyTransaction = async () => {
-        setShowJoinTransactionModal(false);
         setIsJoiningLobby(true);
-
+    
         try {
             let transactionSignature = null;
-
-            if (amountNeededFromOnchain > 0) {
+    
+            if (selectedLobby.stake > ingameBalance) {
+                const amountNeeded = selectedLobby.stake - ingameBalance;
                 const gamePublicKey = new PublicKey(GAME_WALLET);
-
+    
                 const transaction = new Transaction().add(
                     SystemProgram.transfer({
                         fromPubkey: publicKey!,
                         toPubkey: gamePublicKey,
-                        lamports: Math.round(amountNeededFromOnchain * LAMPORTS_PER_SOL),
+                        lamports: Math.round(amountNeeded * LAMPORTS_PER_SOL),
                     })
                 );
-
+    
                 transactionSignature = await sendTransaction(transaction, connection);
                 console.log(`Transaction signature: ${transactionSignature}`);
-
-                setOnchainBalance((prevBalance) => prevBalance - amountNeededFromOnchain);
+    
+                setOnchainBalance((prevBalance) => prevBalance - amountNeeded);
                 playerContext.refreshPlayerData();
             }
-
+    
             console.log(`Calling joinLobby with lobbyId: ${selectedLobby.id} ...`);
             await apiFetch('joinLobby', {
                 method: 'POST',
@@ -253,18 +240,17 @@ const ElysiumPage = () => {
                     playerAddress: publicKey.toBase58(),
                 },
             });
-
-            // successToast('Successfully joined the lobby!');
+    
             route(`/lobby/${selectedLobby.id}`);
         } catch (error) {
             errorToast('Error joining lobby: ' + (error.message || error));
         } finally {
             setIsJoiningLobby(false);
+            setShowJoinConfirmationModal(false);
             setSelectedLobby(null);
         }
     };
     
-
     const handleOpenModal = () => {
         setIsModalOpen(true);
         setStakeAmount('0.01');
@@ -419,11 +405,11 @@ const ElysiumPage = () => {
                     <div className="balance-info">
                         <div className="balance-item">
                             <span className="balance-label">In-game balance</span>
-                            <span className="balance-value">{ingameBalance} SOL</span>
+                            <span className="balance-value">{Number(ingameBalance.toFixed(4))} SOL</span>
                         </div>
                         <div className="balance-item">
                             <span className="balance-label">On-chain balance</span>
-                            <span className="balance-value">{onchainBalance.toFixed(4)} SOL</span>
+                            <span className="balance-value">{Number(onchainBalance.toFixed(4))} SOL</span>
                         </div>
                     </div>
                     <div className="wallet-button-container">
@@ -649,7 +635,7 @@ const ElysiumPage = () => {
                                 You are about to join {selectedLobby.nickname}'s game with a stake of {' '}
                                 <span className="highlight-amount">
                                     {selectedLobby.stake} SOL
-                                </span>{' '}
+                                </span>
                                 .
                             </p>
                             <p>
@@ -666,7 +652,7 @@ const ElysiumPage = () => {
                                     )
                                 }
                             </p>
-                            <p>Do you want to proceed?</p>
+                            {!isJoiningLobby && <p>Do you want to proceed?</p>}
                         </div>
                         <div className="modal-footer">
                             {isJoiningLobby ? (
@@ -687,34 +673,6 @@ const ElysiumPage = () => {
                                     </button>
                                 </>
                             )}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {showJoinTransactionModal && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <h3>Confirm Transaction</h3>
-                        <div className="modal-content">
-                            <p>
-                                An additional {amountNeededFromOnchain.toFixed(4)} SOL will be transferred from your wallet to cover the stake.
-                            </p>
-                            <p>Do you want to proceed with the transaction?</p>
-                        </div>
-                        <div className="modal-footer">
-                            <button
-                                onClick={() => setShowJoinTransactionModal(false)}
-                                className="cancel-btn"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={joinLobbyTransaction}
-                                className="confirm-btn"
-                            >
-                                Confirm Transaction
-                            </button>
                         </div>
                     </div>
                 </div>
