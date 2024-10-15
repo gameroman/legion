@@ -1,7 +1,7 @@
 import { onRequest } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import * as functions from "firebase-functions";
-import admin, { corsMiddleware, getUID, checkAPIKey } from "./APIsetup";
+import admin, { corsMiddleware, getUID, checkAPIKey, performLockedOperation } from "./APIsetup";
 import { fetchParsedTransactionWithRetry } from "./lobbyAPI";
 
 import { uniqueNamesGenerator }
@@ -953,103 +953,100 @@ export const withdrawSOL = onRequest(async (request, response) => {
   return corsMiddleware(request, response, async () => {
     try {
       if (!checkAPIKey(request)) {
-        response.status(401).send('Unauthorized');
-        return;
+        return response.status(401).send('Unauthorized');
       }
 
       const uid = await getUID(request);
       const amount = parseFloat(request.body.amount);
 
-      // Validate amount
       if (isNaN(amount) || amount < MIN_WITHDRAW) {
         return response.status(400).send({ error: `Invalid withdrawal amount. Minimum is ${MIN_WITHDRAW} SOL.` });
       }
 
-      // Fetch player data
-      const playerDocRef = db.collection('players').doc(uid);
-      const playerDoc = await playerDocRef.get();
+      const result = await performLockedOperation(uid, async () => {
+        return db.runTransaction(async (transaction) => {
+          // Fetch player data
+          const playerDocRef = db.collection('players').doc(uid);
+          const playerDoc = await transaction.get(playerDocRef);
 
-      if (!playerDoc.exists) {
-        return response.status(404).send({ error: 'Player not found.' });
-      }
+          if (!playerDoc.exists) {
+            throw new Error('Player not found.');
+          }
 
-      const playerData = playerDoc.data();
+          const playerData = playerDoc.data();
+          if (!playerData) {
+            throw new Error('Player data is null.');
+          }
 
-      if (!playerData) {
-        return response.status(500).send({ error: 'Player data is null.' });
-      }
+          const playerAddress = playerData.address;
+          const inGameBalance = playerData.tokens?.[Token.SOL] || 0;
 
-      const playerAddress = playerData.address;
-      const inGameBalance = playerData.tokens?.SOL || 0;
+          if (!playerAddress) {
+            throw new Error('Player wallet address not registered.');
+          }
 
-      if (!playerAddress) {
-        return response.status(400).send({ error: 'Player wallet address not registered.' });
-      }
+          // Check if the player has enough balance
+          if (amount > inGameBalance) {
+            throw new Error('Insufficient in-game balance.');
+          }
 
-      // Check if the player has enough balance
-      if (amount > inGameBalance) {
-        return response.status(400).send({ error: 'Insufficient in-game balance.' });
-      }
+          // Load the game wallet keypair from the environment variable
+          const secretKeyString = process.env.GAME_WALLET_PRIVATE_KEY;
+          if (!secretKeyString) {
+            throw new Error('Game wallet private key not set in environment variables.');
+          }
 
-      // Load the game wallet keypair from the environment variable
-      const secretKeyString = process.env.GAME_WALLET_PRIVATE_KEY || 'fNG99mSMeVZeK5UgKvKFqbiPAuSbNs2DjH3EQCrjSRnzRRKchYmTMpeuJV4yCW3FRNPEpR1LH2nsxdnAtLsZakc';
-      if (!secretKeyString) {
-        console.error('Game wallet private key not set in environment variables.');
-        return response.status(500).send({ error: 'Server configuration error.' });
-      }
+          const secretKey = bs58.decode(secretKeyString);
+          const gameWalletKeypair = Keypair.fromSecretKey(secretKey);
 
-      const secretKey = bs58.decode(secretKeyString);
-      const gameWalletKeypair = Keypair.fromSecretKey(secretKey);
-      // const secretKey = Uint8Array.from(JSON.parse(secretKeyString));
-      // const gameWalletKeypair = Keypair.fromSecretKey(secretKey);
+          // Create a connection to the Solana cluster
+          const connection = new Connection(RPC, 'confirmed');
 
-      // Create a connection to the Solana cluster
-      const connection = new Connection(RPC, 'confirmed');
+          // Create a transaction to send SOL from the game wallet to the player
+          const withdrawTransaction = new Transaction().add(
+            SystemProgram.transfer({
+              fromPubkey: gameWalletKeypair.publicKey,
+              toPubkey: new PublicKey(playerAddress),
+              lamports: Math.round(amount * LAMPORTS_PER_SOL),
+            })
+          );
 
-      // Create a transaction to send SOL from the game wallet to the player
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: gameWalletKeypair.publicKey,
-          toPubkey: new PublicKey(playerAddress),
-          lamports: Math.round(amount * LAMPORTS_PER_SOL),
-        })
-      );
+          // Sign and send the transaction
+          const signature = await connection.sendTransaction(withdrawTransaction, [gameWalletKeypair]);
+          console.log(`Withdrawal transaction signature: ${signature}`);
 
-      // Sign and send the transaction
-      const signature = await connection.sendTransaction(transaction, [gameWalletKeypair]);
-      console.log(`Withdrawal transaction signature: ${signature}`);
+          // Wait for transaction confirmation
+          const confirmedTransaction = await fetchParsedTransactionWithRetry(signature, connection);
 
-      // Wait for transaction confirmation using the helper function
-      const confirmedTransaction = await fetchParsedTransactionWithRetry(
-        signature,
-        connection,
-      );
+          if (!confirmedTransaction) {
+            throw new Error('Transaction could not be confirmed after retries.');
+          }
 
-      if (!confirmedTransaction) {
-        console.error('Transaction could not be confirmed after retries');
-        return response.status(500).send({ error: 'Transaction could not be confirmed.' });
-      }
+          // Update the player's in-game balance
+          transaction.update(playerDocRef, {
+            [`tokens.${Token.SOL}`]: admin.firestore.FieldValue.increment(-amount),
+          });
 
-      // Update the player's in-game balance
-      await playerDocRef.update({
-        'tokens.SOL': admin.firestore.FieldValue.increment(-amount),
+          // Record the withdrawal transaction
+          const withdrawalRef = db.collection('withdrawals').doc();
+          transaction.set(withdrawalRef, {
+            uid: uid,
+            amount: amount,
+            signature: signature,
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          });
+
+          return { success: true, signature: signature };
+        });
       });
 
-      // Optionally, record the withdrawal transaction
-      await db.collection('withdrawals').add({
-        uid: uid,
-        amount: amount,
-        signature: signature,
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
-      });
-
-      return response.status(200).send({
-        success: true,
-        signature: signature,
-      });
+      return response.status(200).send(result);
     } catch (error) {
       console.error('withdrawSOL error:', error);
-      return response.status(500).send({ error: 'An error occurred during withdrawal.' });
+      if (error instanceof Error && error.message === 'Failed to acquire lock. Resource is busy.') {
+        return response.status(423).send({ error: "Resource is locked. Please try again later." });
+      }
+      return response.status(500).send({ error: 'An error occurred during withdrawal: ' + (error instanceof Error ? error.message : String(error)) });
     }
   });
 });

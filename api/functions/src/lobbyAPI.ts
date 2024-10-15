@@ -1,9 +1,9 @@
 import { onRequest } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
-import admin, { corsMiddleware, getUID } from "./APIsetup";
+import admin, { corsMiddleware, getUID, performLockedOperation } from "./APIsetup";
 import {
     Connection, LAMPORTS_PER_SOL, ParsedInstruction,
-    PartiallyDecodedInstruction, ParsedTransactionWithMeta, Commitment,
+    PartiallyDecodedInstruction, ParsedTransactionWithMeta,
 } from '@solana/web3.js';
 import { Token } from "@legion/shared/enums";
 import { GAME_WALLET, RPC } from '@legion/shared/config';
@@ -14,88 +14,97 @@ export const createLobby = onRequest((request, response) => {
     return corsMiddleware(request, response, async () => {
         try {
             const uid = await getUID(request);
-            const stake = Number(request.body.stake);
-            const transactionSignature = request.body.transactionSignature;
-            const playerAddress = request.body.playerAddress;
 
-            console.log(`[createLobby] uid: ${uid}, stake: ${stake}`);
+            const result = await performLockedOperation(uid, async () => {
+                const stake = Number(request.body.stake);
+                const transactionSignature = request.body.transactionSignature;
+                const playerAddress = request.body.playerAddress;
 
-            // Fetch player data
-            const playerDoc = await db.collection("players").doc(uid).get();
-            if (!playerDoc.exists) {
-                return response.status(404).send("Player not found");
-            }
-            const playerData = playerDoc.data();
+                console.log(`[createLobby] uid: ${uid}, stake: ${stake}`);
 
-            if (!playerData) {
-                return response.status(404).send("Player data not found");
-            }
+                return db.runTransaction(async (transaction) => {
+                    // Fetch player data
+                    const playerDocRef = db.collection("players").doc(uid);
+                    const playerDoc = await transaction.get(playerDocRef);
 
-            if (!playerData.address) {
-                return response.status(400).send("Player's blockchain address not found");
-            }
+                    if (!playerDoc.exists) {
+                        throw new Error("Player not found");
+                    }
 
-            // Verify that the provided playerAddress matches the stored address
-            if (playerAddress !== playerData.address) {
-                return response.status(400).send("Player address does not match records");
-            }
+                    const playerData = playerDoc.data();
+                    if (!playerData) {
+                        throw new Error("Player data not found");
+                    }
 
-            // Get player's in-game balance
-            const currentIngameBalance = playerData.tokens?.[Token.SOL] || 0;
+                    if (!playerData.address) {
+                        throw new Error("Player's blockchain address not found");
+                    }
 
-            // Calculate the amount needed from on-chain balance
-            const amountNeededFromOnchain = stake - currentIngameBalance;
+                    // Verify that the provided playerAddress matches the stored address
+                    if (playerAddress !== playerData.address) {
+                        throw new Error("Player address does not match records");
+                    }
 
-            if (amountNeededFromOnchain > 0) {
-                // If in-game balance is insufficient, verify the transaction
-                if (!transactionSignature) {
-                    return response.status(400).send("Transaction signature is required when in-game balance is insufficient");
-                }
+                    // Get player's in-game balance
+                    const currentIngameBalance = playerData.tokens?.[Token.SOL] || 0;
 
-                // Call the separate transaction verification method
-                const transactionValid = await verifyTransaction(transactionSignature, playerAddress, amountNeededFromOnchain);
+                    // Calculate the amount needed from on-chain balance
+                    const amountNeededFromOnchain = stake - currentIngameBalance;
 
-                if (!transactionValid) {
-                    return response.status(400).send("Transaction verification failed");
-                }
+                    if (amountNeededFromOnchain > 0) {
+                        // If in-game balance is insufficient, verify the transaction
+                        if (!transactionSignature) {
+                            throw new Error("Transaction signature is required when in-game balance is insufficient");
+                        }
 
-                // Update player's in-game balance
-                const newIngameBalance = currentIngameBalance + amountNeededFromOnchain;
+                        // Call the separate transaction verification method
+                        const transactionValid = await verifyTransaction(transactionSignature, playerAddress, amountNeededFromOnchain);
 
-                await playerDoc.ref.update({
-                    [`tokens.${Token.SOL}`]: newIngameBalance,
+                        if (!transactionValid) {
+                            throw new Error("Transaction verification failed");
+                        }
+
+                        // Update player's in-game balance
+                        const newIngameBalance = currentIngameBalance + amountNeededFromOnchain;
+                        transaction.update(playerDocRef, {
+                            [`tokens.${Token.SOL}`]: newIngameBalance,
+                        });
+                    } else if (currentIngameBalance < stake) {
+                        throw new Error("Insufficient in-game balance");
+                    }
+
+                    // Deduct stake from player's balance
+                    transaction.update(playerDocRef, {
+                        [`tokens.${Token.SOL}`]: admin.firestore.FieldValue.increment(-stake),
+                    });
+
+                    // Create lobby document
+                    const lobbyData = {
+                        creatorUID: uid,
+                        avatar: playerData.avatar,
+                        nickname: playerData.name,
+                        elo: playerData.elo,
+                        league: playerData.league,
+                        rank: playerData.leagueStats.rank,
+                        stake: stake,
+                        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                        status: "open",
+                    };
+
+                    const newLobbyRef = db.collection("lobbies").doc();
+                    transaction.set(newLobbyRef, lobbyData);
+
+                    return { lobbyId: newLobbyRef.id };
                 });
-            } else {
-                // If no on-chain funds are needed, ensure the in-game balance is sufficient
-                if (currentIngameBalance < stake) {
-                    return response.status(400).send("Insufficient in-game balance");
-                }
-            }
-
-            // Deduct stake from player's balance
-            await playerDoc.ref.update({
-                [`tokens.${Token.SOL}`]: admin.firestore.FieldValue.increment(-stake),
             });
 
-            // Create lobby document
-            const lobbyData = {
-                creatorUID: uid,
-                avatar: playerData.avatar,
-                nickname: playerData.name,
-                elo: playerData.elo,
-                league: playerData.league,
-                rank: playerData.leagueStats.rank,
-                stake: stake,
-                createdAt: admin.firestore.FieldValue.serverTimestamp(),
-                status: "open",
-            };
-
-            const lobbyRef = await db.collection("lobbies").add(lobbyData);
-
-            return response.status(200).send({ lobbyId: lobbyRef.id });
+            return response.status(200).send(result);
         } catch (error) {
             console.error("createLobby error:", error);
-            return response.status(500).send("Error creating lobby");
+            if (error instanceof Error && error.message === 'Failed to acquire lock. Resource is busy.') {
+                return response.status(423).send("Resource is locked. Please try again later.");
+            }
+            return response.status(500).send("Error creating lobby: " + (error instanceof Error ? error.message : String(error)));
         }
     });
 });
@@ -244,92 +253,107 @@ export const joinLobby = onRequest((request, response) => {
     return corsMiddleware(request, response, async () => {
         try {
             const uid = await getUID(request);
-            const lobbyId = request.body.lobbyId;
-            const transactionSignature = request.body.transactionSignature;
-            const playerAddress = request.body.playerAddress;
-            console.log(`[joinLobby] uid: ${uid}, lobbyId: ${lobbyId}`);
 
-            const lobbyDoc = await db.collection("lobbies").doc(lobbyId).get();
-            if (!lobbyDoc.exists) {
-                return response.status(404).send("Lobby not found");
-            }
+            const result = await performLockedOperation(uid, async () => {
+                const lobbyId = request.body.lobbyId;
+                const transactionSignature = request.body.transactionSignature;
+                const playerAddress = request.body.playerAddress;
 
-            const lobbyData = lobbyDoc.data();
+                console.log(`[joinLobby] uid: ${uid}, lobbyId: ${lobbyId}`);
 
-            if (!lobbyData) {
-                return response.status(404).send("Lobby data not found");
-            }
+                return db.runTransaction(async (transaction) => {
+                    // Fetch lobby data
+                    const lobbyDocRef = db.collection("lobbies").doc(lobbyId);
+                    const lobbyDoc = await transaction.get(lobbyDocRef);
 
-            if (lobbyData.opponentUID) {
-                return response.status(400).send("Lobby is full");
-            }
+                    if (!lobbyDoc.exists) {
+                        throw new Error("Lobby not found");
+                    }
 
-            if (lobbyData.creatorUID === uid) {
-                return response.status(400).send("Cannot join own lobby");
-            }
+                    const lobbyData = lobbyDoc.data();
+                    if (!lobbyData) {
+                        throw new Error("Lobby data not found");
+                    }
 
-            if (lobbyData.status !== "open") {
-                return response.status(400).send("Lobby is not open");
-            }
+                    if (lobbyData.opponentUID) {
+                        throw new Error("Lobby is full");
+                    }
 
-            const playerDoc = await db.collection("players").doc(uid).get();
-            if (!playerDoc.exists) {
-                return response.status(404).send("Player not found");
-            }
-            const playerData = playerDoc.data();
+                    if (lobbyData.creatorUID === uid) {
+                        throw new Error("Cannot join own lobby");
+                    }
 
-            if (!playerData) {
-                return response.status(404).send("Player data not found");
-            }
+                    if (lobbyData.status !== "open") {
+                        throw new Error("Lobby is not open");
+                    }
 
-            // Get player's in-game balance
-            const currentIngameBalance = playerData.tokens?.[Token.SOL] || 0;
+                    // Fetch player data
+                    const playerDocRef = db.collection("players").doc(uid);
+                    const playerDoc = await transaction.get(playerDocRef);
 
-            // Calculate the amount needed from on-chain balance
-            const amountNeededFromOnchain = lobbyData.stake - currentIngameBalance;
+                    if (!playerDoc.exists) {
+                        throw new Error("Player not found");
+                    }
 
-            if (amountNeededFromOnchain > 0) {
-                // If in-game balance is insufficient, verify the transaction
-                if (!transactionSignature) {
-                    return response.status(400).send("Transaction signature is required when in-game balance is insufficient");
-                }
+                    const playerData = playerDoc.data();
+                    if (!playerData) {
+                        throw new Error("Player data not found");
+                    }
 
-                // Call the separate transaction verification method
-                const transactionValid = await verifyTransaction(transactionSignature, playerAddress, amountNeededFromOnchain);
+                    if (playerAddress !== playerData.address) {
+                        throw new Error("Player address does not match records");
+                    }
 
-                if (!transactionValid) {
-                    return response.status(400).send("Transaction verification failed");
-                }
+                    // Get player's in-game balance
+                    const currentIngameBalance = playerData.tokens?.[Token.SOL] || 0;
 
-                // Update player's in-game balance
-                const newIngameBalance = currentIngameBalance + amountNeededFromOnchain;
+                    // Calculate the amount needed from on-chain balance
+                    const amountNeededFromOnchain = lobbyData.stake - currentIngameBalance;
 
-                await playerDoc.ref.update({
-                    [`tokens.${Token.SOL}`]: newIngameBalance,
+                    if (amountNeededFromOnchain > 0) {
+                        // If in-game balance is insufficient, verify the transaction
+                        if (!transactionSignature) {
+                            throw new Error("Transaction signature is required when in-game balance is insufficient");
+                        }
+
+                        // Call the separate transaction verification method
+                        const transactionValid = await verifyTransaction(transactionSignature, playerAddress, amountNeededFromOnchain);
+
+                        if (!transactionValid) {
+                            throw new Error("Transaction verification failed");
+                        }
+
+                        // Update player's in-game balance
+                        const newIngameBalance = currentIngameBalance + amountNeededFromOnchain;
+                        transaction.update(playerDocRef, {
+                            [`tokens.${Token.SOL}`]: newIngameBalance,
+                        });
+                    } else if (currentIngameBalance < lobbyData.stake) {
+                        throw new Error("Insufficient in-game balance");
+                    }
+
+                    // Deduct stake from player's balance
+                    transaction.update(playerDocRef, {
+                        [`tokens.${Token.SOL}`]: admin.firestore.FieldValue.increment(-lobbyData.stake),
+                    });
+
+                    // Update lobby
+                    transaction.update(lobbyDocRef, {
+                        opponentUID: uid,
+                        status: "joined",
+                    });
+
+                    return { status: "joined" };
                 });
-            } else {
-                // If no on-chain funds are needed, ensure the in-game balance is sufficient
-                if (currentIngameBalance < lobbyData.stake) {
-                    return response.status(400).send("Insufficient in-game balance");
-                }
-            }
-
-            // Update lobby
-            await lobbyDoc.ref.update({
-                opponentUID: uid,
-                status: "joined",
             });
 
-            // Deduct stake from player's balance
-            await playerDoc.ref.update({
-                "tokens.SOL": admin.firestore.FieldValue.increment(-lobbyData.stake),
-            });
-            console.log(`[joinLobby] Player ${uid} joined lobby ${lobbyId} with stake ${lobbyData.stake}`);
-
-            return response.status(200).send({ status: "joined" });
+            return response.status(200).send(result);
         } catch (error) {
-            logger.error("joinLobby error:", error);
-            return response.status(500).send("Error joining lobby");
+            console.error("joinLobby error:", error);
+            if (error instanceof Error && error.message === 'Failed to acquire lock. Resource is busy.') {
+                return response.status(423).send("Resource is locked. Please try again later.");
+            }
+            return response.status(500).send("Error joining lobby: " + (error instanceof Error ? error.message : String(error)));
         }
     });
 });

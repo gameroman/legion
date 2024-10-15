@@ -276,7 +276,7 @@ const ElysiumPage = () => {
                     playerAddress: publicKey.toBase58(),
                 },
             });
-
+            playerContext.refreshPlayerData();
             route(`/lobby/${lobbyId}`);
         } catch (error) {
             errorToast('Error creating lobby: ' + (error.message || error));
