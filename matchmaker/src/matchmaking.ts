@@ -431,11 +431,66 @@ export async function processJoinLobby(socket, data: { lobbyId: string }) {
 
 export async function processDisconnect(socket) {
     console.log(`Player ${socket.id} disconnected`);
-    const player = playersQueue.find(player => player.socket.id === socket.id);
-    if (!player) return;
-    notifyAdmin(socket.uid, null, player.mode, 'left');
+    
+    // Check if the player is in a queue
+    const queuePlayer = playersQueue.find(player => player.socket.id === socket.id);
+    if (queuePlayer) {
+        await handleQueueDisconnect(queuePlayer);
+        return;
+    }
+    
+    // Check if the player is in a lobby
+    const lobby = findLobbyBySocketId(socket.id);
+    if (lobby) {
+        await handleLobbyDisconnect(socket, lobby);
+        return;
+    }
+    
+    console.log(`Player ${socket.id} was not in a queue or lobby`);
+}
+
+async function handleQueueDisconnect(player: Player) {
+    notifyAdmin(player.socket.uid, null, player.mode, 'left');
     removePlayerFromQ(player);
-    logQueuingActivity(socket.uid, 'leaveQueue', null);
+    await logQueuingActivity(player.socket.uid, 'leaveQueue', null);
+}
+
+async function handleLobbyDisconnect(socket, lobby: Lobby) {
+    console.log(`Player ${socket.id} disconnected from lobby ${lobby.id}`);
+    
+    // Destroy the lobby
+    lobbies.delete(lobby.id);
+    
+    // Call the cancelLobby endpoint
+    try {
+        await apiFetch(
+            'cancelLobby',
+            socket.firebaseToken,
+            {
+                method: 'POST',
+                body: {
+                    lobbyId: lobby.id,
+                }
+            }
+        );
+        console.log(`Lobby ${lobby.id} cancelled successfully`);
+    } catch (error) {
+        console.error(`Error cancelling lobby ${lobby.id}:`, error);
+    }
+    
+    // Notify the other player in the lobby, if any
+    // const otherSocket = lobby.creatorSocket.id === socket.id ? lobby.opponentSocket : lobby.creatorSocket;
+    // if (otherSocket) {
+    //     otherSocket.emit('lobbyError', { message: 'The other player has disconnected. The lobby has been cancelled.' });
+    // }
+    
+    await logQueuingActivity(socket.uid, 'leaveLobby', lobby.id);
+}
+
+function findLobbyBySocketId(socketId: string): Lobby | undefined {
+    return Array.from(lobbies.values()).find(lobby => 
+        lobby.creatorSocket?.id === socketId || lobby.opponentSocket?.id === socketId
+    );
 }
 
 interface FirebasePublicKeys {

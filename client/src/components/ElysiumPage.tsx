@@ -192,7 +192,7 @@ const ElysiumPage = () => {
             }
 
             console.log(`Calling joinLobby with lobbyId: ${selectedLobby.id} ...`);
-            const response = await apiFetch('joinLobby', {
+            await apiFetch('joinLobby', {
                 method: 'POST',
                 body: {
                     lobbyId: selectedLobby.id,

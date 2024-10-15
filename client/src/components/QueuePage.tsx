@@ -8,7 +8,7 @@ import { getFirebaseIdToken } from '../services/apiService';
 import { ENABLE_APPROX_WT, ENABLE_MM_TOGGLE, ENABLE_Q_NEWS, DISCORD_LINK, X_LINK } from '@legion/shared/config';
 import { tips } from './tips'
 import { PlayerContext } from '../contexts/PlayerContext';
-import { errorToast, playSoundEffect } from './utils';
+import { errorToast, playSoundEffect, silentErrorToast } from './utils';
 import { QueueTips } from './queueTips/QueueTips';
 
 import goldIcon from '@assets/gold_icon.png';
@@ -57,7 +57,6 @@ class QueuePage extends Component<QPageProps, QpageState> {
     static contextType = PlayerContext; 
     interval = null;
     intervalWaited = null;
-    manualDisconnect = false;
 
     constructor(props: QPageProps) {
         super(props);
@@ -102,7 +101,6 @@ class QueuePage extends Component<QPageProps, QpageState> {
 
     componentWillUnmount() {
         if (this.socket) {
-            this.manualDisconnect = true;
             this.socket.disconnect();
         }
         clearInterval(this.interval);
@@ -140,7 +138,6 @@ class QueuePage extends Component<QPageProps, QpageState> {
             if (this.props.matches.mode != 0) {
                 playSoundEffect(matchFound, 0.5);
             }
-            this.manualDisconnect = true;
             this.socket.disconnect();
             route(`/game/${gameId}`);
         });
@@ -174,11 +171,14 @@ class QueuePage extends Component<QPageProps, QpageState> {
             this.socket.emit('joinQueue', { mode: this.props.matches.mode || 0 });
         }
 
-        // this.socket.on('disconnect', () => {
-        //     if (!this.manualDisconnect) {
-        //         errorToast('Disconnected from server, pleae refresh the page');
-        //     }
-        // });
+        this.socket.on('disconnect', (reason) => {
+            console.log(`[QueuePage:disconnect] Disconnected from matchmaker`);
+            if (reason != 'io client disconnect') {
+                // The disconnection was initiated by the server
+                console.error(`Matchmaker disconnect: ${reason}`);
+                silentErrorToast('Disconnected from matchmaker, please reload the page');
+            } 
+        });
 
         this.socket.on('error', (e) => {
             errorToast(e);
