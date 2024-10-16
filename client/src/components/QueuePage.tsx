@@ -1,3 +1,4 @@
+import '../style/QueuePage.style.css';
 import { h, Component } from 'preact';
 import { io } from 'socket.io-client';
 import { route } from 'preact-router';
@@ -54,7 +55,7 @@ interface QpageState {
 
 /* eslint-disable react/prefer-stateless-function */
 class QueuePage extends Component<QPageProps, QpageState> {
-    static contextType = PlayerContext; 
+    static contextType = PlayerContext;
     interval = null;
     intervalWaited = null;
 
@@ -148,7 +149,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
         });
 
         this.socket.on('queueData', (data) => {
-            this.setState({ 
+            this.setState({
                 queueDataLoaded: true,
                 queueData: { ...data }
             });
@@ -177,7 +178,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
                 // The disconnection was initiated by the server
                 console.error(`Matchmaker disconnect: ${reason}`);
                 silentErrorToast('Disconnected from matchmaker, please reload the page');
-            } 
+            }
         });
 
         this.socket.on('error', (e) => {
@@ -195,32 +196,31 @@ class QueuePage extends Component<QPageProps, QpageState> {
     render() {
         const { progress, queueData } = this.state;
         const isLobbyMode = this.props.matches.id !== undefined;
-    
+
         return (
             <div className="queue-container">
                 <div className="queue-body">
-                    {this.state.queueDataLoaded ? (
+                    {this.state.queueDataLoaded || isLobbyMode ? (
                         isLobbyMode ? (
-                            // Render lobby mode UI
-                            <div className="queue-info">
+                            <div className="queue-info lobby-mode">
                                 <div className="queue-spinner-centered">
                                     <div className="queue-spinner-loader"></div>
                                 </div>
                                 <div className="queue-text">
-                                    Waiting for other player for duel...
+                                    Waiting for another player to join...
                                 </div>
-                                <div className="lobby-info-text">
+                                {/* <div className="lobby-info-text">
                                     <p>The stake has been deducted from your in-game wallet.</p>
                                     <p>If you leave the lobby, it will be refunded to your in-game wallet.</p>
                                     <p>If you win the game, the proceeds will go to your in-game wallet.</p>
-                                </div>
-                                <Link href="/play">
-                                    <div className="queue-detail-footer">
+                                </div> */}
+                                <Link href="/play" className="cancel-game-link">
+                                    <div className="queue-detail-footer centered">
                                         <div className="queue-footer-exit">
-                                            <img src={exitIcon} />
+                                            <img src={exitIcon} alt="Exit" />
                                         </div>
                                         <div className="queue-footer-text">
-                                            CANCEL DUEL
+                                            CANCEL GAME
                                         </div>
                                     </div>
                                 </Link>
@@ -297,7 +297,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
                                                 </div>
                                             )}
                                         </div>
-    
+
                                         <Link href="/play">
                                             <div className="queue-detail-footer">
                                                 <div className="queue-footer-exit">
@@ -331,7 +331,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
                         />
                     )}
                 </div>
-    
+
                 {/* Conditionally render QueueNews and QueueTips */}
                 {!isLobbyMode && ENABLE_Q_NEWS && (
                     <div className="queue-news">
@@ -354,9 +354,9 @@ class QueuePage extends Component<QPageProps, QpageState> {
                         ))}
                     </div>
                 )}
-    
-                {!isLobbyMode && <QueueTips />}
-    
+
+                <QueueTips />
+
                 <div className="queue-btns">
                     <Link href={X_LINK} target="_blank">
                         <div className="btn-x">
@@ -372,7 +372,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
             </div>
         );
     }
-    
+
 }
 
 export default QueuePage;
