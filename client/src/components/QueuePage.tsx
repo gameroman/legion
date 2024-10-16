@@ -18,6 +18,7 @@ import discordIcon from '@assets/queue/discord_btn.png';
 import xIcon from '@assets/queue/x_btn.png';
 import blueTriangle from '@assets/queue/blue_triangle.png';
 import matchFound from "@assets/sfx/match_found.wav";
+import { PlayModeLabels } from '@legion/shared/enums';
 
 interface QPageProps {
     matches: {
@@ -25,8 +26,6 @@ interface QPageProps {
         id?: string;
     };
 }
-
-const playModes = ['practice', 'casual', 'ranked'];
 
 interface QueueData {
     goldRewardInterval: number;
@@ -330,7 +329,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
                                 </div>
                                 <div className="queue-number"></div>
                                 <div className="queue-text">
-                                    Waiting for players in {playModes[this.props.matches.mode]} mode…
+                                    Waiting for players in {PlayModeLabels[this.props.matches.mode]} mode…
                                 </div>
                             </div>
                         )

@@ -64,12 +64,22 @@ export enum Terrain {
 
 export enum PlayMode {
     PRACTICE,
+    TUTORIAL,
     CASUAL,
     CASUAL_VS_AI,
     RANKED,
-    TUTORIAL,
-    STAKED,
     RANKED_VS_AI,
+    STAKED,
+}
+
+export const PlayModeLabels = {
+    [PlayMode.PRACTICE]: 'Practice',
+    [PlayMode.TUTORIAL]: 'Tutorial',
+    [PlayMode.CASUAL]: 'Casual',
+    [PlayMode.CASUAL_VS_AI]: 'Casual vs AI',
+    [PlayMode.RANKED]: 'Ranked',
+    [PlayMode.RANKED_VS_AI]: 'Ranked vs AI',
+    [PlayMode.STAKED]: 'Staked',
 }
 
 export enum EquipmentSlot {
