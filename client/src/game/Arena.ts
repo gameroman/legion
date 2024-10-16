@@ -105,7 +105,7 @@ export class Arena extends Phaser.Scene
 
     preload()
     {
-        console.log('Preloading assets ...');
+        // console.log('Preloading assets ...');
         this.gamehud = new GameHUD();
         
         this.load.image('killzone',  killzoneImage);
@@ -1331,13 +1331,13 @@ export class Arena extends Phaser.Scene
             mode: null,
         }
 
-        console.log(`[Arena:create] Scene created`);
+        // console.log(`[Arena:create] Scene created`);
         this.sceneCreated = true;
         this.emptyQueue();
     }
 
     emptyQueue(){ // Process the events that have been queued during initialization
-        console.log(`[Arena:emptyQueue] Emptying event queue`);
+        // console.log(`[Arena:emptyQueue] Emptying event queue`);
         if (this.eventsQueue.length > 1) this.isLateToTheParty = true;
         this.eventsQueue.forEach((event) => {
             this.socket.onevent.call(this.socket, event);

@@ -18,9 +18,12 @@ interface GamePageState {
   progress: number;
   isPortraitMode: boolean;
   key: number;
+  waitingStartTime: number | null;
 }
 
 class GamePage extends Component<GamePageProps, GamePageState> {
+  private waitingTimer: number | null = null;
+
   constructor(props: GamePageProps) {
     super(props);
     this.state = {
@@ -30,6 +33,7 @@ class GamePage extends Component<GamePageProps, GamePageState> {
       initialized: false,
       isPortraitMode: false,
       key: 0,
+      waitingStartTime: null,
     };
   }
 
@@ -59,6 +63,9 @@ class GamePage extends Component<GamePageProps, GamePageState> {
     events.off('serverDisconnect', this.handleServerDisconnect);
     window.removeEventListener('resize', this.checkOrientation);
     window.removeEventListener('orientationchange', this.checkOrientation);
+    if (this.waitingTimer) {
+      clearTimeout(this.waitingTimer);
+    }
   }
 
   checkOrientation = () => {
@@ -70,29 +77,43 @@ class GamePage extends Component<GamePageProps, GamePageState> {
   };
 
   updateProgress = (progress: number) => {
-    // console.log(`[GamePage:updateProgress] Progress: ${progress}`);
     if (this.state.progress === 100) return;
-    this.setState({ progress, loading: progress !== 100 });
+    this.setState({ progress, loading: progress !== 100 }, () => {
+      if (!this.state.loading && !this.state.initialized) {
+        this.startWaitingTimer();
+      }
+    });
   };
 
   handleGameInitialized = () => {
     this.setState({ initialized: true });
+    if (this.waitingTimer) {
+      clearTimeout(this.waitingTimer);
+    }
   };
 
   handleServerDisconnect = () => {
     console.log(`[GamePage:serverDisconnect] Server disconnected`);
     
     if (window.location.pathname.includes('tutorial')) {
-      // If in tutorial, remount the component
       this.setState(prevState => ({ key: prevState.key + 1 }), () => {
         this.cleanup();
         this.initializeGame();
       });
     } else {
       if (process.env.NODE_ENV === 'development') return;
-      // If not in tutorial, route to home page
       route('/');
     }
+  };
+
+  startWaitingTimer = () => {
+    this.setState({ waitingStartTime: Date.now() });
+    this.waitingTimer = window.setTimeout(() => {
+      const waitingDuration = Date.now() - (this.state.waitingStartTime || 0);
+      if (waitingDuration >= 30000) {
+        console.error('Error: Server connection timeout - Waiting for server exceeded 30 seconds');
+      }
+    }, 30000);
   };
 
   render() {

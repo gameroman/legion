@@ -187,7 +187,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
         }
 
         this.socket.on('disconnect', (reason) => {
-            console.log(`[QueuePage:disconnect] Disconnected from matchmaker`);
+            // console.log(`[QueuePage:disconnect] Disconnected from matchmaker`);
             if (reason != 'io client disconnect') {
                 // The disconnection was initiated by the server
                 console.error(`Matchmaker disconnect: ${reason}`);
