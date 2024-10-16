@@ -70,7 +70,7 @@ class GamePage extends Component<GamePageProps, GamePageState> {
   };
 
   updateProgress = (progress: number) => {
-    console.log(`[GamePage:updateProgress] Progress: ${progress}`);
+    // console.log(`[GamePage:updateProgress] Progress: ${progress}`);
     if (this.state.progress === 100) return;
     this.setState({ progress, loading: progress !== 100 });
   };

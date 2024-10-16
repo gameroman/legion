@@ -163,11 +163,15 @@ export class Arena extends Phaser.Scene
         });
 
         this.load.on('progress', (value) => {
+            // console.log(`[Arena:progress] Progress: ${Math.floor(value * 100)}`);
             this.emitEvent('progressUpdate', Math.floor(value * 100));
         });
 
         this.load.on('complete', () => {
             this.emitEvent('progressUpdate', 100);
+            // Remove listener
+            this.load.off('progress');
+            this.load.off('complete');
         });
         this.connectToServer();
     }
