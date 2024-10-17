@@ -360,6 +360,8 @@
     color: #71deff; 
     text-align: center;
     margin-bottom: 8px;
+    font-family: 'Kim';
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }
 
 .dialog-spell-modal-btns { 

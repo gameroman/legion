@@ -27,7 +27,6 @@ export class PvPGame extends Game {
             });
         }));
     }
-        
 
     async addPlayer(socket: Socket, playerData: PlayerContextData) {
         super.addPlayer(socket, playerData);

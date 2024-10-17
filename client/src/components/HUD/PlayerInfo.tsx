@@ -120,8 +120,6 @@ class PlayerInfo extends Component<Props, State> {
             {!isBot && player.playerName}
             {isBot && <div class="glitch">
               {player.playerName}
-                <span aria-hidden="true">{player.playerName}</span>
-                <span aria-hidden="true">{player.playerName}</span>
             </div>}
           </div>
           <div className={`player_info_rank ${position === 'right' && 'row_reverse'}`}>
@@ -154,7 +152,7 @@ class PlayerInfo extends Component<Props, State> {
         </Modal>
         <Modal isOpen={this.state.isExitModalOpen} onRequestClose={this.handleCloseModal} style={customStyles1}>
           <div className="exit_game_menu flex flex_col gap_4">
-            <div className="game_leave_dialog">Are you sure want to abandon the game? This will count as a loss.</div>
+            <div className="game_leave_dialog">Are you sure you want to abandon the game? This will count as a loss.</div>
             <div className="flex gap_4">
               <div className="game_leave_btn" onClick={this.handleExit}>Leave</div>
               <div className="game_leave_btn" onClick={this.handleCloseModal}>Cancel</div>

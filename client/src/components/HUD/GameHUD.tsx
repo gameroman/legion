@@ -193,8 +193,8 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     return (
       <div className="gamehud height_full flex flex_col justify_between padding_bottom_16">
         <div className="hud-container">
-          <Overview position="left" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team2} />
-          <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team1} />
+          <Overview position="left" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team1} />
+          <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team2} />
         </div>
         {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
         {team1 && <SpectatorFooter 

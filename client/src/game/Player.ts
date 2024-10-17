@@ -272,11 +272,11 @@ export class Player extends Phaser.GameObjects.Container {
         const callback = () => { 
             this.playAnim('boast', true);
             // Say the phrase with a random delay
-            if (this.isPlayer && !isTutorial) {
-                setTimeout(() => {
-                    this.talk(combatStartPhrases[Math.floor(Math.random() * combatStartPhrases.length)]);
-                }, Math.random() * 600);
-            }
+            // if (this.isPlayer && !isTutorial) {
+            //     setTimeout(() => {
+            //         this.talk(combatStartPhrases[Math.floor(Math.random() * combatStartPhrases.length)]);
+            //     }, Math.random() * 600);
+            // }
         };
         this.walkTo(this.gridX, this.gridY, 2000, callback);
     }
@@ -446,7 +446,7 @@ export class Player extends Phaser.GameObjects.Container {
         const selectedPlayer = this.arena.selectedPlayer;
         if (selectedPlayer) {
             if (selectedPlayer == this) return; // Might be a move up order
-            if (selectedPlayer.hasPendingSpell() || selectedPlayer.hasPendingItem()) return;
+            if (selectedPlayer.hasPendingSpell() || selectedPlayer.hasPendingItem()) return; // Spell cast or item use should be tile-based
         }
         this.arena.handleTileClick(this.gridX, this.gridY);
         this.arena.lockInput();
