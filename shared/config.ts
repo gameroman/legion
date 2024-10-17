@@ -49,7 +49,7 @@ export const ENABLE_MM_TOGGLE = false;
 export const ENABLE_Q_NEWS = true;
 export const ENABLE_QUESTS = false;
 export const ENABLE_SPECTATOR_MODE = false;
-export const ENABLE_SETTINGS = false;
+export const ENABLE_SETTINGS = true;
 export const ENABLE_ELYSIUM = true;
 
 // Admin
