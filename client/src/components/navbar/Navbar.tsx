@@ -1,6 +1,7 @@
 // Navbar.tsx
 
 import './navbar.style.css';
+import './SettingsModalWrapper.css';
 import { h, Component } from 'preact';
 import { Link, useRouter } from 'preact-router';
 import firebase from 'firebase/compat/app'
@@ -8,6 +9,7 @@ import UserInfoBar from '../userInfoBar/UserInfoBar';
 import { PlayerContextData } from '@legion/shared/interfaces';
 import { successToast, avatarContext } from '../utils';
 import { ENABLE_PLAYER_LEVEL, DISCORD_LINK, X_LINK } from '@legion/shared/config';
+import { SettingsModal } from '../settingsModal/SettingsModal';
 
 import legionLogo from '@assets/logo.png';
 import playIcon from '@assets/play_btn_idle.png';
@@ -24,7 +26,7 @@ import xIcon from '@assets/svg/x.svg';
 import discordIcon from '@assets/svg/discord.svg';
 import copyIcon from '@assets/svg/copy.svg';
 import logoutIcon from '@assets/svg/logout.svg';
-import walletIcon from '@assets/svg/wallet.svg';
+import cogIcon from '@assets/svg/cog.svg';
 
 enum MenuItems {
     PLAY = 'PLAY',
@@ -55,6 +57,7 @@ interface State {
     isSolanaWalletPresent: boolean;
     isSolanaWalletConnected: boolean;
     solanaBalance: number | null;
+    isSettingsModalOpen: boolean;
 }
 
 class Navbar extends Component<Props, State> {
@@ -66,7 +69,8 @@ class Navbar extends Component<Props, State> {
         isLoading: true,
         isSolanaWalletPresent: false,
         isSolanaWalletConnected: false,
-        solanaBalance: null
+        solanaBalance: null,
+        isSettingsModalOpen: false,
     }
 
     constructor(props: Props) {
@@ -112,6 +116,10 @@ class Navbar extends Component<Props, State> {
           useGrouping: true,
           maximumFractionDigits: 2
         }).format(number);
+    };
+
+    toggleSettingsModal = () => {
+        this.setState(prevState => ({ isSettingsModalOpen: !prevState.isSettingsModalOpen }));
     };
 
     render() {
@@ -219,12 +227,23 @@ class Navbar extends Component<Props, State> {
                                     </div>
                                 )
                             )} */}
+                            <div onClick={this.toggleSettingsModal}>
+                                <img src={cogIcon} alt="Settings" /> Settings
+                            </div>
                             <div onClick={this.props.logout}>
                                 <img src={logoutIcon} alt="Logout" /> Log out
                             </div>
                         </div>
                     </div>
                 </div>
+                {this.state.isSettingsModalOpen && (
+                    <div className="settings-modal-wrapper">
+                        <div className="settings-modal-overlay" onClick={this.toggleSettingsModal}></div>
+                        <div className="settings-modal-container">
+                            <SettingsModal onClose={this.toggleSettingsModal} />
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
