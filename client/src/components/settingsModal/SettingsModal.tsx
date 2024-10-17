@@ -18,13 +18,32 @@ export class SettingsModal extends Component<SettingsModalProps> {
       sfxCurrentValue: 50,
       sfxMinValue: 0,
       sfxMaxValue: 100,
-      selectedKeyboardLayout: 0,
+      selectedKeyboardLayout: 1,
     }
   
     componentDidMount() {
+      this.detectKeyboardLayout();
       this.loadSettings();
       this.updateMusicControlThumb();
       this.updateSFXControlThumb();
+    }
+  
+    detectKeyboardLayout = () => {
+      console.log(navigator.language);
+      // This is a simple heuristic and may not be 100% accurate
+      const isAZERTY = navigator.language.startsWith('fr') || 
+                       navigator.language.startsWith('be') || 
+                       navigator.language.startsWith('dz');
+      
+      const detectedLayout = isAZERTY ? 0 : 1; // 0 for AZERTY, 1 for QWERTY
+      console.log(detectedLayout);
+
+      // Only set the detected layout if there's no saved setting
+      const savedSettings = localStorage.getItem('gameSettings');
+      if (!savedSettings) {
+        this.setState({ selectedKeyboardLayout: detectedLayout });
+        this.saveSettings();
+      }
     }
   
     componentDidUpdate(prevProps, prevState) {
@@ -44,6 +63,7 @@ export class SettingsModal extends Component<SettingsModalProps> {
     loadSettings = () => {
       const savedSettings = localStorage.getItem('gameSettings');
       if (savedSettings) {
+        console.log(savedSettings);
         const settings = JSON.parse(savedSettings);
         this.setState({
           musicCurrentValue: settings.musicVolume,
@@ -59,6 +79,7 @@ export class SettingsModal extends Component<SettingsModalProps> {
         sfxVolume: this.state.sfxCurrentValue,
         keyboardLayout: this.state.selectedKeyboardLayout,
       };
+      console.log(settings);
       localStorage.setItem('gameSettings', JSON.stringify(settings));
       events.emit('settingsChanged', settings);  // Emit the settingsChanged event
     }

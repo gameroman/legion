@@ -478,9 +478,9 @@ export class Player extends Phaser.GameObjects.Container {
         
         // Get the current keyboard layout from settings
         const settingsString = localStorage.getItem('gameSettings');
-        const settings = settingsString ? JSON.parse(settingsString) : { keyboardLayout: 0 };
+        const settings = settingsString ? JSON.parse(settingsString) : { keyboardLayout: 1 }; // Default to QWERTY (1) if no settings
         const layout = settings.keyboardLayout === 0 ? azertyLayout : qwertyLayout;
-
+        console.log(`layout: ${layout}`);
         const index = layout.indexOf(keyCode);
         this.onKey(index);
     }

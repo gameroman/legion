@@ -70,6 +70,8 @@ class ItemIcon extends Component<ItemIconProps, ItemIconState> {
     if (settingsString) {
       const settings = JSON.parse(settingsString);
       this.setState({ keyboardLayout: settings.keyboardLayout });
+    } else {
+      this.setState({ keyboardLayout: 1 });
     }
   }
 
