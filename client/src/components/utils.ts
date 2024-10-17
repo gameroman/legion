@@ -102,8 +102,14 @@ export function mapFrameToCoordinates(frame: number) {
 }
 
 export function playSoundEffect(src: string, volume: number = 1.0) {
+  let sfxVolume = 1.0;
+  const settingsString = localStorage.getItem('gameSettings');
+  if (settingsString) {
+      const settings = JSON.parse(settingsString);
+      sfxVolume = settings.sfxVolume;
+  }
   const audio = new Audio(src);
-  audio.volume = Math.min(Math.max(volume, 0), 1); // Ensure volume is between 0 and 1
+  audio.volume = Math.min(Math.max(volume * sfxVolume, 0), 1); // Adjust volume based on SFX setting
   audio.play().catch(error => console.error('Error playing sound:', error));
 }
 
