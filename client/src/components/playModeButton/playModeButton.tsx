@@ -75,7 +75,7 @@ class PlayModeButton extends Component<ButtonProps> {
                 <div className="labelContainer">
                     <span className="label">{this.props.label}</span>
                     {this.props.isLobbies 
-                        ? (this.state.lobbiesCount > 0 && <span className="player"><span style={playerSpanStyle}>{this.state.lobbiesCount}</span> Opponents Waiting</span>)
+                        ? (this.state.lobbiesCount > 0 && <span className="player"><span style={playerSpanStyle}>{this.state.lobbiesCount}</span> {this.state.lobbiesCount === 1 ? 'Opponent' : 'Opponents'} Waiting</span>)
                         : (this.props.players && <span className="player"><span style={playerSpanStyle}>{this.props.players}</span> Players Queuing</span>)
                     }
                 </div>
