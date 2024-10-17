@@ -21,46 +21,40 @@ interface Props {
   isPlayerTeam: boolean;
 }
 interface State {
-  modalOpen: boolean;
-  modalOpen1: boolean;
-  modalOpen2: boolean;
+  isMenuModalOpen: boolean;
+  isExitModalOpen: boolean;
+  isSettingsModalOpen: boolean;
   modalPos: any;
 }
 
 class PlayerInfo extends Component<Props, State> {
   state = {
-    modalOpen: false,
-    modalOpen1: false,
-    modalOpen2: false,
+    isMenuModalOpen: false,
+    isExitModalOpen: false,
+    isSettingsModalOpen: false,
     modalPos: null,
   }
 
   handleOpenModal = (e, modalType) => {
-    if (modalType !== "menu_modal") {
-      if (modalType === "exit_modal") {
-        this.setState({ modalOpen: false, modalOpen1: true, modalOpen2: false });
-        return;
-      } else {
-        this.setState({ modalOpen: false, modalOpen1: false, modalOpen2: true });
-        return;
-      }
+    if (modalType === "menu_modal") {
+      const elementRect = e.currentTarget.getBoundingClientRect();
+      const modalPosition = {
+        top: elementRect.top + elementRect.height,
+        left: elementRect.left - 56,
+      };
+      this.setState({ isMenuModalOpen: true, modalPos: modalPosition });
+    } else if (modalType === "exit_modal") {
+      this.setState({ isMenuModalOpen: false, isExitModalOpen: true, isSettingsModalOpen: false });
+    } else if (modalType === "setting_modal") {
+      this.setState({ isMenuModalOpen: false, isExitModalOpen: false, isSettingsModalOpen: true });
     }
-
-    const elementRect = e.currentTarget.getBoundingClientRect();
-
-    const modalPosition = {
-      top: elementRect.top + elementRect.height,
-      left: elementRect.left - 56,
-    };
-
-    this.setState({ modalOpen: true, modalPos: modalPosition });
   }
 
   handleCloseModal = () => {
     this.setState({
-      modalOpen: false,
-      modalOpen1: false,
-      modalOpen2: false,
+      isMenuModalOpen: false,
+      isExitModalOpen: false,
+      isSettingsModalOpen: false,
     });
   }
 
@@ -148,7 +142,7 @@ class PlayerInfo extends Component<Props, State> {
             <img src={settingsIcon} alt="" />
           </div>
         </div>}
-        <Modal isOpen={this.state.modalOpen} style={customStyles} onRequestClose={this.handleCloseModal}>
+        <Modal isOpen={this.state.isMenuModalOpen} style={customStyles} onRequestClose={this.handleCloseModal}>
           <div>
             {ENABLE_SETTINGS && <div className="game_setting" onClick={(e) => this.handleOpenModal(e, "setting_modal")}>
               <p>Settings</p>
@@ -158,7 +152,7 @@ class PlayerInfo extends Component<Props, State> {
             </div>
           </div>
         </Modal>
-        <Modal isOpen={this.state.modalOpen1} onRequestClose={this.handleCloseModal} style={customStyles1}>
+        <Modal isOpen={this.state.isExitModalOpen} onRequestClose={this.handleCloseModal} style={customStyles1}>
           <div className="exit_game_menu flex flex_col gap_4">
             <div className="game_leave_dialog">Are you sure want to abandon the game? This will count as a loss.</div>
             <div className="flex gap_4">
@@ -167,7 +161,7 @@ class PlayerInfo extends Component<Props, State> {
             </div>
           </div>
         </Modal>
-        <Modal isOpen={this.state.modalOpen2} onRequestClose={this.handleCloseModal} style={customStyles1}>
+        <Modal isOpen={this.state.isSettingsModalOpen} onRequestClose={this.handleCloseModal} style={customStyles1}>
           <SettingsModal onClose={this.handleCloseModal} />
         </Modal>
       </div>
