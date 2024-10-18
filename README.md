@@ -37,6 +37,8 @@ Note: The API has its own `firebase.json` file used for local development with t
 
 ### Setting up secrets
 
-For Firebase Functions:  `firebase functions:secrets:set SECRET_NAME`, you'll then be prompted to enter the secret value. It can then be accessed in the code with `process.env.SECRET_NAME`.
+For Firebase Functions:  `firebase functions:secrets:set SECRET_NAME`, you'll then be prompted to enter the secret value. It can then be accessed in the code with `process.env.SECRET_NAME`. 
+
+To access it in Firebase Functions, don't forget to add `{ secrets: ["<secret_name>"] }` to the function declaration.
 
 To access it in one of the Cloud Run services, go to the Google Cloud Console, select the project, then click on the service and edit to create a new revision. In the secrets tab you can add a secret referring to the one set in Firebase.

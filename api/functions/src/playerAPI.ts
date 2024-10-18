@@ -949,7 +949,7 @@ export const zombieData = onRequest(async (req, res) => {
   }
 });
 
-export const withdrawSOL = onRequest(async (request, response) => {
+export const withdrawSOL = onRequest({ secrets: ["GAME_WALLET_PRIVATE_KEY"] }, async (request, response) => {
   const db = admin.firestore();
 
   return corsMiddleware(request, response, async () => {
