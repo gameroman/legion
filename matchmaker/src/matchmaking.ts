@@ -191,7 +191,11 @@ async function tryMatchPlayers() {
                 // Start a game for these two players
                 const success = await createGame(player1.socket, player2.socket, player1.mode, player1.league);
                 if (success) {
+                    console.log(`[matchmaker:tryMatchPlayers] Queue: ${playersQueue.map(p => p.socket.id)}`);
+                    console.log(`[matchmaker:tryMatchPlayers] Removing ${player2.socket.id} from queue`);
                     removePlayerFromQ(player2.socket); // Remove player2 first since it's later in the array
+                    console.log(`[matchmaker:tryMatchPlayers] Queue: ${playersQueue.map(p => p.socket.id)}`);
+                    console.log(`[matchmaker:tryMatchPlayers] Removing ${player1.socket.id} from queue`);
                     removePlayerFromQ(player1.socket);
                 }
                 matchFound = true;
@@ -346,15 +350,21 @@ async function getUID(IDToken) {
 
 export async function processJoinQueue(socket, data: { mode: PlayMode }) {
     try {
+        console.log(`[matchmaker:processJoinQueue] Player ${socket.id} joining queue in mode ${data.mode} ...`);
         socket.uid = await getUID(socket.firebaseToken);
 
-        notifyAdmin(socket.uid, null, data.mode, 'joined');
-
         if (data.mode == PlayMode.PRACTICE) {
+            notifyAdmin(socket.uid, null, data.mode, 'joined');
             createGame(socket, null, PlayMode.PRACTICE);
             return;
         }
 
+        // Return if the player is already in the queue
+        if (playersQueue.some(player => player.socket.id === socket.id)) {
+            return;
+        }
+
+        notifyAdmin(socket.uid, null, data.mode, 'joined');
         addToQueue(socket, data.mode);
         logQueuingActivity(socket.uid, 'joinQueue', data.mode);
     } catch (error) {
