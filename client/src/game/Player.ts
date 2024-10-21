@@ -482,7 +482,6 @@ export class Player extends Phaser.GameObjects.Container {
         const settingsString = localStorage.getItem('gameSettings');
         const settings = settingsString ? JSON.parse(settingsString) : { keyboardLayout: 1 }; // Default to QWERTY (1) if no settings
         const layout = settings.keyboardLayout === 0 ? azertyLayout : qwertyLayout;
-        console.log(`layout: ${layout}`);
         const index = layout.indexOf(keyCode);
         this.onKey(index);
     }
@@ -863,8 +862,8 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     showStatusAnimation(status: StatusEffect) {
+        console.log(`Showing status ${status}`);
         const keys = {
-            [StatusEffect.FREEZE]: 'freeze',
             [StatusEffect.PARALYZE]: 'paralyzed',
             [StatusEffect.POISON]: 'poisoned',
             [StatusEffect.BURN]: 'burn',

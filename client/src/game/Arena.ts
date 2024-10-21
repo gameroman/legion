@@ -639,19 +639,19 @@ export class Arena extends Phaser.Scene
         const pendingSpell = this.selectedPlayer?.spells[this.selectedPlayer?.pendingSpell];
         const pendingItem = this.selectedPlayer?.inventory[this.selectedPlayer?.pendingItem];
         if (pendingSpell != null) {
-            console.log(`Casting spell ${pendingSpell.name}`);
+            // console.log(`Casting spell ${pendingSpell.name}`);
             this.sendSpell(gridX, gridY, player);
         } else if (this.selectedPlayer?.pendingItem != null) {
-            console.log(`Using item ${pendingItem.name}`)
+            // console.log(`Using item ${pendingItem.name}`)
             this.sendUseItem(this.selectedPlayer?.pendingItem, gridX, gridY, player);
         } else if ((!player || !player.isAlive()) && this.hasObstacle(gridX, gridY)) {
-            console.log(`Clicked on obstacle at (${gridX}, ${gridY})`);
+            // console.log(`Clicked on obstacle at (${gridX}, ${gridY})`);
             this.sendObstacleAttack(gridX, gridY);
         } else if (this.selectedPlayer && !player) {
-            console.log(`Moving to (${gridX}, ${gridY})`);
+            // console.log(`Moving to (${gridX}, ${gridY})`);
             this.handleMove(gridX, gridY);
         } else if (player){ 
-            console.log(`Clicked on player ${player.num}`);
+            // console.log(`Clicked on player ${player.num}`);
             if (pendingSpell?.target === Target.SINGLE) {
                 this.sendSpell(gridX, gridY, player);
             } if (pendingItem?.target === Target.SINGLE) {
@@ -916,7 +916,7 @@ export class Arena extends Phaser.Scene
 
     createIceBlock(x: number, y: number) {
         const {x: pixelX, y: pixelY} = this.gridToPixelCoords(x, y);
-        const depth = 3 + y/10;
+        const depth = this.yToZ(y) + DEPTH_OFFSET;
         const icesprite = this.add.sprite(pixelX, pixelY, 'iceblock')
             .setDepth(depth).setAlpha(0.9).setOrigin(0.5, 0.35).setInteractive();
         // Add pointerover event to sprite
