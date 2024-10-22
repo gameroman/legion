@@ -64,10 +64,10 @@ export abstract class Game
             if (this.sockets.length === 2) return;
             this.addSocket(socket);
             const index = this.sockets.indexOf(socket);
-            console.log(`[Game:addPlayer] Adding player ${index + 1} to game ${this.id}`);
+            // console.log(`[Game:addPlayer] Adding player ${index + 1} to game ${this.id}`);
 
             const team = this.teams.get(index + 1);
-            console.log(`[Game:addPlayer] Player ${playerData.name} assigned to team ${team.id}`);
+            // console.log(`[Game:addPlayer] Player ${playerData.name} assigned to team ${team.id}`);
             this.socketMap.set(socket, team);
             team.setSocket(socket);
             team.setPlayerData(playerData);
@@ -111,7 +111,7 @@ export abstract class Game
     async getRemoteConfig() {
         const isDev = process.env.NODE_ENV === 'development';
         this.config = isDev ? remoteConfig : await getRemoteConfig();
-        console.log(`[Game:getRemoteConfig] [isDev: ${isDev}] ${JSON.stringify(this.config)}`);
+        // console.log(`[Game:getRemoteConfig] [isDev: ${isDev}] ${JSON.stringify(this.config)}`);
     }
 
     getPosition(index, flip) {
@@ -698,7 +698,7 @@ export abstract class Game
             GENs = GENs.filter(gen => gen !== GEN.MULTI_HIT);
         }
     
-        console.log(`[Game:broadcastGEN] GENs: ${GENs}`);
+        // console.log(`[Game:broadcastGEN] GENs: ${GENs}`);
         this.broadcast('gen', GENs);
     }
 
@@ -923,7 +923,7 @@ export abstract class Game
     }
     
     computeAudienceRewards(score: number, chests: Array<GameOutcomeReward>): void {
-        console.log(`[Game:computeAudienceRewards] League: ${this.league}, Score: ${score}`);
+        // console.log(`[Game:computeAudienceRewards] League: ${this.league}, Score: ${score}`);
         const casualRewards = [ChestColor.BRONZE, ChestColor.BRONZE, ChestColor.SILVER];
         const leagueRewards = {
             [League.BRONZE]: [ChestColor.BRONZE, ChestColor.BRONZE, ChestColor.BRONZE],
@@ -1028,7 +1028,7 @@ export abstract class Game
     computeTeamXP(team: Team, otherTeam: Team, grade: number, mode: PlayMode) {
         if (team.getTotalInteractedTargets() == 0) return 0;
         let xp = otherTeam.getTotalLevel() * XP_PER_LEVEL * (grade + 0.3);
-        console.log(`Base XP: ${xp}: ${otherTeam.getTotalLevel()} * ${XP_PER_LEVEL} * (${grade} + 0.3)`);
+        // console.log(`Base XP: ${xp}: ${otherTeam.getTotalLevel()} * ${XP_PER_LEVEL} * (${grade} + 0.3)`);
         if (mode == PlayMode.PRACTICE || mode == PlayMode.TUTORIAL) xp *= PRACTICE_XP_COEF;
         if (mode == PlayMode.RANKED || mode == PlayMode.RANKED_VS_AI) xp *= RANKED_XP_COEF;
         // Add +- 5% random factor
@@ -1038,7 +1038,7 @@ export abstract class Game
     }
 
     async writeOutcomesToDb(team: Team, rewards: OutcomeData) {
-        console.log(`[Game:writeOutcomesToDb] Writing outcomes to DB for team ${team.id}`);
+        // console.log(`[Game:writeOutcomesToDb] Writing outcomes to DB for team ${team.id}`);
         try {
             await apiFetch(
                 'postGameUpdate',

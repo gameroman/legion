@@ -173,7 +173,7 @@ export class Team {
         if (!this.teamData.dailyloot) {
             return null;
         }
-        console.log(`[Team:getChestKey] Daily loot data: ${JSON.stringify(this.teamData.dailyloot)}`);
+        // console.log(`[Team:getChestKey] Daily loot data: ${JSON.stringify(this.teamData.dailyloot)}`);
         const chestsOrder = [ChestColor.BRONZE, ChestColor.SILVER, ChestColor.GOLD];
 
         for (const color of chestsOrder) {
@@ -203,7 +203,7 @@ export class Team {
         for (let i = 0; i < this.members.length; i++) {
             const xpRatio = (this.members[i].countInteractedTargets() / total) || 0;
             const xpShare = Math.round(xp * xpRatio);
-            console.log(`[Team.distributeXp] XP share for ${this.members[i].name}: ${xpShare} (${this.members[i].countInteractedTargets()} / ${total})`);
+            // console.log(`[Team.distributeXp] XP share for ${this.members[i].name}: ${xpShare} (${this.members[i].countInteractedTargets()} / ${total})`);
             this.members[i].gainXP(xpShare);
         }
     }

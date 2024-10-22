@@ -309,8 +309,8 @@ export class ServerPlayer {
     }
 
     setUpCharacter(data, isAI = false) {
-        console.log(`[ServerPlayer:setUpCharacter] Setting up character ${data.name}`);
-        console.log(`[ServerPlayer:setUpCharacter] Spells: ${JSON.stringify(data.skills)}`);
+        // console.log(`[ServerPlayer:setUpCharacter] Setting up character ${data.name}`);
+        // console.log(`[ServerPlayer:setUpCharacter] Spells: ${JSON.stringify(data.skills)}`);
         this.setHP(this.getStatValue(data, "hp"));
         this.setMP(this.getStatValue(data, "mp"));
         this.setStat(Stat.ATK, this.getStatValue(data, "atk"));
@@ -489,7 +489,7 @@ export class ServerPlayer {
     addStatusEffect(status: StatusEffect, duration: number, chance: number = 1) {
         if (this.isDead()) return false;
         if (Math.random() > chance) return false;
-        console.log(`[ServerPlayer:addStatusEffect] Adding status ${status} for ${duration} seconds`);
+        // console.log(`[ServerPlayer:addStatusEffect] Adding status ${status} for ${duration} seconds`);
         this.statuses[status] = duration;
         
         if (DoTStatuses.includes(status)) {

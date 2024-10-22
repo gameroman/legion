@@ -79,7 +79,7 @@ export class AIGame extends Game {
         if (AI_VS_AI) {
             levels = this.createAITeam(playerTeam!, DEFAULT_SIZE);
         } else {
-            console.log(`[AIGame:populateTeams] Fetching player team data...`);
+            // console.log(`[AIGame:populateTeams] Fetching player team data...`);
             const teamData = await apiFetch('rosterData', playerTeam.getFirebaseToken());
             teamData.characters.forEach((character: any, index) => {
                 const position = this.getPosition(index, false);
@@ -92,7 +92,7 @@ export class AIGame extends Game {
             nb = teamData.characters.length;
         }
 
-        console.log(`[AIGame:populateTeams] Game mode is ${this.mode}, isZombie: ${this.mode === PlayMode.CASUAL_VS_AI || this.mode === PlayMode.RANKED_VS_AI}`);
+        // console.log(`[AIGame:populateTeams] Game mode is ${this.mode}, isZombie: ${this.mode === PlayMode.CASUAL_VS_AI || this.mode === PlayMode.RANKED_VS_AI}`);
         if (this.mode === PlayMode.CASUAL_VS_AI || this.mode === PlayMode.RANKED_VS_AI) {
             await this.fetchZombieTeam(aiTeam!, playerTeam.teamData.elo, nb, levels);
         } else {
