@@ -62,7 +62,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     chests: [],
     key: null,
     gameInitialized: false,
-    tutorialMessage: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH',
+    tutorialMessage: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     isTutorialVisible: true,
     tutorialAvatarSrc: 'avatars/default.png',
   };
