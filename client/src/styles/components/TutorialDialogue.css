@@ -3,7 +3,7 @@
   bottom: 2vh;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(20, 20, 20, 0.95);
+  background-color: #242b37;
   color: #e0e0e0;
   padding: 1vh 2vw;
   border-radius: 0.5vw;
@@ -15,8 +15,9 @@
   align-items: center;
   opacity: 0;
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-  box-shadow: 0 0.2vw 0.3vw rgba(0, 0, 0, 0.1), 0 0.05vw 0.15vw rgba(0, 0, 0, 0.08);
-  border: 0.05vw solid rgba(255, 255, 255, 0.1);
+  border: 0.1vw solid #194256;
+  border-bottom-width: 0.3vw;
+  box-shadow: 0 0.3vw 0 #194256;
 }
 
 .tutorial-dialogue.visible {
@@ -34,8 +35,9 @@
   border-radius: 50%;
   margin-right: 1.5vw;
   flex-shrink: 0;
-  border: 0.2vw solid #4a90e2;
+  border: 0.2vw solid #194256;
   box-shadow: 0 0.1vw 0.2vw rgba(0, 0, 0, 0.1);
+  animation: pulse 2s infinite;
 }
 
 @media (max-width: 768px) {
@@ -60,7 +62,7 @@
 .tutorial-dialogue-speaker {
   font-size: 0.9vw;
   font-weight: bold;
-  color: #4a90e2;
+  color: #194256;
   margin-bottom: 0.1vw;
   text-transform: uppercase;
   letter-spacing: 0.03vw;
@@ -77,13 +79,13 @@
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.4);
+    box-shadow: 0 0 0 0 rgba(25, 66, 86, 0.4);
   }
   70% {
-    box-shadow: 0 0 0 0.5vw rgba(74, 144, 226, 0);
+    box-shadow: 0 0 0 10px rgba(25, 66, 86, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(74, 144, 226, 0);
+    box-shadow: 0 0 0 0 rgba(25, 66, 86, 0);
   }
 }
 
@@ -92,7 +94,7 @@
   bottom: 0.7vh;
   right: 0.7vw;
   background-color: transparent;
-  color: #4a90e2;
+  color: #194256;
   border: none;
   width: 1.8vw;
   height: 1.8vw;
@@ -105,7 +107,7 @@
 }
 
 .tutorial-dialogue-next:hover {
-  color: #357abd;
+  color: #2a5f7a;
 }
 
 .tutorial-dialogue-next:focus {
