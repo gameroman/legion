@@ -12,6 +12,7 @@ import { apiFetch } from '../../services/apiService';
 import { showGuideToast } from '../utils';
 import { guide } from '../tips';
 import { firebaseAuth } from '../../services/firebaseService'; 
+import TutorialDialogue from './TutorialDialogue';
 
 interface GameHUDProps {
   changeMainDivClass: (newClass: string) => void;
@@ -34,12 +35,16 @@ interface GameHUDState {
   chests: GameOutcomeReward[];
   key: ChestColor;
   gameInitialized: boolean;
+  tutorialMessage: string;
+  isTutorialVisible: boolean;
+  tutorialAvatarSrc: string;
 }
 
 const events = new EventEmitter();
 
 class GameHUD extends Component<GameHUDProps, GameHUDState> {
-  state: GameHUDState = {
+
+  state = {
     playerVisible: false,
     player: null,
     pendingSpell: false,
@@ -57,7 +62,10 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     chests: [],
     key: null,
     gameInitialized: false,
-  }
+    tutorialMessage: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH',
+    isTutorialVisible: true,
+    tutorialAvatarSrc: 'avatars/default.png',
+  };
 
   resetState = () => {
     this.setState({
@@ -181,6 +189,20 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     route('/play');
 }
 
+  showTutorial = (message: string, avatarSrc: string = 'avatars/default.png') => {
+    this.setState({
+      tutorialMessage: message,
+      isTutorialVisible: true,
+      tutorialAvatarSrc: avatarSrc,
+    });
+  }
+
+  hideTutorial = () => {
+    this.setState({
+      isTutorialVisible: false,
+    });
+  }
+
   render() {
     const { playerVisible, player, team1, team2, isSpectator, mode, gameInitialized } = this.state; 
     const members = team1?.members[0].isPlayer ? team1?.members : team2?.members; 
@@ -216,6 +238,11 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
           closeGame={this.closeGame}
           eventEmitter={events}
         />}
+        <TutorialDialogue
+          message={this.state.tutorialMessage}
+          isVisible={this.state.isTutorialVisible}
+          avatarSrc={this.state.tutorialAvatarSrc}
+        />
       </div>
     );
   }
