@@ -15,9 +15,9 @@
   align-items: center;
   opacity: 0;
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-  border: 0.1vw solid #194256;
+  border: 0.1vw solid #00ffff;
   border-bottom-width: 0.3vw;
-  box-shadow: 0 0.3vw 0 #194256;
+  box-shadow: 0 0.3vw 0 #00ffff;
 }
 
 .tutorial-dialogue.visible {
@@ -35,7 +35,7 @@
   border-radius: 50%;
   margin-right: 1.5vw;
   flex-shrink: 0;
-  border: 0.2vw solid #194256;
+  border: 0.2vw solid #00ffff;
   box-shadow: 0 0.1vw 0.2vw rgba(0, 0, 0, 0.1);
   animation: pulse 2s infinite;
 }
@@ -62,7 +62,7 @@
 .tutorial-dialogue-speaker {
   font-size: 0.9vw;
   font-weight: bold;
-  color: #194256;
+  color: #00ffff;
   margin-bottom: 0.1vw;
   text-transform: uppercase;
   letter-spacing: 0.03vw;
@@ -79,13 +79,13 @@
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(25, 66, 86, 0.4);
+    box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.4);
   }
   70% {
-    box-shadow: 0 0 0 10px rgba(25, 66, 86, 0);
+    box-shadow: 0 0 0 10px rgba(0, 255, 255, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(25, 66, 86, 0);
+    box-shadow: 0 0 0 0 rgba(0, 255, 255, 0);
   }
 }
 
@@ -94,7 +94,7 @@
   bottom: 0.7vh;
   right: 0.7vw;
   background-color: transparent;
-  color: #194256;
+  color: #00ffff;
   border: none;
   width: 1.8vw;
   height: 1.8vw;
@@ -107,7 +107,7 @@
 }
 
 .tutorial-dialogue-next:hover {
-  color: #2a5f7a;
+  color: #80ffff;
 }
 
 .tutorial-dialogue-next:focus {
