@@ -16,8 +16,9 @@
   opacity: 0;
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
   border: 0.1vw solid #00ffff;
-  border-bottom-width: 0.3vw;
-  box-shadow: 0 0.3vw 0 #00ffff;
+  box-shadow: 
+    0 0.1vw 0 #00ffff,
+    0 0.2vw 0 #005f5f;
 }
 
 .tutorial-dialogue.visible {

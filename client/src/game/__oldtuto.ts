@@ -2,7 +2,7 @@ import { events } from '../components/HUD/GameHUD';
 import { Arena } from './Arena';
 import { GEN }  from "@legion/shared/enums";
 
-export class Tutorial {
+export class OldTutorial {
     p1;
     p2;
     p3;

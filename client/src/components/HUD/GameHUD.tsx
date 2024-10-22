@@ -37,7 +37,6 @@ interface GameHUDState {
   gameInitialized: boolean;
   tutorialMessage: string;
   isTutorialVisible: boolean;
-  tutorialAvatarSrc: string;
 }
 
 const events = new EventEmitter();
@@ -64,7 +63,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     gameInitialized: false,
     tutorialMessage: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     isTutorialVisible: true,
-    tutorialAvatarSrc: 'avatars/default.png',
   };
 
   resetState = () => {
@@ -192,11 +190,10 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     route('/play');
 }
 
-  showTutorial = (message: string, avatarSrc: string = 'avatars/default.png') => {
+  showTutorial = (message: string) => {
     this.setState({
       tutorialMessage: message,
       isTutorialVisible: true,
-      tutorialAvatarSrc: avatarSrc,
     });
   }
 
@@ -249,7 +246,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
         <TutorialDialogue
           message={this.state.tutorialMessage}
           isVisible={this.state.isTutorialVisible}
-          avatarSrc={this.state.tutorialAvatarSrc}
           speakerName="Taskmaster"
           onNext={this.handleNextTutorial}
         />

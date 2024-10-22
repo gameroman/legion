@@ -1,10 +1,11 @@
 import { h, Component } from 'preact';
 import '../../styles/components/TutorialDialogue.css';
 
+const DEFAULT_AVATAR_SRC = 'avatars/default.png';
+
 interface TutorialDialogueProps {
   message: string;
   isVisible: boolean;
-  avatarSrc?: string;
   speakerName?: string;
   onNext?: () => void;
 }
@@ -32,9 +33,6 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
   componentDidUpdate(prevProps: TutorialDialogueProps) {
     if (this.props.message !== prevProps.message || this.props.isVisible !== prevProps.isVisible) {
       this.resetTyping();
-    }
-    if (this.props.avatarSrc !== prevProps.avatarSrc) {
-      this.setState({ isAvatarLoaded: false });
     }
   }
 
@@ -75,7 +73,7 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
   }
 
   render() {
-    const { isVisible, avatarSrc = 'avatars/default.png', speakerName = 'Taskmaster', onNext } = this.props;
+    const { isVisible, speakerName = 'Taskmaster', onNext } = this.props;
     const { displayedMessage, isAvatarLoaded } = this.state;
 
     if (!isVisible) {
@@ -85,7 +83,7 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
     return (
       <div className={`tutorial-dialogue ${isAvatarLoaded ? 'visible' : ''}`}>
         <img 
-          src={avatarSrc} 
+          src={DEFAULT_AVATAR_SRC} 
           alt="Character Avatar" 
           className="tutorial-dialogue-avatar" 
           onLoad={this.handleAvatarLoad}

@@ -10,7 +10,7 @@ import { getFirebaseIdToken } from '../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain, GEN, PlayMode } from "@legion/shared/enums";
 import { TerrainUpdate, GameData, OutcomeData, PlayerNetworkData } from '@legion/shared/interfaces';
-import { Tutorial } from './tutorial';
+// import { Tutorial } from './tutorial';
 import { KILL_CAM_DURATION, BASE_ANIM_FRAME_RATE } from '@legion/shared/config';
 
 import killzoneImage from '@assets/killzone.png';
@@ -1424,6 +1424,7 @@ export class Arena extends Phaser.Scene
             console.error('Player team id is undefined');
         }
 
+        data.general.mode = PlayMode.TUTORIAL; // TODO: Remove this
         this.gameSettings.tutorial = (data.general.mode == PlayMode.TUTORIAL);
         this.gameSettings.spectator = data.general.spectator;
         this.gameSettings.mode = data.general.mode;
@@ -1439,8 +1440,6 @@ export class Arena extends Phaser.Scene
 
         this.processTerrain(data.terrain); // Put after floatTiles() to allow for tilesMap to be intialized
 
-        this.tutorial = new Tutorial(this);
-
         if (isReconnect) {
             this.setGameInitialized();
         } else {
@@ -1452,7 +1451,7 @@ export class Arena extends Phaser.Scene
             }, delay);
 
             if (this.gameSettings.tutorial) {
-                setTimeout(() => events.emit('tutorialStarted'), delay + 3000);
+                // setTimeout(() => events.emit('tutorialStarted'), delay + 3000);
             }
         }
 
