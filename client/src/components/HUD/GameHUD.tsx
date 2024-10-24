@@ -1,5 +1,5 @@
 // GameHUD.tsx
-import { h, Component } from 'preact';
+import { h, Fragment, Component } from 'preact';
 import { route } from 'preact-router';
 import PlayerTab from './PlayerTab';
 import Overview from './Overview';
@@ -217,20 +217,26 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
       return null; 
     }
 
+    const isTutorialMode = mode === PlayMode.TUTORIAL;
+
     return (
       <div className="gamehud height_full flex flex_col justify_between padding_bottom_16">
-        <div className="hud-container">
-          <Overview position="left" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team1} />
-          <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team2} />
-        </div>
-        {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
-        {team1 && <SpectatorFooter 
-          isTutorial={mode == PlayMode.TUTORIAL}
+        {!isTutorialMode && (
+          <>
+            <div className="hud-container">
+              <Overview position="left" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team1} />
+              <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team2} />
+            </div>
+            {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
+          </>
+        )}
+        <SpectatorFooter 
+          isTutorial={isTutorialMode}
           score={score} 
           mode={mode} 
           closeGame={this.closeGame}
-          />}
-        {this.state.gameOver && <Endgame 
+        />
+        {this.state.gameOver && !isTutorialMode && <Endgame 
           members={members} 
           grade={this.state.grade}
           chests={this.state.chests}
@@ -243,12 +249,14 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
           closeGame={this.closeGame}
           eventEmitter={events}
         />}
-        <TutorialDialogue
-          message={this.state.tutorialMessage}
-          isVisible={this.state.isTutorialVisible}
-          speakerName="Taskmaster"
-          onNext={this.handleNextTutorial}
-        />
+        {/* {isTutorialMode && (
+          <TutorialDialogue
+            message={this.state.tutorialMessage}
+            isVisible={this.state.isTutorialVisible}
+            speakerName="Taskmaster"
+            onNext={this.handleNextTutorial}
+          />
+        )} */}
       </div>
     );
   }

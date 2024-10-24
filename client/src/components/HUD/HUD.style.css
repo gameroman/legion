@@ -765,11 +765,22 @@
   height: 100%;
 }
 
+.spectator_footer_wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 48px;
+  z-index: 10;
+}
+
 .spectator_footer_container {
   background-image: url("@assets/HUD/footer_ornament.png");
   background-size: 100% 100%;
+  /* height: 100%;
+  width: 100%; */
   height: 48px;
-  z-index: 10;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -793,16 +804,35 @@
   }
 }
 
+.skip_tutorial {
+  position: absolute;
+  bottom: 0;
+  right: 16px;
+  background-image: url("@assets/HUD/skip_btn_bg.png");
+  background-size: 100% 100%;
+  height: 54px;
+  padding: 0 24px 0 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.skip_tutorial:hover {
+  background-image: url("@assets/game_end/leave_btn_active.png");
+}
+
 .spectator_progress {
   background-image: url("@assets/HUD/spectator_progress_bg.png");
   background-size: 100% 100%;
   width: 36%;
-  height: 48px;
-
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-
   padding: 16px;
   position: relative;
 }
@@ -864,28 +894,6 @@
 .progress_chest_silver img {
   width: 24px;
   height: 22px;
-}
-
-.skip_tutorial {
-  background-image: url("@assets/HUD/skip_btn_bg.png");
-  background-size: 100% 100%;
-  height: 54px;
-  position: absolute;
-  right: 64px;
-  padding: 0 24px 0 16px;
-  cursor: pointer;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  font-size: 12px;
-  color: #ffffff;
-  text-transform: uppercase;
-}
-
-.skip_tutorial:hover {
-  background-image: url("@assets/game_end/leave_btn_active.png");
 }
 
 .game_leave_dialog {

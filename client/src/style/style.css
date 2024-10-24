@@ -1,3 +1,7 @@
+.firebase-emulator-warning {
+  display: none;
+}
+
 :root {
   --game-pointer: url('/public/pointers/hand_pointer.png'), auto;
 }
