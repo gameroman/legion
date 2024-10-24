@@ -259,7 +259,6 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     makeAirEntrance(isTutorial = false) {
-        // Ensure the player is visible
         const {x: targetX, y: targetY} = this.arena.gridToPixelCoords(this.gridX, this.gridY);
 
         // Create a dust cloud effect
@@ -273,14 +272,42 @@ export class Player extends Phaser.GameObjects.Container {
             quantity: 0
         });
 
+        // Create a trail effect
+        const trailSprites: Phaser.GameObjects.Sprite[] = [];
+        const trailInterval = 50; // Interval between trail sprites in ms
+        const trailDuration = 400; // Duration for which each trail sprite is visible
+
+        const createTrail = () => {
+            const trailSprite = this.scene.add.sprite(this.x, this.y, this.texture)
+                .setAlpha(0.5)
+                .setScale(this.sprite.scaleX, this.sprite.scaleY)
+                .setDepth(this.sprite.depth - 1); // Ensure trail is behind the main sprite
+
+            trailSprites.push(trailSprite);
+
+            this.scene.tweens.add({
+                targets: trailSprite,
+                alpha: 0,
+                duration: trailDuration,
+                onComplete: () => {
+                    trailSprite.destroy();
+                }
+            });
+        };
+
         // Tween for the dramatic landing
         this.scene.tweens.add({
             targets: this,
             y: targetY,
             duration: 400,
-            // ease: 'Bounce.easeOut',
             onStart: () => {
                 this.playAnim('hurt');
+                this.scene.time.addEvent({
+                    delay: trailInterval,
+                    callback: createTrail,
+                    callbackScope: this,
+                    repeat: Math.floor(400 / trailInterval) - 1 // Create trails throughout the fall
+                });
             },
             onComplete: () => {
                 // Burst of particles on landing
