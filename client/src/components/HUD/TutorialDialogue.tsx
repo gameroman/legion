@@ -5,10 +5,7 @@ const DEFAULT_AVATAR_SRC = 'avatars/default.png';
 const DEFAULT_SPEAKER_NAME = 'Taskmaster';
 
 interface TutorialDialogueProps {
-  message: string;
-  isVisible: boolean;
-  speakerName?: string;
-  onNext?: () => void;
+  messages: string[];
 }
 
 interface TutorialDialogueState {
@@ -26,13 +23,13 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
   };
 
   componentDidMount() {
-    if (this.props.isVisible && this.props.message) {
+    if (this.props.messages) {
       this.resetTyping();
     }
   }
 
   componentDidUpdate(prevProps: TutorialDialogueProps) {
-    if (this.props.message !== prevProps.message || this.props.isVisible !== prevProps.isVisible) {
+    if (this.props.messages !== prevProps.messages) {
       this.resetTyping();
     }
   }
@@ -56,12 +53,12 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
   }
 
   typeMessage() {
-    const { message } = this.props;
+    const { messages } = this.props;
     const { displayedMessage } = this.state;
 
-    if (displayedMessage.length < message.length) {
+    if (displayedMessage.length < messages[0].length) {
       this.setState(
-        { displayedMessage: message.slice(0, displayedMessage.length + 1) },
+        { displayedMessage: messages[0].slice(0, displayedMessage.length + 1) },
         () => {
           this.typingTimer = window.setTimeout(() => this.typeMessage(), this.typingSpeed);
         }
@@ -74,12 +71,7 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
   }
 
   render() {
-    const { isVisible } = this.props;
     const { displayedMessage, isAvatarLoaded } = this.state;
-
-    if (!isVisible) {
-      return null;
-    }
 
     return (
       <div className={`tutorial-dialogue ${isAvatarLoaded ? 'visible' : ''}`}>

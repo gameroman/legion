@@ -223,8 +223,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
         />}
         {this.state.isTutorialVisible && (
           <TutorialDialogue
-            message={this.state.tutorialMessages[0]}
-            isVisible={this.state.isTutorialVisible}
+            messages={this.state.tutorialMessages}
           />
         )}
       </div>
