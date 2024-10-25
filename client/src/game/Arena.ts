@@ -49,6 +49,7 @@ import poisonSoundSFX from '@assets/sfx/spells/poison.wav';
 import muteSoundSFX from '@assets/sfx/spells/mute.wav';
 import bgmStartSFX from '@assets/music/bgm_start.wav';
 import bgmEndSFX from '@assets/music/bgm_end.wav';
+import thudSFX from '@assets/sfx/thud.wav';
 
 import speechBubble from '@assets/speech_bubble.png';
 import speechTail from '@assets/speech_tail.png';
@@ -161,6 +162,8 @@ export class Arena extends Phaser.Scene
         this.load.audio('flames', flamesSFX);
         this.load.audio('crowd', crowdSFX);
         this.load.audio('cheer', cheerSFX);
+        this.load.audio('thud', thudSFX);
+
 
         // Load spell sounds
         this.load.audio('cast', castSoundSFX);
@@ -416,19 +419,20 @@ export class Arena extends Phaser.Scene
             }
         }
 
-        if (duration > 0) {
-            for (let x = -5; x < 1; x++) {
-                for (let y = 1; y < 8; y++) {
-                    this.floatOneTile(x, y, startX, startY, duration, true);
-                }
-            }
+        // Tiles for the "paths" on both sides of the arena
+        // if (duration > 0) {
+        //     for (let x = -5; x < 1; x++) {
+        //         for (let y = 1; y < 8; y++) {
+        //             this.floatOneTile(x, y, startX, startY, duration, true);
+        //         }
+        //     }
 
-            for (let x = 19; x < 26; x++) {
-                for (let y = 1; y < 8; y++) {
-                    this.floatOneTile(x, y, startX, startY, duration, true);
-                }
-            }
-        }
+        //     for (let x = 19; x < 26; x++) {
+        //         for (let y = 1; y < 8; y++) {
+        //             this.floatOneTile(x, y, startX, startY, duration, true);
+        //         }
+        //     }
+        // }
     }
 
     floatOneTile(x, y, startX, startY, duration, yoyo = false) {
@@ -1019,7 +1023,7 @@ export class Arena extends Phaser.Scene
     createSounds() {
         this.SFX = {};
         const sounds = ['click', 'slash', 'steps', 'nope', 'heart', 'cooldown', 'fireball','healing',
-            'cast', 'thunder', 'ice', 'shatter', 'flames', 'crowd', 'cheer', 'poison', 'mute']
+            'cast', 'thunder', 'ice', 'shatter', 'flames', 'crowd', 'cheer', 'poison', 'mute', 'thud']
         sounds.forEach((sound) => {
             this.SFX[sound] = this.sound.add(sound);
         })
@@ -1233,7 +1237,7 @@ export class Arena extends Phaser.Scene
         this.anims.create({
             key: `smoke`, 
             frames: this.anims.generateFrameNumbers('smoke', { start: 32, end: 42 }), 
-            frameRate: 10,
+            frameRate: 12,
         });
 
         // Status effects VFX

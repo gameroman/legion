@@ -270,7 +270,8 @@ export class Player extends Phaser.GameObjects.Container {
             const trailSprite = this.scene.add.sprite(this.x, this.y, this.texture)
                 .setAlpha(0.5)
                 .setScale(this.sprite.scaleX, this.sprite.scaleY)
-                .setDepth(this.sprite.depth - 1); // Ensure trail is behind the main sprite
+                .setDepth(this.sprite.depth - 1) // Ensure trail is behind the main sprite
+                .setFlipX(this.sprite.flipX);
 
             trailSprites.push(trailSprite);
 
@@ -299,11 +300,13 @@ export class Player extends Phaser.GameObjects.Container {
                 });
             },
             onComplete: () => {
+                // Play the 'thud' sound effect
+                this.arena.playSound('thud', 0.5);
+
                 // Create a smoke effect on landing
                 const smokeSprite = this.scene.add.sprite(targetX, targetY + 15, '')
                     .setDepth(this.sprite.depth + 1)
-                    .setScale(2)
-                    // .setAlpha(0.8);
+                    .setScale(2);
 
                 smokeSprite.play('smoke');
 
@@ -1030,5 +1033,4 @@ export class Player extends Phaser.GameObjects.Container {
 
     
 }
-
 
