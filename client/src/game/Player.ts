@@ -1008,6 +1008,11 @@ export class Player extends Phaser.GameObjects.Container {
         this.speechBubble.setVisible(false);
     }
 
+    stripForTutorial() {
+        this.healthBar.setVisible(false);
+        this.MPBar?.setVisible(false);
+    }
+
     destroy() {
         this.clearStatusTimer();
 

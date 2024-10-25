@@ -154,7 +154,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   handleTutorialMessage = (messages: string[]) => {
-    console.log(`Received tutorial messages: ${messages}`);
     this.setState({
       tutorialMessages: messages,
       isTutorialVisible: true,

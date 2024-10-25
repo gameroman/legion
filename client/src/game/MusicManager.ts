@@ -144,6 +144,10 @@ export class MusicManager {
         if (this.currentSound) {
             this.currentSound.stop();
         }
+        // Check if the end music asset is loaded
+        if (!this.scene.cache.audio.has('bgm_end')) {
+            return;
+        }
         this.scene.sound.add('bgm_end', this.soundConfig).play();
     }
 

@@ -243,7 +243,7 @@ export class Arena extends Phaser.Scene
                 console.error(`Server disconnect during game: ${reason}`);
                 const isTutorial = gameId === 'tutorial';
                 if (isTutorial) {
-                    silentErrorToast('Disconnected from server. Restarting tutorial...');
+                    silentErrorToast('Uh-oh, disconnected from the server! Please refresh the page!');
                 } else {
                     silentErrorToast('Disconnected from server');
                 }
@@ -1286,6 +1286,10 @@ export class Arena extends Phaser.Scene
                 character.hp, character.maxHP, character.mp, character.maxMP,
                 character.level, character.xp,
                 );
+
+            if (this.gameSettings.tutorial) {
+                player.stripForTutorial();
+            }
             
             if (isPlayer) {
                 player.setDistance(character.distance);
@@ -1432,7 +1436,6 @@ export class Arena extends Phaser.Scene
             console.error('Player team id is undefined');
         }
 
-        data.general.mode = PlayMode.TUTORIAL; // TODO: Remove this
         this.gameSettings.tutorial = (data.general.mode == PlayMode.TUTORIAL);
         this.gameSettings.spectator = data.general.spectator;
         this.gameSettings.mode = data.general.mode;

@@ -15,7 +15,6 @@ export class Tutorial {
             "I'm the Taskmaster of the Arena! My job is to make sure you learn the ropes and know how to order your warriors around!",
             "Second message",
         ];
-        console.log(`Emitting tutorial messages: ${messages}`);
         events.emit('showTutorialMessage', messages);
     }
 }

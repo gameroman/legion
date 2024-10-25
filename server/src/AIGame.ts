@@ -18,7 +18,7 @@ export class AIGame extends Game {
     nbExpectedPlayers = 1;
     tickTimer: NodeJS.Timeout | null = null;
     temporaryFrozen = false;
-
+    savedCharacters = [];
 
     constructor(id: string, mode: PlayMode, league: League, io: Server) {
         super(id, mode, league, io);
@@ -69,6 +69,14 @@ export class AIGame extends Game {
         }
     }
 
+    modifyTeamForTutorial(characters: ServerPlayer[]) {
+        if (this.mode == PlayMode.TUTORIAL) {
+            characters = characters.slice(0, 1);
+            characters[0].y += 1;
+        }
+        return characters;
+    }
+
     async populateTeams() {
         const DEFAULT_SIZE = 3;
         const playerTeam = this.teams.get(1);
@@ -81,13 +89,18 @@ export class AIGame extends Game {
         } else {
             // console.log(`[AIGame:populateTeams] Fetching player team data...`);
             const teamData = await apiFetch('rosterData', playerTeam.getFirebaseToken());
+            let characters = [];
             teamData.characters.forEach((character: any, index) => {
                 const position = this.getPosition(index, false);
                 const newCharacter = new ServerPlayer(index + 1, character.name, character.portrait, position.x, position.y);
                 newCharacter.setTeam(playerTeam!);
                 newCharacter.setUpCharacter(character);
-                playerTeam?.addMember(newCharacter);
+                characters.push(newCharacter);
                 levels.push(character.level);
+            });
+            characters = this.modifyTeamForTutorial(characters);
+            characters.forEach(character => {
+                playerTeam?.addMember(character);
             });
             nb = teamData.characters.length;
         }
@@ -96,7 +109,9 @@ export class AIGame extends Game {
         if (this.mode === PlayMode.CASUAL_VS_AI || this.mode === PlayMode.RANKED_VS_AI) {
             await this.fetchZombieTeam(aiTeam!, playerTeam.teamData.elo, nb, levels);
         } else {
-            this.createAITeam(aiTeam!, nb, levels);
+            if (this.mode != PlayMode.TUTORIAL) {
+                this.createAITeam(aiTeam!, nb, levels);
+            }
         }
     }
 
