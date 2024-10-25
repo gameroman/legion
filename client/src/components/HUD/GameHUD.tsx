@@ -35,7 +35,7 @@ interface GameHUDState {
   chests: GameOutcomeReward[];
   key: ChestColor;
   gameInitialized: boolean;
-  tutorialMessage: string;
+  tutorialMessages: string[];
   isTutorialVisible: boolean;
 }
 
@@ -61,7 +61,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     chests: [],
     key: null,
     gameInitialized: false,
-    tutorialMessage: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    tutorialMessages: ['Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'],
     isTutorialVisible: true,
   };
 
@@ -88,21 +88,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   componentDidMount() {
-    const user = firebaseAuth.currentUser;
-
-    this.resetState();
-
-    // if (user) {
-    //   apiFetch('fetchGuideTip?combatTip=1', {
-    //       method: 'GET',
-    //   })
-    //   .then((data) => {
-    //       if (data.guideId == -1) return;
-    //       showGuideToast(guide[data.guideId], data.route);
-    //   })
-    //   .catch(error => console.error(`Fetching tip error: ${error}`));
-    // }
-
     events.on('showPlayerBox', this.showPlayerBox);
     events.on('hidePlayerBox', this.hidePlayerBox);
     events.on('updateOverview', this.updateOverview);
@@ -188,22 +173,11 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     route('/play');
   }
 
-  showTutorialMessage = (message: string) => {
+  showTutorialMessage = (messages: string[]) => {
     this.setState({
-      tutorialMessage: message,
+      tutorialMessages: messages,
       isTutorialVisible: true,
     });
-  }
-
-  hideTutorial = () => {
-    this.setState({
-      isTutorialVisible: false,
-    });
-  }
-
-  handleNextTutorial = () => {
-    // This method will be implemented later to handle moving to the next tutorial message
-    console.log('Next tutorial message');
   }
 
   render() {
@@ -249,10 +223,8 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
         />}
         {this.state.isTutorialVisible && (
           <TutorialDialogue
-            message={this.state.tutorialMessage}
+            message={this.state.tutorialMessages[0]}
             isVisible={this.state.isTutorialVisible}
-            speakerName="Taskmaster"
-            onNext={this.handleNextTutorial}
           />
         )}
       </div>

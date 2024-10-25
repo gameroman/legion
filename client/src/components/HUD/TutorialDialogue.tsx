@@ -2,6 +2,7 @@ import { h, Component } from 'preact';
 import '../../styles/components/TutorialDialogue.css';
 
 const DEFAULT_AVATAR_SRC = 'avatars/default.png';
+const DEFAULT_SPEAKER_NAME = 'Taskmaster';
 
 interface TutorialDialogueProps {
   message: string;
@@ -73,7 +74,7 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
   }
 
   render() {
-    const { isVisible, speakerName = 'Taskmaster', onNext } = this.props;
+    const { isVisible } = this.props;
     const { displayedMessage, isAvatarLoaded } = this.state;
 
     if (!isVisible) {
@@ -89,7 +90,7 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
           onLoad={this.handleAvatarLoad}
         />
         <div className="tutorial-dialogue-content">
-          <div className="tutorial-dialogue-speaker">{speakerName}</div>
+          <div className="tutorial-dialogue-speaker">{DEFAULT_SPEAKER_NAME}</div>
           <p>{displayedMessage}</p>
         </div>
         {/* <button className="tutorial-dialogue-next" onClick={onNext} aria-label="Next">

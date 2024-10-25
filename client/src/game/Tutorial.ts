@@ -11,6 +11,10 @@ export class Tutorial {
     }
 
     start() {
-        this.gameHUD.showTutorialMessage("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+        this.gameHUD.showTutorialMessage(
+            [
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                "Second message",
+            ]);
     }
 }
