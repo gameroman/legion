@@ -9,6 +9,7 @@ interface TutorialDialogueProps {
 }
 
 interface TutorialDialogueState {
+  messageIndex: number;
   displayedMessage: string;
   isAvatarLoaded: boolean;
 }
@@ -18,6 +19,7 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
   private typingSpeed: number = 30; // milliseconds per character
 
   state: TutorialDialogueState = {
+    messageIndex: 0,
     displayedMessage: '',
     isAvatarLoaded: false,
   };
@@ -56,9 +58,9 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
     const { messages } = this.props;
     const { displayedMessage } = this.state;
 
-    if (displayedMessage.length < messages[0].length) {
+    if (displayedMessage.length < messages[this.state.messageIndex].length) {
       this.setState(
-        { displayedMessage: messages[0].slice(0, displayedMessage.length + 1) },
+        { displayedMessage: messages[this.state.messageIndex].slice(0, displayedMessage.length + 1) },
         () => {
           this.typingTimer = window.setTimeout(() => this.typeMessage(), this.typingSpeed);
         }
@@ -70,8 +72,15 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
     this.setState({ isAvatarLoaded: true });
   }
 
+  handleNext = () => {
+    this.setState({ messageIndex: this.state.messageIndex + 1 });
+  }
+
   render() {
-    const { displayedMessage, isAvatarLoaded } = this.state;
+    const { displayedMessage, isAvatarLoaded, messageIndex } = this.state;
+    const { messages } = this.props;
+
+    // console.log(`Messages: ${messages}, messageIndex: ${messageIndex}`);
 
     return (
       <div className={`tutorial-dialogue ${isAvatarLoaded ? 'visible' : ''}`}>
@@ -85,9 +94,9 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
           <div className="tutorial-dialogue-speaker">{DEFAULT_SPEAKER_NAME}</div>
           <p>{displayedMessage}</p>
         </div>
-        {/* <button className="tutorial-dialogue-next" onClick={onNext} aria-label="Next">
+        {messageIndex < messages.length - 1 && <button className="tutorial-dialogue-next" onClick={this.handleNext} aria-label="Next">
           <div className="tutorial-dialogue-next-arrow"></div>
-        </button> */}
+        </button>}
       </div>
     );
   }

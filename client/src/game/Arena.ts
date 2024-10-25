@@ -1450,7 +1450,6 @@ export class Arena extends Phaser.Scene
 
         if (this.gameSettings.tutorial) {
             this.tutorial = new Tutorial(this, this.gamehud);
-            this.tutorial.start();
         }
 
         if (isReconnect) {

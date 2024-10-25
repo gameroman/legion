@@ -61,31 +61,9 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     chests: [],
     key: null,
     gameInitialized: false,
-    tutorialMessages: ['Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'],
+    tutorialMessages: [],
     isTutorialVisible: true,
   };
-
-  resetState = () => {
-    this.setState({
-      playerVisible: false,
-      player: null,
-      pendingSpell: false,
-      pendingItem: false,
-      team1: null,
-      team2: null,
-      isWinner: false,
-      gameOver: false,
-      isSpectator: false,
-      mode: null,
-      xpReward: 0,
-      goldReward: 0,
-      characters: [],
-      grade: null,
-      chests: [],
-      key: null,
-      gameInitialized: false,
-    });
-  }
 
   componentDidMount() {
     events.on('showPlayerBox', this.showPlayerBox);
@@ -221,7 +199,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
           closeGame={this.closeGame}
           eventEmitter={events}
         />}
-        {this.state.isTutorialVisible && (
+        {this.state.isTutorialVisible && this.state.tutorialMessages.length > 0 && (
           <TutorialDialogue
             messages={this.state.tutorialMessages}
           />
