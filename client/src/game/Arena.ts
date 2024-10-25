@@ -1295,8 +1295,8 @@ export class Arena extends Phaser.Scene
             }
             player.setStatuses(character.statuses);
 
-            isReconnect = false; // TODO: remove
             if (!isReconnect) {
+                player.y -= 1000;
                 // Stagger the entrance of each player with a random offset between -200 and +200 ms
                 const randomOffset = Math.floor(Math.random() * 401) - 200; // Random number between -200 and 200
                 const entranceDelay = 750 + randomOffset;
@@ -1460,11 +1460,11 @@ export class Arena extends Phaser.Scene
             setTimeout(() => {
                 if (!this.gameSettings.tutorial) this.displayGEN(GEN.COMBAT_BEGINS);
                 this.setGameInitialized();
-
-                if (this.gameSettings.tutorial) {
-                    this.tutorial.start();
-                }
             }, delay);
+        }
+
+        if (this.gameSettings.tutorial) {
+            this.tutorial.start();
         }
 
         // Events from the HUD

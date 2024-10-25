@@ -145,7 +145,6 @@ export class Player extends Phaser.GameObjects.Container {
         // Add the container to the scene
         scene.add.existing(this);
         this.updatePos(gridX, gridY);
-        this.y -= 1000;
 
         this.playAnim('idle');
         this.sprite.setInteractive(new Phaser.Geom.Rectangle(35, 40, 70, 100), Phaser.Geom.Rectangle.Contains);

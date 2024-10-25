@@ -1,5 +1,5 @@
 import { Arena } from './Arena';
-import { GameHUD } from '../components/HUD/GameHUD';
+import { events, GameHUD } from '../components/HUD/GameHUD';
 
 export class Tutorial {
     private game: Arena;
@@ -11,11 +11,11 @@ export class Tutorial {
     }
 
     start() {
-        this.gameHUD.showTutorialMessage(
-            [
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                "Second message",
-            ]
-        );
+        const messages = [
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+            "Second message",
+        ];
+        console.log(`Emitting tutorial messages: ${messages}`);
+        events.emit('showTutorialMessage', messages);
     }
 }

@@ -105,6 +105,8 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
       this.handleCursorChange('normalCursor')
     });
 
+    // Add a new event listener for tutorial messages
+    events.on('showTutorialMessage', this.handleTutorialMessage);
   }
 
   componentWillUnmount() {
@@ -151,7 +153,8 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     route('/play');
   }
 
-  showTutorialMessage = (messages: string[]) => {
+  handleTutorialMessage = (messages: string[]) => {
+    console.log(`Received tutorial messages: ${messages}`);
     this.setState({
       tutorialMessages: messages,
       isTutorialVisible: true,
