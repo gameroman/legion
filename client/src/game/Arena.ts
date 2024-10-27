@@ -90,6 +90,7 @@ export class Arena extends Phaser.Scene
     sprites: Phaser.GameObjects.Sprite[] = [];
     environmentalAudioSources;
     gameSettings;
+    tutorialSettings;
     killCamActive = false;
     pendingGEN: GEN;
     genQueue: GEN[] = [];
@@ -709,6 +710,9 @@ export class Arena extends Phaser.Scene
 
     emitEvent(event, data?) {
         switch (event) {
+            case 'characterAdded':
+                if (this.gameSettings.tutorial) events.emit('characterAdded');
+                break;
             case 'hpChange':
                 if (this.selectedPlayer && data.num === this.selectedPlayer.num) {
                     this.refreshBox();
@@ -1031,7 +1035,6 @@ export class Arena extends Phaser.Scene
     }
 
     processAddCharacter(data: {team: number, character: PlayerNetworkData}) {
-        console.log(`[Arena:processAddCharacter] ${JSON.stringify(data)}`);
         const team = this.teamsMap.get(data.team);
         this.placeCharacter(data.character, false, team, false);
     }
@@ -1304,11 +1307,7 @@ export class Arena extends Phaser.Scene
             team.getMembers().length + 1, character.frame, isPlayer, character.class,
             character.hp, character.maxHP, character.mp, character.maxMP,
             character.level, character.xp,
-            );
-
-        if (this.gameSettings.tutorial) {
-            player.stripForTutorial();
-        }
+        );
         
         if (isPlayer) {
             player.setDistance(character.distance);
@@ -1395,6 +1394,10 @@ export class Arena extends Phaser.Scene
             mode: null,
         }
 
+        this.tutorialSettings = {
+            showHealthBars: false,
+        }
+
         // console.log(`[Arena:create] Scene created`);
         this.sceneCreated = true;
         this.emptyQueue();
@@ -1461,6 +1464,10 @@ export class Arena extends Phaser.Scene
         this.gameSettings.tutorial = (data.general.mode == PlayMode.TUTORIAL);
         this.gameSettings.spectator = data.general.spectator;
         this.gameSettings.mode = data.general.mode;
+
+        if (this.gameSettings.tutorial) {
+            this.tutorialSettings.showHealthBars = false;
+        }
 
         this.teamsMap.set(data.player.teamId, new Team(this, data.player.teamId, true, data.player.player, data.player.score));
         this.teamsMap.set(data.opponent.teamId, new Team(this, data.opponent.teamId, false, data.opponent.player));
@@ -1826,6 +1833,7 @@ export class Arena extends Phaser.Scene
     // }
 
     showFloatingHand(x: number, y: number, orientation: 'up' | 'down' | 'left' | 'right' = 'up') {
+        console.log(`[showFloatingHand] @ x: ${x}, y: ${y}`);
         const scale = 0.3;
 
         if (!this.handSprite) {
@@ -1876,9 +1884,12 @@ export class Arena extends Phaser.Scene
         }
     }
 
-    pointToCharacter(characterIdx: number) {
-        const character = this.teamsMap.get(this.playerTeamId).members[characterIdx];
-        this.showFloatingHand(character.x - 5, character.y - 70, 'down');
+    pointToCharacter(playerTeam: boolean, characterIdx: number) {
+        const teamId = playerTeam ? this.playerTeamId : 2;
+        const character = this.teamsMap.get(teamId).members[characterIdx];
+        const {x, y} = this.gridToPixelCoords(character.gridX, character.gridY);
+        const yOffset = this.tutorialSettings.showHealthBars ? 100 : 60;
+        this.showFloatingHand(x - 5, y - yOffset, 'down');
     }
 
     pointToTile(tileX: number, tileY: number) {
@@ -1888,5 +1899,15 @@ export class Arena extends Phaser.Scene
 
     summonEnemy() {
         this.send('tutorialEvent', {action: 'summonEnemy'});
+    }
+
+    revealHealthBars() {
+        this.tutorialSettings.showHealthBars = true;
+        // Iterate over all team members and reveal their health bars
+        this.teamsMap.forEach((team) => {
+            team.members.forEach((player) => {
+                player.revealHealthBar();
+            });
+        });
     }
 }

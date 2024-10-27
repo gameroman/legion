@@ -150,6 +150,38 @@ export abstract class Game
         this.gridMap.set(`${gridX},${gridY}`, player);
     }
 
+    listCellsAround(gridX: number, gridY: number) {
+        const cells = new Set<{x: number, y: number}>();
+        for (let x = gridX - 1; x <= gridX + 1; x++) {
+            for (let y = gridY - 1; y <= gridY + 1; y++) {
+                cells.add({x, y});
+            }
+        }
+        return cells;
+    }
+
+    findFreeCellNear(gridX: number, gridY: number) {
+        // Perform a BFS to find the nearest free cell
+        const queue = [{x: gridX, y: gridY}];
+        const visited = new Set<{x: number, y: number}>();
+        visited.add({x: gridX, y: gridY});
+
+        while (queue.length > 0) {
+            const {x, y} = queue.shift()!;
+            if (this.isFree(x, y)) {
+                return {x, y};
+            }
+            const neighbors = this.listCellsAround(x, y);
+            neighbors.forEach(neighbor => {
+                if (!visited.has(neighbor) && !this.isSkip(neighbor.x, neighbor.y)) {
+                    queue.push(neighbor);
+                    visited.add(neighbor);
+                }
+            });
+        }
+        return null;
+    }
+
     populateGrid() {
         // Iterate over teams
         this.teams.forEach(team => {

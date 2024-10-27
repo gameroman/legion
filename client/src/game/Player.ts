@@ -155,6 +155,8 @@ export class Player extends Phaser.GameObjects.Container {
 
         this.speechBubble = new SpeechBubble(this.scene, -15, (this.height / 2) - 10, 'Hello!').setVisible(false);
         this.add(this.speechBubble);
+
+        this.adaptToTutorial();
     }
 
     setUpStatusEffects() {
@@ -257,7 +259,7 @@ export class Player extends Phaser.GameObjects.Container {
         this.baseSquare.setAlpha(1);
     }
 
-    makeAirEntrance(isTutorial = false) {
+    makeAirEntrance() {
         const {x: targetX, y: targetY} = this.arena.gridToPixelCoords(this.gridX, this.gridY);
 
         // Create a trail effect
@@ -320,12 +322,13 @@ export class Player extends Phaser.GameObjects.Container {
                 // Revert to idle animation after a short delay
                 this.scene.time.delayedCall(300, () => {
                     this.playAnim('boast', true);
+                    if (this.arena.gameSettings.tutorial) this.arena.emitEvent('characterAdded');
                 });
             }
         });
     }
 
-    makeEntrance(isTutorial = false) {
+    makeEntrance() {
         const combatStartPhrases: string[] = [
             "Let's dance!",
             "Prepare to fall!",
@@ -1008,9 +1011,13 @@ export class Player extends Phaser.GameObjects.Container {
         this.speechBubble.setVisible(false);
     }
 
-    stripForTutorial() {
-        this.healthBar.setVisible(false);
+    adaptToTutorial() {
+        this.healthBar.setVisible(this.arena.tutorialSettings.showHealthBars);
         this.MPBar?.setVisible(false);
+    }
+
+    revealHealthBar() {
+        this.healthBar.setVisible(true);
     }
 
     destroy() {
@@ -1034,7 +1041,5 @@ export class Player extends Phaser.GameObjects.Container {
         // Call the parent class's destroy method
         super.destroy();
       }
-
-    
 }
 

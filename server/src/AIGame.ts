@@ -30,7 +30,8 @@ export class AIGame extends Game {
         const aiTeam = this.teams.get(2);
         const character = new NewCharacter(Class.WARRIOR, 1, false, true).getCharacterData();
         character.portrait = 'mil1_3';
-        const newCharacter = this.addAICharacter(aiTeam!, character);
+        const position = this.findFreeCellNear(15, 4);
+        const newCharacter = this.addAICharacter(aiTeam!, character, position);
         // Emit to human client
         this.broadcast('addCharacter', {
             team: aiTeam!.id,
@@ -38,8 +39,8 @@ export class AIGame extends Game {
         });
     }
 
-    addAICharacter(team: Team, character: DBCharacterData) {
-        const position = this.getPosition(team.getMembers().length, true);
+    addAICharacter(team: Team, character: DBCharacterData, position?: {x: number, y: number}) {
+        if (!position) position = this.getPosition(team.getMembers().length, true);
         const newCharacter = new AIServerPlayer(team.getMembers().length + 1, character.name, character.portrait, position.x, position.y);
         newCharacter.setTeam(team);
         newCharacter.setUpCharacter(character);

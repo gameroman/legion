@@ -54,7 +54,7 @@ export class Tutorial {
                     if (this.flags['playerSelected']) {
                         this.transition('playerSelected');
                     } else {
-                        this.game.pointToCharacter(0);
+                        this.game.pointToCharacter(true,0);
                     }
                 },
                 transitions: {
@@ -68,7 +68,7 @@ export class Tutorial {
                     } else {
                         this.game.pointToTile(6, 4);
                         this.showMessages([
-                        "Now, click on the tile you want to move your warrior to. You can move to any tile highlighted in yellow.",
+                         "Now, click on the tile you want to move your warrior to. You can move to any tile highlighted in yellow.",
                         ]);
                     }
                 },
@@ -78,9 +78,22 @@ export class Tutorial {
             },
             summonEnemy: {
                 onEnter: () => {
+                    this.game.hideFloatingHand();
                     this.game.summonEnemy();
                 },
-                transitions: {},
+                transitions: {
+                    characterAdded: 'attackInstructions',
+                },
+            },
+            attackInstructions: {
+                onEnter: () => {
+                    this.game.revealHealthBars();
+                    this.game.pointToCharacter(false, 0);
+                    this.showMessages([
+                        "Here is your first enemy! Move your warrior next to the it and click on it to attack!",
+                    ]);
+                },
+                transitions: {}
             },
         };
     }
@@ -89,6 +102,7 @@ export class Tutorial {
         events.on('nextTutorialMessage', () => this.transition('nextMessage'));
         events.on('selectPlayer', () => this.setFlag('playerSelected', true));
         events.on('playerMoved', () => this.setFlag('playerMoved', true));
+        events.on('characterAdded', () => this.transition('characterAdded'));
     }
 
     private setFlag(flag: string, value: boolean) {
