@@ -1,5 +1,5 @@
 import { ServerPlayer, ActionType } from './ServerPlayer';
-import { Target } from "@legion/shared/enums";
+import { AIAttackMode, Target } from "@legion/shared/enums";
 import { INITIAL_COOLDOWN } from "@legion/shared/config";
 
 
@@ -23,6 +23,9 @@ export class AIServerPlayer extends ServerPlayer {
     retargetRate: number = 0;
     retargetCount: number = 0;
 
+    attackMode: AIAttackMode = AIAttackMode.IDLE;
+    actionCount: number = 0;
+    
     constructor(num: number, name: string, frame: string, x: number, y: number) {
         super(num, name, frame, x, y);
 
@@ -71,6 +74,9 @@ export class AIServerPlayer extends ServerPlayer {
     }
 
     takeAction(): number {
+        if (this.attackMode === AIAttackMode.IDLE) return 0;
+        if (this.actionCount > 0 && this.attackMode === AIAttackMode.ATTACK_ONCE) return 0;
+
         if (!this.canAct()) return 0;
         let delay = 0;
 
@@ -101,6 +107,8 @@ export class AIServerPlayer extends ServerPlayer {
             this.target = null;
             this.retargetCount = this.retargetRate;
         }
+
+        this.actionCount++;
 
         return 0;
     }

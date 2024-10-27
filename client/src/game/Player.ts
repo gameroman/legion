@@ -767,6 +767,8 @@ export class Player extends Phaser.GameObjects.Container {
           ];
         const phrase = deathPhrases[Math.floor(Math.random() * deathPhrases.length)];
         // this.talk(phrase);
+
+        if (this.arena.gameSettings.tutorial) this.arena.emitEvent('characterKilled');
     }
 
     attack(targetX: number) {

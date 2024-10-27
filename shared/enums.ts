@@ -196,3 +196,9 @@ export enum GEN {
 export enum Token {
     SOL = "SOL",
 }
+
+export enum AIAttackMode {
+    IDLE,
+    ATTACK_ONCE,
+    UNLIMITED,
+}

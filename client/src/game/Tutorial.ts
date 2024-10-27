@@ -1,5 +1,6 @@
 import { Arena } from './Arena';
 import { events, GameHUD } from '../components/HUD/GameHUD';
+import { AIAttackMode } from '@legion/shared/enums';
 
 type TutorialState = {
   onEnter?: () => void;
@@ -79,7 +80,7 @@ export class Tutorial {
             summonEnemy: {
                 onEnter: () => {
                     this.game.hideFloatingHand();
-                    this.game.summonEnemy();
+                    this.game.summonEnemy(15, 4);
                 },
                 transitions: {
                     characterAdded: 'attackInstructions',
@@ -90,10 +91,54 @@ export class Tutorial {
                     this.game.revealHealthBars();
                     this.game.pointToCharacter(false, 0);
                     this.showMessages([
-                        "Here is your first enemy! Move your warrior next to the it and click on it to attack!",
+                        "Here is your first enemy! See the green bars that appeared on your warrior and the enemy? They represent their health (or HP).",
+                        "When a character's HP reaches 0, they are KO! Move next to the enemy and click on it to attack it and make it lose HP!",
                     ]);
                 },
-                transitions: {}
+                transitions: {
+                    playerAttacked: 'attackAgain',
+                }
+            },
+            attackAgain: {
+                onEnter: () => {
+                    this.showMessages([
+                        "Great! Keep attacking the enemy until it's KO!",
+                    ]);
+                },
+                transitions: {
+                    characterKilled: 'characterKilled',
+                },
+            },
+            characterKilled: {
+                onEnter: () => {
+                    this.game.hideFloatingHand();
+                    this.showMessages([
+                        "Great job! Defeating enemies is the way to win! But beware, another one is coming!",
+                        ""
+                    ]);
+                },
+                transitions: {
+                    nextMessage: 'summonEnemy2',
+                },
+            },
+            summonEnemy2: {
+                onEnter: () => {
+                    const {x, y} = this.game.getCharacterPosition(true, 0);
+                    this.game.summonEnemy(x, y, AIAttackMode.ATTACK_ONCE);
+                },
+                transitions: {
+                    hpChange: 'enemyAttack',
+                },
+            },
+            enemyAttack: {
+                onEnter: () => {
+                    this.showMessages([
+                        "Enemies can also attack! Watch out, you lost some HP! Defeat that other enemy!",
+                    ]);
+                },
+                transitions: {
+                    characterKilled: 'characterKilled2',
+                },
             },
         };
     }
@@ -103,6 +148,9 @@ export class Tutorial {
         events.on('selectPlayer', () => this.setFlag('playerSelected', true));
         events.on('playerMoved', () => this.setFlag('playerMoved', true));
         events.on('characterAdded', () => this.transition('characterAdded'));
+        events.on('playerAttacked', () => this.transition('playerAttacked'));
+        events.on('characterKilled', () => this.transition('characterKilled'));
+        events.on('hpChange', () => this.transition('hpChange'));
     }
 
     private setFlag(flag: string, value: boolean) {

@@ -90,6 +90,8 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
     const { displayedMessage, isAvatarLoaded, messageIndex } = this.state;
     const { messages } = this.props;
 
+    if (displayedMessage.length === 0) return null;
+
     return (
       <div className={`tutorial-dialogue ${isAvatarLoaded ? 'visible' : ''}`}>
         <img 

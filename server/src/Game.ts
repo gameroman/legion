@@ -38,6 +38,7 @@ export abstract class Game
     audienceTimer: NodeJS.Timeout | null = null;
     checkEndTimer: NodeJS.Timeout | null = null;
     config: any;
+    tutorialSettings: any;
     GENhistory: Set<GEN> = new Set<GEN>();
 
     gridWidth: number = 20;
@@ -51,6 +52,10 @@ export abstract class Game
 
         this.teams.set(1, new Team(1, this));
         this.teams.set(2, new Team(2, this));
+
+        this.tutorialSettings = {
+            allowVictoryConditions: false,
+        }
         console.log(`[Game] Created game ${this.id}`);
     }
 
@@ -152,11 +157,21 @@ export abstract class Game
 
     listCellsAround(gridX: number, gridY: number) {
         const cells = new Set<{x: number, y: number}>();
-        for (let x = gridX - 1; x <= gridX + 1; x++) {
-            for (let y = gridY - 1; y <= gridY + 1; y++) {
-                cells.add({x, y});
-            }
+        const offsets = [
+            {x: -1, y: 0},  // Left
+            {x: -1, y: -1}, // Top-left
+            {x: 0, y: -1},  // Top
+            {x: 1, y: -1},  // Top-right
+            {x: 1, y: 0},   // Right
+            {x: 1, y: 1},   // Bottom-right
+            {x: 0, y: 1},   // Bottom
+            {x: -1, y: 1},  // Bottom-left
+        ];
+
+        for (const offset of offsets) {
+            cells.add({x: gridX + offset.x, y: gridY + offset.y});
         }
+
         return cells;
     }
 
@@ -352,6 +367,7 @@ export abstract class Game
 
     checkEndGame() {
         if (this.gameOver) return;
+        if (this.mode == PlayMode.TUTORIAL && !this.tutorialSettings.allowVictoryConditions) return;
         if (this.teams.get(1)!.isDefeated() || this.teams.get(2)!.isDefeated()) {
             this.endGame(this.teams.get(1).isDefeated() ? 2 : 1);
         }

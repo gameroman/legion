@@ -4,7 +4,7 @@ import { Game } from './Game';
 import { ServerPlayer } from './ServerPlayer';
 import { AIServerPlayer } from './AIServerPlayer';
 import {apiFetch} from './API';
-import { Class, PlayMode, League } from "@legion/shared/enums";
+import { Class, PlayMode, League, AIAttackMode } from "@legion/shared/enums";
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {Team} from "./Team";
 import { DBCharacterData, PlayerContextData } from '@legion/shared/interfaces';
@@ -25,14 +25,16 @@ export class AIGame extends Game {
         if (mode === PlayMode.TUTORIAL) this.temporaryFrozen = true;
     }
 
-    summonEnemy() {
+    summonEnemy(data: {x: number, y: number, attackMode: AIAttackMode}) {
         console.log('[AIGame:summonEnemy] Summoning enemy...');
         const aiTeam = this.teams.get(2);
         const character = new NewCharacter(Class.WARRIOR, 1, false, true).getCharacterData();
         character.portrait = 'mil1_3';
-        const position = this.findFreeCellNear(15, 4);
+        character.stats.hp = 20;
+        const position = this.findFreeCellNear(data.x, data.y);
         const newCharacter = this.addAICharacter(aiTeam!, character, position);
-        // Emit to human client
+        newCharacter.attackMode = data.attackMode;
+
         this.broadcast('addCharacter', {
             team: aiTeam!.id,
             character: newCharacter.getPlacementData(false),
@@ -158,7 +160,7 @@ export class AIGame extends Game {
     processTutorialEvent(data: any) {
         switch (data.action) {
             case 'summonEnemy':
-                this.summonEnemy();
+                this.summonEnemy(data);
                 break;
         }
     }
@@ -171,7 +173,7 @@ export class AIGame extends Game {
 
         const AIteams = AI_VS_AI ? [1, 2] : [2];
 
-        if (FREEZE_AI || this.temporaryFrozen) return;
+        if (FREEZE_AI) return;
 
         AIteams.forEach(teamNum => {
             (this.teams.get(teamNum)?.getMembers() as AIServerPlayer[]).forEach(player => {

@@ -8,7 +8,7 @@ import { getSpellById } from '@legion/shared/Spells';
 import { lineOfSight, serializeCoords } from '@legion/shared/utils';
 import { getFirebaseIdToken } from '../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
-import { Target, Terrain, GEN, PlayMode } from "@legion/shared/enums";
+import { Target, Terrain, GEN, PlayMode, AIAttackMode } from "@legion/shared/enums";
 import { TerrainUpdate, GameData, OutcomeData, PlayerNetworkData } from '@legion/shared/interfaces';
 import { KILL_CAM_DURATION, BASE_ANIM_FRAME_RATE } from '@legion/shared/config';
 
@@ -713,6 +713,9 @@ export class Arena extends Phaser.Scene
             case 'characterAdded':
                 if (this.gameSettings.tutorial) events.emit('characterAdded');
                 break;
+            case 'characterKilled':
+                if (this.gameSettings.tutorial) events.emit('characterKilled');
+                break;
             case 'hpChange':
                 if (this.selectedPlayer && data.num === this.selectedPlayer.num) {
                     this.refreshBox();
@@ -866,6 +869,10 @@ export class Arena extends Phaser.Scene
         const player = this.getPlayer(team, num);
         player.setHP(hp);
         if (damage) player.displayDamage(damage);
+
+        if (this.gameSettings.tutorial) {
+            if (player.isPlayer) events.emit('hpChange', {num, hp});
+        }
     }
 
     processStatusChange({team, num, statuses}) {
@@ -1884,10 +1891,15 @@ export class Arena extends Phaser.Scene
         }
     }
 
-    pointToCharacter(playerTeam: boolean, characterIdx: number) {
+    getCharacterPosition(playerTeam: boolean, characterIdx: number) {
         const teamId = playerTeam ? this.playerTeamId : 2;
         const character = this.teamsMap.get(teamId).members[characterIdx];
-        const {x, y} = this.gridToPixelCoords(character.gridX, character.gridY);
+        return {x: character.gridX, y: character.gridY};
+    }
+
+    pointToCharacter(playerTeam: boolean, characterIdx: number) {
+        const {x: gridX, y: gridY} = this.getCharacterPosition(playerTeam, characterIdx);
+        const {x, y} = this.gridToPixelCoords(gridX, gridY);
         const yOffset = this.tutorialSettings.showHealthBars ? 100 : 60;
         this.showFloatingHand(x - 5, y - yOffset, 'down');
     }
@@ -1897,8 +1909,8 @@ export class Arena extends Phaser.Scene
         this.showFloatingHand(x - 5, y, 'down');
     }
 
-    summonEnemy() {
-        this.send('tutorialEvent', {action: 'summonEnemy'});
+    summonEnemy(x: number, y: number, attackMode: AIAttackMode = AIAttackMode.IDLE) {
+        this.send('tutorialEvent', {action: 'summonEnemy', x, y, attackMode});
     }
 
     revealHealthBars() {
