@@ -1847,7 +1847,7 @@ export class Arena extends Phaser.Scene
     // }
 
     showFloatingHand(x: number, y: number, orientation: 'up' | 'down' | 'left' | 'right' = 'up') {
-        console.log(`[showFloatingHand] @ x: ${x}, y: ${y}`);
+        // console.log(`[showFloatingHand] @ x: ${x}, y: ${y}`);
         const scale = 0.3;
 
         if (!this.handSprite) {

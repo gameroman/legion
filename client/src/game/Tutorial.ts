@@ -32,7 +32,7 @@ export class Tutorial {
     constructor(game: Arena, gameHUD: GameHUD) {
         this.game = game;
         this.gameHUD = gameHUD;
-        this.currentState = 'initial';
+        this.currentState = 'summonAlly'; //'initial';
         this.flags = {};
 
         this.initializeStates();
@@ -43,8 +43,8 @@ export class Tutorial {
         this.states = {
             initial: {
                 onEnter: () => this.showMessages([
-                    "I'm the Taskmaster of the Arena! My job is to make sure you learn the ropes and know how to order your warriors around!",
-                    "Let's start with a single warrior. Click on the warrior to select them.",
+                    "I'm the Taskmaster of the Arena! My job is to make sure you learn the ropes and know how to order your characters around!",
+                    "Let's start with a single character. Click on the warrior to select them.",
                 ]),
                 transitions: {
                     nextMessage: 'pointToCharacter',
@@ -166,7 +166,7 @@ export class Tutorial {
                     this.showMessages([
                         "In the arena, you will control multiple characters. You can switch between them by clicking on them.",
                         "This one is a Black Mage! They can cast spells that deal damage and impact the terrain.",
-                        "See the blue bar above their head? That's their Magic Points (or MP)! Casting spells costs MP; when it's empty, they can't cast spells until they recharge it!",
+                        "",
                     ]);
                 },
                 transitions: {
@@ -176,23 +176,41 @@ export class Tutorial {
             mageInstructions2: {
                 onEnter: () => {
                     this.game.pointToCharacter(true, 1);
+                    this.game.revealMPBars();
                     this.showMessages([
-                        "Let's try it out! Click on the Black Mage!",
+                        "See the blue bar above their head? That's their Magic Points (or MP)!",
+                        "Casting spells costs MP; when it's empty, they can't cast spells until they recharge it!",
+                        "",
                     ]);
                 },
                 transitions: {
-                    selectCharacter_BLACK_MAGE: 'mageInstructions3',
+                    lastMessage: 'mageInstructions3',
                 },
             },
             mageInstructions3: {
                 onEnter: () => {
+                    if (this.flags['playerSelected']) {
+                        this.transition('selectCharacter_BLACK_MAGE');
+                    } else {
+                        this.showMessages([
+                            "Let's try it out! Click on the Black Mage!",
+                        ]);
+                    }
+                },
+                transitions: {
+                    selectCharacter_BLACK_MAGE: 'mageInstructions4',
+                },
+            },
+            mageInstructions4: {
+                onEnter: () => {
+                    this.revealTopMenu();
                     this.game.hideFloatingHand();
                     this.showMessages([
-                        "Great! Now, click on the tile you want to cast the spell on!",
+                        "This menu appears when you select a character. You can see better their HP and MP, and in the case of mages, their spells!",
                     ]);
                 },
                 transitions: {
-                    lastMessage: 'mageInstructions4',
+                    // lastMessage: 'mageInstructions4',
                 },
             },
         };
@@ -207,7 +225,7 @@ export class Tutorial {
         events.on('characterKilled', () => this.transition('characterKilled'));
         events.on('hpChange', () => this.transition('hpChange'));
         events.on('lastTutorialMessage', () => this.transition('lastMessage'));
-        events.on('selectCharacter_BLACK_MAGE', () => this.transition('selectCharacter_BLACK_MAGE'));
+        events.on('selectCharacter_2', () => this.setFlag('selectCharacter_BLACK_MAGE', true));
     }
 
     private setFlag(flag: string, value: boolean) {
@@ -241,6 +259,10 @@ export class Tutorial {
 
     private showMessages(messages: string[]) {
         events.emit('showTutorialMessage', messages);
+    }
+
+    private revealTopMenu() {
+        events.emit('revealTopMenu');
     }
 
     start() {

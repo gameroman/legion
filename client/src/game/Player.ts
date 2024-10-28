@@ -399,7 +399,7 @@ export class Player extends Phaser.GameObjects.Container {
         this.animationLock = true;
 
         this.sprite.removeListener('animationcomplete', this.handleAnimationComplete);
-        this.sprite.anims.stop();
+        this.sprite.anims?.stop();
 
         if (this.isFrozen()) {
             this.animationLock = false;

@@ -18,6 +18,8 @@ import targetIcon from '@assets/inventory/target_icon.png';
 interface Props {
   player: PlayerProps;
   eventEmitter: any;
+  showCooldown: boolean;
+  showItems: boolean;
 }
 
 interface State {
@@ -218,16 +220,18 @@ class PlayerTab extends Component<Props, State> {
                 </div>
               </div>
             </div>
-            <div className="xp_bar_bg_container">
-              <img src={cdIcon} alt="" />
-              <div className={`xp_bar_bg ${cooldownRatio === 1 ? 'cooldown_bar_flash' : ''}`}>
+            {this.props.showCooldown && (
+              <div className="xp_bar_bg_container">
+                <img src={cdIcon} alt="" />
+                <div className={`xp_bar_bg ${cooldownRatio === 1 ? 'cooldown_bar_flash' : ''}`}>
                 <div className="cooldown_bar" style={cooldownBarStyle}></div>
               </div>
-            </div>
+              </div>
+            )}
           </div>
 
           <div className="flex width_half justify_between padding_8 padding_top_16 gap_24 padding_right_16">
-            {this.renderActionContainer("Items", player.items, canAct, isMuted, itemsIndex, InventoryType.CONSUMABLES)}
+            {this.props.showItems && this.renderActionContainer("Items", player.items, canAct, isMuted, itemsIndex, InventoryType.CONSUMABLES)}
             {this.renderActionContainer("Spells", player.spells, canAct, isMuted, 0, InventoryType.SPELLS)}
           </div>
         </div>

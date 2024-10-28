@@ -79,7 +79,7 @@ class TutorialDialogue extends Component<TutorialDialogueProps, TutorialDialogue
   handleNext = () => {
     events.emit('nextTutorialMessage');
     // If we're switching to the last message, emit a corresponding event
-    if (this.state.messageIndex === this.props.messages.length - 1) {
+    if (this.state.messageIndex === this.props.messages.length - 2) {
       events.emit('lastTutorialMessage');
     }
     this.setState(

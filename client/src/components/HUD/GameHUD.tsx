@@ -39,6 +39,8 @@ interface GameHUDState {
   isTutorialVisible: boolean;
   showTopMenu: boolean;
   showOverview: boolean;
+  showCooldown: boolean;
+  showItems: boolean;
 }
 
 const events = new EventEmitter();
@@ -65,18 +67,13 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     gameInitialized: false,
     tutorialMessages: [],
     isTutorialVisible: true,
-    showTopMenu: true,
-    showOverview: true,
+    showTopMenu: false,
+    showOverview: false,
+    showCooldown: false,
+    showItems: false,
   };
 
   componentDidMount() {
-    if (this.state.mode == PlayMode.TUTORIAL) {
-      this.setState({ 
-        showTopMenu: false,
-        showOverview: false,
-      });
-    }
-
     events.on('showPlayerBox', this.showPlayerBox);
     events.on('hidePlayerBox', this.hidePlayerBox);
     events.on('updateOverview', this.updateOverview);
@@ -118,6 +115,11 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
 
     // Add a new event listener for tutorial messages
     events.on('showTutorialMessage', this.handleTutorialMessage);
+    // Add new event listener for revealing top menu
+    events.on('revealTopMenu', this.revealTopMenu);
+    events.on('revealCooldown', this.revealCooldown);
+    events.on('revealItems', this.revealItems);
+    events.on('revealOverview', this.revealOverview);
   }
 
   componentWillUnmount() {
@@ -133,11 +135,20 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   updateOverview = (team1: TeamOverview, team2: TeamOverview, general: any, initialized: boolean) => {
+    const _showTopMenu = this.state.showTopMenu;
+    const _showOverview = this.state.showOverview;
+    const _showCooldown = this.state.showCooldown;
+    const _showItems = this.state.showItems;
     this.setState({ team1, team2 });
     this.setState({
-      isSpectator: general.isSpectator,
-      mode: general.mode,
-      gameInitialized: initialized
+        isSpectator: general.isSpectator,
+        mode: general.mode,
+        gameInitialized: initialized,
+        // Change the logic to preserve the current state unless it's tutorial mode
+        showTopMenu: general.mode === PlayMode.TUTORIAL ? _showTopMenu : true,
+        showOverview: general.mode === PlayMode.TUTORIAL ? _showOverview : true,
+        showCooldown: general.mode === PlayMode.TUTORIAL ? _showCooldown : true,
+        showItems: general.mode === PlayMode.TUTORIAL ? _showItems : true,
     })
   }
 
@@ -171,8 +182,24 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     });
   }
 
+  revealTopMenu = () => {
+    this.setState({ showTopMenu: true });
+  }
+
+  revealCooldown = () => {
+    this.setState({ showCooldown: true });
+  }
+
+  revealItems = () => {
+    this.setState({ showItems: true });
+  }
+
+  revealOverview = () => {
+    this.setState({ showOverview: true });
+  }
+
   render() {
-    const { playerVisible, player, team1, team2, isSpectator, mode, gameInitialized, showTopMenu, showOverview } = this.state;
+    const { playerVisible, player, team1, team2, isSpectator, mode, gameInitialized, showTopMenu, showOverview, showCooldown, showItems } = this.state;
     const members = team1?.members[0].isPlayer ? team1?.members : team2?.members;
     const score = team1?.members[0].isPlayer ? team1?.score : team2?.score;
 
@@ -184,17 +211,15 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
 
     return (
       <div className="gamehud height_full flex flex_col justify_between padding_bottom_16">
-        (
-          <>
-            {showOverview && (
-              <div className="hud-container">
-                <Overview position="left" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team1} />
-                <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team2} />
-              </div>
-            )}
-            {showTopMenu && playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
-          </>
-        )
+        <>
+          {showOverview && (
+            <div className="hud-container">
+              <Overview position="left" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team1} />
+              <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team2} />
+            </div>
+          )}
+          {showTopMenu && playerVisible && player ? <PlayerTab player={player} eventEmitter={events} showCooldown={showCooldown} showItems={showItems} /> : null}
+        </>
         <SpectatorFooter
           isTutorial={isTutorialMode}
           score={score}
