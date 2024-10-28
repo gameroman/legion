@@ -452,6 +452,7 @@ export class Player extends Phaser.GameObjects.Container {
         this.selected = true;
 
         this.checkHeartbeat();
+        this.arena.relayEvent(`selectCharacter_${this.class}`);
     }
 
     deselect() {
@@ -722,8 +723,8 @@ export class Player extends Phaser.GameObjects.Container {
             }
 
             if (!this.casting) this.playAnim('hurt', true);
-            this.healthBar.setVisible(true);
-            this.MPBar?.setVisible(true);
+            this.healthBar.setVisible(this.arena.tutorialSettings.showHealthBars);
+            this.MPBar?.setVisible(this.arena.tutorialSettings.showMPBars);
         }
 
         if(this.hp != _hp) {
@@ -1015,11 +1016,15 @@ export class Player extends Phaser.GameObjects.Container {
 
     adaptToTutorial() {
         this.healthBar.setVisible(this.arena.tutorialSettings.showHealthBars);
-        this.MPBar?.setVisible(false);
+        this.MPBar?.setVisible(this.arena.tutorialSettings.showMPBars);
     }
 
     revealHealthBar() {
         this.healthBar.setVisible(true);
+    }
+
+    revealMPBar() {
+        this.MPBar?.setVisible(true);
     }
 
     destroy() {

@@ -18,11 +18,26 @@ export class AIGame extends Game {
     nbExpectedPlayers = 1;
     tickTimer: NodeJS.Timeout | null = null;
     temporaryFrozen = false;
-    savedCharacters = [];
+    savedCharacters = {};
 
     constructor(id: string, mode: PlayMode, league: League, io: Server) {
         super(id, mode, league, io);
         if (mode === PlayMode.TUTORIAL) this.temporaryFrozen = true;
+    }
+
+    summonAlly(data: {x: number, y: number, className: Class}) {
+        console.log('[AIGame:summonAlly] Summoning ally...');
+        const team = this.teams.get(1);
+        const character = this.savedCharacters[data.className];
+        const position = this.findFreeCellNear(data.x, data.y);
+        character.x = position.x;
+        character.y = position.y;
+        team.addMember(character);
+
+        this.broadcast('addCharacter', {
+            team: team!.id,
+            character: character.getPlacementData(true),
+        });
     }
 
     summonEnemy(data: {x: number, y: number, attackMode: AIAttackMode}) {
@@ -87,8 +102,12 @@ export class AIGame extends Game {
     }
 
     modifyTeamForTutorial(characters: ServerPlayer[]) {
+        // Save all characters in a map for later use, mapping class to character
+        characters.forEach(character => {
+            this.savedCharacters[character.class] = character;
+        });
         if (this.mode == PlayMode.TUTORIAL) {
-            characters = characters.slice(0, 1);
+            characters = [this.savedCharacters[Class.WARRIOR]];
             characters[0].y += 1;
         }
         return characters;
@@ -161,6 +180,9 @@ export class AIGame extends Game {
         switch (data.action) {
             case 'summonEnemy':
                 this.summonEnemy(data);
+                break;
+            case 'summonAlly':
+                this.summonAlly(data);
                 break;
         }
     }

@@ -708,6 +708,10 @@ export class Arena extends Phaser.Scene
         if (this.overviewReady) events.emit('gameEnd', data);
     }
 
+    relayEvent(event, data?) {
+        events.emit(event, data);
+    }
+
     emitEvent(event, data?) {
         switch (event) {
             case 'characterAdded':
@@ -716,6 +720,7 @@ export class Arena extends Phaser.Scene
             case 'characterKilled':
                 if (this.gameSettings.tutorial) events.emit('characterKilled');
                 break;
+            
             case 'hpChange':
                 if (this.selectedPlayer && data.num === this.selectedPlayer.num) {
                     this.refreshBox();
@@ -1043,7 +1048,7 @@ export class Arena extends Phaser.Scene
 
     processAddCharacter(data: {team: number, character: PlayerNetworkData}) {
         const team = this.teamsMap.get(data.team);
-        this.placeCharacter(data.character, false, team, false);
+        this.placeCharacter(data.character, team, false);
     }
 
     updateMusicIntensity(ratio){
@@ -1306,7 +1311,8 @@ export class Arena extends Phaser.Scene
         };
     }
 
-    placeCharacter(character: PlayerNetworkData, isPlayer: boolean, team: Team, isReconnect = false) {
+    placeCharacter(character: PlayerNetworkData, team: Team, isReconnect = false) {
+        const isPlayer = team.id === this.playerTeamId;
         const {x, y} = this.gridToPixelCoords(character.x, character.y);
 
         const player = new Player(
@@ -1337,8 +1343,8 @@ export class Arena extends Phaser.Scene
         team.addMember(player);
     }
 
-    placeCharacters(data: PlayerNetworkData[], isPlayer: boolean, team: Team, isReconnect = false) {
-        data.forEach(player => this.placeCharacter(player, isPlayer, team, isReconnect));
+    placeCharacters(data: PlayerNetworkData[], team: Team, isReconnect = false) {
+        data.forEach(player => this.placeCharacter(player, team, isReconnect));
     }
   
     isValidCell(fromX, fromY, toX, toY) {
@@ -1403,6 +1409,7 @@ export class Arena extends Phaser.Scene
 
         this.tutorialSettings = {
             showHealthBars: false,
+            showMPBars: false,
         }
 
         // console.log(`[Arena:create] Scene created`);
@@ -1479,8 +1486,8 @@ export class Arena extends Phaser.Scene
         this.teamsMap.set(data.player.teamId, new Team(this, data.player.teamId, true, data.player.player, data.player.score));
         this.teamsMap.set(data.opponent.teamId, new Team(this, data.opponent.teamId, false, data.opponent.player));
 
-        this.placeCharacters(data.player.team, true, this.teamsMap.get(data.player.teamId), isReconnect);
-        this.placeCharacters(data.opponent.team, false, this.teamsMap.get(data.opponent.teamId), isReconnect);
+        this.placeCharacters(data.player.team, this.teamsMap.get(data.player.teamId), isReconnect);
+        this.placeCharacters(data.opponent.team, this.teamsMap.get(data.opponent.teamId), isReconnect);
 
         const tilesDelay = isReconnect ? 0 : 1000;
         this.floatTiles(tilesDelay);
@@ -1913,6 +1920,10 @@ export class Arena extends Phaser.Scene
         this.send('tutorialEvent', {action: 'summonEnemy', x, y, attackMode});
     }
 
+    summonAlly(x: number, y: number, className: Class) {
+        this.send('tutorialEvent', {action: 'summonAlly', x, y, className});
+    }
+
     revealHealthBars() {
         this.tutorialSettings.showHealthBars = true;
         // Iterate over all team members and reveal their health bars
@@ -1922,4 +1933,15 @@ export class Arena extends Phaser.Scene
             });
         });
     }
+
+    revealMPBars() {
+        this.tutorialSettings.showMPBars = true;
+        // Iterate over all team members and reveal their MP bars
+        this.teamsMap.forEach((team) => {
+            team.members.forEach((player) => {
+                player.revealMPBar();
+            });
+        });
+    }
+
 }

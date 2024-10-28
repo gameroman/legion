@@ -117,6 +117,7 @@ export class ServerPlayer {
             data['inventory'] = this.getNetworkInventory();
             data['spells'] = this.getNetworkSpells();
             data['xp'] = this.xp;
+            data['isPlayer'] = includePersonal;
         }
         return data;
     }

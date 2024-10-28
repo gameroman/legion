@@ -37,6 +37,8 @@ interface GameHUDState {
   gameInitialized: boolean;
   tutorialMessages: string[];
   isTutorialVisible: boolean;
+  showTopMenu: boolean;
+  showOverview: boolean;
 }
 
 const events = new EventEmitter();
@@ -63,9 +65,18 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     gameInitialized: false,
     tutorialMessages: [],
     isTutorialVisible: true,
+    showTopMenu: true,
+    showOverview: true,
   };
 
   componentDidMount() {
+    if (this.state.mode == PlayMode.TUTORIAL) {
+      this.setState({ 
+        showTopMenu: false,
+        showOverview: false,
+      });
+    }
+
     events.on('showPlayerBox', this.showPlayerBox);
     events.on('hidePlayerBox', this.hidePlayerBox);
     events.on('updateOverview', this.updateOverview);
@@ -161,7 +172,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   render() {
-    const { playerVisible, player, team1, team2, isSpectator, mode, gameInitialized } = this.state;
+    const { playerVisible, player, team1, team2, isSpectator, mode, gameInitialized, showTopMenu, showOverview } = this.state;
     const members = team1?.members[0].isPlayer ? team1?.members : team2?.members;
     const score = team1?.members[0].isPlayer ? team1?.score : team2?.score;
 
@@ -173,15 +184,17 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
 
     return (
       <div className="gamehud height_full flex flex_col justify_between padding_bottom_16">
-        {!isTutorialMode && (
+        (
           <>
-            <div className="hud-container">
-              <Overview position="left" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team1} />
-              <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team2} />
-            </div>
-            {playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
+            {showOverview && (
+              <div className="hud-container">
+                <Overview position="left" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team1} />
+                <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team2} />
+              </div>
+            )}
+            {showTopMenu && playerVisible && player ? <PlayerTab player={player} eventEmitter={events} /> : null}
           </>
-        )}
+        )
         <SpectatorFooter
           isTutorial={isTutorialMode}
           score={score}

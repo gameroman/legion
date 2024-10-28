@@ -1195,6 +1195,10 @@ export abstract class Game
     setStake(stake: number) {
         this.stake = stake;
     } 
+
+    isTutorial() {
+        return this.mode === PlayMode.TUTORIAL;
+    }
 }
 
 interface Tile {

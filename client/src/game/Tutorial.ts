@@ -1,6 +1,6 @@
 import { Arena } from './Arena';
 import { events, GameHUD } from '../components/HUD/GameHUD';
-import { AIAttackMode } from '@legion/shared/enums';
+import { AIAttackMode, Class } from '@legion/shared/enums';
 
 type TutorialState = {
   onEnter?: () => void;
@@ -67,7 +67,7 @@ export class Tutorial {
                     if (this.flags['playerMoved']) {
                         this.transition('playerMoved');
                     } else {
-                        this.game.pointToTile(6, 4);
+                        this.game.pointToTile(7, 4);
                         this.showMessages([
                          "Now, click on the tile you want to move your warrior to. You can move to any tile highlighted in yellow.",
                         ]);
@@ -127,6 +127,7 @@ export class Tutorial {
                     this.game.summonEnemy(x, y, AIAttackMode.ATTACK_ONCE);
                 },
                 transitions: {
+                    characterKilled: 'characterKilled2',
                     hpChange: 'enemyAttack',
                 },
             },
@@ -140,6 +141,60 @@ export class Tutorial {
                     characterKilled: 'characterKilled2',
                 },
             },
+            characterKilled2: {
+                onEnter: () => {
+                    this.showMessages([
+                        "Well done! Now, looks like someone else is coming...",
+                        ""
+                    ]);
+                },
+                transitions: {
+                    nextMessage: 'summonAlly',
+                },
+            },
+            summonAlly: {
+                onEnter: () => {
+                    this.game.summonAlly(4, 4, Class.BLACK_MAGE);
+                },
+                transitions: {
+                    characterAdded: 'mageInstructions',
+                },
+            },
+            mageInstructions: {
+                onEnter: () => {
+                    this.game.revealMPBars();
+                    this.showMessages([
+                        "In the arena, you will control multiple characters. You can switch between them by clicking on them.",
+                        "This one is a Black Mage! They can cast spells that deal damage and impact the terrain.",
+                        "See the blue bar above their head? That's their Magic Points (or MP)! Casting spells costs MP; when it's empty, they can't cast spells until they recharge it!",
+                    ]);
+                },
+                transitions: {
+                    lastMessage: 'mageInstructions2',
+                },
+            },
+            mageInstructions2: {
+                onEnter: () => {
+                    this.game.pointToCharacter(true, 1);
+                    this.showMessages([
+                        "Let's try it out! Click on the Black Mage!",
+                    ]);
+                },
+                transitions: {
+                    selectCharacter_BLACK_MAGE: 'mageInstructions3',
+                },
+            },
+            mageInstructions3: {
+                onEnter: () => {
+                    this.game.hideFloatingHand();
+                    this.showMessages([
+                        "Great! Now, click on the tile you want to cast the spell on!",
+                    ]);
+                },
+                transitions: {
+                    lastMessage: 'mageInstructions4',
+                },
+            },
         };
     }
 
@@ -151,6 +206,8 @@ export class Tutorial {
         events.on('playerAttacked', () => this.transition('playerAttacked'));
         events.on('characterKilled', () => this.transition('characterKilled'));
         events.on('hpChange', () => this.transition('hpChange'));
+        events.on('lastTutorialMessage', () => this.transition('lastMessage'));
+        events.on('selectCharacter_BLACK_MAGE', () => this.transition('selectCharacter_BLACK_MAGE'));
     }
 
     private setFlag(flag: string, value: boolean) {

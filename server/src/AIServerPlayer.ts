@@ -1,5 +1,5 @@
 import { ServerPlayer, ActionType } from './ServerPlayer';
-import { AIAttackMode, Target } from "@legion/shared/enums";
+import { AIAttackMode, PlayMode, Target } from "@legion/shared/enums";
 import { INITIAL_COOLDOWN } from "@legion/shared/config";
 
 
@@ -35,7 +35,11 @@ export class AIServerPlayer extends ServerPlayer {
         this.retargetRate = Math.floor(Math.random() * 10) + 1;
         this.retargetCount = this.retargetRate;
 
-        this.setCooldown(Math.floor((INITIAL_COOLDOWN + 1) * 1000 * (1 + Math.random() * 0.7)));
+        let cooldown = Math.floor((INITIAL_COOLDOWN + 1) * 1000 * (1 + Math.random() * 0.7));
+        if (this.team?.game.isTutorial()) {
+            cooldown = 1000;
+        }
+        this.setCooldown(cooldown);
     }
 
     setArchetype() {
@@ -74,8 +78,10 @@ export class AIServerPlayer extends ServerPlayer {
     }
 
     takeAction(): number {
-        if (this.attackMode === AIAttackMode.IDLE) return 0;
-        if (this.actionCount > 0 && this.attackMode === AIAttackMode.ATTACK_ONCE) return 0;
+        if (this.team?.game.isTutorial()) {
+            if (this.attackMode === AIAttackMode.IDLE) return 0;
+            if (this.actionCount > 0 && this.attackMode === AIAttackMode.ATTACK_ONCE) return 0;
+        }
 
         if (!this.canAct()) return 0;
         let delay = 0;
