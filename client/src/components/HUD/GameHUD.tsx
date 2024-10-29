@@ -213,7 +213,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
           mode={mode}
           closeGame={this.closeGame}
         />
-        {this.state.gameOver && !isTutorialMode && <Endgame
+        {this.state.gameOver && <Endgame
           members={members}
           grade={this.state.grade}
           chests={this.state.chests}

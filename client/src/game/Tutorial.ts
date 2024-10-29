@@ -374,10 +374,10 @@ export class Tutorial {
                     ]);
                 },
                 transitions: {
-                    lastMessage: 'pvpInto',
+                    lastMessage: 'pvpIntro',
                 }
             },
-            pvpInto: {
+            pvpIntro: {
                 onEnter: () => {
                     this.showMessages([
                         "Now it's time for a real battle! Use what you learned to control your 3 characters and defeat the enemy team!",
