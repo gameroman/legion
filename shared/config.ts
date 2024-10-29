@@ -77,7 +77,7 @@ export const X_LINK = 'https://x.com/iolegion';
 export const remoteConfig = {
     AUTO_DEFEAT: false,
     HIGH_DAMAGE: false,
-    FAST_MODE: true,
+    FAST_MODE: false,
     COOLDOWN_OVERRIDE: 500,
 }
 

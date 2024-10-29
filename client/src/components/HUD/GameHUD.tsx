@@ -39,7 +39,6 @@ interface GameHUDState {
   isTutorialVisible: boolean;
   showTopMenu: boolean;
   showOverview: boolean;
-  showCooldown: boolean;
   showItems: boolean;
 }
 
@@ -69,7 +68,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     isTutorialVisible: true,
     showTopMenu: false,
     showOverview: false,
-    showCooldown: false,
     showItems: false,
   };
 
@@ -117,7 +115,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     events.on('showTutorialMessage', this.handleTutorialMessage);
     // Add new event listener for revealing top menu
     events.on('revealTopMenu', this.revealTopMenu);
-    events.on('revealCooldown', this.revealCooldown);
     events.on('revealItems', this.revealItems);
     events.on('revealOverview', this.revealOverview);
   }
@@ -137,7 +134,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   updateOverview = (team1: TeamOverview, team2: TeamOverview, general: any, initialized: boolean) => {
     const _showTopMenu = this.state.showTopMenu;
     const _showOverview = this.state.showOverview;
-    const _showCooldown = this.state.showCooldown;
     const _showItems = this.state.showItems;
     this.setState({ team1, team2 });
     this.setState({
@@ -147,7 +143,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
         // Change the logic to preserve the current state unless it's tutorial mode
         showTopMenu: general.mode === PlayMode.TUTORIAL ? _showTopMenu : true,
         showOverview: general.mode === PlayMode.TUTORIAL ? _showOverview : true,
-        showCooldown: general.mode === PlayMode.TUTORIAL ? _showCooldown : true,
         showItems: general.mode === PlayMode.TUTORIAL ? _showItems : true,
     })
   }
@@ -186,11 +181,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     this.setState({ showTopMenu: true });
   }
 
-  revealCooldown = () => {
-    console.log(`[GameHUD:revealCooldown] Revealing cooldown`);
-    this.setState({ showCooldown: true });
-  }
-
   revealItems = () => {
     this.setState({ showItems: true });
   }
@@ -200,7 +190,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   render() {
-    const { playerVisible, player, team1, team2, isSpectator, mode, gameInitialized, showTopMenu, showOverview, showCooldown, showItems } = this.state;
+    const { playerVisible, player, team1, team2, isSpectator, mode, gameInitialized, showTopMenu, showOverview, showItems } = this.state;
     const members = team1?.members[0].isPlayer ? team1?.members : team2?.members;
     const score = team1?.members[0].isPlayer ? team1?.score : team2?.score;
 
@@ -219,7 +209,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
               <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team2} />
             </div>
           )}
-          {showTopMenu && playerVisible && player ? <PlayerTab player={player} eventEmitter={events} showCooldown={showCooldown} showItems={showItems} /> : null}
+          {showTopMenu && playerVisible && player ? <PlayerTab player={player} eventEmitter={events} showItems={showItems} isTutorial={isTutorialMode} /> : null}
         </>
         <SpectatorFooter
           isTutorial={isTutorialMode}

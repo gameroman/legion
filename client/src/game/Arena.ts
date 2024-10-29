@@ -375,8 +375,6 @@ export class Arena extends Phaser.Scene
         };
         this.send('spell', data);
         this.toggleTargetMode(false);
-        const spell = this.selectedPlayer.spells[this.selectedPlayer.pendingSpell];
-        if (this.gameSettings.tutorial) events.emit(`playerCastSpell_${spell.id}`);
         this.selectedPlayer.pendingSpell = null;
     }
 
@@ -1027,6 +1025,8 @@ export class Arena extends Phaser.Scene
             const intensity = 0.002;
             this.cameras.main.shake(duration, intensity);
          } 
+
+        if (this.gameSettings.tutorial) events.emit(`playerCastSpell_${spell.id}`);
     }
 
     processGameEnd(data: OutcomeData) {

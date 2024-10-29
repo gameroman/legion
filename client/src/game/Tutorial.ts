@@ -28,6 +28,7 @@ export class Tutorial {
     private currentState: string;
     private states: { [key: string]: TutorialState };
     private flags: { [key: string]: boolean };
+    private cooldownVisible: boolean = false;
 
     constructor(game: Arena, gameHUD: GameHUD) {
         this.game = game;
@@ -232,7 +233,7 @@ export class Tutorial {
             introToCooldown: {
                 onEnter: () => {
                     this.game.hideFloatingHand();
-                    this.gameHUD.revealCooldown();
+                    this.revealCooldown();
                     if (!this.game.isCharacterSelected(2)) { 
                         this.transition('ensureSelectedMageForCooldown');
                     } else {
@@ -259,15 +260,19 @@ export class Tutorial {
                     ]);
                 },
                 transitions: {
-                    enemyAdded: 'ensureSelectedMageForItems',
+                    lastMessage: 'ensureSelectedMageForItems',
                 }
             },
             ensureSelectedMageForCooldown: {
                 onEnter: () => {
-                    this.game.pointToCharacter(true, 1);
-                    this.showMessages([
-                        "Now, select the Black Mage again!",
-                    ]);
+                    if (this.game.isCharacterSelected(2)) {
+                        this.transition('selectCharacter_BLACK_MAGE');
+                    } else {
+                        this.game.pointToCharacter(true, 1);
+                        this.showMessages([
+                            "Now, select the Black Mage again!",
+                        ]);
+                    }
                 },
                 transitions: {
                     selectCharacter_BLACK_MAGE: 'introToCooldown',
@@ -275,10 +280,14 @@ export class Tutorial {
             },
             ensureSelectedMageForItems: {
                 onEnter: () => {
-                    this.game.pointToCharacter(true, 1);
-                    this.showMessages([
-                        "Now, select the Black Mage again!",
-                    ]);
+                    if (this.game.isCharacterSelected(2)) {
+                        this.transition('selectCharacter_BLACK_MAGE');
+                    } else {
+                        this.game.pointToCharacter(true, 1);
+                        this.showMessages([
+                            "Now, select the Black Mage again!",
+                        ]);
+                    }
                 },
                 transitions: {
                     selectCharacter_BLACK_MAGE: 'introToItems',
@@ -375,6 +384,11 @@ export class Tutorial {
 
     private revealTopMenu() {
         events.emit('revealTopMenu');
+    }
+
+    private revealCooldown() {
+        this.cooldownVisible = true;
+        events.emit('revealCooldown');
     }
 
     start() {

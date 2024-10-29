@@ -18,8 +18,8 @@ import targetIcon from '@assets/inventory/target_icon.png';
 interface Props {
   player: PlayerProps;
   eventEmitter: any;
-  showCooldown: boolean;
   showItems: boolean;
+  isTutorial?: boolean;
 }
 
 interface State {
@@ -27,6 +27,7 @@ interface State {
   croppedImages: {
     [key: string]: string;
   };
+  cooldownVisible: boolean;
 }
 
 class PlayerTab extends Component<Props, State> {
@@ -38,8 +39,13 @@ class PlayerTab extends Component<Props, State> {
     this.state = {
       player: this.props.player,
       croppedImages: {},
+      cooldownVisible: !props.isTutorial,
     };
     this.events = this.props.eventEmitter;
+
+    this.events.on('revealCooldown', () => {
+      this.setState({ cooldownVisible: true });
+    });
   }
 
   componentDidMount() {
@@ -220,14 +226,14 @@ class PlayerTab extends Component<Props, State> {
                 </div>
               </div>
             </div>
-            {this.props.showCooldown && (
-              <div className="xp_bar_bg_container">
-                <img src={cdIcon} alt="" />
-                <div className={`xp_bar_bg ${cooldownRatio === 1 ? 'cooldown_bar_flash' : ''}`}>
+            <div className="xp_bar_bg_container" style={{ 
+              visibility: this.state.cooldownVisible ? 'visible' : 'hidden' 
+            }}>
+              <img src={cdIcon} alt="" />
+              <div className={`xp_bar_bg ${cooldownRatio === 1 ? 'cooldown_bar_flash' : ''}`}>
                 <div className="cooldown_bar" style={cooldownBarStyle}></div>
               </div>
-              </div>
-            )}
+            </div>
           </div>
 
           <div className="flex width_half justify_between padding_8 padding_top_16 gap_24 padding_right_16">
