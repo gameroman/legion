@@ -1,7 +1,7 @@
 import { Arena } from './Arena';
 import { events, GameHUD } from '../components/HUD/GameHUD';
 import { AIAttackMode, Class, GEN } from '@legion/shared/enums';
-import { lastEventId } from '@sentry/react';
+import { apiFetch } from 'src/services/apiService';
 
 type TutorialState = {
   onEnter?: () => void;
@@ -29,7 +29,6 @@ export class Tutorial {
     private currentState: string;
     private states: { [key: string]: TutorialState };
     private flags: { [key: string]: boolean };
-    private cooldownVisible: boolean = false;
 
     constructor(game: Arena, gameHUD: GameHUD) {
         this.game = game;
@@ -45,6 +44,12 @@ export class Tutorial {
         this.states = {
             initial: {
                 onEnter: () => {
+                    apiFetch('recordPlayerAction', {
+                        body: {
+                            actionType: 'tutorial',
+                            details: 'initial',
+                        },
+                    });
                     this.showMessages([
                         "I'm the Taskmaster of the Arena! My job is to make sure you learn the ropes and know how to order your characters around!",
                         "Let's start with a single character. Click on the warrior to select them.",
