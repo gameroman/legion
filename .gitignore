@@ -10,3 +10,4 @@ firebase-export-*
 serviceAccountKey.json
 /build
 /*.log
+dashboardv2/.env

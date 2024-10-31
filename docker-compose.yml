@@ -71,3 +71,14 @@ services:
       - IS_DOCKER=true
       - NODE_ENV=development
 
+  dashboard:
+    build:
+      context: .
+      dockerfile: ./dashboardv2/Dockerfile
+    ports:
+      - "8050:8050"
+    volumes:
+      - ./dashboardv2:/usr/src/app
+    depends_on:
+      - api
+
