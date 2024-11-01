@@ -1055,7 +1055,6 @@ export const withdrawSOL = onRequest({ secrets: ["GAME_WALLET_PRIVATE_KEY"] }, a
 });
 
 export const recordPlayerAction = onRequest((request, response) => {
-  const db = admin.firestore();
   return corsMiddleware(request, response, async () => {
     try {
       const uid = await getUID(request);

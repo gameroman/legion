@@ -360,13 +360,13 @@ export const getGameLog = onRequest(async (request, response) => {
     });
 });
 
-export const listPlayers = onRequest({ secrets: ["API_KEY"] }, async (request, response) => {
+export const listPlayerIDs = onRequest(async (request, response) => {
     const db = admin.firestore();
     corsMiddleware(request, response, async () => {
-        if (!checkAPIKey(request)) {
-            response.status(401).send('Unauthorized');
-            return;
-        }
+        // if (!checkAPIKey(request)) {
+        //     response.status(401).send('Unauthorized');
+        //     return;
+        // }
         // Return a list of all player IDs together with their joinDate
         const snapshot = await db.collection("players").get();
         const players = snapshot.docs.map((doc) => ({

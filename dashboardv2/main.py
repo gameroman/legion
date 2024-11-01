@@ -4,6 +4,8 @@ from datetime import datetime
 from typing import Optional
 from dotenv import load_dotenv
 import os
+import plotly.graph_objects as go
+from collections import defaultdict
 
 # Load environment variables
 load_dotenv()
@@ -12,8 +14,18 @@ API_KEY = os.getenv('API_KEY', '')
 LOCAL_API = "http://api:5001/legion-32c6d/us-central1"
 PROD_API = "https://us-central1-legion-32c6d.cloudfunctions.net"
 
-current_api = LOCAL_API
+current_api = PROD_API
 last_visit = None
+
+PLAY_MODE = {
+    0: "PRACTICE",
+    1: "TUTORIAL",
+    2: "CASUAL",
+    3: "CASUAL_VS_AI",
+    4: "RANKED",
+    5: "RANKED_VS_AI",
+    6: "STAKED"
+}
 
 def get_headers():
     if current_api == PROD_API:
@@ -30,7 +42,7 @@ def update_last_visit():
 
 def toggle_api():
     global current_api
-    current_api = PROD_API if current_api == LOCAL_API else LOCAL_API
+    current_api = LOCAL_API if current_api == PROD_API else PROD_API
     api_label.text = f"Current API: {current_api}"
     if current_api == PROD_API and not API_KEY:
         ui.notify('Warning: No API key set for production API', type='warning')
@@ -41,7 +53,7 @@ def format_date(date_str):
         return 'N/A'
     try:
         dt = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-        return dt.strftime('%Y-%m-%d')
+        return dt.strftime('%Y-%m-%d %H:%M:%S')
     except:
         return date_str
 
@@ -66,6 +78,7 @@ async def fetch_action_log(player_id=None):
         ui.notify('Please enter or select a Player ID', type='warning')
         return
 
+    spinner = ui.spinner(size='3em').classes('absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2')
     try:
         response = requests.get(
             f"{current_api}/getActionLog",
@@ -78,30 +91,104 @@ async def fetch_action_log(player_id=None):
             
             with actions:
                 with ui.card().classes('w-full mb-4'):
-                    ui.label('Player Summary').classes('text-lg font-bold')
+                    ui.label(f'Player {player_id} Summary').classes('text-lg font-bold')
                     summary = data.get('playerSummary', {})
                     ui.label(f"Join Date: {format_date(summary.get('joinDate', 'N/A'))}")
                     ui.label(f"Last Active: {format_date(summary.get('lastActiveDate', 'N/A'))}")
-                    ui.label(f"Rank: {summary.get('rank', 'N/A')}")
-                    ui.label(f"Gold: {summary.get('gold', 'N/A')}")
                 
                 ui.label('Action Log').classes('text-lg font-bold mt-4')
+                
+                # First, create all the cards and store them in a list
+                cards = []
+                
+                # Find the last tutorial action first
+                last_tutorial = None
+                last_tutorial_timestamp = None
                 for action in data.get('actionLog', []):
+                    if action.get('actionType') == 'tutorial' and isinstance(action.get('details'), str):
+                        last_tutorial = action.get('details')
+                        last_tutorial_timestamp = action.get('timestamp')
+                
+                # Create card for tutorial if exists
+                if last_tutorial:
+                    timestamp_value = 0
+                    if isinstance(last_tutorial_timestamp, dict) and '_seconds' in last_tutorial_timestamp:
+                        timestamp_value = float(last_tutorial_timestamp['_seconds'])
+                    elif isinstance(last_tutorial_timestamp, str):
+                        try:
+                            timestamp_value = datetime.fromisoformat(last_tutorial_timestamp.replace('Z', '+00:00')).timestamp()
+                        except:
+                            pass
+                    
+                    cards.append({
+                        'timestamp_value': timestamp_value,
+                        'time_str': format_timestamp(last_tutorial_timestamp),
+                        'content': f"Tutorial up to {last_tutorial}",
+                        'type': 'tutorial',
+                        'details': None
+                    })
+                
+                # Create cards for other actions
+                for action in data.get('actionLog', []):
+                    if action.get('actionType') == 'tutorial':
+                        continue
+                        
+                    timestamp = action.get('timestamp')
+                    timestamp_value = 0
+                    if isinstance(timestamp, dict) and '_seconds' in timestamp:
+                        timestamp_value = float(timestamp['_seconds'])
+                    elif isinstance(timestamp, str):
+                        try:
+                            timestamp_value = datetime.fromisoformat(timestamp.replace('Z', '+00:00')).timestamp()
+                        except:
+                            pass
+                    
+                    action_type = action.get('actionType', 'N/A')
+                    details = action.get('details', {})
+                    
+                    # Handle loadGame, pageView, and gameStart actions
+                    if action_type == 'loadGame' and isinstance(details, dict) and details.get('message'):
+                        content = f"loadGame - {details.get('message')}"
+                    elif action_type == 'pageView' and isinstance(details, dict) and details.get('message'):
+                        content = f"pageView - {details.get('message')}"
+                    elif action_type == 'gameStart' and isinstance(details, dict) and details.get('mode') is not None:
+                        mode = PLAY_MODE.get(details.get('mode'), 'UNKNOWN')
+                        content = f"gameStart - {mode}"
+                    else:
+                        content = action_type
+
+                    cards.append({
+                        'timestamp_value': timestamp_value,
+                        'time_str': format_timestamp(timestamp),
+                        'content': content,
+                        'type': action_type,
+                        'details': details if action_type not in ['loadGame', 'tutorial', 'pageView', 'gameStart'] else None,
+                        'is_mobile': isinstance(details, dict) and details.get('mobile')
+                    })
+                
+                # Sort cards by timestamp
+                cards.sort(key=lambda x: x['timestamp_value'])
+                
+                # Render all cards in sorted order
+                for card in cards:
                     with ui.card().classes('w-full mb-2 p-2'):
-                        ui.label(f"Action: {action.get('actionType', 'N/A')}").classes('font-bold')
-                        ui.label(f"Time: {format_date(action.get('timestamp', {}).get('_seconds', 'N/A'))}")
-                        ui.label(f"Details: {action.get('details', 'N/A')}").classes('text-sm font-mono')
-        elif response.status_code == 401:
-            ui.notify('Unauthorized: Check your API key', type='error')
-        else:
-            ui.notify(f'Error: {response.status_code}', type='error')
+                        with ui.row().classes('items-center gap-2'):
+                            ui.label(card['time_str']).classes('font-mono text-gray-600')
+                            ui.label(card['content']).classes('font-bold')
+                            if 'is_mobile' in card and card['is_mobile'] is not None:
+                                ui.label('📱' if card['is_mobile'] else '💻').classes('text-xl')
+                            
+                            if card['details']:
+                                ui.label(f"Details: {card['details']}").classes('text-sm font-mono')
     except Exception as e:
         ui.notify(f'Error: {str(e)}', type='error')
+    finally:
+        spinner.delete()
 
 def load_players():
     try:
         response = requests.get(
-            f"{current_api}/listPlayers",
+            f"{current_api}/listPlayerIDs",
             headers=get_headers()
         )
         if response.status_code == 200:
@@ -136,9 +223,82 @@ def load_players():
     except Exception as e:
         ui.notify(f'Error loading players: {str(e)}', type='error')
 
+def fetch_dashboard_data():
+    try:
+        response = requests.get(
+            f"{current_api}/getDashboardData",
+            headers=get_headers()
+        )
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Filter data based on cutoff date
+            cutoff_date = datetime.strptime(date_input.value, '%Y-%m-%d').date()
+            
+            # Plot new players per day
+            dates = list(data['newPlayersPerDay'].keys())
+            player_counts = list(data['newPlayersPerDay'].values())
+            
+            # Filter data points after cutoff date
+            filtered_data = [(date, count) for date, count in zip(dates, player_counts) 
+                           if datetime.strptime(date, '%Y-%m-%d').date() >= cutoff_date]
+            dates, player_counts = zip(*filtered_data) if filtered_data else ([], [])
+            
+            new_players_fig = go.Figure()
+            new_players_fig.add_trace(go.Bar(
+                x=dates,
+                y=player_counts,
+                name='New Players'
+            ))
+            new_players_fig.update_layout(
+                title='New Players per Day',
+                xaxis_title='Date',
+                yaxis_title='Number of New Players',
+                height=300,
+                width=500,
+                margin=dict(l=50, r=20, t=40, b=40)
+            )
+            
+            # Calculate total games per day
+            games_per_day = defaultdict(int)
+            for date, modes in data['gamesPerModePerDay'].items():
+                if datetime.strptime(date, '%Y-%m-%d').date() >= cutoff_date:
+                    games_per_day[date] = sum(modes.values())
+            
+            dates = list(games_per_day.keys())
+            game_counts = list(games_per_day.values())
+            
+            games_fig = go.Figure()
+            games_fig.add_trace(go.Bar(
+                x=dates,
+                y=game_counts,
+                name='Games Played'
+            ))
+            games_fig.update_layout(
+                title='Games Played per Day',
+                xaxis_title='Date',
+                yaxis_title='Number of Games',
+                height=300,
+                width=500,
+                margin=dict(l=50, r=20, t=40, b=40)
+            )
+            
+            # Update the plots in the UI
+            new_players_plot.clear()
+            games_plot.clear()
+            with new_players_plot:
+                ui.plotly(new_players_fig).classes('w-full')
+            with games_plot:
+                ui.plotly(games_fig).classes('w-full')
+            
+        else:
+            ui.notify(f'Error fetching dashboard data: {response.status_code}', type='error')
+    except Exception as e:
+        ui.notify(f'Error: {str(e)}', type='error')
+
 @ui.page('/')
 def dashboard():    
-    global api_label, player_id_input, actions, players_list
+    global api_label, player_id_input, actions, players_list, new_players_plot, games_plot, date_input
     
     with ui.row().classes('w-full h-full gap-4 p-4'):
         with ui.column().classes('w-1/4 min-w-[250px]'):
@@ -149,8 +309,17 @@ def dashboard():
             ui.label('Legion Dashboard').classes('text-2xl font-bold mb-4')
             
             with ui.row().classes('items-center gap-4'):
-                ui.switch('Use Production API', on_change=toggle_api)
+                ui.switch('Use Local API', on_change=toggle_api)
                 api_label = ui.label(f"Current API: {current_api}")
+                ui.label('Show data from:').classes('ml-4')
+                date_input = ui.input(value='2024-10-31', placeholder='YYYY-MM-DD')
+                date_input.on('change', lambda: fetch_dashboard_data())
+            
+            with ui.row().classes('w-full gap-4 mt-4'):
+                with ui.card().classes('w-1/2'):
+                    new_players_plot = ui.column().classes('w-full')
+                with ui.card().classes('w-1/2'):
+                    games_plot = ui.column().classes('w-full')
             
             with ui.row().classes('items-center gap-4 mt-4'):
                 player_id_input = ui.input(label='Player ID').classes('flex-grow')
@@ -158,8 +327,23 @@ def dashboard():
             
             actions = ui.column().classes('mt-4 w-full')
     
-    # Update last visit time and load players
+    # Update last visit time and load data
     update_last_visit()
     load_players()
+    fetch_dashboard_data()
+
+def format_timestamp(timestamp):
+    if isinstance(timestamp, dict):
+        seconds = timestamp.get('_seconds')
+        if seconds:
+            dt = datetime.fromtimestamp(seconds)
+            return dt.strftime('%b %d %H:%M:%S')
+    elif isinstance(timestamp, str):
+        try:
+            dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            return dt.strftime('%b %d %H:%M:%S')
+        except:
+            return timestamp
+    return 'N/A'
 
 ui.run(port=8050, host='0.0.0.0')
