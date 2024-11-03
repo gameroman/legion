@@ -7,7 +7,7 @@ import os
 import plotly.graph_objects as go
 from collections import defaultdict
 from datetime import timedelta
-
+import asyncio
 # Load environment variables
 load_dotenv()
 API_KEY = os.getenv('API_KEY', '')
@@ -41,13 +41,13 @@ def update_last_visit():
     global last_visit
     last_visit = datetime.utcnow().isoformat()
 
-def toggle_api():
+async def toggle_api():
     global current_api
     current_api = LOCAL_API if current_api == PROD_API else PROD_API
     api_label.text = f"Current API: {current_api}"
     if current_api == PROD_API and not API_KEY:
         ui.notify('Warning: No API key set for production API', type='warning')
-    load_players()
+    await load_players()
 
 def format_date(date_str):
     if not date_str:
@@ -79,10 +79,12 @@ async def fetch_action_log(player_id=None):
         ui.notify('Please enter or select a Player ID', type='warning')
         return
 
-    spinner = ui.spinner(size='3em').classes('absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2')
+    # Show spinner next to the button
+    fetch_spinner.visible = True
 
     try:
-        response = requests.get(
+        response = await asyncio.to_thread(
+            requests.get,
             f"{current_api}/getActionLog",
             params={'playerId': player_id},
             headers=get_headers()
@@ -185,44 +187,55 @@ async def fetch_action_log(player_id=None):
     except Exception as e:
         ui.notify(f'Error: {str(e)}', type='error')
     finally:
-        spinner.delete()
+        # Hide spinner when done
+        fetch_spinner.visible = False
 
-def load_players():
+async def load_players():
+    players_list.clear()
+    with players_list:
+        spinner = ui.spinner(size='3em').classes('absolute top-1/2 left-1/2')
     try:
-        response = requests.get(
+        response = await asyncio.to_thread(
+            requests.get,
             f"{current_api}/listPlayerIDs",
             headers=get_headers()
         )
         if response.status_code == 200:
-            players_list.clear()
-            
             players = sorted(
                 response.json(),
                 key=lambda x: x.get('joinDate', ''),
                 reverse=True
             )
-            
+
+            # Remove the spinner
+            spinner.delete()
+
             with players_list:
-                ui.label('Players').classes('text-xl font-bold mb-2')
                 for player in players:
                     player_id = player.get('id')
                     join_date = player.get('joinDate')
                     formatted_date = format_date(join_date)
-                    
-                    with ui.card().classes('w-full mb-2 p-2 cursor-pointer hover:bg-gray-100').on('click', lambda p=player_id: fetch_action_log(p)):
+
+                    async def on_player_click(p=player_id):
+                        await fetch_action_log(p)
+
+                    with ui.card().classes('w-full mb-2 p-2 cursor-pointer hover:bg-gray-100').on('click', on_player_click):
                         with ui.row().classes('items-center gap-2'):
                             ui.label(f"ID: {shorten_id(player_id)}").classes('font-mono')
                             if is_new_player(join_date):
                                 ui.label('NEW').classes('px-2 py-0.5 text-xs bg-green-500 text-white rounded-full')
                         ui.label(f"Joined: {formatted_date}").classes('text-sm text-gray-600')
         elif response.status_code == 401:
+            spinner.delete()
             ui.notify('Unauthorized: Check your API key', type='error')
             players_list.clear()
             with players_list:
                 ui.label('Unable to load players: Unauthorized').classes('text-red-500')
         else:
+            spinner.delete()
             ui.notify(f'Error loading players: {response.status_code}', type='error')
     except Exception as e:
+        spinner.delete()
         ui.notify(f'Error loading players: {str(e)}', type='error')
 
 def fetch_dashboard_data():
@@ -413,13 +426,15 @@ def fetch_tutorial_dropoff():
         ui.notify(f'Error: {str(e)}', type='error')
 
 @ui.page('/')
-def dashboard():    
-    global api_label, player_id_input, actions, players_list, new_players_plot, games_plot, date_input, metrics_container, tutorial_plot
+async def dashboard():    
+    global api_label, player_id_input, actions, players_list, new_players_plot, games_plot, date_input, metrics_container, tutorial_plot, fetch_spinner
     
     with ui.row().classes('w-full h-full gap-4 p-4'):
         with ui.column().classes('w-1/4 min-w-[250px]'):
-            with ui.card().classes('w-full'):
-                players_list = ui.column().classes('w-full')
+            with ui.card().classes('w-full h-[calc(100vh-2rem)]'):
+                ui.label('Players').classes('text-xl font-bold mb-2 px-2')
+                with ui.scroll_area().classes('w-full h-[calc(100%-3rem)]'):
+                    players_list = ui.column().classes('w-full px-2')
         
         with ui.column().classes('flex-grow'):
             ui.label('Legion Dashboard').classes('text-2xl font-bold mb-4')
@@ -446,13 +461,17 @@ def dashboard():
             
             with ui.row().classes('items-center gap-4 mt-4'):
                 player_id_input = ui.input(label='Player ID').classes('flex-grow')
-                ui.button('Fetch Action Log', on_click=lambda: fetch_action_log())
-            
+                player_id_input.on('change', fetch_action_log)
+                with ui.row().classes('items-center gap-2'):
+                    ui.button('Fetch Action Log', on_click=fetch_action_log)
+                    fetch_spinner = ui.spinner(size='sm').props('color=primary')
+                    fetch_spinner.visible = False
+
             actions = ui.column().classes('mt-4 w-full')
     
     # Update last visit time and load data
     update_last_visit()
-    load_players()
+    await load_players()
     # fetch_dashboard_data ()
     # fetch_engagement_metrics()
     # fetch_tutorial_dropoff()
