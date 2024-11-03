@@ -422,41 +422,59 @@ export const getEngagementMetrics = onRequest(async (request, response) => {
                 return;
             }
 
-            let completedTutorial = 0;
-            let playedOneGame = 0;
-            let playedMultipleGames = 0;
+            const playerIds = playersSnapshot.docs.map(doc => doc.id);
+            const gamesPerPlayer = new Map<string, number>();
 
-            // Process each player
-            for (const playerDoc of playersSnapshot.docs) {
-                // Check tutorial completion
-                const tutorialActions = await playerDoc.ref
-                    .collection("actions")
-                    .where("actionType", "==", "tutorial")
-                    .where("details", "==", "coda")
-                    .limit(1)
-                    .get();
-                
-                if (!tutorialActions.empty) {
-                    completedTutorial++;
-                }
-
-                // Check games played
+            // Process games in batches of 30 (Firestore array-contains-any limit)
+            const gameBatchSize = 30;
+            for (let i = 0; i < playerIds.length; i += gameBatchSize) {
+                const batchPlayerIds = playerIds.slice(i, i + gameBatchSize);
                 const gamesQuery = await db.collection("games")
-                    .where("players", "array-contains", playerDoc.id)
+                    .where("players", "array-contains-any", batchPlayerIds)
                     .get();
 
-                const gamesCount = gamesQuery.size;
-                if (gamesCount >= 1) {
-                    playedOneGame++;
-                }
-                if (gamesCount > 1) {
-                    playedMultipleGames++;
-                }
+                // Count games per player in this batch
+                gamesQuery.docs.forEach(gameDoc => {
+                    const players = gameDoc.data().players || [];
+                    players.forEach((playerId: string) => {
+                        if (playerIds.includes(playerId)) {
+                            gamesPerPlayer.set(playerId, (gamesPerPlayer.get(playerId) || 0) + 1);
+                        }
+                    });
+                });
             }
+
+            // Alternative approach: Query each player's actions separately
+            let completedTutorialCount = 0;
+            const tutorialBatchSize = 500;
+
+            for (let i = 0; i < playerIds.length; i += tutorialBatchSize) {
+                const batchPlayerIds = playerIds.slice(i, i + tutorialBatchSize);
+                
+                // Create array of promises for parallel execution
+                const tutorialQueries = batchPlayerIds.map(playerId =>
+                    db.collection("players").doc(playerId)
+                        .collection("actions")
+                        .where("actionType", "==", "tutorial")
+                        .where("details", "==", "coda")
+                        .limit(1)
+                        .get()
+                );
+
+                // Execute queries in parallel
+                const results = await Promise.all(tutorialQueries);
+                
+                // Count completed tutorials
+                completedTutorialCount += results.filter(querySnapshot => !querySnapshot.empty).length;
+            }
+
+            // Calculate final metrics
+            const playedOneGame = Array.from(gamesPerPlayer.values()).filter(count => count >= 1).length;
+            const playedMultipleGames = Array.from(gamesPerPlayer.values()).filter(count => count > 1).length;
 
             const metrics: EngagementMetrics = {
                 totalPlayers,
-                tutorialCompletionRate: (completedTutorial / totalPlayers) * 100,
+                tutorialCompletionRate: (completedTutorialCount / totalPlayers) * 100,
                 playedOneGameRate: (playedOneGame / totalPlayers) * 100,
                 playedMultipleGamesRate: (playedMultipleGames / totalPlayers) * 100
             };

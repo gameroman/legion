@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 from collections import defaultdict
 from datetime import timedelta
 import asyncio
+import pytz
 # Load environment variables
 load_dotenv()
 API_KEY = os.getenv('API_KEY', '')
@@ -27,6 +28,8 @@ PLAY_MODE = {
     5: "RANKED_VS_AI",
     6: "STAKED"
 }
+
+TIMEZONE = pytz.timezone('Europe/Brussels')
 
 def get_headers():
     if current_api == PROD_API:
@@ -53,8 +56,11 @@ def format_date(date_str):
     if not date_str:
         return 'N/A'
     try:
+        # Parse UTC time and convert to Belgian time
         dt = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-        return dt.strftime('%d/%m/%y %H:%M:%S')
+        dt_utc = dt.replace(tzinfo=pytz.UTC)
+        dt_local = dt_utc.astimezone(TIMEZONE)
+        return dt_local.strftime('%d/%m/%y %H:%M:%S')
     except:
         return date_str
 
@@ -79,6 +85,11 @@ async def fetch_action_log(player_id=None):
         ui.notify('Please enter or select a Player ID', type='warning')
         return
 
+    # Update selected player and update highlighting
+    global selected_player_id
+    selected_player_id = player_id
+    update_player_cards_highlighting()  # Just update highlighting instead of reloading
+
     # Show spinner next to the button
     fetch_spinner.visible = True
 
@@ -95,7 +106,11 @@ async def fetch_action_log(player_id=None):
             
             with actions:
                 with ui.card().classes('w-full mb-4'):
-                    ui.label(f'Player {player_id} Summary').classes('text-lg font-bold')
+                    with ui.row().classes('items-center gap-2'):
+                        ui.label(f'Player {player_id} Summary').classes('text-lg font-bold')
+                        ui.button(icon='content_copy', on_click=lambda p=player_id: copy_to_clipboard(p)) \
+                            .props('flat dense padding="0 0"') \
+                            .classes('text-gray-500 hover:text-gray-700')
                     summary = data.get('playerSummary', {})
                     ui.label(f"Join Date: {format_date(summary.get('joinDate', 'N/A'))}")
                     ui.label(f"Last Active: {format_date(summary.get('lastActiveDate', 'N/A'))}")
@@ -190,8 +205,19 @@ async def fetch_action_log(player_id=None):
         # Hide spinner when done
         fetch_spinner.visible = False
 
+def update_player_cards_highlighting():
+    """Update the highlighting of player cards without reloading the data"""
+    for card, player_id in player_cards.items():
+        if player_id == selected_player_id:
+            card.classes('bg-blue-100 hover:bg-blue-200', remove='hover:bg-gray-100')
+        else:
+            card.classes('hover:bg-gray-100', remove='bg-blue-100 hover:bg-blue-200')
+
 async def load_players():
+    global player_cards
+    player_cards = {}
     players_list.clear()
+    
     with players_list:
         spinner = ui.spinner(size='3em').classes('absolute top-1/2 left-1/2')
     try:
@@ -207,7 +233,6 @@ async def load_players():
                 reverse=True
             )
 
-            # Remove the spinner
             spinner.delete()
 
             with players_list:
@@ -219,7 +244,11 @@ async def load_players():
                     async def on_player_click(p=player_id):
                         await fetch_action_log(p)
 
-                    with ui.card().classes('w-full mb-2 p-2 cursor-pointer hover:bg-gray-100').on('click', on_player_click):
+                    card_classes = 'w-full mb-2 p-2 cursor-pointer hover:bg-gray-100'
+                    card = ui.card().classes(card_classes).on('click', on_player_click)
+                    player_cards[card] = player_id
+
+                    with card:
                         with ui.row().classes('items-center gap-2'):
                             ui.label(f"ID: {shorten_id(player_id)}").classes('font-mono')
                             if is_new_player(join_date):
@@ -238,9 +267,10 @@ async def load_players():
         spinner.delete()
         ui.notify(f'Error loading players: {str(e)}', type='error')
 
-def fetch_dashboard_data():
+async def fetch_dashboard_data():
     try:
-        response = requests.get(
+        response = await asyncio.to_thread(
+            requests.get,
             f"{current_api}/getDashboardData",
             headers=get_headers()
         )
@@ -427,8 +457,13 @@ def fetch_tutorial_dropoff():
 
 @ui.page('/')
 async def dashboard():    
-    global api_label, player_id_input, actions, players_list, new_players_plot, games_plot, date_input, metrics_container, tutorial_plot, fetch_spinner
+    global api_label, player_id_input, actions, players_list, new_players_plot, games_plot, date_input
+    global metrics_container, tutorial_plot, fetch_spinner, selected_player_id, player_cards
     
+    # Initialize global variables
+    selected_player_id = None
+    player_cards = {}
+
     with ui.row().classes('w-full h-full gap-4 p-4'):
         with ui.column().classes('w-1/4 min-w-[250px]'):
             with ui.card().classes('w-full h-[calc(100vh-2rem)]'):
@@ -450,8 +485,8 @@ async def dashboard():
             metrics_container = ui.row().classes('w-full mt-4')
             
             # Add tutorial dropoff plot
-            with ui.card().classes('w-full mt-4'):
-                tutorial_plot = ui.column().classes('w-full')
+            # with ui.card().classes('w-full mt-4'):
+            #     tutorial_plot = ui.column().classes('w-full')
             
             with ui.row().classes('w-full gap-4 mt-4 flex-wrap'):
                 with ui.card().classes('w-[600px]'):
@@ -472,22 +507,32 @@ async def dashboard():
     # Update last visit time and load data
     update_last_visit()
     await load_players()
-    # fetch_dashboard_data ()
-    # fetch_engagement_metrics()
+    await fetch_dashboard_data()
+    fetch_engagement_metrics()
     # fetch_tutorial_dropoff()
 
 def format_timestamp(timestamp):
     if isinstance(timestamp, dict):
         seconds = timestamp.get('_seconds')
         if seconds:
-            dt = datetime.fromtimestamp(seconds)
-            return dt.strftime('%b %d %H:%M:%S')
+            # Convert Unix timestamp to Belgian time
+            dt_utc = datetime.fromtimestamp(seconds, pytz.UTC)
+            dt_local = dt_utc.astimezone(TIMEZONE)
+            return dt_local.strftime('%b %d %H:%M:%S')
     elif isinstance(timestamp, str):
         try:
+            # Parse UTC time string and convert to Belgian time
             dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
-            return dt.strftime('%b %d %H:%M:%S')
+            dt_utc = dt.replace(tzinfo=pytz.UTC)
+            dt_local = dt_utc.astimezone(TIMEZONE)
+            return dt_local.strftime('%b %d %H:%M:%S')
         except:
             return timestamp
     return 'N/A'
+
+async def copy_to_clipboard(text: str):
+    """Helper function to copy text to clipboard and show notification"""
+    await ui.run_javascript(f'navigator.clipboard.writeText("{text}")')
+    ui.notify('Player ID copied to clipboard', type='positive')
 
 ui.run(port=8050, host='0.0.0.0')
