@@ -6,7 +6,7 @@ import { Spell } from './Spell';
 import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import { apiFetch, getRemoteConfig } from './API';
 import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League, GEN } from '@legion/shared/enums';
-import { OutcomeData, TerrainUpdate, PlayerContextData, GameOutcomeReward, GameData, EndGameDataResults } from '@legion/shared/interfaces';
+import { OutcomeData, TerrainUpdate, PlayerContextData, GameOutcomeReward, GameData, EndGameDataResults, GameReplayMessage } from '@legion/shared/interfaces';
 import { getChestContent } from '@legion/shared/chests';
 import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL, MOVE_COOLDOWN, ATTACK_COOLDOWN,
     PRACTICE_XP_COEF, PRACTICE_GOLD_COEF, RANKED_XP_COEF, RANKED_GOLD_COEF, remoteConfig, LEGION_CUT } from '@legion/shared/config';
@@ -43,6 +43,8 @@ export abstract class Game
 
     gridWidth: number = 20;
     gridHeight: number = 10;
+
+    replayMessages: GameReplayMessage[] = [];
 
     constructor(id: string, mode: PlayMode, league: League, io: Server) {
         this.id = id;
@@ -243,10 +245,28 @@ export abstract class Game
             console.error(`[Game:sendGameStatus] Reconnect flag set to true for game not started`);
         }
         const teamId = this.socketMap.get(socket)?.id!;
-        socket.emit('gameStatus', this.getGameData(teamId, reconnect));
+        const gameData = this.getGameData(teamId, reconnect);
+        
+        // Store the initial game state in replay messages
+        if (!reconnect) {
+            const timestamp = Date.now() - this.startTime;
+            this.replayMessages.push({
+                timestamp,
+                event: 'gameStatus',
+                data: gameData
+            });
+        }
+        
+        socket.emit('gameStatus', gameData);
     }
 
     broadcast(event: string, data: any) {
+        const timestamp = Date.now() - this.startTime;
+        this.replayMessages.push({
+            timestamp,
+            event,
+            data
+        });
         this.io.in(this.id).emit(event, data);
     }
 
@@ -411,6 +431,9 @@ export abstract class Game
                 }
             });
             this.updateGameInDB(winnerUID, results);
+
+            this.saveReplayToDb();
+
         } catch (error) {
             console.error(error);
         }
@@ -1211,6 +1234,29 @@ export abstract class Game
 
     isTutorial() {
         return this.mode === PlayMode.TUTORIAL;
+    }
+
+    async saveReplayToDb() {
+        try {
+            await apiFetch(
+                'saveReplay',
+                '',
+                {
+                    method: 'POST',
+                    body: {
+                        gameId: this.id,
+                        messages: this.replayMessages,
+                        duration: this.duration,
+                        mode: this.mode,
+                    },
+                    headers: {
+                        'x-api-key': process.env.API_KEY,
+                    }
+                }
+            );
+        } catch (error) {
+            console.error('Failed to save replay:', error);
+        }
     }
 }
 

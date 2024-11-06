@@ -104,6 +104,7 @@ class App extends Component<{}, AppState> {
                                 <Router onChange={(e: RouterOnChangeArgs) => this.handleRoute(e, refreshAllData, updateActiveCharacter)}>
                                     <Route path="/" component={withNoAuth(LandingPage)} />
                                     <Route path="/game/:id" component={AuthenticatedGamePage} />
+                                    <Route path="/replay/:id" component={AuthenticatedGamePage} />
                                     <Route path="/play" component={AuthenticatedHomePage} />
                                     <Route path="/team/:id?" component={AuthenticatedHomePage} />
                                     <Route path="/shop/:id?" component={AuthenticatedHomePage} />

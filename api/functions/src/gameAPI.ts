@@ -1,7 +1,7 @@
 import {onRequest} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import admin, {checkAPIKey, corsMiddleware} from "./APIsetup";
-import {EndGameData} from "@legion/shared/interfaces";
+import {EndGameData, GameReplayMessage} from "@legion/shared/interfaces";
 import {GameStatus} from "@legion/shared/enums";
 import {logPlayerAction} from "./dashboardAPI";
 
@@ -208,6 +208,71 @@ export const addNews = onRequest({secrets: ["API_KEY"]}, (request, response) => 
     } catch (error) {
       console.error("addNews error:", error);
       response.status(500).send("Error adding news");
+    }
+  });
+});
+
+export const saveReplay = onRequest({ secrets: ["API_KEY"] }, (request, response) => {
+  const db = admin.firestore();
+
+  corsMiddleware(request, response, async () => {
+    try {
+      if (!checkAPIKey(request)) {
+        response.status(401).send('Unauthorized');
+        return;
+      }
+
+      const { gameId, messages, duration, mode } = request.body;
+
+      // Validate required fields
+      if (!gameId || !messages || !Array.isArray(messages)) {
+        response.status(400).send("Bad Request: Missing or invalid required fields");
+        return;
+      }
+
+      // Create replay data object
+      const replayData = {
+        gameId,
+        messages: messages as GameReplayMessage[],
+        duration,
+        mode,
+        savedAt: new Date(),
+      };
+
+      // Save to a new 'replays' collection
+      await db.collection("replays").doc(gameId).set(replayData);
+
+      response.status(200).send({status: 0});
+    } catch (error) {
+      console.error("saveReplay error:", error);
+      response.status(500).send("Error saving replay");
+    }
+  });
+});
+
+export const getReplay = onRequest((request, response) => {
+  const db = admin.firestore();
+
+  corsMiddleware(request, response, async () => {
+    try {
+      const gameId = request.query.id;
+      if (!gameId) {
+        response.status(400).send("Bad Request: Missing game ID");
+        return;
+      }
+
+      const replayDoc = await db.collection("replays").doc(gameId.toString()).get();
+
+      if (!replayDoc.exists) {
+        response.status(404).send("Replay not found");
+        return;
+      }
+
+      const replayData = replayDoc.data();
+      response.status(200).json(replayData);
+    } catch (error) {
+      console.error("getReplay error:", error);
+      response.status(500).send("Error fetching replay");
     }
   });
 });

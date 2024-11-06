@@ -367,3 +367,9 @@ export interface PlayerContextData {
     carrying_capacity: number;
     tokens: any;
   }
+
+export interface GameReplayMessage {
+    timestamp: number;  // Milliseconds since game start
+    event: string;     // Socket event name
+    data: any;         // Event data
+}
