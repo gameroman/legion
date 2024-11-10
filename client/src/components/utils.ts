@@ -202,7 +202,7 @@ interface ActionDetails {
   isMobile: boolean;
 }
 
-export async function recordPlayerAction(actionType: string, details: string) {
+async function recordPlayerAction(actionType: string, details: string) {
   try {
     await apiFetch('recordPlayerAction', {
       method: 'POST',
@@ -217,6 +217,10 @@ export async function recordPlayerAction(actionType: string, details: string) {
   } catch (error) {
     console.error(`Error recording player action: ${error}`);
   }
+}
+
+export function recordCompletedGame() {
+  recordPlayerAction('completedGame', '');
 }
 
 export function recordLoadingStep(step: string) {

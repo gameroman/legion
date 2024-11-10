@@ -142,8 +142,8 @@ export const createPlayer = functions.runWith({ memory: '512MB' }).auth.user().o
     },
     guideTipsShown: [],
     engagementStats: {
-      startedGames: 0, // Total games started
-      totalGames: 0, // Total games played and finished
+      completedGames: 0, // Total games completed
+      totalGames: 0, // Total games started
       completedTutorial: false,
       everPurchased: false,
       everSpentSP: false,
@@ -1065,14 +1065,20 @@ export const withdrawSOL = onRequest({ secrets: ["GAME_WALLET_PRIVATE_KEY"] }, a
 export const recordPlayerAction = onRequest((request, response) => {
   return corsMiddleware(request, response, async () => {
     try {
+      console.log(`[recordPlayerAction] ${JSON.stringify(request.body)}`);
       const uid = await getUID(request);
       const actionType = request.body.actionType;
       const details = request.body.details;
       logPlayerAction(uid, actionType, details);
 
-      // if (actionType == 'loadGame' && details.message == 'finish') {
-      //   await incrementStartedGames(uid);
-      // }
+      // Check if action type is pageView and if the message.details are in format "/game/:gameid"
+      if (actionType == 'pageView' && details.message.includes('/game/')) {
+        await incrementStartedGames(uid);
+      }
+
+      if (actionType == 'completedGame') {
+        await incrementCompletedGame(uid);
+      }
 
       if (actionType == 'tutorial' && details == 'coda') {
         await incrementCompletedTutorial(uid);
@@ -1086,16 +1092,27 @@ export const recordPlayerAction = onRequest((request, response) => {
   });
 });
 
-async function incrementStartedGames(uid: string) {
-  const db = admin.firestore();
-  await db.collection('players').doc(uid).update({
-    'engagementStats.startedGames': admin.firestore.FieldValue.increment(1),
-  });
-}
-
 async function incrementCompletedTutorial(uid: string) {
   const db = admin.firestore();
   await db.collection('players').doc(uid).update({
     'engagementStats.completedTutorial': true,
   });
+}
+
+async function incrementStartedGames(uid: string) {
+  const db = admin.firestore();
+  await db.collection('players').doc(uid).set({
+    engagementStats: {
+      totalGames: admin.firestore.FieldValue.increment(1)
+    }
+  }, { merge: true });
+}
+
+async function incrementCompletedGame(uid: string) {
+  const db = admin.firestore();
+  await db.collection('players').doc(uid).set({
+    engagementStats: {
+      completedGames: admin.firestore.FieldValue.increment(1)
+    }
+  }, { merge: true });
 }

@@ -32,6 +32,7 @@ interface EngagementMetrics {
     tutorialCompletionRate: number;
     playedOneGameRate: number;
     playedMultipleGamesRate: number;
+    gameCompletionRate: number;
 }
 
 interface TutorialDropoffStats {
@@ -417,7 +418,8 @@ export const getEngagementMetrics = onRequest(async (request, response) => {
                     totalPlayers: 0,
                     tutorialCompletionRate: 0,
                     playedOneGameRate: 0,
-                    playedMultipleGamesRate: 0
+                    playedMultipleGamesRate: 0,
+                    gameCompletionRate: 0
                 });
                 return;
             }
@@ -426,118 +428,30 @@ export const getEngagementMetrics = onRequest(async (request, response) => {
             let playedOneGame = 0;
             let playedMultipleGames = 0;
             let completedTutorialCount = 0;
+            let totalCompletedGames = 0;
+            let totalGamesStarted = 0;
 
             // Process each player
             for (const playerDoc of playersSnapshot.docs) {
                 const playerData = playerDoc.data();
-                const totalGames = playerData.engagementStats?.totalGames || 0;
+                const stats = playerData.engagementStats || {};
+                const playerTotalGames = stats.totalGames || 0;
+                const playerCompletedGames = stats.completedGames || 0;
                 
-                if (totalGames >= 1) playedOneGame++;
-                if (totalGames > 1) playedMultipleGames++;
+                if (playerTotalGames >= 1) playedOneGame++;
+                if (playerTotalGames > 1) playedMultipleGames++;
+                if (stats.completedTutorial) completedTutorialCount++;
 
-                // Check tutorial completion using the new flag
-                if (playerData.engagementStats?.completedTutorial) {
-                    completedTutorialCount++;
-                }
+                totalCompletedGames += playerCompletedGames;
+                totalGamesStarted += playerTotalGames;
             }
 
             const metrics: EngagementMetrics = {
                 totalPlayers,
                 tutorialCompletionRate: (completedTutorialCount / totalPlayers) * 100,
                 playedOneGameRate: (playedOneGame / totalPlayers) * 100,
-                playedMultipleGamesRate: (playedMultipleGames / totalPlayers) * 100
-            };
-
-            response.send(metrics);
-        } catch (error) {
-            console.error("getEngagementMetrics error:", error);
-            response.status(500).send("Error calculating engagement metrics");
-        }
-    });
-});
-
-export const getOldEngagementMetrics = onRequest(async (request, response) => {
-    const db = admin.firestore();
-
-    corsMiddleware(request, response, async () => {
-        try {
-            const startDate = request.query.date;
-            if (!startDate) {
-                response.status(400).send("Bad Request: Missing date parameter");
-                return;
-            }
-
-            // Get all players who joined after the start date
-            const playersSnapshot = await db.collection("players")
-                .where("joinDate", ">=", startDate)
-                .get();
-
-            const totalPlayers = playersSnapshot.size;
-            if (totalPlayers === 0) {
-                response.send({
-                    totalPlayers: 0,
-                    tutorialCompletionRate: 0,
-                    playedOneGameRate: 0,
-                    playedMultipleGamesRate: 0
-                });
-                return;
-            }
-
-            const playerIds = playersSnapshot.docs.map(doc => doc.id);
-            const gamesPerPlayer = new Map<string, number>();
-
-            // Process games in batches of 30 (Firestore array-contains-any limit)
-            const gameBatchSize = 30;
-            for (let i = 0; i < playerIds.length; i += gameBatchSize) {
-                const batchPlayerIds = playerIds.slice(i, i + gameBatchSize);
-                const gamesQuery = await db.collection("games")
-                    .where("players", "array-contains-any", batchPlayerIds)
-                    .get();
-
-                // Count games per player in this batch
-                gamesQuery.docs.forEach(gameDoc => {
-                    const players = gameDoc.data().players || [];
-                    players.forEach((playerId: string) => {
-                        if (playerIds.includes(playerId)) {
-                            gamesPerPlayer.set(playerId, (gamesPerPlayer.get(playerId) || 0) + 1);
-                        }
-                    });
-                });
-            }
-
-            // Alternative approach: Query each player's actions separately
-            let completedTutorialCount = 0;
-            const tutorialBatchSize = 500;
-
-            for (let i = 0; i < playerIds.length; i += tutorialBatchSize) {
-                const batchPlayerIds = playerIds.slice(i, i + tutorialBatchSize);
-                
-                // Create array of promises for parallel execution
-                const tutorialQueries = batchPlayerIds.map(playerId =>
-                    db.collection("players").doc(playerId)
-                        .collection("actions")
-                        .where("actionType", "==", "tutorial")
-                        .where("details", "==", "coda")
-                        .limit(1)
-                        .get()
-                );
-
-                // Execute queries in parallel
-                const results = await Promise.all(tutorialQueries);
-                
-                // Count completed tutorials
-                completedTutorialCount += results.filter(querySnapshot => !querySnapshot.empty).length;
-            }
-
-            // Calculate final metrics
-            const playedOneGame = Array.from(gamesPerPlayer.values()).filter(count => count >= 1).length;
-            const playedMultipleGames = Array.from(gamesPerPlayer.values()).filter(count => count > 1).length;
-
-            const metrics: EngagementMetrics = {
-                totalPlayers,
-                tutorialCompletionRate: (completedTutorialCount / totalPlayers) * 100,
-                playedOneGameRate: (playedOneGame / totalPlayers) * 100,
-                playedMultipleGamesRate: (playedMultipleGames / totalPlayers) * 100
+                playedMultipleGamesRate: (playedMultipleGames / totalPlayers) * 100,
+                gameCompletionRate: totalGamesStarted > 0 ? (totalCompletedGames / totalGamesStarted) * 100 : 0
             };
 
             response.send(metrics);

@@ -9,7 +9,7 @@ import { CharacterUpdate, GameOutcomeReward, OutcomeData, PlayerProps, TeamOverv
 import SpectatorFooter from './SpectatorFooter';
 import { PlayMode, ChestColor } from '@legion/shared/enums';
 import { apiFetch } from '../../services/apiService';
-import { showGuideToast } from '../utils';
+import { recordCompletedGame, showGuideToast } from '../utils';
 import { guide } from '../tips';
 import { firebaseAuth } from '../../services/firebaseService';
 import TutorialDialogue from './TutorialDialogue';
@@ -142,6 +142,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   endGame = (data: OutcomeData) => {
+    recordCompletedGame();
     const { isWinner, xp, gold, grade, chests, characters, key } = data;
     this.setState({
       gameOver: true,

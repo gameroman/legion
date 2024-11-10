@@ -400,6 +400,8 @@ export abstract class Game
             this.duration = Date.now() - this.startTime;
             this.gameOver = true;
 
+            this.saveReplayToDb();
+
             clearTimeout(this.audienceTimer!);
             clearTimeout(this.checkEndTimer!);
             this.teams.forEach(team => {
@@ -437,9 +439,6 @@ export abstract class Game
                 }
             });
             this.updateGameInDB(winnerUID, results);
-
-            this.saveReplayToDb();
-
         } catch (error) {
             console.error(error);
         }
