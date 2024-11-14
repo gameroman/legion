@@ -21,6 +21,7 @@ PROD_API = "https://us-central1-legion-32c6d.cloudfunctions.net"
 
 current_api = PROD_API
 last_visit = None
+game_logs_cache = {}  # Cache for storing game logs
 
 PLAY_MODE = {
     0: "PRACTICE",
@@ -187,38 +188,45 @@ async def fetch_action_log(player_id=None):
                     action_type = action.get('actionType', 'N/A')
                     details = action.get('details', {})
                     
-                    # Check for game pageView and create additional card
-                    if action_type == 'pageView' and isinstance(details, dict):
-                        message = details.get('message', '')
-                        if message.startswith('/game/'):
-                            game_id = message.replace('/game/', '')
+                    # Check for game pageView and gameComplete to create game log cards
+                    if (action_type == 'pageView' and isinstance(details, dict) and 
+                        details.get('message', '').startswith('/game/')) or action_type == 'gameComplete':
+                        
+                        # Extract game ID
+                        game_id = (details.get('message', '').replace('/game/', '') 
+                                  if action_type == 'pageView' 
+                                  else details.get('gameId'))
+                        
+                        if game_id:
                             logging.info(f"Game ID found: {game_id}")
                             
-                            # Fetch game log
-                            try:
-                                game_log_response = requests.get(
-                                    f"{current_api}/getGameLog",
-                                    params={'gameId': game_id},
-                                    headers=get_headers()
-                                )
-                                if game_log_response.status_code == 200:
-                                    game_log = game_log_response.json()
-                                else:
-                                    game_log = f"Error fetching game log: {game_log_response.status_code}"
-                            except Exception as e:
-                                game_log = f"Error fetching game log: {str(e)}"
+                            # Check cache first
+                            if game_id not in game_logs_cache:
+                                # Fetch game log if not in cache
+                                try:
+                                    game_log_response = requests.get(
+                                        f"{current_api}/getGameLog",
+                                        params={'gameId': game_id},
+                                        headers=get_headers()
+                                    )
+                                    if game_log_response.status_code == 200:
+                                        game_logs_cache[game_id] = game_log_response.json()
+                                    else:
+                                        game_logs_cache[game_id] = f"Error fetching game log: {game_log_response.status_code}"
+                                except Exception as e:
+                                    game_logs_cache[game_id] = f"Error fetching game log: {str(e)}"
                             
-                            # Add the game log card with a slightly later timestamp
+                            # Add the game log card
                             cards.append({
-                                'timestamp_value': timestamp_value + 0.1,  # Slightly after the pageView
+                                'timestamp_value': timestamp_value + 0.1,  # Slightly after the action
                                 'time_str': format_timestamp(timestamp),
                                 'content': f"Game Log for {game_id}",
                                 'type': 'game_log',
-                                'details': game_log,
+                                'details': game_logs_cache[game_id],
                                 'is_mobile': isinstance(details, dict) and details.get('mobile')
                             })
                     
-                    # Handle loadGame, pageView, and gameStart actions
+                    # Handle other action types
                     if action_type == 'loadGame' and isinstance(details, dict) and details.get('message'):
                         content = f"loadGame - {details.get('message')}"
                     elif action_type == 'pageView' and isinstance(details, dict) and details.get('message'):
@@ -227,6 +235,8 @@ async def fetch_action_log(player_id=None):
                     elif action_type == 'gameStart' and isinstance(details, dict) and details.get('mode') is not None:
                         mode = PLAY_MODE.get(details.get('mode'), 'UNKNOWN')
                         content = f"gameStart - {mode}"
+                    elif action_type == 'gameComplete':
+                        content = f"gameComplete - Game {details.get('gameId')}"
                     else:
                         content = action_type
 
@@ -235,7 +245,7 @@ async def fetch_action_log(player_id=None):
                         'time_str': format_timestamp(timestamp),
                         'content': content,
                         'type': action_type,
-                        'details': details if action_type not in ['loadGame', 'tutorial', 'pageView', 'gameStart'] else None,
+                        'details': details if action_type not in ['loadGame', 'tutorial', 'pageView', 'gameStart', 'gameComplete'] else None,
                         'is_mobile': isinstance(details, dict) and details.get('mobile')
                     })
                 
