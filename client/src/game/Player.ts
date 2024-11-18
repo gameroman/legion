@@ -418,7 +418,7 @@ export class Player extends Phaser.GameObjects.Container {
         // }
 
         // Retrieve the animation by its key
-        const animation = this.scene.anims.get(`${this.texture}_anim_${key}`);
+        const animation = this.scene.anims?.get(`${this.texture}_anim_${key}`);
         const frameRate = animation ? animation.frameRate : BASE_ANIM_FRAME_RATE;
 
         // Play the animation with the retrieved frame rate

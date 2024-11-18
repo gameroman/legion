@@ -6,6 +6,7 @@ import axios from 'axios';
 import './LandingPage.style.css';
 interface LandingPageState {
   showLoginOptions: boolean;
+  isVideoPlaying: boolean;
 }
 
 class LandingPage extends Component<{}, LandingPageState> {
@@ -13,6 +14,7 @@ class LandingPage extends Component<{}, LandingPageState> {
 
   state: LandingPageState = {
     showLoginOptions: false,
+    isVideoPlaying: false,
   };
 
   private firebaseUIContainer: HTMLDivElement | null = null;
@@ -47,7 +49,19 @@ class LandingPage extends Component<{}, LandingPageState> {
   };
 
   renderInitialView = (): h.JSX.Element => (
-    <div>
+    <div className="landing-content">
+      <div className="video-section">
+        <div className="video-wrapper">
+          <iframe 
+            className="trailer-video"
+            src="https://www.youtube.com/embed/VM6cGO-e2hY?si=NWHUWMMpdEFMaaki" 
+            title="YouTube video player" 
+            frameBorder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            allowFullScreen
+          ></iframe>
+        </div>
+      </div>
       <div className="login-header">
         <p>Assemble your team and become the strongest of the arena!</p>
       </div>
@@ -73,7 +87,7 @@ class LandingPage extends Component<{}, LandingPageState> {
 
     return (
       <div className="landingPage">
-        <div className="login-container">
+        <div className={`login-container ${showLoginOptions ? 'compact' : ''}`}>
           <img src={logoBig} alt="Logo" className="logo" />
           <div className="login-dialog">
             {showLoginOptions ? this.renderLoginOptions() : this.renderInitialView()}

@@ -12,15 +12,20 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    max-width: 400px;
+    max-width: 800px;
     width: 100%;
+    transition: max-width 0.3s ease;
+}
+
+.login-container.compact {
+    max-width: 400px;
 }
 
 .login-dialog {
     background-color: #242b37;
     border: 1px solid #0096a1;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 150, 161, 0.2);
     text-align: center;
     padding: 70px 20px 20px;
     width: 100%;
@@ -28,6 +33,30 @@
     text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
     position: relative;
     z-index: 0;
+}
+
+.video-section {
+    margin: -50px -20px 20px;
+    background-color: #1a1f2a;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+}
+
+.video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.trailer-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
 }
 
 .login-header {
@@ -130,16 +159,29 @@ button {
     opacity: 0.8;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 840px) {
     .login-container {
         max-width: 100%;
     }
 
+    .video-section {
+        margin: -30px -20px 20px;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
     .logo {
         margin-bottom: -30px;
+        max-width: 280px;
     }
 
     .login-dialog {
         padding-top: 50px;
+    }
+
+    .video-section {
+        margin: -20px -20px 15px;
+        padding: 10px;
     }
 }
