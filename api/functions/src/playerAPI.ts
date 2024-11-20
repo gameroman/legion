@@ -133,6 +133,10 @@ export const createPlayer = functions.runWith({ memory: '512MB' }).auth.user().o
       nbGames: 0,
       wins: 0,
     },
+    AIstats: {
+      nbGames: 0,
+      wins: 0,
+    },
     tours: {
       'play': false,
       'team': false,

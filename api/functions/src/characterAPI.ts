@@ -289,6 +289,26 @@ export const postGameUpdate = onRequest({ secrets: ["API_KEY"] }, (request, resp
           }
         }
 
+        if (mode == PlayMode.PRACTICE || mode == PlayMode.CASUAL_VS_AI || mode == PlayMode.RANKED_VS_AI) {
+          // First ensure AIstats exists with default values if needed
+          transaction.set(playerRef, {
+            AIstats: {
+              nbGames: 0,
+              wins: 0
+            }
+          }, { merge: true });
+
+          // Then perform the updates
+          transaction.update(playerRef, {
+            'AIstats.nbGames': admin.firestore.FieldValue.increment(1),
+          });
+          if (isWinner) {
+            transaction.update(playerRef, {
+              'AIstats.wins': admin.firestore.FieldValue.increment(1),
+            });
+          }
+        }
+
         // Iterate over the player's characters and increase their XP
         // Update XP for each character directly using their references
         if (playerData.characters && Array.isArray(playerData.characters) && characters) {

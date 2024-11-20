@@ -260,11 +260,11 @@ async function updateLeagues() {
         }
 
         let newLeague = player.isPromoted ? leagueID + 1 : player.isDemoted ? leagueID - 1 : leagueID;
-        newLeague = Math.max(0, Math.min(4, newLeague));
+        newLeague = Math.max(0, Math.min(4, newLeague)); // TODO: use enum values
 
-        if (newLeague === leagueID) {
-          return null;
-        }
+        // if (newLeague === leagueID) {
+        //   return null;
+        // }
 
         updatedPlayers.add(player.playerId!); // Add player ID to the set of updated players
 
