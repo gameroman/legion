@@ -15,12 +15,16 @@ import { getConsumableById } from '@legion/shared/Items';
 
 const TICK = 100;
 const AI_VS_AI = false;
+const MIN_AI_DECISION_TIME = 500;  // Minimum time between ANY AI decisions
+const MAX_AI_DECISION_TIME = 2000; // Maximum time between ANY AI decisions
+const COMPETITIVE_MODES = [PlayMode.CASUAL_VS_AI, PlayMode.RANKED_VS_AI];
 
 export class AIGame extends Game {
     nbExpectedPlayers = 1;
     tickTimer: NodeJS.Timeout | null = null;
     temporaryFrozen = false;
     savedCharacters = {};
+    lastAIActionTime: number = 0;
 
     constructor(id: string, mode: PlayMode, league: League, io: Server) {
         super(id, mode, league, io);
@@ -174,6 +178,11 @@ export class AIGame extends Game {
                 this.createAITeam(aiTeam!, nb, levels);
             }
         }
+        const AImodes = [PlayMode.PRACTICE, PlayMode.CASUAL_VS_AI, PlayMode.RANKED_VS_AI];
+        if (AImodes.includes(this.mode)) {
+            // TODO: tweak the AI difficulty
+            aiTeam.addWinRatio(playerTeam.teamData.AIwinRatio);
+        }
     }
 
     async addPlayer(socket: Socket, playerData: PlayerContextData) {
@@ -244,17 +253,46 @@ export class AIGame extends Game {
             return;
         }
 
-        const AIteams = AI_VS_AI ? [1, 2] : [2];
-
         if (FREEZE_AI) return;
 
-        AIteams.forEach(teamNum => {
-            (this.teams.get(teamNum)?.getMembers() as AIServerPlayer[]).forEach(player => {
-                const delay = player.takeAction();
-                setTimeout(() => {
-                    this.checkEndGame();
-                }, delay);
-            }, this);
-        });
+        const currentTime = Date.now();
+        const AIteams = AI_VS_AI ? [1, 2] : [2];
+
+        // Initialize lastAIActionTime if not set
+        if (this.lastAIActionTime === 0) {
+            this.lastAIActionTime = currentTime;
+        }
+
+        // Calculate delay based on game mode
+        let minDelay = MIN_AI_DECISION_TIME;
+        let maxDelay = MAX_AI_DECISION_TIME;
+
+        // Make AI more responsive in competitive modes
+        if (COMPETITIVE_MODES.includes(this.mode)) {
+            minDelay = Math.floor(MIN_AI_DECISION_TIME * 0.7);
+            maxDelay = Math.floor(MAX_AI_DECISION_TIME * 0.8);
+        }
+
+        const timeSinceLastAction = currentTime - this.lastAIActionTime;
+        const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay)) + minDelay;
+
+        // Only allow an action if enough time has passed since the last AI action
+        if (timeSinceLastAction >= randomDelay) {
+            // Get all AI players
+            const aiPlayers: AIServerPlayer[] = [];
+            AIteams.forEach(teamNum => {
+                const team = this.teams.get(teamNum);
+                if (team) {
+                    aiPlayers.push(...(team.getMembers() as AIServerPlayer[]));
+                }
+            });
+
+            // Randomly select one AI player to take action
+            if (aiPlayers.length > 0) {
+                const randomIndex = Math.floor(Math.random() * aiPlayers.length);
+                aiPlayers[randomIndex].takeAction();
+                this.lastAIActionTime = currentTime;
+            }
+        }
     }
 }

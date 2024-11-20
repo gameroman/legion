@@ -253,6 +253,11 @@ export const getPlayerData = onRequest((request, response) => {
           equipment: playerData.inventory.equipment.sort(numericalSort),
         };
 
+        const AIwinRatio = 
+          playerData.AIstats && playerData.AIstats.nbGames > 0 ?
+            playerData.AIstats.wins / playerData.AIstats.nbGames :
+            0;
+
         response.send({
           uid,
           gold: playerData.gold,
@@ -271,6 +276,7 @@ export const getPlayerData = onRequest((request, response) => {
           carrying_capacity: playerData.carrying_capacity,
           isLoaded: false,
           tokens: playerData.tokens,
+          AIwinRatio,
         } as PlayerContextData);
       } else {
         response.status(404).send(`Player ID ${uid} not found`);

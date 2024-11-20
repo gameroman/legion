@@ -44,7 +44,8 @@ export class Team {
             avatar: '',
             league: 0,
             rank: -1,
-            dailyloot: null
+            dailyloot: null,
+            AIwinRatio: 0,
         };
     }   
 
@@ -157,6 +158,7 @@ export class Team {
         this.teamData.league = playerData.league;
         this.teamData.rank = playerData.rank; // league rank
         this.teamData.dailyloot = playerData.dailyloot;
+        this.teamData.AIwinRatio = playerData.AIwinRatio;
     }
 
     getPlayerData() {
@@ -284,5 +286,9 @@ export class Team {
 
     getTeamSize() {
         return this.members.length;
+    }
+    
+    addWinRatio(winRatio: number) {
+        this.teamData.AIwinRatio = winRatio;
     }
 }

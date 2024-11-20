@@ -313,4 +313,8 @@ export class AIServerPlayer extends ServerPlayer {
         }
         this.team?.game.processMove(data, this.team);
     }
+
+    getIQ() {
+        return this.team?.teamData.AIwinRatio;
+    }
 }

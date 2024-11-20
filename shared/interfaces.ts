@@ -216,6 +216,7 @@ export interface TeamData {
     league: number;
     rank: number;
     dailyloot: DailyLootAllAPIData;
+    AIwinRatio: number;
 }
 
 export interface GameOutcomeReward {
@@ -366,6 +367,7 @@ export interface PlayerContextData {
     inventory: PlayerInventory;
     carrying_capacity: number;
     tokens: any;
+    AIwinRatio?: number;
   }
 
 export interface GameReplayMessage {
