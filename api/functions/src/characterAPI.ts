@@ -149,7 +149,7 @@ export const postGameUpdate = onRequest({ secrets: ["API_KEY"] }, (request, resp
       const {isWinner, xp, gold, characters, elo, key, chests, rawGrade, score, tokens} =
         request.body.outcomes as OutcomeData;
       console.log(
-        `[postGameUpdate] isWinner: ${isWinner}, xp: ${xp}, gold: ${gold}, elo: ${elo}, key: ${key}, chests: ${chests}, 
+        `[postGameUpdate for player ${uid}] isWinner: ${isWinner}, xp: ${xp}, gold: ${gold}, elo: ${elo}, key: ${key}, 
           rawGrade: ${rawGrade}, score: ${score}, tokens: ${tokens}`);
       const mode = request.body.mode as PlayMode;
       const spellsUsed = request.body.spellsUsed;
@@ -206,10 +206,6 @@ export const postGameUpdate = onRequest({ secrets: ["API_KEY"] }, (request, resp
           });
         }
 
-        // transaction.update(playerRef, {
-        //   'engagementStats.totalGames': admin.firestore.FieldValue.increment(1),
-        // });
-
         if (mode == PlayMode.PRACTICE) {
           transaction.update(playerRef, {
             'engagementStats.everPlayedPractice': true,
@@ -247,7 +243,9 @@ export const postGameUpdate = onRequest({ secrets: ["API_KEY"] }, (request, resp
           }
 
           if (mode == PlayMode.RANKED || mode == PlayMode.RANKED_VS_AI) {
+            console.log(`[postGameUpdate for player ${uid}] Updating ranked stats`);
             if (isWinner) {
+              console.log(`[postGameUpdate for player ${uid}] Updating ranked stats: wins`);
               transaction.update(playerRef, {
                 'leagueStats.wins': admin.firestore.FieldValue.increment(1),
                 'allTimeStats.wins': admin.firestore.FieldValue.increment(1),
@@ -257,6 +255,7 @@ export const postGameUpdate = onRequest({ secrets: ["API_KEY"] }, (request, resp
                 'allTimeStats.lossesStreak': 0,
               });
             } else {
+              console.log(`[postGameUpdate for player ${uid}] Updating ranked stats: losses`);
               transaction.update(playerRef, {
                 'leagueStats.losses': admin.firestore.FieldValue.increment(1),
                 'allTimeStats.losses': admin.firestore.FieldValue.increment(1),
@@ -267,14 +266,12 @@ export const postGameUpdate = onRequest({ secrets: ["API_KEY"] }, (request, resp
               });
             }
             let leagueAvgAudienceScore = playerData.leagueStats?.avgAudienceScore || 0;
-            console.log(`[postGameUpdate] previous leagueAvgAudienceScore: ${leagueAvgAudienceScore}`);
             let allTimeAvgAudienceScore = playerData.allTimeStats?.avgAudienceScore || 0;
             let leagueAvgGrade = playerData.leagueStats?.avgGrade || 0;
             let allTimeAvgGrade = playerData.allTimeStats?.avgGrade || 0;
             const leagueNbGames = playerData.leagueStats?.nbGames || 0;
             const allTimeNbGames = playerData.allTimeStats?.nbGames || 0;
             leagueAvgAudienceScore = (leagueAvgAudienceScore * leagueNbGames + score) / (leagueNbGames + 1);
-            console.log(`[postGameUpdate] new leagueAvgAudienceScore: ${leagueAvgAudienceScore}, nbGames: ${leagueNbGames}, score: ${score}`);
             allTimeAvgAudienceScore = (allTimeAvgAudienceScore * allTimeNbGames + score) / (allTimeNbGames + 1);
             leagueAvgGrade = (leagueAvgGrade * leagueNbGames + rawGrade) / (leagueNbGames + 1);
             allTimeAvgGrade = (allTimeAvgGrade * allTimeNbGames + rawGrade) / (allTimeNbGames + 1);

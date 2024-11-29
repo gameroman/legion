@@ -1,4 +1,5 @@
-import { ChestColor } from "@legion/shared/enums";
+import { ChestColor, League } from "@legion/shared/enums";
+import { LeaderboardRow} from "@legion/shared/interfaces";
 import './LeaderboardTable.style.css';
 import { h, Component } from 'preact';
 import { loadAvatar } from '../utils';
@@ -16,29 +17,16 @@ import goldChest from '@assets/shop/gold_chest.png';
 import silverChest from '@assets/shop/silver_chest.png';
 import bronzeChest from '@assets/shop/bronze_chest.png';
 
-interface PlayerData {
-    rank: number;
-    player: string;
-    elo: number;
-    wins: number;
-    losses: number;
-    winsRatio: string;
-    isFriend?: boolean;
-    isPlayer?: boolean;
-    chestColor?: ChestColor;
-    avatar: string;
-}
-
 interface LeaderboardTableProps {
-    data: PlayerData[];
-    promotionRows: number;
-    demotionRows: number;
+    data: LeaderboardRow[];
+    league: number;
     camelCaseToNormal: (text: string) => string;
     rankRowNumberStyle: (index: number) => React.CSSProperties;
 }
 
 interface LeaderboardTableState {
-    tableData: PlayerData[];
+    tableData: LeaderboardRow[];
+    league: number;
     isAscending: boolean[];
     hoveredRow: number | null;
 }
@@ -62,17 +50,20 @@ enum columnType {
 class LeaderboardTable extends Component<LeaderboardTableProps, LeaderboardTableState> {
     state: LeaderboardTableState = {
         tableData: [],
+        league: 0,
         isAscending: Array(6).fill(false),
         hoveredRow: null
     }
 
     componentDidMount() {
-        this.setState({ tableData: this.props.data });
+        this.setState(
+            { tableData: this.props.data, league: this.props.league }
+        );
     }
 
     componentDidUpdate(prevProps: LeaderboardTableProps) {
         if (prevProps.data !== this.props.data) {
-            this.setState({ tableData: this.props.data });
+            this.setState({ tableData: this.props.data, league: this.props.league });
         }
     }
 
@@ -103,7 +94,7 @@ class LeaderboardTable extends Component<LeaderboardTableProps, LeaderboardTable
         this.setState({ hoveredRow: index });
     }
 
-    getRowBG = (player: PlayerData, index: number): React.CSSProperties => {
+    getRowBG = (player: LeaderboardRow, index: number): React.CSSProperties => {
         if (player.isPlayer) {
             return { backgroundImage: `url(${leaderboardBgOwn})` };
         } else if (player.isFriend) {
@@ -116,16 +107,23 @@ class LeaderboardTable extends Component<LeaderboardTableProps, LeaderboardTable
     };
 
     render() {
-        const { demotionRows, promotionRows, rankRowNumberStyle, camelCaseToNormal } = this.props;
+        const { rankRowNumberStyle, camelCaseToNormal } = this.props;
         const columns = ['rank', 'player name', 'elo', 'wins', 'losses', 'wins ratio', 'rewards'];
 
-        const getUpgradeImage = (index: number): React.CSSProperties => ({
-            backgroundImage: index <= promotionRows
-                ? `url(${promoteIcon})`
-                : (demotionRows && index > this.state.tableData.length - demotionRows)
+        const getUpgradeImage = (isPromoted: boolean, isDemoted: boolean): React.CSSProperties => {
+            console.log(this.state.league);
+            if (this.state.league == 5) {
+                return { backgroundImage: 'none' };
+            }
+
+            return {
+                backgroundImage: isPromoted
+                    ? `url(${promoteIcon})`
+                : isDemoted
                     ? `url(${demoteIcon})`
                     : 'none'
-        });
+            }
+        }
 
         const rankRowAvatar = (index: number) => { 
             return {
@@ -155,7 +153,7 @@ class LeaderboardTable extends Component<LeaderboardTableProps, LeaderboardTable
                         </tr>
                     </thead>
                     <tbody>
-                        {this.props.data ? this.state.tableData.map((item, index) => (
+                        {this.props.data ? this.state.tableData.map((item: LeaderboardRow, index: number) => (
                             <tr 
                                 key={index} 
                                 className={item.player === 'Me' ? 'highlighted-row' : ''} 
@@ -166,7 +164,7 @@ class LeaderboardTable extends Component<LeaderboardTableProps, LeaderboardTable
                                 <td className="rank-row">
                                     <div className="rank-row-number" style={rankRowNumberStyle(item.rank)}>{item.rank}</div>
                                     <div className="rank-row-avatar" style={rankRowAvatar(index)}></div>
-                                    <div className="rank-row-upgrade" style={getUpgradeImage(item.rank)}></div>
+                                    <div className="rank-row-upgrade" style={getUpgradeImage(item.isPromoted, item.isDemoted)}></div>
                                 </td>
                                 <td>{item.player}</td>
                                 <td>{item.elo}</td>

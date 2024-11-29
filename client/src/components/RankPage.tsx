@@ -6,6 +6,8 @@ import AwardedPlayer from './awardedPlayer/AwardedPlayer';
 import { PlayerContext } from '../contexts/PlayerContext';
 import 'react-loading-skeleton/dist/skeleton.css'
 import Skeleton from 'react-loading-skeleton';
+import { APILeaderboardResponse } from "@legion/shared/interfaces";
+
 
 // Import image assets
 import tabsActiveImage from '@assets/shop/tabs_active.png';
@@ -37,10 +39,19 @@ export const rankIcons = [
   alltimeRankIcon,
 ];
 
-class RankPage extends Component {
+interface State {
+  curr_tab: number;
+  leaderboardData: APILeaderboardResponse | null;
+  sortColumn: string;
+  sortAscending: boolean;
+  tour: string | null;
+  isLoading: boolean;
+}
+
+class RankPage extends Component<{}, State> {
   static contextType = PlayerContext;
 
-  state = {
+  state: State = {
     leaderboardData: null,
     sortColumn: 'elo',
     sortAscending: false,
@@ -150,8 +161,7 @@ class RankPage extends Component {
           {!this.state.isLoading ?
             <LeaderboardTable
               data={this.state.leaderboardData.ranking}
-              promotionRows={this.state.leaderboardData.promotionRank}
-              demotionRows={this.state.leaderboardData.demotionRank}
+              league={this.state.leaderboardData.league}
               camelCaseToNormal={this.camelCaseToNormal}
               rankRowNumberStyle={rankRowNumberStyle}
             /> :

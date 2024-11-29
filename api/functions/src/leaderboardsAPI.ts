@@ -7,12 +7,11 @@ import { addWeeks, setDay, setHours, setMinutes, setSeconds, differenceInSeconds
 import {League, ChestColor} from "@legion/shared/enums";
 import {logPlayerAction} from "./dashboardAPI";
 import {awardChestContent} from "./playerAPI";
-import {DBPlayerData} from "@legion/shared/interfaces";
+import {DBPlayerData, LeaderboardRow} from "@legion/shared/interfaces";
 import {PROMOTION_RATIO, DEMOTION_RATIO, SEASON_END_CRON} from "@legion/shared/config";
 interface APILeaderboardResponse {
+  league: number;
   seasonEnd: number;
-  promotionRank: number;
-  demotionRank: number;
   highlights: any[];
   ranking: LeaderboardRow[];
 }
@@ -23,19 +22,7 @@ interface LeaderboardHighlight {
   description: string;
   title: string
 }
-interface LeaderboardRow {
-  rank: number;
-  player: string;
-  elo: number;
-  wins: number;
-  losses: number;
-  winsRatio: string;
-  isPlayer: boolean;
-  chestColor: ChestColor | null;
-  isPromoted: boolean;
-  isDemoted: boolean;
-  playerId?: string | null;
-}
+
 interface Player extends DBPlayerData{
   id: string;
 }
@@ -175,9 +162,8 @@ async function getLeagueLeaderboard(leagueID: number, rankingOnly: boolean, uid?
   }
 
   const leaderboard: APILeaderboardResponse = {
+    league: leagueID,
     seasonEnd,
-    promotionRank,
-    demotionRank,
     highlights,
     ranking: [],
   };
@@ -193,8 +179,12 @@ async function getLeagueLeaderboard(leagueID: number, rankingOnly: boolean, uid?
       winsRatio = Math.round((statsObject.wins/denominator)*100);
     }
 
+    const hasPlayedGames = statsObject.wins + statsObject.losses > 0;
+
+    const canGetChest = hasPlayedGames && statsObject.wins > 0;
+
     let chest = null;
-    if (!isAllTime) {
+    if (!isAllTime && canGetChest) {
       if (player.leagueStats.rank === 1) {
         chest = ChestColor.GOLD;
       } else if (player.leagueStats.rank === 2) {
@@ -203,6 +193,15 @@ async function getLeagueLeaderboard(leagueID: number, rankingOnly: boolean, uid?
         chest = ChestColor.BRONZE;
       }
     }
+
+    // Only mark as promoted if not in the highest league (4) and has played games and has at least one victory
+    const isPromoted = 
+      leagueID !== 4 &&
+      hasPlayedGames &&
+      statsObject.wins > 0 &&
+      statsObject.rank <= promotionRank;
+    // Only mark as demoted if not in the lowest league (0)
+    const isDemoted = leagueID !== 0 && hasPlayedGames && statsObject.rank >= demotionRank;
 
     return {
       rank: statsObject.rank,
@@ -215,8 +214,9 @@ async function getLeagueLeaderboard(leagueID: number, rankingOnly: boolean, uid?
       isPlayer: player.id === uid,
       playerId: rankingOnly ? player.id : null,
       chestColor: chest,
-      isPromoted: statsObject.rank <= promotionRank,
-      isDemoted: statsObject.rank >= demotionRank,
+      isFriend: false,
+      isPromoted: isPromoted,
+      isDemoted: isDemoted,
     } as LeaderboardRow;
   });
   if (rankingOnly) {

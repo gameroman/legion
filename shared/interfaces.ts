@@ -375,3 +375,26 @@ export interface GameReplayMessage {
     event: string;     // Socket event name
     data: any;         // Event data
 }
+
+export interface LeaderboardRow {
+    rank: number;
+    player: string;
+    avatar: string;
+    elo: number;
+    wins: number;
+    losses: number;
+    winsRatio: string;
+    isPlayer: boolean;
+    chestColor: ChestColor | null;
+    isFriend: boolean;
+    isPromoted: boolean;
+    isDemoted: boolean;
+    playerId?: string | null;
+}
+
+export interface APILeaderboardResponse {
+    league: number;
+    seasonEnd: number;
+    highlights: any[];
+    ranking: LeaderboardRow[];
+  }
