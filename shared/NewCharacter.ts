@@ -1,4 +1,4 @@
-import { Class, Stat } from "./enums";
+import { Class, Stat, statFields } from "./enums";
 import { CharacterStats, Equipment, DBCharacterData } from "./interfaces";
 import { warriorSprites, whiteMageSprites, blackMageSprites, thiefSprites, femaleSprites }
   from "./sprites";
@@ -65,28 +65,28 @@ export class NewCharacter {
     };
     this.skills = this.getSpells();
     this.stats = {
-      hp: this.getHP() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
-      mp: this.getMP() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
-      atk: this.getAtk() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
-      def: this.getDef() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
-      spatk: this.getSpatk() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
-      spdef: this.getSpdef() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
+      [Stat.HP]: this.getHP() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
+      [Stat.MP]: this.getMP() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
+      [Stat.ATK]: this.getAtk() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
+      [Stat.DEF]: this.getDef() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
+      [Stat.SPATK]: this.getSpatk() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
+      [Stat.SPDEF]: this.getSpdef() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
     };
     this.equipment_bonuses = {
-      hp: 0,
-      mp: 0,
-      atk: 0,
-      def: 0,
-      spatk: 0,
-      spdef: 0,
+      [Stat.HP]: 0,
+      [Stat.MP]: 0,
+      [Stat.ATK]: 0,
+      [Stat.DEF]: 0,
+      [Stat.SPATK]: 0,
+      [Stat.SPDEF]: 0,
     };
     this.sp_bonuses = {
-      hp: 0,
-      mp: 0,
-      atk: 0,
-      def: 0,
-      spatk: 0,
-      spdef: 0,
+      [Stat.HP]: 0,
+      [Stat.MP]: 0,
+      [Stat.ATK]: 0,
+      [Stat.DEF]: 0,
+      [Stat.SPATK]: 0,
+      [Stat.SPDEF]: 0,
     };
 
     for (let i = 1; i < this.level; i++) {
@@ -104,22 +104,22 @@ export class NewCharacter {
       const stat = selectStatToLevelUp(this.characterClass);
       switch (stat) {
         case Stat.HP:
-          this.stats.hp = increaseStat(stat, this.stats.hp, this.level, this.characterClass);
+          this.stats[Stat.HP] = increaseStat(stat, this.stats[Stat.HP], this.level, this.characterClass);
           break;
         case Stat.MP:
-          this.stats.mp = increaseStat(stat, this.stats.mp, this.level, this.characterClass);
+          this.stats[Stat.MP] = increaseStat(stat, this.stats[Stat.MP], this.level, this.characterClass);
           break;
-        case 2:
-          this.stats.atk = increaseStat(stat, this.stats.atk, this.level, this.characterClass);
+        case Stat.ATK:
+          this.stats[Stat.ATK] = increaseStat(stat, this.stats[Stat.ATK], this.level, this.characterClass);
           break;
         case Stat.DEF:
-          this.stats.def = increaseStat(stat, this.stats.def, this.level, this.characterClass);
+          this.stats[Stat.DEF] = increaseStat(stat, this.stats[Stat.DEF], this.level, this.characterClass);
           break;
         case Stat.SPATK:
-          this.stats.spatk = increaseStat(stat, this.stats.spatk, this.level, this.characterClass);
+          this.stats[Stat.SPATK] = increaseStat(stat, this.stats[Stat.SPATK], this.level, this.characterClass);
           break;
         case Stat.SPDEF:
-          this.stats.spdef = increaseStat(stat, this.stats.spdef, this.level, this.characterClass);
+          this.stats[Stat.SPDEF] = increaseStat(stat, this.stats[Stat.SPDEF], this.level, this.characterClass);
           break;
       }
     }
@@ -300,26 +300,31 @@ export class NewCharacter {
   }
 
   getCharacterData(includePrice = false): DBCharacterData {
+    // Convert stats from enum keys to string keys for DB storage
+    const dbStats = Object.fromEntries(statFields.map(key => [key, this.stats[Stat[key.toUpperCase()]]]));
+    const dbEquipmentBonuses = Object.fromEntries(statFields.map(key => [key, this.equipment_bonuses[Stat[key.toUpperCase()]]]));
+    const dbSpBonuses = Object.fromEntries(statFields.map(key => [key, this.sp_bonuses[Stat[key.toUpperCase()]]]));
+
     const data: DBCharacterData = {
-      name: this.name,
-      portrait: this.portrait,
-      class: this.characterClass,
-      level: this.level,
-      xp: 0,
-      sp: 0,
-      allTimeSP: 0,
-      stats: this.stats,
-      carrying_capacity: this.carrying_capacity,
-      carrying_capacity_bonus: this.carrying_capacity_bonus,
-      skill_slots: this.skill_slots,
-      inventory: this.inventory,
-      equipment: this.equipment,
-      equipment_bonuses: this.equipment_bonuses,
-      sp_bonuses: this.sp_bonuses,
-      skills: this.skills
+        name: this.name,
+        portrait: this.portrait,
+        class: this.characterClass,
+        level: this.level,
+        xp: 0,
+        sp: 0,
+        allTimeSP: 0,
+        stats: dbStats,
+        carrying_capacity: this.carrying_capacity,
+        carrying_capacity_bonus: this.carrying_capacity_bonus,
+        skill_slots: this.skill_slots,
+        inventory: this.inventory,
+        equipment: this.equipment,
+        equipment_bonuses: dbEquipmentBonuses,
+        sp_bonuses: dbSpBonuses,
+        skills: this.skills
     };
     if (includePrice) {
-      data.price = this.getPrice();
+        data.price = this.getPrice();
     }
     return data;
   }

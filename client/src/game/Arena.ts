@@ -1291,6 +1291,7 @@ export class Arena extends Phaser.Scene
     }
 
     placeCharacter(character: PlayerNetworkData, team: Team, isReconnect = false) {
+        console.log(`[Arena:placeCharacter] Placing character ${character.name} with data ${JSON.stringify(character)}`);
         const isPlayer = team.id === this.playerTeamId;
         const {x, y} = this.gridToPixelCoords(character.x, character.y);
 

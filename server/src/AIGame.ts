@@ -4,7 +4,7 @@ import { Game } from './Game';
 import { ServerPlayer } from './ServerPlayer';
 import { AIServerPlayer } from './AIServerPlayer';
 import {apiFetch} from './API';
-import { Class, PlayMode, League, AIAttackMode } from "@legion/shared/enums";
+import { Class, PlayMode, League, AIAttackMode, Stat } from "@legion/shared/enums";
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {Team} from "./Team";
 import { DBCharacterData, PlayerContextData } from '@legion/shared/interfaces';
@@ -52,7 +52,7 @@ export class AIGame extends Game {
         const character = new NewCharacter(data.className, 1, false, true).getCharacterData();
         if (!data.full) {
             character.portrait = 'mil1_3';
-            character.stats.hp = 40;
+            character.stats[Stat.HP] = 40;
         }
         // Half all the stats of the character
         Object.keys(character.stats).forEach(stat => {
@@ -180,11 +180,17 @@ export class AIGame extends Game {
                 this.createAITeam(aiTeam!, nb, levels);
             }
         }
+
     
         const AImodes = [PlayMode.PRACTICE, PlayMode.CASUAL_VS_AI, PlayMode.RANKED_VS_AI];
         if (AImodes.includes(this.mode)) {
-            // TODO: tweak the AI difficulty
-            aiTeam.addWinRatio(playerTeam.teamData.AIwinRatio);
+            const winRatio = playerTeam.teamData.AIwinRatio;
+            aiTeam.addWinRatio(winRatio);
+            console.log(`[AIGame:populateTeams] AI team win ratio: ${winRatio}`);
+
+            if (winRatio <= 0.1) {
+                aiTeam.halveStats();
+            }
         }
     }
 

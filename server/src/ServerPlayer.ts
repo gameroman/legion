@@ -5,7 +5,7 @@ import { Stat, Terrain, StatusEffect, Class } from "@legion/shared/enums";
 import { getConsumableById } from '@legion/shared/Items';
 import { getSpellById } from '@legion/shared/Spells';
 import { getXPThreshold } from '@legion/shared/levelling';
-import { PlayerNetworkData, StatusEffects } from '@legion/shared/interfaces';
+import { CharacterStats, PlayerNetworkData, StatusEffects } from '@legion/shared/interfaces';
 import { INITIAL_COOLDOWN, TIME_COEFFICIENT, INJURED_MODE } from "@legion/shared/config";
 import { CooldownManager } from './CooldownManager';
 import { paralyzingStatuses } from '@legion/shared/utils';
@@ -49,15 +49,10 @@ export class ServerPlayer {
     _hp: number = 0;
     _mp: number = 0;
     justDied: boolean = false;
+    stats: CharacterStats;
     hp;
-    maxHP;
     mp;
-    maxMP;
     distance;
-    atk;
-    def;
-    spatk;
-    spdef;
     cooldownManager: CooldownManager;
     terrainDoTTimer: NodeJS.Timeout | null = null;
     statusDoTTimer: NodeJS.Timeout | null = null;
@@ -95,6 +90,15 @@ export class ServerPlayer {
         
         this.setCooldown(INITIAL_COOLDOWN * 1000);
         this.setStatusesTimer();
+
+        this.stats = {
+            [Stat.HP]: 0,
+            [Stat.MP]: 0,
+            [Stat.ATK]: 0,
+            [Stat.DEF]: 0,
+            [Stat.SPATK]: 0,
+            [Stat.SPDEF]: 0,
+        };
     }
 
     getPlacementData(includePersonal = false): PlayerNetworkData {
@@ -104,14 +108,14 @@ export class ServerPlayer {
             x: this.x,
             y: this.y,
             hp: this.hp,
-            maxHP: this.maxHP,
+            maxHP: this.getStat(Stat.HP),
             statuses: this.statuses,
             class: this.class,
             level: this.level,
         }
         if (includePersonal) {
             data['mp'] = this.mp;
-            data['maxMP'] = this.maxMP;
+            data['maxMP'] = this.getStat(Stat.MP);
             data['distance'] = this.distance;
             data['cooldown'] = this.getActiveCooldown();
             data['inventory'] = this.getNetworkInventory();
@@ -213,7 +217,7 @@ export class ServerPlayer {
     updateHP(amount: number) {
         this._hp = this.hp;
         this.hp -= Math.round(amount);
-        this.hp = Math.max(Math.min(this.hp, this.maxHP), 0);
+        this.hp = Math.max(Math.min(this.hp, this.getStat(Stat.HP)), 0);
 
         if (this.HPHasChanged()){
             this.broadcastHPChange();
@@ -233,15 +237,19 @@ export class ServerPlayer {
     }
 
     getMaxHP() {
-        return this.maxHP;
+        return this.getStat(Stat.HP);
+    }
+
+    getMaxMP() {
+        return this.getStat(Stat.MP);
     }
 
     getHPratio() {
-        return this.hp / this.maxHP;
+        return this.hp / this.getMaxHP();
     }
 
     getPreviousHPRatio() {
-        return this._hp / this.maxHP;
+        return this._hp / this.getMaxHP();
     }
 
     resetPreviousHP() {
@@ -268,8 +276,8 @@ export class ServerPlayer {
     restoreMP(amount: number) {
         this._mp = this.mp;
         this.mp += amount;
-        if (this.mp > this.maxMP) {
-            this.mp = this.maxMP;
+        if (this.mp > this.getMaxMP()) {
+            this.mp = this.getMaxMP();
         }
         return this.mp;
     }
@@ -288,9 +296,9 @@ export class ServerPlayer {
     }
 
     setHP(hp: number) {
-        this.maxHP = hp;
-        this.hp = INJURED_MODE ? this.maxHP / 2 : this.maxHP;
-        this._hp = this.maxHP;
+        this.setStat(Stat.HP, hp);
+        this.hp = INJURED_MODE ? this.getMaxHP() / 2 : this.getMaxHP();
+        this._hp = this.getMaxHP();
     }
 
     getHP() {
@@ -302,8 +310,8 @@ export class ServerPlayer {
     }
 
     setMP(mp: number) {
-        this.maxMP = mp;
-        this.mp = this.maxMP;
+        this.setStat(Stat.MP, mp);
+        this.mp = this.getMaxMP();
     }
 
     getMP() {
@@ -315,7 +323,7 @@ export class ServerPlayer {
     }
 
     setUpCharacter(data, isAI = false) {
-        // console.log(`[ServerPlayer:setUpCharacter] Setting up character ${data.name}`);
+        console.log(`[ServerPlayer:setUpCharacter] ${this.name} set up with data: ${JSON.stringify(data)}`);
         // console.log(`[ServerPlayer:setUpCharacter] Spells: ${JSON.stringify(data.skills)}`);
         this.setHP(this.getStatValue(data, "hp"));
         this.setMP(this.getStatValue(data, "mp"));
@@ -333,39 +341,15 @@ export class ServerPlayer {
     }
 
     setStat(stat: Stat, value: number) {
-        switch (stat) {
-            case Stat.SPATK:
-                this.spatk = value;
-                break;
-            case Stat.SPDEF:
-                this.spdef = value;
-                break;
-            case Stat.ATK:
-                this.atk = value;
-                break;
-            case Stat.DEF:
-                this.def = value;
-                break;
-            default:
-                throw new Error(`Invalid stat ${stat}`);
+        if (stat === Stat.NONE) {
+            throw new Error('Cannot set NONE stat');
         }
+        this.stats[stat] = value;
     }
 
     getStat(stat: Stat) {
-        switch (stat) {
-            case Stat.SPATK:
-                return this.spatk;
-            case Stat.SPDEF:
-                return this.spdef;
-            case Stat.ATK:
-                return this.atk;
-            case Stat.DEF:
-                return this.def;
-            case Stat.NONE:
-                return 0;
-            default:
-                throw new Error(`Invalid stat ${stat}`);
-        }
+        if (stat === Stat.NONE) return 0;
+        return this.stats[stat];
     }
 
     // Return the cooldown that the player has to wait before being able to act again
@@ -609,6 +593,14 @@ export class ServerPlayer {
 
     countInteractedTargets() {
         return this.interactedTargets.size;
+    }
+
+    halveStats() {
+        // Iterate over the keys of the stats object
+        for (const stat in this.stats) {
+            this.stats[stat] /= 2;
+        }
+        this.setHP(this.getStat(Stat.HP) / 2);
     }
 }
 

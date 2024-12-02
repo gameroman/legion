@@ -112,13 +112,12 @@ export interface OutcomeData {
     score: number;
 }
 
-export interface CharacterStats {
-    hp: number;
-    mp: number;
-    atk: number;
-    def: number;
-    spatk: number;
-    spdef: number;
+export type CharacterStats = {
+    [K in Exclude<Stat, Stat.NONE>]: number;
+}
+
+export type CharacterStringStats = {
+    [key: string]: number;
 }
 
 
@@ -231,14 +230,14 @@ export interface DBCharacterData {
     xp: number;
     sp: number;
     allTimeSP: number;
-    stats: CharacterStats;
+    stats: CharacterStringStats;
     carrying_capacity: number;
     carrying_capacity_bonus: number;
     skill_slots: number;
     inventory: number[];
     equipment: Equipment;
-    equipment_bonuses: CharacterStats;
-    sp_bonuses: CharacterStats;
+    equipment_bonuses: CharacterStringStats;
+    sp_bonuses: CharacterStringStats;
     skills: number[];
     onSale?: boolean;
     price?: number;

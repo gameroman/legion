@@ -291,4 +291,12 @@ export class Team {
     addWinRatio(winRatio: number) {
         this.teamData.AIwinRatio = winRatio;
     }
+
+    halveStats() {
+        console.log(`[Team:halveStats] Halving stats for team ${this.id}`);
+        for (let i = 0; i < this.members.length; i++) {
+            this.members[i].halveStats();
+            // console.log(`[Team:halveStats] New stats for ${this.members[i].name}: ${JSON.stringify(this.members[i].stats)}`);
+        }
+    }
 }

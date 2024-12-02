@@ -5,7 +5,7 @@ import { Team } from './Team';
 import { Spell } from './Spell';
 import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import { apiFetch, getRemoteConfig } from './API';
-import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League, GEN } from '@legion/shared/enums';
+import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League, GEN, Stat } from '@legion/shared/enums';
 import { OutcomeData, TerrainUpdate, PlayerContextData, GameOutcomeReward, GameData, EndGameDataResults, GameReplayMessage } from '@legion/shared/interfaces';
 import { getChestContent } from '@legion/shared/chests';
 import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL, MOVE_COOLDOWN, ATTACK_COOLDOWN,
@@ -306,7 +306,7 @@ export abstract class Game
         }
         // Calculate the base damage
         // let baseDamage = attacker.atk - defender.def;
-        let baseDamage = attacker.atk / (1 + defender.def);
+        let baseDamage = attacker.getStat(Stat.ATK) / (1 + defender.getStat(Stat.DEF));
         baseDamage *= 10;
     
         // Ensure baseDamage doesn't fall below some minimum (e.g., 1)

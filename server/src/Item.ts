@@ -27,11 +27,11 @@ export class Item extends BaseItem {
                 let value;
                 switch (effect.stat) {
                     case Stat.HP:
-                        value = effect.value == -1 ? target.maxHP : effect.value;
+                        value = effect.value == -1 ? target.getMaxHP() : effect.value;
                         target.heal(value);
                         break;
                     case Stat.MP:
-                        value = effect.value == -1 ? target.maxMP : effect.value;
+                        value = effect.value == -1 ? target.getMaxMP() : effect.value;
                         target.restoreMP(value);
                         break;
                 }
@@ -49,9 +49,9 @@ export class Item extends BaseItem {
             if (effect.onKO && target.isAlive()) return false;
             switch (effect.stat) {
                 case Stat.HP:
-                    return target.hp < target.maxHP;
+                    return target.hp < target.getMaxHP();
                 case Stat.MP:
-                    return target.mp < target.maxMP;
+                    return target.mp < target.getMaxMP();
                 default:
                     return false;
             }

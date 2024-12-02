@@ -194,7 +194,7 @@ export class AIServerPlayer extends ServerPlayer {
         if (!ally) return -1;
 
         const healAmount = spell.getHealAmount();
-        if (ally.hp <= (ally.maxHP - healAmount)) {
+        if (ally.hp <= (ally.getMaxHP() - healAmount)) {
             const data = {
                 num: this.num,
                 x: ally.x,
