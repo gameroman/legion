@@ -840,8 +840,11 @@ export const zombieData = onRequest({ secrets: ["API_KEY"] }, async (req, res) =
     const league = parseInt(req.query.league as string, 10);
     const targetElo = parseInt(req.query.elo as string, 10);
 
+    console.log(`[zombieData] Fetching zombie data for elo: ${targetElo} and league: ${league}`);
+
     if (isNaN(league) || isNaN(targetElo)) {
       res.status(400).json({ error: 'Valid league and elo parameters are required' });
+      console.log(`[zombieData] Invalid league or elo parameters: ${league} ${targetElo}`);
       return;
     }
 
@@ -855,6 +858,8 @@ export const zombieData = onRequest({ secrets: ["API_KEY"] }, async (req, res) =
     // Get all matching player documents
     const playersSnapshot = await playersQuery.get();
     const playerDocs = playersSnapshot.docs;
+
+    console.log(`[zombieData] Found ${playerDocs.length} players`);
 
     // Shuffle the array of player documents
     for (let i = playerDocs.length - 1; i > 0; i--) {
@@ -922,8 +927,6 @@ export const zombieData = onRequest({ secrets: ["API_KEY"] }, async (req, res) =
         skills: characterDoc.get('skills'),
       }));
 
-      console.log(`[zombieData] playerData dailyloot: ${JSON.stringify(playerData.dailyloot)}`);
-
       // Transform dailyloot
       const transformedDailyLoot = transformDailyLoot(playerData.dailyloot);
 
@@ -964,7 +967,8 @@ export const zombieData = onRequest({ secrets: ["API_KEY"] }, async (req, res) =
 
       res.json(responseData);
     } else {
-      res.json({ message: `No dangling player IDs found${league !== -1 ? ` in league ${league}` : ''}` });
+      console.log(`[zombieData] No dangling player IDs found${league !== -1 ? ` in league ${league}` : ''}`);
+      res.json({});
     }
   } catch (error) {
     console.error('Error in zombieData:', error);

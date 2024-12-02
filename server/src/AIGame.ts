@@ -79,7 +79,7 @@ export class AIGame extends Game {
         return newCharacter;
     }
 
-    createAITeam(team: Team, nb: number, levels?: number[]) {
+    createAITeam(team: Team, nb: number = 3, levels?: number[]) {
         console.log(`[AIGame:createAITeam] Creating AI team with ${nb} members...`);
         const classes = [Class.WARRIOR, Class.WHITE_MAGE, Class.BLACK_MAGE];
         if (!levels) {
@@ -98,12 +98,9 @@ export class AIGame extends Game {
         if (this.mode === PlayMode.TUTORIAL) {
             team.teamData.playerName = 'Taskmaster';
         }
-
-        return levels;
     }
 
-    async fetchZombieTeam(team: Team, elo: number, nb: number, levels: number[]) {
-        // console.log(`[AIGame:fetchZombieTeam] mode = ${this.mode}, league = ${this.league}, elo = ${elo}`);
+    async fetchZombieData(elo: number) {
         const league = this.mode == PlayMode.RANKED_VS_AI ? this.league : -1;
         const data = await apiFetch(
             `zombieData?league=${league}&elo=${elo}`,
@@ -114,17 +111,15 @@ export class AIGame extends Game {
                 }
             }
         );
-        console.log(`[AIGame:fetchZombieTeam] Zombie player data: ${JSON.stringify(data.playerData)}`);
-        
-        if (data.playerData === undefined) {
-            console.log('[AIGame:fetchZombieTeam] Failed to fetch zombie data. Falling back to createAITeam.');
-            this.createAITeam(team, nb, levels);
-        } else {
-            team.setPlayerData(data.playerData);
-            data.rosterData.characters.forEach((character: DBCharacterData, index: number) => {
-                this.addAICharacter(team, character);
-            });
-        }
+        // console.log(`[AIGame:fetchZombieData] All zombie data: ${JSON.stringify(data)}`);
+        return data;
+    }
+
+    async createZombieTeam(team: Team, zombieData) {
+        team.setPlayerData(zombieData.playerData);
+        zombieData.rosterData.characters.forEach((character: DBCharacterData, index: number) => {
+            this.addAICharacter(team, character);
+        });
     }
 
     modifyTeamForTutorial(characters: ServerPlayer[]) {
@@ -142,42 +137,50 @@ export class AIGame extends Game {
         return characters;
     }
 
+    async createPlayerTeam(playerTeam: Team) {
+        const teamData = await apiFetch('rosterData', playerTeam.getFirebaseToken());
+        let characters = [];
+        teamData.characters.forEach((character: any, index) => {
+            const position = this.getPosition(index, false);
+            const newCharacter = new ServerPlayer(index + 1, character.name, character.portrait, position.x, position.y);
+            newCharacter.setTeam(playerTeam!);
+            newCharacter.setUpCharacter(character);
+            characters.push(newCharacter);
+        });
+        characters = this.modifyTeamForTutorial(characters);
+        characters.forEach(character => {
+            playerTeam?.addMember(character);
+        });
+    }
+
     async populateTeams() {
-        const DEFAULT_SIZE = 3;
         const playerTeam = this.teams.get(1);
         const aiTeam = this.teams.get(2);
-        let levels = [];
-        let nb = DEFAULT_SIZE;
 
         if (AI_VS_AI) {
-            levels = this.createAITeam(playerTeam!, DEFAULT_SIZE);
+            this.createAITeam(playerTeam!);
         } else {
-            // console.log(`[AIGame:populateTeams] Fetching player team data...`);
-            const teamData = await apiFetch('rosterData', playerTeam.getFirebaseToken());
-            let characters = [];
-            teamData.characters.forEach((character: any, index) => {
-                const position = this.getPosition(index, false);
-                const newCharacter = new ServerPlayer(index + 1, character.name, character.portrait, position.x, position.y);
-                newCharacter.setTeam(playerTeam!);
-                newCharacter.setUpCharacter(character);
-                characters.push(newCharacter);
-                levels.push(character.level);
-            });
-            characters = this.modifyTeamForTutorial(characters);
-            characters.forEach(character => {
-                playerTeam?.addMember(character);
-            });
-            nb = teamData.characters.length;
+            await this.createPlayerTeam(playerTeam);
         }
 
-        // console.log(`[AIGame:populateTeams] Game mode is ${this.mode}, isZombie: ${this.mode === PlayMode.CASUAL_VS_AI || this.mode === PlayMode.RANKED_VS_AI}`);
+        const nb = playerTeam.getMembers().length;
+        const levels = playerTeam.getMembers().map(player => player.level);
         if (this.mode === PlayMode.CASUAL_VS_AI || this.mode === PlayMode.RANKED_VS_AI) {
-            await this.fetchZombieTeam(aiTeam!, playerTeam.teamData.elo, nb, levels);
-        } else {
+            const zombieData = await this.fetchZombieData(playerTeam.teamData.elo);
+            console.log(`[AIGame:populateTeams] Fetched zombie data: ${JSON.stringify(zombieData)}`);
+            // Check if the zombieData is not empty
+            if (Object.keys(zombieData).length > 0) {
+                await this.createZombieTeam(aiTeam!, zombieData);
+            } else {
+                console.log('[AIGame:populateTeams] Failed to fetch zombie data. Falling back to createAITeam.');
+                this.createAITeam(aiTeam!, nb, levels);
+            }
+        } else { // Create a matching team for practice
             if (this.mode != PlayMode.TUTORIAL) {
                 this.createAITeam(aiTeam!, nb, levels);
             }
         }
+    
         const AImodes = [PlayMode.PRACTICE, PlayMode.CASUAL_VS_AI, PlayMode.RANKED_VS_AI];
         if (AImodes.includes(this.mode)) {
             // TODO: tweak the AI difficulty
