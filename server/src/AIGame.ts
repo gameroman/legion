@@ -74,7 +74,7 @@ export class AIGame extends Game {
         if (!position) position = this.getPosition(team.getMembers().length, true);
         const newCharacter = new AIServerPlayer(team.getMembers().length + 1, character.name, character.portrait, position.x, position.y);
         newCharacter.setTeam(team);
-        newCharacter.setUpCharacter(character);
+        newCharacter.setUpCharacter(character, true);
         team.addMember(newCharacter);
         return newCharacter;
     }
@@ -144,7 +144,7 @@ export class AIGame extends Game {
             const position = this.getPosition(index, false);
             const newCharacter = new ServerPlayer(index + 1, character.name, character.portrait, position.x, position.y);
             newCharacter.setTeam(playerTeam!);
-            newCharacter.setUpCharacter(character);
+            newCharacter.setUpCharacter(character, true);
             characters.push(newCharacter);
         });
         characters = this.modifyTeamForTutorial(characters);
