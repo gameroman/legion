@@ -608,12 +608,13 @@ export class ServerPlayer {
         return this.interactedTargets.size;
     }
 
-    halveStats() {
+    scaleStats(scale: number) {
         // Iterate over the keys of the stats object
         for (const stat in this.stats) {
-            this.stats[stat] /= 2;
+            this.stats[stat] *= scale;
         }
-        this.setHP(this.getStat(Stat.HP) / 2);
+        this.setHP(this.getStat(Stat.HP) * scale);
+        this.setMP(this.getStat(Stat.MP) * scale);
     }
 
     halveSpeed() {
@@ -622,6 +623,10 @@ export class ServerPlayer {
 
     setSpeed(speed: number) {
         this.speed = speed;
+    }
+
+    isMage() {
+        return this.class === Class.WHITE_MAGE || this.class === Class.BLACK_MAGE;
     }
 }
 

@@ -293,10 +293,10 @@ export class Team {
         this.teamData.AIwinRatio = winRatio;
     }
 
-    halveStats() {
-        console.log(`[Team:halveStats] Halving stats for team ${this.id}`);
+    scaleStats(scale: number) {
+        console.log(`[Team:scaleStats] Scaling stats for team ${this.id} by ${scale}`);
         for (let i = 0; i < this.members.length; i++) {
-            this.members[i].halveStats();
+            this.members[i].scaleStats(scale);
             // console.log(`[Team:halveStats] New stats for ${this.members[i].name}: ${JSON.stringify(this.members[i].stats)}`);
         }
     }
@@ -315,11 +315,27 @@ export class Team {
         }
     }
 
+    setHealRandomThreshold(threshold: number) {
+        console.log(`[Team:setHealRandomThreshold] Setting heal random threshold for team ${this.id} to ${threshold}`);
+        for (let i = 0; i < this.members.length; i++) {
+            const member = this.members[i] as AIServerPlayer;
+            member.healRandomThreshold = threshold;
+        }
+    }
+
     disableItems() {
         console.log(`[Team:disableItems] Disabling items for team ${this.id}`);
         for (let i = 0; i < this.members.length; i++) {
             const member = this.members[i] as AIServerPlayer;
             member.canUseItems = false;
+        }
+    }
+
+    disableStatusEffects() {
+        console.log(`[Team:disableStatusEffects] Disabling status effects for team ${this.id}`);
+        for (let i = 0; i < this.members.length; i++) {
+            const member = this.members[i] as AIServerPlayer;
+            member.canUseStatusEffects = false;
         }
     }
 

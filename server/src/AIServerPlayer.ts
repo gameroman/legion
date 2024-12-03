@@ -1,5 +1,5 @@
 import { ServerPlayer, ActionType } from './ServerPlayer';
-import { AIAttackMode, PlayMode, Target } from "@legion/shared/enums";
+import { AIAttackMode, PlayMode, StatusEffect, Target } from "@legion/shared/enums";
 import { INITIAL_COOLDOWN } from "@legion/shared/config";
 
 
@@ -23,7 +23,9 @@ export class AIServerPlayer extends ServerPlayer {
     retargetRate: number = 0;
     retargetCount: number = 0;
     canUseItems: boolean = true;
+    canUseStatusEffects: boolean = true;
     bannedSpells: number[] = [];
+    healRandomThreshold: number = 1.0;
 
     attackMode: AIAttackMode = AIAttackMode.IDLE;
     actionCount: number = 0;
@@ -146,8 +148,7 @@ export class AIServerPlayer extends ServerPlayer {
 
     checkForItemUse() {
         if (!this.canUseItems) return -1;
-        // Iterate over the 5 item slots
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < this.inventory.length; i++) {
             const item = this.getItemAtIndex(i);
             if (!item) continue;
             if (item.effectsAreApplicable(this)) {
@@ -170,14 +171,16 @@ export class AIServerPlayer extends ServerPlayer {
         console.log(`[AIServerPlayer:checkForSpellUse] Checking for spells among ${this.spells.map(spell => spell.id)}`);
         let delay = -1;
         for (let i = 0; i < this.spells.length; i++) {
-            const spell = this.spells[i];
+            const spell = this.getSpellAtIndex(i);
             if (this.bannedSpells.includes(spell.id)) continue;
+            if (spell.isStatusEffectSpell() && !this.canUseStatusEffects) continue;
             // console.log(`[AIServerPlayer:checkForSpellUse] Checking spell ${spell.id}`);
             if (spell.cost > this.mp) {
                 console.log(`[AIServerPlayer:checkForSpellUse] Spell ${spell.id} costs ${spell.cost} MP, which is more than the AI has`);
                 continue;
             }
 
+            // TODO: replace by checks on spell properties
             switch (spell.id) {
                 case 0:
                 case 1:
@@ -212,6 +215,7 @@ export class AIServerPlayer extends ServerPlayer {
         const spell = this.spells[index];
         if (spell.target != Target.SINGLE) return -1;
         if (!spell.isHealingSpell()) return -1;
+        if (Math.random() > this.healRandomThreshold) return -1;
 
         const allies = this.team?.game.listAllAllies(this);
         if (!allies || allies.length === 0) return -1;
@@ -261,10 +265,15 @@ export class AIServerPlayer extends ServerPlayer {
         const spell = this.spells[index];
         console.log(`[AIServerPlayer:checkForStatusEffectUse] Checking for status effect use: ${spell.status.effect}`);
 
-        const targets = this.team?.game.listAllEnemies(this);
+        let targets = this.team?.game.listAllEnemies(this);
+        if (spell.status.effect === StatusEffect.MUTE) {
+            // Filter to keep only mages
+            targets = targets.filter(target => target.isMage());
+        }
         if (!targets || targets.length === 0) return -1;
         // Find the first target that is not afflicted by the status effect
-        const target = targets.find(target => !target.hasStatusEffect(spell.status.effect));
+        const target = targets.find(target => !target.hasStatusEffect(spell.status.effect)); 
+        
         if (target) {
             const data = {
                 num: this.num,

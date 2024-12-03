@@ -276,21 +276,22 @@ export class NewCharacter {
   }
 
   setUpInventory() {
-    let consumables = getStarterConsumables(this.level / 2);
-    if (consumables.length === 0) return;
+    this.inventory = [1,1,1];
+    // let consumables = getStarterConsumables(this.level / 2);
+    // if (consumables.length === 0) return;
 
-    // If the character is not a mage, filter out mage specific items
-    if (this.characterClass !== Class.WHITE_MAGE && this.characterClass !== Class.BLACK_MAGE) {
-      consumables = consumables.filter(item => !MAGE_SPECIFIC_ITEMS.includes(item));
-    }
+    // // If the character is not a mage, filter out mage specific items
+    // if (this.characterClass !== Class.WHITE_MAGE && this.characterClass !== Class.BLACK_MAGE) {
+    //   consumables = consumables.filter(item => !MAGE_SPECIFIC_ITEMS.includes(item));
+    // }
 
-    // For each available slot, add a random consumable or possibly nothing
-    for (let i = 0; i < this.carrying_capacity; i++) {
-      if (Math.random() < 0.6) {
-        // Pick a random consumable
-        this.inventory.push(consumables[Math.floor(Math.random() * consumables.length)]);
-      }
-    }
+    // // For each available slot, add a random consumable or possibly nothing
+    // for (let i = 0; i < this.carrying_capacity; i++) {
+    //   if (Math.random() < 0.6) {
+    //     // Pick a random consumable
+    //     this.inventory.push(consumables[Math.floor(Math.random() * consumables.length)]);
+    //   }
+    // }
   }
 
   getPrice(): number {

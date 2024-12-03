@@ -1,6 +1,6 @@
 import { ServerPlayer } from "./ServerPlayer";
 import { Game } from "./Game";
-import { Stat, Target, EffectDirection } from "@legion/shared/enums";
+import { Stat, Target, EffectDirection, StatusEffect } from "@legion/shared/enums";
 import { EffectModifiers, EffectModifier, Effect } from "@legion/shared/interfaces";
 
 import { BaseSpell } from "@legion/shared/BaseSpell";
@@ -72,6 +72,10 @@ export class Spell extends BaseSpell {
 
     isHealingSpell() {
         return this.effects.some(effect => effect.stat === Stat.HP && effect.value > 0);
+    }
+
+    isStatusEffectSpell() {
+        return this.status?.effect !== undefined;
     }
 
     getHealAmount() {

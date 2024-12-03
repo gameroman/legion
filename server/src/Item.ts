@@ -51,6 +51,7 @@ export class Item extends BaseItem {
                 case Stat.HP:
                     return target.hp < target.getMaxHP();
                 case Stat.MP:
+                    // console.log(`[Item:effectsAreApplicable] ${this.name} is applicable for ${target.name}? MP: ${target.mp} < ${target.getMaxMP()}`);
                     return target.mp < target.getMaxMP();
                 default:
                     return false;
