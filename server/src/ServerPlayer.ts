@@ -616,6 +616,10 @@ export class ServerPlayer {
         this.setHP(this.getStat(Stat.HP) / 2);
     }
 
+    halveSpeed() {
+        this.speed /= 2;
+    }
+
     setSpeed(speed: number) {
         this.speed = speed;
     }

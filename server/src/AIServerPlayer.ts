@@ -22,6 +22,8 @@ export class AIServerPlayer extends ServerPlayer {
     target: ServerPlayer | null = null;
     retargetRate: number = 0;
     retargetCount: number = 0;
+    canUseItems: boolean = true;
+    bannedSpells: number[] = [];
 
     attackMode: AIAttackMode = AIAttackMode.IDLE;
     actionCount: number = 0;
@@ -83,45 +85,67 @@ export class AIServerPlayer extends ServerPlayer {
     }
 
     takeAction(): number {
-        // console.log(`AI ${this.num} taking action, cooldown = ${this.getActiveCooldown()}`);
         if (this.team?.game.isTutorial()) {
             if (this.attackMode === AIAttackMode.IDLE) return 0;
             if (this.actionCount > 0 && this.attackMode === AIAttackMode.ATTACK_ONCE) return 0;
         }
 
         if (!this.canAct()) return 0;
-        let delay = 0;
 
-        if (this.checkForItemUse()) return 0;
+        if (this.getIQ() > 0.4) {
+            if (this.team?.game.checkIsOnFlame(this.x, this.y)) {
+                const cell = this.team?.game.findFreeCellNear(this.x, this.y, true);
+                if (cell) {
+                    this.moveTowards(cell.x, cell.y);
+                    this.handleActionTaken();
+                    return 0;
+                }
+            }
+        }
+
+        // Try to use an item
+        if (this.checkForItemUse()) {
+            this.handleActionTaken();
+            return 0;
+        }
         
-        delay = this.checkForSpellUse();
-        if (delay > -1)
-            return delay;
-
-        if (!this.hasValidTarget()) this.determineTarget();
-        if(!this.target) {
-            // console.log(`AI ${this.num} has no target! ${this.target}`);    
-            return;
+        // Try to use a spell
+        const spellDelay = this.checkForSpellUse();
+        if (spellDelay > -1) {
+            this.handleActionTaken();
+            return spellDelay;
         }
 
-        if (this.isNextTo(this.target!.x, this.target!.y)) {
-            this.attack(this.target!);
+        // Try to attack or move
+        if (!this.hasValidTarget()) {
+            this.determineTarget();
+        }
+        
+        if (!this.target) {
+            return 0;
+        }
+
+        if (this.isNextTo(this.target.x, this.target.y)) {
+            this.attack(this.target);
         } else {
-            this.moveTowards(this.target!.x, this.target!.y);
+            this.moveTowards(this.target.x, this.target.y);
         }
 
+        this.handleActionTaken();
+        return 0;
+    }
+
+    private handleActionTaken() {
+        this.actionCount++;
         this.retargetCount--;
         if (this.retargetCount <= 0) {
             this.target = null;
             this.retargetCount = this.retargetRate;
         }
-
-        this.actionCount++;
-
-        return 0;
     }
 
     checkForItemUse() {
+        if (!this.canUseItems) return -1;
         // Iterate over the 5 item slots
         for (let i = 0; i < 5; i++) {
             const item = this.getItemAtIndex(i);
@@ -147,6 +171,7 @@ export class AIServerPlayer extends ServerPlayer {
         let delay = -1;
         for (let i = 0; i < this.spells.length; i++) {
             const spell = this.spells[i];
+            if (this.bannedSpells.includes(spell.id)) continue;
             // console.log(`[AIServerPlayer:checkForSpellUse] Checking spell ${spell.id}`);
             if (spell.cost > this.mp) {
                 console.log(`[AIServerPlayer:checkForSpellUse] Spell ${spell.id} costs ${spell.cost} MP, which is more than the AI has`);

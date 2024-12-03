@@ -5,6 +5,7 @@ import { Game } from "./Game";
 import { CharacterUpdate, PlayerContextData, TeamData } from '@legion/shared/interfaces';
 import { ChestColor } from '@legion/shared/enums';
 import { MAX_AUDIENCE_SCORE } from "@legion/shared/config";
+import { AIServerPlayer } from "./AIServerPlayer";
 
 
 const MULTIHIT_SCORE_BASE = 6;
@@ -297,6 +298,35 @@ export class Team {
         for (let i = 0; i < this.members.length; i++) {
             this.members[i].halveStats();
             // console.log(`[Team:halveStats] New stats for ${this.members[i].name}: ${JSON.stringify(this.members[i].stats)}`);
+        }
+    }
+
+    halveSpeed() {
+        console.log(`[Team:halveSpeed] Halving speed for team ${this.id}`);
+        for (let i = 0; i < this.members.length; i++) {
+            this.members[i].halveSpeed();
+        }
+    }
+
+    setSpeed(speed: number) {
+        console.log(`[Team:setSpeed] Setting speed for team ${this.id} to ${speed}`);
+        for (let i = 0; i < this.members.length; i++) {
+            this.members[i].setSpeed(speed);
+        }
+    }
+
+    disableItems() {
+        console.log(`[Team:disableItems] Disabling items for team ${this.id}`);
+        for (let i = 0; i < this.members.length; i++) {
+            const member = this.members[i] as AIServerPlayer;
+            member.canUseItems = false;
+        }
+    }
+
+    banSpells(spells: number[]) {
+        for (let i = 0; i < this.members.length; i++) {
+            const member = this.members[i] as AIServerPlayer;
+            member.bannedSpells = spells;
         }
     }
 }

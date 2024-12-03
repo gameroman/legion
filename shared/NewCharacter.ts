@@ -5,7 +5,7 @@ import { warriorSprites, whiteMageSprites, blackMageSprites, thiefSprites, femal
 import { male_names, female_names } from "./names";
 import { selectStatToLevelUp, increaseStat, getSPIncrement } from "./levelling";
 import { getPrice } from "./economy";
-import { getStarterConsumables } from "./Items";
+import { getStarterConsumables, MAGE_SPECIFIC_ITEMS } from "./Items";
 
 import { LOTSA_MP, BASE_CARRYING_CAPACITY } from "@legion/shared/config";
 import { getSpellsUpToLevel } from "./Spells";
@@ -276,9 +276,14 @@ export class NewCharacter {
   }
 
   setUpInventory() {
-    const consumables = getStarterConsumables(this.level / 2);
-    // console.log(`[NewCharacter:setUpInventory] Consumables for AI ${this.name}: ${consumables}`);
+    let consumables = getStarterConsumables(this.level / 2);
     if (consumables.length === 0) return;
+
+    // If the character is not a mage, filter out mage specific items
+    if (this.characterClass !== Class.WHITE_MAGE && this.characterClass !== Class.BLACK_MAGE) {
+      consumables = consumables.filter(item => !MAGE_SPECIFIC_ITEMS.includes(item));
+    }
+
     // For each available slot, add a random consumable or possibly nothing
     for (let i = 0; i < this.carrying_capacity; i++) {
       if (Math.random() < 0.6) {
@@ -286,7 +291,6 @@ export class NewCharacter {
         this.inventory.push(consumables[Math.floor(Math.random() * consumables.length)]);
       }
     }
-    // console.log(`[NewCharacter:setUpInventory] Inventory for AI ${this.name}: ${this.inventory} (length: ${this.inventory.length})`);
   }
 
   getPrice(): number {

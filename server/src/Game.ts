@@ -178,7 +178,7 @@ export abstract class Game
         return cells;
     }
 
-    findFreeCellNear(gridX: number, gridY: number) {
+    findFreeCellNear(gridX: number, gridY: number, noFire: boolean = false) {
         // Perform a BFS to find the nearest free cell
         const queue = [{x: gridX, y: gridY}];
         const visited = new Set<{x: number, y: number}>();
@@ -186,7 +186,7 @@ export abstract class Game
 
         while (queue.length > 0) {
             const {x, y} = queue.shift()!;
-            if (this.isFree(x, y)) {
+            if (this.isFree(x, y) && (!noFire || !this.checkIsOnFlame(x, y))) {
                 return {x, y};
             }
             const neighbors = this.listCellsAround(x, y);
@@ -517,6 +517,10 @@ export abstract class Game
         if (terrain) {
             player.setUpTerrainEffect(terrain);
         }
+    }
+
+    checkIsOnFlame(x: number, y: number) {
+        return this.terrainManager.getTerrain(x, y) === Terrain.FIRE;
     }
 
     processAttack({num, target, sameTeam}: {num: number, target: number, sameTeam: boolean}, team: Team) {

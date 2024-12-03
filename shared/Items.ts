@@ -203,3 +203,5 @@ export function getRandomConsumableByRarity(rarity: number): BaseItem {
 export function getStarterConsumables(effort: number):number[] {
     return items.filter(item => item.effort <= effort).map(item => item.id);
 }
+
+export const MAGE_SPECIFIC_ITEMS = [1, 3, 5, 12];

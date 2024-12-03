@@ -189,9 +189,13 @@ export class AIGame extends Game {
             aiTeam.addWinRatio(winRatio);
             console.log(`[AIGame:populateTeams] AI team win ratio: ${winRatio}`);
 
-            if (winRatio <= 0.1) {
-                aiTeam.halveStats();
+            if (winRatio <= 0.1) aiTeam.halveStats();
+            if (winRatio <= 0.2) aiTeam.setSpeed(0.7);
+            if (winRatio <= 0.4) {
+                aiTeam.disableItems();
+                aiTeam.banSpells([3,4,5,6,7,8]);
             }
+            if (winRatio > 0.8) aiTeam.setSpeed(1.2);
         }
     }
 
