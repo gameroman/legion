@@ -1178,6 +1178,7 @@ export abstract class Game
     }
 
     async saveInventoryToDb(token: string, characterId: string, inventory: number[]) {
+        console.log(`[Game:saveInventoryToDb] Saving inventory to DB for character ${characterId}`);
         try {
             await apiFetch(
                 'inventorySave',

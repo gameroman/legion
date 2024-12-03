@@ -144,7 +144,7 @@ export class AIGame extends Game {
             const position = this.getPosition(index, false);
             const newCharacter = new ServerPlayer(index + 1, character.name, character.portrait, position.x, position.y);
             newCharacter.setTeam(playerTeam!);
-            newCharacter.setUpCharacter(character, true);
+            newCharacter.setUpCharacter(character, false);
             characters.push(newCharacter);
         });
         characters = this.modifyTeamForTutorial(characters);
@@ -184,7 +184,8 @@ export class AIGame extends Game {
     
         const AImodes = [PlayMode.PRACTICE, PlayMode.CASUAL_VS_AI, PlayMode.RANKED_VS_AI];
         if (AImodes.includes(this.mode)) {
-            const winRatio = playerTeam.teamData.AIwinRatio;
+            let winRatio = playerTeam.teamData.AIwinRatio;
+            if (this.mode === PlayMode.RANKED_VS_AI) winRatio += 0.1;
             aiTeam.addWinRatio(winRatio);
             console.log(`[AIGame:populateTeams] AI team win ratio: ${winRatio}`);
 

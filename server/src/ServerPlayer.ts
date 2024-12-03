@@ -29,6 +29,10 @@ const statusDoTInterval = {
     [StatusEffect.BURN]: 3000,
 }
 
+const statusSpeedModifiers = {
+    [StatusEffect.HASTE]: 2,
+}
+
 const DoTStatuses = [StatusEffect.POISON, StatusEffect.BURN];
 const DoTTerrains = [Terrain.FIRE];
 
@@ -52,6 +56,7 @@ export class ServerPlayer {
     stats: CharacterStats;
     hp;
     mp;
+    speed = 1; // TODO: incorporate into stats one day
     distance;
     cooldownManager: CooldownManager;
     terrainDoTTimer: NodeJS.Timeout | null = null;
@@ -365,8 +370,7 @@ export class ServerPlayer {
     
     setCooldown(durationMs: number) {
         if (this.team?.game.config.FAST_MODE) durationMs = this.team?.game.config.COOLDOWN_OVERRIDE;
-        if (this.isHasted()) durationMs /= 2;
-        this.cooldownManager.setCooldown(durationMs);
+        this.cooldownManager.setCooldown(durationMs / this.speed);
     }
 
     setStatusesTimer() {
@@ -393,6 +397,7 @@ export class ServerPlayer {
     }
 
     removeItem(item: Item) {
+        console.log(`[ServerPlayer:removeItem] Removing ${item.name} from inventory`);
         const index = this.inventory.indexOf(item);
         if (index === -1) {
             console.error(`Cannot remove ${item.name} from player ${this.num}'s inventory because it is not there`);
@@ -495,6 +500,10 @@ export class ServerPlayer {
             this.cooldownManager.pauseCooldown();
         }
 
+        if (statusSpeedModifiers[status]) {
+            this.setSpeed(this.speed * statusSpeedModifiers[status]);
+        }
+
         this.broadcastStatusEffectChange();
         return true;
     }
@@ -507,6 +516,10 @@ export class ServerPlayer {
 
         if (paralyzingStatuses.includes(status)) {
             this.cooldownManager.resumeCooldown();
+        }
+
+        if (statusSpeedModifiers[status]) {
+            this.setSpeed(this.speed / statusSpeedModifiers[status]);
         }
 
         this.broadcastStatusEffectChange();
@@ -601,6 +614,10 @@ export class ServerPlayer {
             this.stats[stat] /= 2;
         }
         this.setHP(this.getStat(Stat.HP) / 2);
+    }
+
+    setSpeed(speed: number) {
+        this.speed = speed;
     }
 }
 

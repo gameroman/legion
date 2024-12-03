@@ -7,7 +7,7 @@ import { selectStatToLevelUp, increaseStat, getSPIncrement } from "./levelling";
 import { getPrice } from "./economy";
 import { getStarterConsumables } from "./Items";
 
-import { STARTING_BLACK_MAGE_SPELLS, STARTING_WHITE_MAGE_SPELLS, LOTSA_MP, BASE_CARRYING_CAPACITY } from "@legion/shared/config";
+import { LOTSA_MP, BASE_CARRYING_CAPACITY } from "@legion/shared/config";
 import { getSpellsUpToLevel } from "./Spells";
 
 enum Gender {
