@@ -87,15 +87,26 @@ export class AIServerPlayer extends ServerPlayer {
     }
 
     takeAction(): number {
+        // console.log(`[AIServerPlayer:takeAction] ${this.name} is taking action`);
         if (this.team?.game.isTutorial()) {
-            if (this.attackMode === AIAttackMode.IDLE) return 0;
-            if (this.actionCount > 0 && this.attackMode === AIAttackMode.ATTACK_ONCE) return 0;
+            if (this.attackMode === AIAttackMode.IDLE) {
+                console.log(`[AIServerPlayer:takeAction] ${this.name} is idle`);
+                return 0;
+            }
+            if (this.actionCount > 0 && this.attackMode === AIAttackMode.ATTACK_ONCE) {
+                console.log(`[AIServerPlayer:takeAction] ${this.name} can act onlyonce`);
+                return 0;
+            }
         }
 
-        if (!this.canAct()) return 0;
+        if (!this.canAct()) {
+            console.log(`[AIServerPlayer:takeAction] ${this.name} cannot act`);
+            return 0;
+        }
 
         if (this.getIQ() > 0.4) {
             if (this.team?.game.checkIsOnFlame(this.x, this.y)) {
+                console.log(`[AIServerPlayer:takeAction] ${this.name} is on fire`);
                 const cell = this.team?.game.findFreeCellNear(this.x, this.y, true);
                 if (cell) {
                     this.moveTowards(cell.x, cell.y);
@@ -124,12 +135,15 @@ export class AIServerPlayer extends ServerPlayer {
         }
         
         if (!this.target) {
+            console.log(`[AIServerPlayer:takeAction] ${this.name} has no valid target`);
             return 0;
         }
 
         if (this.isNextTo(this.target.x, this.target.y)) {
+            console.log(`[AIServerPlayer:takeAction] ${this.name} is next to target`);
             this.attack(this.target);
         } else {
+            console.log(`[AIServerPlayer:takeAction] ${this.name} is not next to target`);
             this.moveTowards(this.target.x, this.target.y);
         }
 
@@ -147,7 +161,11 @@ export class AIServerPlayer extends ServerPlayer {
     }
 
     checkForItemUse() {
-        if (!this.canUseItems) return -1;
+        // console.log(`[AIServerPlayer:checkForItemUse] Checking for items among ${this.inventory.map(item => item.id)}`);
+        if (!this.canUseItems) {
+            console.log(`[AIServerPlayer:checkForItemUse] ${this.name} cannot use items`);
+            return false;
+        }
         for (let i = 0; i < this.inventory.length; i++) {
             const item = this.getItemAtIndex(i);
             if (!item) continue;
@@ -168,7 +186,7 @@ export class AIServerPlayer extends ServerPlayer {
     }
 
     checkForSpellUse(): number {
-        console.log(`[AIServerPlayer:checkForSpellUse] Checking for spells among ${this.spells.map(spell => spell.id)}`);
+        // console.log(`[AIServerPlayer:checkForSpellUse] Checking for spells among ${this.spells.map(spell => spell.id)}`);
         let delay = -1;
         for (let i = 0; i < this.spells.length; i++) {
             const spell = this.getSpellAtIndex(i);

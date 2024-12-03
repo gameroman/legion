@@ -7,7 +7,7 @@ import { selectStatToLevelUp, increaseStat, getSPIncrement } from "./levelling";
 import { getPrice } from "./economy";
 import { getStarterConsumables, MAGE_SPECIFIC_ITEMS } from "./Items";
 
-import { LOTSA_MP, BASE_CARRYING_CAPACITY } from "@legion/shared/config";
+import { LOTSA_MP, BASE_CARRYING_CAPACITY, STARTING_WHITE_MAGE_SPELLS, STARTING_BLACK_MAGE_SPELLS } from "@legion/shared/config";
 import { getSpellsUpToLevel } from "./Spells";
 
 enum Gender {
@@ -63,7 +63,7 @@ export class NewCharacter {
       right_ring: -1,
       necklace: -1,
     };
-    this.skills = this.getSpells();
+    this.skills = this.getSpells(isAI);
     this.stats = {
       [Stat.HP]: this.getHP() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
       [Stat.MP]: this.getMP() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
@@ -262,13 +262,14 @@ export class NewCharacter {
     return 5;
   }
 
-  getSpells(): number[] {
+  getSpells(isAI = false): number[] {
     switch (this.characterClass) {
       case Class.WARRIOR:
         return [];
       case Class.WHITE_MAGE:
+        return isAI ? getSpellsUpToLevel(this.characterClass, this.level) : STARTING_WHITE_MAGE_SPELLS;
       case Class.BLACK_MAGE:
-        return getSpellsUpToLevel(this.characterClass, this.level);
+        return isAI ? getSpellsUpToLevel(this.characterClass, this.level) : STARTING_BLACK_MAGE_SPELLS;
       case Class.THIEF:
         return [];
     }
@@ -306,9 +307,22 @@ export class NewCharacter {
 
   getCharacterData(includePrice = false): DBCharacterData {
     // Convert stats from enum keys to string keys for DB storage
-    const dbStats = Object.fromEntries(statFields.map(key => [key, this.stats[Stat[key.toUpperCase()]]]));
-    const dbEquipmentBonuses = Object.fromEntries(statFields.map(key => [key, this.equipment_bonuses[Stat[key.toUpperCase()]]]));
-    const dbSpBonuses = Object.fromEntries(statFields.map(key => [key, this.sp_bonuses[Stat[key.toUpperCase()]]]));
+    const validStats = statFields.filter(key => 
+        Stat[key.toUpperCase() as keyof typeof Stat] !== Stat.NONE
+    );
+
+    const dbStats = Object.fromEntries(
+        // @ts-ignore: Stat indexing is actually safe here
+        validStats.map(key => [key, this.stats[Stat[key.toUpperCase() as keyof typeof Stat]]])
+    );
+    const dbEquipmentBonuses = Object.fromEntries(
+        // @ts-ignore: Stat indexing is actually safe here
+        validStats.map(key => [key, this.equipment_bonuses[Stat[key.toUpperCase() as keyof typeof Stat]]])
+    );
+    const dbSpBonuses = Object.fromEntries(
+        // @ts-ignore: Stat indexing is actually safe here
+        validStats.map(key => [key, this.sp_bonuses[Stat[key.toUpperCase() as keyof typeof Stat]]])
+    );
 
     const data: DBCharacterData = {
         name: this.name,
