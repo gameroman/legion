@@ -169,7 +169,7 @@ export class AIGame extends Game {
             const zombieData = await this.fetchZombieData(playerTeam.teamData.elo);
             console.log(`[AIGame:populateTeams] Fetched zombie data: ${JSON.stringify(zombieData)}`);
             // Check if the zombieData is not empty
-            if (Object.keys(zombieData).length > 0) {
+            if (Object.keys(zombieData).length > 0 && zombieData?.playerData && zombieData?.rosterData) {
                 await this.createZombieTeam(aiTeam!, zombieData);
             } else {
                 console.log('[AIGame:populateTeams] Failed to fetch zombie data. Falling back to createAITeam.');
