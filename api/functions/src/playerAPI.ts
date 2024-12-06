@@ -1214,3 +1214,88 @@ export const setUtmSource = onRequest((request, response) => {
     }
   });
 });
+
+// Update the ProfileData interface
+interface ProfileData {
+    name: string;           // Add this
+    avatar: string;         // Add this
+    allTimeStats: {
+        losses: number;
+        lossStreak: number;
+        wins: number;
+        winStreak: number;
+    };
+    casualStats: {
+        gamesPlayed: number;
+        wins: number;
+    };
+    elo: number;
+    joinDate: string;
+    league: number;
+    leagueStats: {
+        gamesPlayed: number;
+        wins: number;
+        winRate: number;
+        avgDamage: number;
+        avgGold: number;
+        avgKills: number;
+    };
+}
+
+// Update the getProfileData function to include name and avatar in the response
+export const getProfileData = onRequest((request, response) => {
+    const db = admin.firestore();
+
+    corsMiddleware(request, response, async () => {
+        try {
+            const playerId = request.query.playerId as string;
+            if (!playerId) {
+                response.status(400).send('Player ID is required');
+                return;
+            }
+
+            const playerDoc = await db.collection('players').doc(playerId).get();
+            
+            if (!playerDoc.exists) {
+                response.status(404).send('Player not found');
+                return;
+            }
+
+            const playerData = playerDoc.data();
+            const statsDoc = await db.collection('stats').doc(playerId).get();
+            const statsData = statsDoc.exists ? statsDoc.data() : null;
+
+            const profileData: ProfileData = {
+                name: playerData?.name || '',
+                avatar: playerData?.avatar || '',
+                allTimeStats: {
+                    losses: statsData?.losses || 0,
+                    lossStreak: statsData?.lossStreak || 0,
+                    wins: statsData?.wins || 0,
+                    winStreak: statsData?.winStreak || 0
+                },
+                casualStats: {
+                    gamesPlayed: statsData?.casual?.gamesPlayed || 0,
+                    wins: statsData?.casual?.wins || 0
+                },
+                elo: playerData?.elo || 1000,
+                joinDate: playerData?.joinDate || '',
+                league: playerData?.league || 0,
+                leagueStats: {
+                    gamesPlayed: statsData?.league?.gamesPlayed || 0,
+                    wins: statsData?.league?.wins || 0,
+                    winRate: statsData?.league?.winRate || 0,
+                    avgDamage: statsData?.league?.avgDamage || 0,
+                    avgGold: statsData?.league?.avgGold || 0,
+                    avgKills: statsData?.league?.avgKills || 0
+                }
+            };
+
+            response.send(profileData);
+
+        } catch (error) {
+            console.error('Error fetching profile data:', error);
+            response.status(500).send('Error fetching profile data');
+        }
+    });
+});

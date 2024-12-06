@@ -222,3 +222,26 @@ login-buttons {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   /* Less shadow on press */
 }
+
+.avatarContainerLink {
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+    display: flex;
+    font-size: inherit;
+}
+
+.avatarContainerLink .userInfo span {
+    font-size: 16px;
+    font-weight: 300;
+}
+
+.avatarContainerLink .userLevel span {
+    font-size: 10px;
+    line-height: 8px;
+}
+
+.avatarContainerLink:hover .avatarContainer {
+    opacity: 0.8;
+    cursor: pointer;
+}

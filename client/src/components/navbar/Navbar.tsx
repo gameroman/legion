@@ -143,31 +143,33 @@ class Navbar extends Component<Props, State> {
                             <img src={legionLogo} alt="Legion Logo" />
                         </Link>
                     </div>
-                    <div className="avatarContainer">
-                        {this.state.isLoading ? (
-                            <div className="avatar spinner-container">
-                                <div className="loading-spinner"></div>
-                            </div>
-                        ) : (
-                            <div className="avatar" style={{ backgroundImage: this.state.avatarUrl ? `url(${this.state.avatarUrl})` : 'none' }}></div>
-                        )}
-                        <div className="userInfo">
+                    <Link href={`/profile/${this.props.playerData?.uid}`} className="avatarContainerLink">
+                        <div className="avatarContainer">
                             {this.state.isLoading ? (
-                                <span className="loading-placeholder">Loading...</span>
-                            ) : (
-                                <span>{this.props.playerData?.name}</span>
-                            )}
-                            {ENABLE_PLAYER_LEVEL && (
-                                <div className="userLevel">
-                                    {this.state.isLoading ? (
-                                        <span className="loading-placeholder">Lvl. --</span>
-                                    ) : (
-                                        <span>Lvl. {this.props.playerData?.lvl}</span>
-                                    )}
+                                <div className="avatar spinner-container">
+                                    <div className="loading-spinner"></div>
                                 </div>
+                            ) : (
+                                <div className="avatar" style={{ backgroundImage: this.state.avatarUrl ? `url(${this.state.avatarUrl})` : 'none' }}></div>
                             )}
+                            <div className="userInfo">
+                                {this.state.isLoading ? (
+                                    <span className="loading-placeholder">Loading...</span>
+                                ) : (
+                                    <span>{this.props.playerData?.name}</span>
+                                )}
+                                {ENABLE_PLAYER_LEVEL && (
+                                    <div className="userLevel">
+                                        {this.state.isLoading ? (
+                                            <span className="loading-placeholder">Lvl. --</span>
+                                        ) : (
+                                            <span>Lvl. {this.props.playerData?.lvl}</span>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    </Link>
                 </div>
 
                 <div className="menuItems">

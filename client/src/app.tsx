@@ -112,6 +112,7 @@ class App extends Component<{}, AppState> {
                                     <Route path="/queue/:mode" component={AuthenticatedHomePage} />
                                     <Route path="/lobby/:id" component={AuthenticatedHomePage} />
                                     <Route path="/elysium" component={AuthenticatedHomePage} />
+                                    <Route path="/profile/:id" component={AuthenticatedHomePage} />
                                     <Route default component={AuthenticatedHomePage} />
                                 </Router>
                             </WalletContextProvider>
