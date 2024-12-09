@@ -1037,10 +1037,17 @@ export class Arena extends Phaser.Scene
     createSounds() {
         this.SFX = {};
         const sounds = ['click', 'slash', 'steps', 'nope', 'heart', 'cooldown', 'fireball','healing',
-            'cast', 'thunder', 'ice', 'shatter', 'flames', 'crowd', 'cheer', 'poison', 'mute', 'thud']
+            'cast', 'thunder', 'ice', 'shatter', 'flames', 'crowd', 'cheer', 'poison', 'mute', 'thud'];
+        
         sounds.forEach((sound) => {
-            this.SFX[sound] = this.sound.add(sound);
-        })
+            // Check if sound is already in the cache before adding
+            if (!this.sound.get(sound)) {
+                this.SFX[sound] = this.sound.add(sound);
+            } else {
+                // If sound exists in cache, use the cached version
+                this.SFX[sound] = this.sound.get(sound);
+            }
+        });
 
         // Listen for settings changes
         events.on('settingsChanged', this.onSettingsChanged, this);

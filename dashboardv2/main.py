@@ -572,7 +572,7 @@ async def dashboard():
                 ui.switch('Use Local API', on_change=toggle_api)
                 api_label = ui.label(f"Current API: {current_api}")
                 ui.label('Show data from:').classes('ml-4')
-                date_input = ui.input(value='2024-10-31', placeholder='YYYY-MM-DD')
+                date_input = ui.input(value='2024-12-06', placeholder='YYYY-MM-DD')
                 date_input.on('change', lambda: [fetch_dashboard_data(), fetch_engagement_metrics()])
             
             # Add the metrics container
