@@ -1,40 +1,14 @@
 import { h, Component } from 'preact';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { avatarContext } from '../utils';
+import { avatarContext, getLeagueIcon } from '../utils';
+import { LeaguesNames } from '@legion/shared/enums';
 import './profile.style.css';
-
-interface ProfileData {
-    name: string;
-    avatar: string;
-    allTimeStats: {
-        losses: number;
-        lossStreak: number;
-        wins: number;
-        winStreak: number;
-    };
-    casualStats: {
-        gamesPlayed: number;
-        wins: number;
-    };
-    elo: number;
-    joinDate: string;
-    league: number;
-    leagueStats: {
-        gamesPlayed: number;
-        wins: number;
-        winRate: number;
-        avgDamage: number;
-        avgGold: number;
-        avgKills: number;
-    };
-}
 
 interface Props {
     id: string;
 }
 
 interface State {
-    profileData: ProfileData | null;
+    profileData: any;
     isLoading: boolean;
     error: string | null;
     avatarUrl: string | null;
@@ -116,75 +90,103 @@ class Profile extends Component<Props, State> {
             return <div className="profile-container error">No profile data found</div>;
         }
 
-        const winRate = profileData.allTimeStats.wins / 
-            (profileData.allTimeStats.wins + profileData.allTimeStats.losses) * 100 || 0;
-
         return (
             <div className="profile-container">
                 <div className="profile-header">
                     <div className="profile-avatar" style={{ backgroundImage: avatarUrl ? `url(${avatarUrl})` : 'none' }} />
                     <div className="profile-info">
                         <h1>{profileData.name}</h1>
-                        <div className="profile-join-date">
-                            Member since {this.formatDate(profileData.joinDate)}
+                        <div className="profile-details">
+                            <div className="player-stats">
+                                <span className="elo-rating">ELO Rating: {profileData.elo}</span>
+                                <span className="rank-divider">•</span>
+                                <span className="all-time-rank">All-time Rank: #{profileData.allTimeStats.rank}</span>
+                            </div>
+                            <div className="profile-join-date">
+                                Member since {this.formatDate(profileData.joinDate)}
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div className="stats-grid">
-                    <div className="stats-card main-stats">
-                        <h2>Overview</h2>
-                        <div className="stat-row">
-                            <span>ELO Rating</span>
-                            <span className="value">{profileData.elo}</span>
-                        </div>
-                        <div className="stat-row">
-                            <span>Win Rate</span>
-                            <span className="value">{this.formatNumber(winRate)}%</span>
-                        </div>
-                        <div className="stat-row">
-                            <span>Total Games</span>
-                            <span className="value">{profileData.allTimeStats.wins + profileData.allTimeStats.losses}</span>
-                        </div>
-                    </div>
-
-                    <div className="stats-card">
-                        <h2>Ranked Stats</h2>
+                    <div className="stats-card all-time">
+                        <h2>All Time Stats</h2>
                         <div className="stat-row">
                             <span>Games Played</span>
-                            <span className="value">{profileData.leagueStats.gamesPlayed}</span>
-                        </div>
-                        <div className="stat-row">
-                            <span>Win Rate</span>
-                            <span className="value">{this.formatNumber(profileData.leagueStats.winRate)}%</span>
-                        </div>
-                        <div className="stat-row">
-                            <span>Avg. Damage</span>
-                            <span className="value">{this.formatNumber(profileData.leagueStats.avgDamage)}</span>
-                        </div>
-                        <div className="stat-row">
-                            <span>Avg. Gold</span>
-                            <span className="value">{this.formatNumber(profileData.leagueStats.avgGold)}</span>
-                        </div>
-                        <div className="stat-row">
-                            <span>Avg. Kills</span>
-                            <span className="value">{this.formatNumber(profileData.leagueStats.avgKills)}</span>
-                        </div>
-                    </div>
-
-                    <div className="stats-card">
-                        <h2>Achievements</h2>
-                        <div className="stat-row">
-                            <span>Highest Win Streak</span>
-                            <span className="value">{profileData.allTimeStats.winStreak}</span>
+                            <span className="value">{profileData.allTimeStats.nbGames}</span>
                         </div>
                         <div className="stat-row">
                             <span>Total Wins</span>
                             <span className="value">{profileData.allTimeStats.wins}</span>
                         </div>
+                        {/* <div className="stat-row">
+                            <span>Total Losses</span>
+                            <span className="value">{profileData.allTimeStats.losses}</span>
+                        </div> */}
                         <div className="stat-row">
-                            <span>Casual Wins</span>
+                            <span>Win Rate</span>
+                            <span className="value">
+                                {this.formatNumber(
+                                    (profileData.allTimeStats.wins / 
+                                    (profileData.allTimeStats.wins + profileData.allTimeStats.losses)) * 100 || 0
+                                )}%
+                            </span>
+                        </div>
+                        <div className="stat-row">
+                            <span>Best Win Streak</span>
+                            <span className="value">{profileData.allTimeStats.winStreak}</span>
+                        </div>
+                        <div className="stat-row">
+                            <span>Worst Loss Streak</span>
+                            <span className="value">{profileData.allTimeStats.lossStreak}</span>
+                        </div>
+                    </div>
+
+                    <div className="stats-card season">
+                        {/* <div className="league-icon">
+                            <img src={getLeagueIcon(profileData.leagueStats.league)} alt="League" />
+                        </div> */}
+                        <h2>{LeaguesNames[profileData.leagueStats.league]} League Stats</h2>
+                        <div className="stat-row">
+                            <span>Games Played</span>
+                            <span className="value">{profileData.leagueStats.gamesPlayed}</span>
+                        </div>
+                        <div className="stat-row">
+                            <span>Wins</span>
+                            <span className="value">{profileData.leagueStats.wins}</span>
+                        </div>
+                        <div className="stat-row">
+                            <span>Win Rate</span>
+                            <span className="value">{this.formatNumber((profileData.leagueStats.wins / profileData.leagueStats.gamesPlayed * 100) || 0)}%</span>
+                        </div>
+                        <div className="stat-row">
+                            <span>Best Win Streak</span>
+                            <span className="value">{profileData.leagueStats.winStreak}</span>
+                        </div>
+                        <div className="stat-row">
+                            <span>Worst Loss Streak</span>
+                            <span className="value">{profileData.leagueStats.lossStreak}</span>
+                        </div>
+                    </div>
+
+                    <div className="stats-card casual">
+                        <h2>Casual Mode Stats</h2>
+                        <div className="stat-row">
+                            <span>Games Played</span>
+                            <span className="value">{profileData.casualStats.gamesPlayed}</span>
+                        </div>
+                        <div className="stat-row">
+                            <span>Wins</span>
                             <span className="value">{profileData.casualStats.wins}</span>
+                        </div>
+                        <div className="stat-row">
+                            <span>Win Rate</span>
+                            <span className="value">
+                                {this.formatNumber(
+                                    (profileData.casualStats.wins / profileData.casualStats.gamesPlayed) * 100 || 0
+                                )}%
+                            </span>
                         </div>
                     </div>
                 </div>

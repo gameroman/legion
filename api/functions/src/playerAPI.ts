@@ -1215,33 +1215,6 @@ export const setUtmSource = onRequest((request, response) => {
   });
 });
 
-// Update the ProfileData interface
-interface ProfileData {
-    name: string;           // Add this
-    avatar: string;         // Add this
-    allTimeStats: {
-        losses: number;
-        lossStreak: number;
-        wins: number;
-        winStreak: number;
-    };
-    casualStats: {
-        gamesPlayed: number;
-        wins: number;
-    };
-    elo: number;
-    joinDate: string;
-    league: number;
-    leagueStats: {
-        gamesPlayed: number;
-        wins: number;
-        winRate: number;
-        avgDamage: number;
-        avgGold: number;
-        avgKills: number;
-    };
-}
-
 // Update the getProfileData function to include name and avatar in the response
 export const getProfileData = onRequest((request, response) => {
     const db = admin.firestore();
@@ -1262,32 +1235,36 @@ export const getProfileData = onRequest((request, response) => {
             }
 
             const playerData = playerDoc.data();
-            const statsDoc = await db.collection('stats').doc(playerId).get();
-            const statsData = statsDoc.exists ? statsDoc.data() : null;
+            const allTimeStats = playerData?.allTimeStats;
+            const casualStats = playerData?.casualStats;
+            const leagueStats = playerData?.leagueStats;
 
-            const profileData: ProfileData = {
+            const profileData = {
                 name: playerData?.name || '',
                 avatar: playerData?.avatar || '',
                 allTimeStats: {
-                    losses: statsData?.losses || 0,
-                    lossStreak: statsData?.lossStreak || 0,
-                    wins: statsData?.wins || 0,
-                    winStreak: statsData?.winStreak || 0
+                    losses: allTimeStats?.losses || 0,
+                    lossStreak: allTimeStats?.lossesStreak || 0,
+                    wins: allTimeStats?.wins || 0,
+                    winStreak: allTimeStats?.winStreak || 0,
+                    nbGames: allTimeStats?.nbGames || 0,
+                    rank: allTimeStats?.rank || 0,
                 },
                 casualStats: {
-                    gamesPlayed: statsData?.casual?.gamesPlayed || 0,
-                    wins: statsData?.casual?.wins || 0
+                    gamesPlayed: casualStats?.nbGames || 0,
+                    wins: casualStats?.wins || 0
                 },
                 elo: playerData?.elo || 1000,
                 joinDate: playerData?.joinDate || '',
                 league: playerData?.league || 0,
                 leagueStats: {
-                    gamesPlayed: statsData?.league?.gamesPlayed || 0,
-                    wins: statsData?.league?.wins || 0,
-                    winRate: statsData?.league?.winRate || 0,
-                    avgDamage: statsData?.league?.avgDamage || 0,
-                    avgGold: statsData?.league?.avgGold || 0,
-                    avgKills: statsData?.league?.avgKills || 0
+                    gamesPlayed: leagueStats?.nbGames || 0,
+                    wins: leagueStats?.wins || 0,
+                    losses: leagueStats?.losses || 0,
+                    lossStreak: leagueStats?.lossesStreak || 0,
+                    winStreak: leagueStats?.winStreak || 0,
+                    rank: leagueStats?.rank || 0,
+                    league: playerData?.league || 0,
                 }
             };
 

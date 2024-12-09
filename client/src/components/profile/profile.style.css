@@ -54,21 +54,69 @@
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     margin-top: 20px;
 }
 
 .stats-card {
-    background: rgba(0, 0, 0, 0.4);
     border-radius: 8px;
     padding: 20px;
     border: 1px solid #49d7d8;
 }
 
-.stats-card.main-stats {
+/* All Time Stats card - blue gradient */
+.stats-card.all-time {
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(73, 215, 216, 0.1));
     border: 2px solid #49d7d8;
+}
+
+/* Current Season Stats card - gold/orange gradient */
+.stats-card.season {
+    position: relative;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(205, 133, 63, 0.1));
+    border: 2px solid #cd853f;
+}
+
+.league-icon {
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    width: 48px;
+    height: 48px;
+    z-index: 1;
+}
+
+.league-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Casual Mode Stats card - green gradient */
+.stats-card.casual {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(73, 216, 116, 0.1));
+    border: 2px solid #49d874;
+}
+
+/* Update the h2 color for each card to match its border */
+.stats-card.season h2 {
+    position: relative;
+    z-index: 0;
+    color: #cd853f;
+}
+
+.stats-card.casual h2 {
+    color: #49d874;
+}
+
+/* Update the value color for each card to match its theme */
+.stats-card.season .value {
+    color: #cd853f;
+}
+
+.stats-card.casual .value {
+    color: #49d874;
 }
 
 .stats-card h2 {
@@ -95,6 +143,32 @@
     color: #49d7d8;
 }
 
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.elo-rating {
+    color: #49d7d8;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Tablet breakpoint */
+@media (max-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Make the all-time stats card span full width at the top */
+    .stats-card.all-time {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Mobile breakpoint */
 @media (max-width: 768px) {
     .profile-container {
         padding: 10px;
@@ -112,5 +186,34 @@
 
     .stats-grid {
         grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    /* Reset the all-time stats card span */
+    .stats-card.all-time {
+        grid-column: auto;
+    }
+} 
+
+.player-stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rank-divider {
+    color: #666;
+}
+
+.all-time-rank {
+    color: #cd853f;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Update mobile styles */
+@media (max-width: 768px) {
+    .player-stats {
+        justify-content: center;
     }
 } 
