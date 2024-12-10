@@ -5,6 +5,7 @@ import { QueueTips } from '../components/queueTips/QueueTips';
 import { startGame } from '../game/game';
 import './GamePage.style.css';
 import { recordLoadingStep } from '../components/utils';
+import { PlayerContext } from '../contexts/PlayerContext';
 
 interface GamePageProps {
   matches: {
@@ -23,6 +24,7 @@ interface GamePageState {
 }
 
 class GamePage extends Component<GamePageProps, GamePageState> {
+  static contextType = PlayerContext;
   private waitingTimer: number | null = null;
 
   constructor(props: GamePageProps) {
@@ -43,6 +45,10 @@ class GamePage extends Component<GamePageProps, GamePageState> {
   }
 
   componentWillUnmount() {
+    const { socket } = this.context;
+    if (socket) {
+      socket.emit('leaveGame', { gameId: this.props.matches.id });
+    }
     this.cleanup();
   }
 

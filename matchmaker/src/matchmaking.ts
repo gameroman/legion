@@ -25,7 +25,7 @@ if (process.env.NODE_ENV === 'development') {
     admin.initializeApp(firebaseConfig);
 } 
 
-interface Player {
+interface QueuingPlayer {
     socket: any,
     elo: number;
     range: number;
@@ -74,7 +74,7 @@ class Lobby {
 let io: Server;
 const lobbies: Map<string, Lobby> = new Map();
 
-const playersQueue: Player[] = [];
+const playersQueue: QueuingPlayer[] = [];
 const RND = true;
 
 async function notifyAdmin(uid1: string, uid2:string, mode: PlayMode, action: string) {
@@ -117,7 +117,7 @@ function emitQueueCount() {
     io.emit('queueCount', { count }); 
 }
 
-function removePlayerFromQ(player: Player) {
+function removePlayerFromQ(player: QueuingPlayer) {
     if (!player) {
         console.error(`[matchmaker:removePlayerFromQ] Player not found`);
         return;
@@ -131,7 +131,7 @@ function removePlayerFromQ(player: Player) {
     }
 }
 
-function incrementGoldReward(player: Player) {
+function incrementGoldReward(player: QueuingPlayer) {
     if (player.mode != PlayMode.PRACTICE && player.waitingTime % goldRewardInterval === 0) {
         player.gold += goldReward; 
         player.socket.emit("updateGold", { gold: player.gold });
@@ -152,7 +152,7 @@ function queueTimeUpdate() {
     });
 }
 
-function switcherooCheck(player: Player) {
+function switcherooCheck(player: QueuingPlayer) {
     if ((player.mode == PlayMode.CASUAL 
         || (ALLOW_SWITCHEROO_RANKED && player.mode == PlayMode.RANKED)) 
         && player.waitingTime > casualModeThresholdTime) {
@@ -227,7 +227,7 @@ function countQueuingPlayers(mode: PlayMode, league: League): number {
     }
 }
 
-function canBeMatched(player1: Player, player2: Player): boolean {
+function canBeMatched(player1: QueuingPlayer, player2: QueuingPlayer): boolean {
     const isDifferentPlayers = player1.socket.uid !== player2.socket.uid;
     const isEloCompatible = Math.abs(player1.elo - player2.elo) <= player1.range && Math.abs(player1.elo - player2.elo) <= player2.range;
     const isLeagueCompatible = player1.mode != PlayMode.RANKED || player1.league == player2.league;
@@ -238,8 +238,6 @@ async function createGame(
     player1: Socket, player2?: Socket, mode: PlayMode = PlayMode.PRACTICE, league: League | null = null, stake: number = 0
 ) {
     try {
-        // @ts-ignore
-        notifyAdmin(player1?.uid, player2?.uid, mode, 'matched');
         const gameId = uuidv4();
         await apiFetch(
             'createGame',
@@ -259,9 +257,21 @@ async function createGame(
                 }
             }
         );
+
+        // Update status for both players
+        // @ts-ignore
+        updatePlayerStatus(player1.uid, PlayerStatus.INGAME, gameId);
+        if (player2) {
+            // @ts-ignore
+            updatePlayerStatus(player2.uid, PlayerStatus.INGAME, gameId);
+        }
+
         player1.nsp.to(player1.id).emit("matchFound", { gameId });
         if (player2)
             player2.nsp.to(player2.id).emit("matchFound", { gameId });
+
+        // @ts-ignore
+        notifyAdmin(player1?.uid, player2?.uid, mode, 'matched');
         return true;
     } catch (error) {
         console.error(`Error creating game: ${error}`);
@@ -269,7 +279,7 @@ async function createGame(
     }
 }
 
-function sendQData(player: Player) {
+function sendQData(player: QueuingPlayer) {
     player.socket.emit("queueData", {
         goldRewardInterval,
         goldReward,
@@ -285,7 +295,7 @@ async function addToQueue(socket: any, mode: PlayMode) {
             socket.firebaseToken,
         );
     
-        const player: Player = {
+        const player: QueuingPlayer = {
             socket,
             elo: queuingData.elo,
             range: eloRangeStart,
@@ -297,13 +307,15 @@ async function addToQueue(socket: any, mode: PlayMode) {
         playersQueue.push(player);
         sendQData(player);
         emitQueueCount();
+        // @ts-ignore
+        updatePlayerStatus(socket.uid, PlayerStatus.QUEUING);
         console.log(`Player ${socket.id} joined queue  in mode ${mode} with elo ${player.elo} and league ${player.league}`);
     } catch (error) {
         console.error(`Error adding player to queue: ${error}`);
     }
 }
 
-async function savePlayerGold(player: Player) {
+async function savePlayerGold(player: QueuingPlayer) {
     if (player.gold == 0) return;
     try {
         await apiFetch(
@@ -360,7 +372,6 @@ async function getUID(IDToken) {
 export async function processJoinQueue(socket, data: { mode: PlayMode }) {
     try {
         console.log(`[matchmaker:processJoinQueue] Player ${socket.id} joining queue in mode ${data.mode} ...`);
-        socket.uid = await getUID(socket.firebaseToken);
 
         if (data.mode == PlayMode.PRACTICE) {
             notifyAdmin(socket.uid, null, data.mode, 'joined');
@@ -413,6 +424,7 @@ export async function processJoinLobby(socket, data: { lobbyId: string }) {
         if (lobby.addPlayer(socket)) {
             notifyAdmin(socket.uid, null, PlayMode.STAKED, 'joined');
             logQueuingActivity(socket.uid, 'joinLobby', PlayMode.STAKED);
+            updatePlayerStatus(socket.uid, PlayerStatus.QUEUING);
             console.log(`[matchmaker:processJoinLobby] Player ${socket.uid} joined lobby ${data.lobbyId}`);
 
 
@@ -440,27 +452,42 @@ export async function processJoinLobby(socket, data: { lobbyId: string }) {
     }
 }
 
+
+export function processLeaveQueue(socket) {
+    // @ts-ignore
+    const uid = socket.uid;
+    const status = getPlayerStatus(uid);
+    
+    if (status === PlayerStatus.QUEUING) {
+        updatePlayerStatus(uid, PlayerStatus.ONLINE);
+    }
+    leaveQueueOrLobby(socket);
+}
+  
 export async function processDisconnect(socket) {
     console.log(`Player ${socket.id} disconnected`);
-    
+    // Update player status to offline
+    // @ts-ignore
+    updatePlayerStatus(socket.uid, PlayerStatus.OFFLINE);
     // Check if the player is in a queue
+    leaveQueueOrLobby(socket);
+}
+
+async function leaveQueueOrLobby(socket) {
     const queuePlayer = playersQueue.find(player => player.socket.id === socket.id);
     if (queuePlayer) {
         await handleQueueDisconnect(queuePlayer);
         return;
     }
-    
-    // Check if the player is in a lobby
+
     const lobby = findLobbyBySocketId(socket.id);
     if (lobby) {
         await handleLobbyDisconnect(socket, lobby);
         return;
     }
-    
-    console.log(`Player ${socket.id} was not in a queue or lobby`);
 }
 
-async function handleQueueDisconnect(player: Player) {
+async function handleQueueDisconnect(player: QueuingPlayer) {
     notifyAdmin(player.socket.uid, null, player.mode, 'left');
     removePlayerFromQ(player);
     await logQueuingActivity(player.socket.uid, 'leaveQueue', null);
@@ -612,3 +639,72 @@ function isFirebaseTokenHeader(header: any): header is FirebaseTokenHeader {
     return payload.sub;
   }
   
+enum PlayerStatus {
+  ONLINE = 'online',
+  QUEUING = 'queuing',
+  INGAME = 'ingame',
+  OFFLINE = 'offline'
+}
+
+interface ConnectedPlayer {
+  socket: Socket;
+  status: PlayerStatus;
+  gameId?: string;
+}
+
+interface PlayerRegistry {
+  [uid: string]: ConnectedPlayer;
+}
+
+const connectedPlayers: PlayerRegistry = {};
+
+function updatePlayerStatus(uid: string, status: PlayerStatus, gameId?: string) {
+  if (connectedPlayers[uid]) {
+    connectedPlayers[uid].status = status;
+    connectedPlayers[uid].gameId = gameId;
+    console.log(`Player ${uid} status updated to ${status}${gameId ? ` (game: ${gameId})` : ''}`);
+  }
+}
+
+function getPlayerSocket(uid: string): Socket | null {
+  return connectedPlayers[uid]?.socket || null;
+}
+
+function getPlayerStatus(uid: string): PlayerStatus {
+  return connectedPlayers[uid]?.status || PlayerStatus.OFFLINE;
+}
+
+export async function processConnection(socket) {
+  try {
+    const uid = await getUID(socket.firebaseToken);
+    socket.uid = uid;
+
+    // Register the player
+    connectedPlayers[uid] = {
+      socket,
+      status: PlayerStatus.ONLINE
+    };
+    
+    console.log(`Player ${uid} connected (total: ${Object.keys(connectedPlayers).length})`);
+    // @ts-ignore
+    updatePlayerStatus(socket.uid, PlayerStatus.ONLINE);
+  } catch (error) {
+    console.error('Error processing connection:', error);
+    socket.disconnect();
+  }
+}
+
+export function processLeaveGame(socket: Socket, data: { gameId: string }) {
+    // @ts-ignore
+    const uid = socket.uid;
+    const status = getPlayerStatus(uid);
+    
+    if (status === PlayerStatus.INGAME) {
+        // Only update if they're leaving the game they're actually in
+        const player = connectedPlayers[uid];
+        if (player && player.gameId === data.gameId) {
+            updatePlayerStatus(uid, PlayerStatus.ONLINE);
+            console.log(`Player ${uid} left game ${data.gameId}`);
+        }
+    }
+}

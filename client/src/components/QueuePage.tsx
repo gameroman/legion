@@ -179,6 +179,9 @@ class QueuePage extends Component<QPageProps, QpageState> {
     componentWillUnmount() {
         const { socket } = this.context;
         if (socket) {
+            // Emit leaveQueue event before removing listeners
+            socket.emit('leaveQueue');
+            
             // Remove all game-related listeners
             socket.off('matchFound');
             socket.off('updateGold');

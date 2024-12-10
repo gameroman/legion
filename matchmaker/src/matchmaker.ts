@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 
 dotenv.config();
-import { setupMatchmaking, processJoinQueue, processJoinLobby, processDisconnect } from './matchmaking';
+import { setupMatchmaking, processJoinQueue, processJoinLobby, processDisconnect, processConnection, processLeaveQueue, processLeaveGame } from './matchmaking';
 
 const allowedOrigins = [process.env.CLIENT_ORIGIN, 'https://legion-32c6d.firebaseapp.com'];
 console.log(`Allowed client origins: ${allowedOrigins}`);
@@ -14,7 +14,7 @@ const corsSettings = {
   origin: (origin, callback) => {
       
       if (!origin || allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.indexOf('*') !== -1) {
-        console.log("Successful connection from origin:", origin);
+        // console.log("Successful connection from origin:", origin);
         callback(null, true);
       } else {
         console.log("Origin not allowed:", origin);
@@ -45,11 +45,15 @@ httpServer.listen(port, () => {
 
 
 io.on("connection", (socket: any) => {
-    console.log(`Player connected`);
+    console.log(`Socket connected`);
     socket.firebaseToken = socket.handshake.auth.token;
+
+    processConnection(socket);
 
     socket.on("joinQueue", (data) => processJoinQueue(socket, data));
     socket.on("joinLobby", (data) => processJoinLobby(socket, data));
+    socket.on("leaveQueue", () => processLeaveQueue(socket));
+    socket.on("leaveGame", (data) => processLeaveGame(socket, data));
     socket.on("disconnect", () => processDisconnect(socket));
 });
 
