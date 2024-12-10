@@ -112,8 +112,52 @@ class QueuePage extends Component<QPageProps, QpageState> {
         if (!this.validateMode()) {
             return;
         }
-        this.joinQueue();
+
         this.loadNews();
+
+        const { socket } = this.context;
+        if (!socket) {
+            errorToast('Not connected to matchmaker');
+            return;
+        }
+
+        // Setup all game-related socket listeners
+        socket.on('matchFound', ({ gameId }) => {
+            playSoundEffect(matchFound, 0.5);
+            route(`/game/${gameId}`);
+        });
+
+        socket.on('updateGold', ({ gold }) => {
+            this.context.setPlayerInfo({ 
+                gold: this.context.player.gold + 1 
+            });
+        });
+
+        socket.on('queueData', (data) => {
+            this.setState({
+                queueDataLoaded: true,
+                queueData: { ...data }
+            });
+        });
+
+        socket.on('queueCount', (data) => {
+            this.setState({
+                queueData: {
+                    ...this.state.queueData,
+                    nbInQueue: data.count
+                }
+            });
+        });
+
+        // Join queue or lobby
+        const isLobbyMode = this.props.matches.id !== undefined;
+        if (isLobbyMode) {
+            socket.emit('joinLobby', { lobbyId: this.props.matches.id });
+        } else {
+            socket.emit('joinQueue', { mode: this.props.matches.mode || 0 });
+        }
+
+        // Setup other timers
         let timeInterval = this.state.queueData.estimatedWaitingTime * 10;
         if (this.state.queueData.estimatedWaitingTime != -1) {
             this.interval = setInterval(() => {
@@ -133,8 +177,13 @@ class QueuePage extends Component<QPageProps, QpageState> {
     }
 
     componentWillUnmount() {
-        if (this.socket) {
-            this.socket.disconnect();
+        const { socket } = this.context;
+        if (socket) {
+            // Remove all game-related listeners
+            socket.off('matchFound');
+            socket.off('updateGold');
+            socket.off('queueData');
+            socket.off('queueCount');
         }
         clearInterval(this.interval);
         clearInterval(this.intervalWaited);
@@ -162,70 +211,6 @@ class QueuePage extends Component<QPageProps, QpageState> {
         this.setState((prevState) => ({
             tipCount: (prevState.tipCount + 1 + len) % len
         }));
-    }
-
-    socket;
-
-    joinQueue = async () => {
-        console.log(`Connecting to ${process.env.MATCHMAKER_URL} ...`);
-        this.socket = io(
-            process.env.MATCHMAKER_URL,
-            {
-                auth: {
-                    token: await getFirebaseIdToken()
-                }
-            }
-        );
-
-        this.socket.on('matchFound', ({ gameId }) => {
-            if (this.props.matches.mode != 0) {
-                playSoundEffect(matchFound, 0.5);
-            }
-            this.socket.disconnect();
-            route(`/game/${gameId}`);
-        });
-
-        this.socket.on('updateGold', ({ gold }) => {
-            this.setState({ earnedGold: gold });
-            this.context.setPlayerInfo({ gold: this.context.player.gold + 1 });
-        });
-
-        this.socket.on('queueData', (data) => {
-            this.setState({
-                queueDataLoaded: true,
-                queueData: { ...data }
-            });
-        });
-
-        this.socket.on('queueCount', (data) => {
-            this.setState({
-                queueData: {
-                    ...this.state.queueData,
-                    nbInQueue: data.count
-                }
-            });
-        });
-
-        const isLobbyMode = this.props.matches.id !== undefined;
-
-        if (isLobbyMode) {
-            this.socket.emit('joinLobby', { lobbyId: this.props.matches.id });
-        } else {
-            this.socket.emit('joinQueue', { mode: this.props.matches.mode || 0 });
-        }
-
-        this.socket.on('disconnect', (reason) => {
-            // console.log(`[QueuePage:disconnect] Disconnected from matchmaker`);
-            if (reason != 'io client disconnect') {
-                // The disconnection was initiated by the server
-                console.error(`Matchmaker disconnect: ${reason}`);
-                silentErrorToast('Disconnected from matchmaker, please reload the page');
-            }
-        });
-
-        this.socket.on('error', (e) => {
-            errorToast(e);
-        });
     }
 
     handleQuickFind = () => {

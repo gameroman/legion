@@ -1,6 +1,7 @@
 import { createContext } from 'preact';
 import { PlayerContextData, APICharacterData, FriendData } from '@legion/shared/interfaces';
 import { League, Stat, InventoryActionType, ShopTab } from "@legion/shared/enums";
+import { Socket } from 'socket.io-client';
 
 export interface PlayerContextState {
   player: PlayerContextData;
@@ -10,6 +11,7 @@ export interface PlayerContextState {
   welcomeShown: boolean;
   lastHelp: number;
   friends: FriendData[];
+  socket: Socket | null;
 }
 
 export const PlayerContext = createContext<{
@@ -34,6 +36,7 @@ export const PlayerContext = createContext<{
   friends: FriendData[];
   addFriend: (friendId: string) => Promise<void>;
   refreshFriends: () => Promise<void>;
+  socket: Socket | null;
 }>({
   player: {
     uid: '',
@@ -78,4 +81,5 @@ export const PlayerContext = createContext<{
   friends: [],
   addFriend: async () => {},
   refreshFriends: async () => {},
+  socket: null,
 });
