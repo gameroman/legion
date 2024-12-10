@@ -491,7 +491,7 @@ const ElysiumPage = () => {
                     <div className="modal">
                         <h3>Create a New Game</h3>
                         <p>Set the stake amount for your new game.</p>
-                        <div className="modal-content">
+                        <div className="stake-modal-content">
                             <label htmlFor="stake">Stake (SOL)</label>
                             <input
                                 id="stake"
@@ -556,7 +556,7 @@ const ElysiumPage = () => {
                 <div className="modal-overlay">
                     <div className="modal confirmation-modal">
                         <h3>Confirm Game Creation</h3>
-                        <div className="modal-content">
+                        <div className="stake-modal-content">
                             <p>
                                 Your in-game balance is insufficient to create this game. An additional{' '}
                                 <span className="highlight-amount">
@@ -592,7 +592,7 @@ const ElysiumPage = () => {
                             Enter the amount of SOL you wish to withdraw to your
                             wallet.
                         </p>
-                        <div className="modal-content">
+                        <div className="stake-modal-content">
                             <label htmlFor="withdraw-amount">Amount (SOL)</label>
                             <input
                                 id="withdraw-amount"
@@ -664,7 +664,7 @@ const ElysiumPage = () => {
                 <div className="modal-overlay">
                     <div className="modal">
                         <h3>Confirm Joining Game</h3>
-                        <div className="modal-content">
+                        <div className="stake-modal-content">
                             <p>
                                 You are about to join {selectedLobby.nickname}'s game with a stake of {' '}
                                 <span className="highlight-amount">

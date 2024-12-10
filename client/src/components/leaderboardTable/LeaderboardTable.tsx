@@ -116,7 +116,6 @@ class LeaderboardTable extends Component<LeaderboardTableProps, LeaderboardTable
         const columns = ['rank', 'player name', 'elo', 'wins', 'losses', 'wins ratio', 'rewards'];
 
         const getUpgradeImage = (isPromoted: boolean, isDemoted: boolean): React.CSSProperties => {
-            console.log(this.state.league);
             if (this.state.league == 5) {
                 return { backgroundImage: 'none' };
             }
