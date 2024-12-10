@@ -1,4 +1,4 @@
-import { h, Component } from 'preact';
+import { h, Component, Fragment } from 'preact';
 import { avatarContext, getLeagueIcon, successToast } from '../utils';
 import { LeaguesNames } from '@legion/shared/enums';
 import { PlayerContext } from '../../contexts/PlayerContext';
@@ -16,26 +16,48 @@ interface State {
     error: string | null;
     avatarUrl: string | null;
     isAddingFriend: boolean;
+    playerStatus: {
+        status: string;
+        gameId?: string;
+    };
+    friendStatuses: {
+        [key: string]: {
+            status: string;
+            gameId?: string;
+        };
+    };
 }
 
 class Profile extends Component<Props, State> {
     static contextType = PlayerContext;
+
+    private statusInterval: NodeJS.Timeout | null = null;
 
     state: State = {
         profileData: null,
         isLoading: true,
         error: null,
         avatarUrl: null,
-        isAddingFriend: false
+        isAddingFriend: false,
+        playerStatus: { status: 'offline' },
+        friendStatuses: {},
     };
 
     async componentDidMount() {
         await this.loadProfileData();
+        this.setupStatusTracking();
     }
 
     async componentDidUpdate(prevProps: Props) {
         if (prevProps.id !== this.props.id) {
             await this.loadProfileData();
+            this.setupStatusTracking();
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.statusInterval) {
+            clearInterval(this.statusInterval);
         }
     }
 
@@ -102,6 +124,63 @@ class Profile extends Component<Props, State> {
         return this.context.friends.some(friend => friend.id === this.props.id);
     };
 
+    setupStatusTracking = () => {
+        const { socket } = this.context;
+        if (!socket) return;
+
+        // Clear existing interval if any
+        if (this.statusInterval) {
+            clearInterval(this.statusInterval);
+        }
+
+        const fetchStatuses = () => {
+            if (this.isOwnProfile()) {
+                // Get all friends' statuses
+                const friendIds = this.context.friends.map(friend => friend.id);
+                if (friendIds.length > 0) {
+                    socket.emit('getFriendsStatuses', { friendIds });
+                }
+            } else {
+                // Get single player status
+                socket.emit('getPlayerStatus', { playerId: this.props.id });
+            }
+        };
+
+        // Set up socket listeners
+        socket.off('playerStatus').on('playerStatus', (statusInfo) => {
+            this.setState({ playerStatus: statusInfo });
+        });
+
+        socket.off('friendsStatuses').on('friendsStatuses', (statuses) => {
+            this.setState({ friendStatuses: statuses });
+        });
+
+        // Initial fetch
+        fetchStatuses();
+
+        // Set up interval for periodic updates
+        this.statusInterval = setInterval(fetchStatuses, 10000); // Update every 10 seconds
+    }
+
+    renderPlayerStatus = (status: string, gameId?: string) => {
+        return (
+            <>
+                <div className={`status-dot ${status}`} />
+                {/* {status === 'ingame' && gameId && (
+                    <div 
+                        className="spectate-badge"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            route(`/game/${gameId}`);
+                        }}
+                    >
+                        Spectate
+                    </div>
+                )} */}
+            </>
+        );
+    }
+
     render() {
         const { profileData, isLoading, error, avatarUrl } = this.state;
         const isOwnProfile = this.isOwnProfile();
@@ -121,7 +200,12 @@ class Profile extends Component<Props, State> {
         return (
             <div className="profile-container">
                 <div className="profile-header">
-                    <div className="profile-avatar" style={{ backgroundImage: avatarUrl ? `url(${avatarUrl})` : 'none' }} />
+                    <div className="profile-avatar" style={{ backgroundImage: avatarUrl ? `url(${avatarUrl})` : 'none' }}>
+                        {!isOwnProfile && this.renderPlayerStatus(
+                            this.state.playerStatus.status,
+                            this.state.playerStatus.gameId
+                        )}
+                    </div>
                     <div className="profile-info">
                         <h1>{profileData.name}</h1>
                         <div className="profile-details">
@@ -265,7 +349,12 @@ class Profile extends Component<Props, State> {
                                             style={{ 
                                                 backgroundImage: `url(${avatarContext(`./${friend.avatar}.png`)})` 
                                             }}
-                                        />
+                                        >
+                                            {this.renderPlayerStatus(
+                                                this.state.friendStatuses[friend.id]?.status || 'offline',
+                                                this.state.friendStatuses[friend.id]?.gameId
+                                            )}
+                                        </div>
                                         <span className="friend-name">{friend.name}</span>
                                     </div>
                                 ))

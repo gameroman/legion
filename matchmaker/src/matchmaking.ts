@@ -708,3 +708,31 @@ export function processLeaveGame(socket: Socket, data: { gameId: string }) {
         }
     }
 }
+
+function getPlayerStatusInfo(uid: string) {
+    const player = connectedPlayers[uid];
+    if (!player) return { status: PlayerStatus.OFFLINE };
+    
+    return {
+        status: player.status,
+        gameId: player.gameId
+    };
+}
+
+function getFriendsStatuses(friendIds: string[]) {
+    const statuses = {};
+    friendIds.forEach(friendId => {
+        statuses[friendId] = getPlayerStatusInfo(friendId);
+    });
+    return statuses;
+}
+
+export function processGetPlayerStatus(socket: Socket, data: { playerId: string }) {
+    const statusInfo = getPlayerStatusInfo(data.playerId);
+    socket.emit('playerStatus', statusInfo);
+}
+
+export function processGetFriendsStatuses(socket: Socket, data: { friendIds: string[] }) {
+    const statuses = getFriendsStatuses(data.friendIds);
+    socket.emit('friendsStatuses', statuses);
+}

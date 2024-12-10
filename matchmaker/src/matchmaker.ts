@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 
 dotenv.config();
-import { setupMatchmaking, processJoinQueue, processJoinLobby, processDisconnect, processConnection, processLeaveQueue, processLeaveGame } from './matchmaking';
+import { setupMatchmaking, processJoinQueue, processJoinLobby, processDisconnect, processConnection, processLeaveQueue, processLeaveGame, processGetPlayerStatus, processGetFriendsStatuses } from './matchmaking';
 
 const allowedOrigins = [process.env.CLIENT_ORIGIN, 'https://legion-32c6d.firebaseapp.com'];
 console.log(`Allowed client origins: ${allowedOrigins}`);
@@ -55,6 +55,8 @@ io.on("connection", (socket: any) => {
     socket.on("leaveQueue", () => processLeaveQueue(socket));
     socket.on("leaveGame", (data) => processLeaveGame(socket, data));
     socket.on("disconnect", () => processDisconnect(socket));
+    socket.on("getPlayerStatus", (data) => processGetPlayerStatus(socket, data));
+    socket.on("getFriendsStatuses", (data) => processGetFriendsStatuses(socket, data));
 });
 
 setupMatchmaking(io);
