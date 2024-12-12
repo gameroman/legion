@@ -38,12 +38,14 @@ interface QueuingPlayer {
 class Lobby {
     id: string;
     creatorId: string;
+    opponentId: string | null;
     creatorSocket: Socket;
     opponentSocket: Socket;
     stake: number;
-    constructor(id: string, creatorId: string, stake: number = 0) {
+    constructor(id: string, creatorId: string, opponentId: string | null = null, stake: number = 0) {
         this.id = id;
         this.creatorId = creatorId;
+        this.opponentId = opponentId;
         this.creatorSocket = null;
         this.opponentSocket = null;
         this.stake = stake;
@@ -400,60 +402,83 @@ export async function processJoinQueue(socket, data: { mode: PlayMode }) {
 
 export async function processJoinLobby(socket, data: { lobbyId: string }) {
     try {
-        socket.uid = await getUID(socket.firebaseToken);
-        console.log(`[matchmaker:processJoinLobby] Player ${socket.uid} attempting to join lobby ${data.lobbyId} ...`);
+        // Get lobby details first
+        const lobbyDetails = await apiFetch(
+            `getLobbyDetails?lobbyId=${data.lobbyId}`,
+            socket.firebaseToken
+        );
 
-        let lobby = lobbies.get(data.lobbyId);
-        
+        // Determine play mode based on lobby type
+        const mode = lobbyDetails.type === 'friend' ? 
+            PlayMode.CASUAL_VS_FRIEND : 
+            PlayMode.STAKED;
+
+        const lobby = lobbies.get(data.lobbyId);
         if (!lobby) {
-            console.log(`[matchmaker:processJoinLobby] Lobby ${data.lobbyId} not found, fetching details...`);
-            // Fetch lobby details if it doesn't exist
-            const lobbyDetails = await apiFetch(
-                `getLobbyDetails?lobbyId=${data.lobbyId}`,
-                socket.firebaseToken,
-            );
-
-            lobby = new Lobby(
-                data.lobbyId,
+            // Create new lobby instance with opponentId from lobbyDetails
+            const newLobby = new Lobby(
+                data.lobbyId, 
                 lobbyDetails.creatorId,
+                lobbyDetails.opponentId, 
                 lobbyDetails.stake
             );
-            lobbies.set(data.lobbyId, lobby);
+            lobbies.set(data.lobbyId, newLobby);
+            
+            if (!newLobby.addPlayer(socket)) {
+                socket.emit('lobbyError', { message: 'Failed to join lobby' });
+                return;
+            }
+
+            // Update player status
+            updatePlayerStatus(socket.uid, PlayerStatus.QUEUING);
+            
+            // Send lobby details along with the join confirmation
+            socket.emit('lobbyJoined', { 
+                lobbyId: data.lobbyId,
+                type: lobbyDetails.type,
+                opponentName: lobbyDetails.type === 'friend' ? 
+                    (socket.uid === lobbyDetails.creatorId ? lobbyDetails.opponentNickname : lobbyDetails.nickname) : 
+                    null
+            });
+            return;
         }
 
-        if (lobby.addPlayer(socket)) {
-            notifyAdmin(socket.uid, null, PlayMode.STAKED, 'joined');
-            logQueuingActivity(socket.uid, 'joinLobby', PlayMode.STAKED);
-            updatePlayerStatus(socket.uid, PlayerStatus.QUEUING);
-            console.log(`[matchmaker:processJoinLobby] Player ${socket.uid} joined lobby ${data.lobbyId}`);
+        if (lobby.isFull()) {
+            socket.emit('lobbyError', { message: 'Lobby is full' });
+            return;
+        }
 
+        if (!lobby.addPlayer(socket)) {
+            socket.emit('lobbyError', { message: 'Failed to join lobby' });
+            return;
+        }
 
-            if (lobby.isFull()) {
-                await createGame(
-                    lobby.creatorSocket,
-                    lobby.opponentSocket,
-                    PlayMode.STAKED,
-                    null,
-                    lobby.stake
-                );
-                lobbies.delete(data.lobbyId);
-            }
-        } else {
-            socket.emit('lobbyError', { message: 'Unable to join lobby. It might be full or you are not authorized.' });
+        // Update player status
+        updatePlayerStatus(socket.uid, PlayerStatus.QUEUING);
+
+        socket.emit('lobbyJoined', { lobbyId: data.lobbyId });
+
+        // If lobby is now full, create the game
+        if (lobby.isFull()) {
+            await createGame(
+                lobby.creatorSocket,
+                lobby.opponentSocket,
+                mode,  // Use the determined mode
+                null,  // No league for friend lobbies
+                lobby.stake
+            );
+            lobbies.delete(data.lobbyId);
         }
     } catch (error) {
-        if (error.code === 'auth/id-token-revoked') {
-            console.log('The Firebase ID token has been revoked.');
-            socket.emit('authError', { message: 'Your session has expired. Please log in again.' });
-        } else {
-            console.error('Error processing join lobby:', error);
-            socket.emit('lobbyError', { message: 'Failed to join lobby. Please try again.' });
-        }
+        console.error('Error joining lobby:', error);
+        socket.emit('lobbyError', { 
+            message: error instanceof Error ? error.message : 'Failed to join lobby'
+        });
     }
 }
 
 
-export function processLeaveQueue(socket) {
+export async function processLeaveQueue(socket) {
     // @ts-ignore
     const uid = socket.uid;
     const status = getPlayerStatus(uid);
@@ -461,6 +486,17 @@ export function processLeaveQueue(socket) {
     if (status === PlayerStatus.QUEUING) {
         updatePlayerStatus(uid, PlayerStatus.ONLINE);
     }
+
+    // Check if player is in a lobby and if it's a friend lobby, notify the opponent
+    const lobby = findLobbyBySocketId(socket.id);
+    if (lobby && lobby.creatorSocket?.id === socket.id) {
+        // Get opponent's socket if they're connected
+        const opponentSocket = lobby.opponentSocket || getPlayerSocket(lobby.opponentId);
+        if (opponentSocket) {
+            opponentSocket.emit('challengeCancelled');
+        }
+    }
+
     leaveQueueOrLobby(socket);
 }
   
@@ -515,12 +551,6 @@ async function handleLobbyDisconnect(socket, lobby: Lobby) {
     } catch (error) {
         console.error(`Error cancelling lobby ${lobby.id}:`, error);
     }
-    
-    // Notify the other player in the lobby, if any
-    // const otherSocket = lobby.creatorSocket.id === socket.id ? lobby.opponentSocket : lobby.creatorSocket;
-    // if (otherSocket) {
-    //     otherSocket.emit('lobbyError', { message: 'The other player has disconnected. The lobby has been cancelled.' });
-    // }
     
     await logQueuingActivity(socket.uid, 'leaveLobby', lobby.id);
 }
@@ -811,18 +841,36 @@ export async function processSendChallenge(socket: any, data: { opponentUID: str
     }
 }
 
-export function processChallengeDeclined(socket: Socket, data: { 
+export async function processChallengeDeclined(socket, data: { 
     challengerId: string,
     lobbyId: string 
 }) {
+    console.log(`[matchmaker:processChallengeDeclined] Challenger ${data.challengerId} declined challenge for lobby ${data.lobbyId}`);
+    
     // Get challenger's socket if they're connected
     const challengerSocket = getPlayerSocket(data.challengerId);
     if (challengerSocket) {
         challengerSocket.emit('challengeDeclined');
     }
 
+    // Cancel the lobby
+    try {
+        apiFetch(
+            'cancelLobby',
+            socket.firebaseToken,
+            {
+                method: 'POST',
+                body: {
+                    lobbyId: data.lobbyId,
+                }
+            }
+        );
+        console.log(`Lobby ${data.lobbyId} cancelled successfully`);
+    } catch (error) {
+        console.error(`Error cancelling lobby ${data.lobbyId}:`, error);
+    }
+
     // Update both players' status back to online
-    // @ts-ignore
     updatePlayerStatus(socket.uid, PlayerStatus.ONLINE);
     updatePlayerStatus(data.challengerId, PlayerStatus.ONLINE);
 }

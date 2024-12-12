@@ -487,7 +487,21 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
     });
 
       socket.on('challengeDeclined', () => {
+        console.log(`[matchmaker:challengeDeclined] Challenge was declined`);
         errorToast('Challenge was declined');
+    });
+
+      socket.on('challengeCancelled', () => {
+        // Hide the challenge modal if it's showing
+        if (this.state.challengeModal.show) {
+            this.setState({
+                challengeModal: {
+                    ...this.state.challengeModal,
+                    show: false
+                }
+            });
+            errorToast('Challenge was cancelled by the opponent');
+        }
     });
 
       this.setState({ socket });

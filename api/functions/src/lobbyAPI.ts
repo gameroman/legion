@@ -102,12 +102,17 @@ async function createFriendLobby(
 ) {
     const { baseLobbyData } = await createBaseLobbyData(uid, transaction);
 
-    // Verify that opponent exists
+    // Verify that opponent exists and get their data
     const opponentDocRef = db.collection("players").doc(opponentUID);
     const opponentDoc = await transaction.get(opponentDocRef);
 
     if (!opponentDoc.exists) {
         throw new Error("Opponent not found");
+    }
+
+    const opponentData = opponentDoc.data();
+    if (!opponentData) {
+        throw new Error("Opponent data not found");
     }
 
     if (opponentUID === uid) {
@@ -119,6 +124,7 @@ async function createFriendLobby(
         type: 'friend',
         stake: 0,
         opponentUID,  // Pre-set the opponent
+        opponentNickname: opponentData.name,  // Add opponent's nickname
         status: 'pending'  // Different initial status for friend lobbies
     };
 
@@ -587,11 +593,13 @@ export const getLobbyDetails = onRequest((request, response) => {
                 opponentId: lobbyData.opponentUID || null,
                 avatar: lobbyData.avatar,
                 nickname: lobbyData.nickname,
+                opponentNickname: lobbyData.opponentNickname || null,  
                 elo: lobbyData.elo,
                 league: lobbyData.league,
                 rank: lobbyData.rank,
                 stake: lobbyData.stake,
                 status: lobbyData.status,
+                type: lobbyData.type,
                 createdAt: lobbyData.createdAt.toDate(),
             };
 

@@ -52,6 +52,10 @@ interface QpageState {
     queueDataLoaded: boolean;
     news: NewsItem[];
     newsLoaded: boolean;
+    lobbyDetails: {
+        type: string;
+        opponentName: string | null;
+    } | null;
 }
 
 
@@ -105,6 +109,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
             queueDataLoaded: false,
             news: [], // Add this line
             newsLoaded: false, // Add this line
+            lobbyDetails: null,
         };
     }
 
@@ -174,6 +179,16 @@ class QueuePage extends Component<QPageProps, QpageState> {
                 waited: prevState.waited + 1,
             }))
         }, 1000);
+
+        // Update the lobbyJoined handler
+        socket.on('lobbyJoined', (data) => {
+            this.setState({
+                lobbyDetails: {
+                    type: data.type,
+                    opponentName: data.opponentName
+                }
+            });
+        });
     }
 
     componentWillUnmount() {
@@ -236,14 +251,15 @@ class QueuePage extends Component<QPageProps, QpageState> {
                                 <div className="queue-spinner-centered">
                                     <div className="queue-spinner-loader"></div>
                                 </div>
-                                <div className="queue-text">
-                                    Waiting for another player to join...
-                                </div>
-                                {/* <div className="lobby-info-text">
-                                    <p>The stake has been deducted from your in-game wallet.</p>
-                                    <p>If you leave the lobby, it will be refunded to your in-game wallet.</p>
-                                    <p>If you win the game, the proceeds will go to your in-game wallet.</p>
-                                </div> */}
+                                {this.state.lobbyDetails && (
+                                    <div className="queue-text">
+                                        {this.state.lobbyDetails.type === 'friend' ? (
+                                            `Waiting for ${this.state.lobbyDetails.opponentName} to join...`
+                                        ) : (
+                                            'Waiting for another player to join...'
+                                        )}
+                                    </div>
+                                )}
                                 <Link href="/play" className="cancel-game-link">
                                     <div className="queue-detail-footer centered">
                                         <div className="queue-footer-exit">
