@@ -12,6 +12,13 @@ export interface PlayerContextState {
   lastHelp: number;
   friends: FriendData[];
   socket: Socket | null;
+  challengeModal: {
+    show: boolean;
+    challengerId: string;
+    challengerName: string;
+    challengerAvatar: string;
+    lobbyId: string;
+  };
 }
 
 export const PlayerContext = createContext<{
@@ -37,6 +44,15 @@ export const PlayerContext = createContext<{
   addFriend: (friendId: string) => Promise<void>;
   refreshFriends: () => Promise<void>;
   socket: Socket | null;
+  challengeModal: {
+    show: boolean;
+    challengerId: string;
+    challengerName: string;
+    challengerAvatar: string;
+    lobbyId: string;
+  };
+  handleChallengeAccept: () => Promise<void>;
+  handleChallengeDecline: () => void;
 }>({
   player: {
     uid: '',
@@ -82,4 +98,13 @@ export const PlayerContext = createContext<{
   addFriend: async () => {},
   refreshFriends: async () => {},
   socket: null,
+  challengeModal: {
+    show: false,
+    challengerId: '',
+    challengerName: '',
+    challengerAvatar: '',
+    lobbyId: '',
+  },
+  handleChallengeAccept: async () => {},
+  handleChallengeDecline: () => {},
 });

@@ -67,6 +67,7 @@ export enum PlayMode {
     TUTORIAL,
     CASUAL,
     CASUAL_VS_AI,
+    CASUAL_VS_FRIEND,
     RANKED,
     RANKED_VS_AI,
     STAKED,

@@ -1,7 +1,7 @@
 import { Component, h } from 'preact';
 import { PlayerContextState, PlayerContext } from '../contexts/PlayerContext';
 import { apiFetch } from '../services/apiService';
-import { successToast, errorToast } from '../components/utils';
+import { successToast, errorToast, avatarContext } from '../components/utils';
 import { APICharacterData, PlayerContextData, PlayerInventory } from '@legion/shared/interfaces';
 import { League, Stat, StatFields, InventoryActionType, ShopTab
  } from "@legion/shared/enums";
@@ -84,6 +84,13 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
         lastHelp: 0,
         friends: [],
         socket: null,
+        challengeModal: {
+            show: false,
+            challengerId: '',
+            challengerName: '',
+            challengerAvatar: '',
+            lobbyId: '',
+        },
       };
     }
 
@@ -458,6 +465,31 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
         errorToast(e);
       });
 
+      socket.on('challengeReceived', (data: { 
+        challengerId: string,
+        challengerName: string,
+        challengerAvatar: string,
+        lobbyId: string 
+    }) => {
+        // Show the challenge modal with the received data
+        this.setState({
+            challengeModal: {
+                show: true,
+                challengerId: data.challengerId,
+                challengerName: data.challengerName,
+                challengerAvatar: data.challengerAvatar,
+                lobbyId: data.lobbyId
+            }
+        });
+
+        // Play sound effect
+        playSoundEffect(matchFound);
+    });
+
+      socket.on('challengeDeclined', () => {
+        errorToast('Challenge was declined');
+    });
+
       this.setState({ socket });
     }
 
@@ -472,6 +504,38 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
         this.setupSocket();
       }, this.reconnectDelay);
     }
+
+    handleChallengeAccept = async () => {
+        const { lobbyId } = this.state.challengeModal;
+        
+        try {
+            // Join the lobby through the socket
+            const { socket } = this.state;
+            if (!socket) {
+                throw new Error("No socket connection available");
+            }
+
+            // Close modal and redirect
+            this.setState({ challengeModal: { ...this.state.challengeModal, show: false } });
+            route(`/lobby/${lobbyId}`);
+        } catch (error) {
+            errorToast('Failed to accept challenge: ' + error.message);
+        }
+    };
+
+    handleChallengeDecline = () => {
+        const { socket } = this.state;
+        const { challengerId, lobbyId } = this.state.challengeModal;
+        
+        if (socket) {
+            socket.emit('challengeDeclined', { 
+                challengerId,
+                lobbyId
+            });
+        }
+        
+        this.setState({ challengeModal: { ...this.state.challengeModal, show: false } });
+    };
 
     render() {
       const { children } = this.props;
@@ -500,8 +564,50 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           addFriend: this.addFriend,
           refreshFriends: this.fetchFriends,
           socket: this.state.socket,
+          challengeModal: this.state.challengeModal,
+          handleChallengeAccept: this.handleChallengeAccept,
+          handleChallengeDecline: this.handleChallengeDecline,
         }}>
           {children}
+          
+          {/* Challenge Response Modal */}
+          {this.state.challengeModal.show && (
+              <div className="modal-overlay">
+                  <div className="modal challenge-response-modal">
+                      <div 
+                          className="challenger-avatar"
+                          style={{ 
+                              backgroundImage: `url(${avatarContext(
+                                  `./${this.state.challengeModal.challengerAvatar}.png`
+                              )})` 
+                          }}
+                      />
+                      <h3>Duel</h3>
+                      <div className="challenge-description">
+                          <p>
+                              <span className="highlight-name">
+                                  {this.state.challengeModal.challengerName}
+                              </span>
+                              {' '}has challenged you to a duel!
+                          </p>
+                      </div>
+                      <div className="button-container">
+                          <button
+                              onClick={this.handleChallengeDecline}
+                              className="decline-btn"
+                          >
+                              Decline
+                          </button>
+                          <button
+                              onClick={this.handleChallengeAccept}
+                              className="accept-btn"
+                          >
+                              Accept
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          )}
         </PlayerContext.Provider>
       );
     }

@@ -1,10 +1,11 @@
 import { h, Component, Fragment } from 'preact';
-import { avatarContext, getLeagueIcon, successToast } from '../utils';
+import { avatarContext, getLeagueIcon, successToast, errorToast } from '../utils';
 import { LeaguesNames } from '@legion/shared/enums';
 import { PlayerContext } from '../../contexts/PlayerContext';
 import './profile.style.css';
 import SearchPlayers from './SearchPlayers';
 import { route } from 'preact-router';
+import { apiFetch } from '../../services/apiService';
 
 interface Props {
     id: string;
@@ -27,6 +28,8 @@ interface State {
         };
     };
     socketReady: boolean;
+    showChallengeModal: boolean;
+    isCreatingChallenge: boolean;
 }
 
 class Profile extends Component<Props, State> {
@@ -43,6 +46,8 @@ class Profile extends Component<Props, State> {
         playerStatus: { status: 'offline' },
         friendStatuses: {},
         socketReady: false,
+        showChallengeModal: false,
+        isCreatingChallenge: false,
     };
 
     async componentDidMount() {
@@ -229,10 +234,7 @@ class Profile extends Component<Props, State> {
                 {showChallengeButton && (
                     <button 
                         className="challenge-button"
-                        onClick={() => {
-                            // TODO: Implement challenge functionality
-                            console.log('Challenge clicked');
-                        }}
+                        onClick={this.handleChallenge}
                     >
                         Challenge to a Duel
                     </button>
@@ -240,6 +242,54 @@ class Profile extends Component<Props, State> {
             </div>
         );
     }
+
+    handleChallenge = () => {
+        this.setState({ showChallengeModal: true });
+    };
+
+    handleChallengeConfirm = async () => {
+        this.setState({ isCreatingChallenge: true });
+        try {
+            const { socket } = this.context;
+            if (!socket) {
+                throw new Error("No socket connection available");
+            }
+
+            // Create a Promise that will resolve when we get a response
+            const challengeResponse = await new Promise((resolve, reject) => {
+                // Set up one-time listener for the response
+                socket.once('challengeResponse', (response) => {
+                    if (response.error) {
+                        reject(new Error(response.error));
+                    } else {
+                        resolve(response);
+                    }
+                });
+
+                // Emit the challenge request
+                socket.emit('sendChallenge', {
+                    opponentUID: this.props.id
+                });
+
+                // Set up timeout
+                setTimeout(() => {
+                    reject(new Error('Challenge request timed out'));
+                }, 5000);
+            });
+
+            // Handle the response
+            const { lobbyId } = challengeResponse as { lobbyId: string };
+            route(`/lobby/${lobbyId}`);
+        } catch (error) {
+            console.error('Error creating challenge:', error);
+            errorToast('Failed to create challenge: ' + (error.message || error));
+        } finally {
+            this.setState({ 
+                isCreatingChallenge: false,
+                showChallengeModal: false 
+            });
+        }
+    };
 
     render() {
         const { profileData, isLoading, error, avatarUrl } = this.state;
@@ -423,6 +473,46 @@ class Profile extends Component<Props, State> {
                             ) : (
                                 <div className="no-friends">No friends yet</div>
                             )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Challenge Modal */}
+                {this.state.showChallengeModal && (
+                    <div className="modal-overlay">
+                        <div className="modal challenge-modal">
+                            <div 
+                                className="challenger-avatar"
+                                style={{ backgroundImage: avatarUrl ? `url(${avatarUrl})` : 'none' }}
+                            />
+                            <h3>Duel</h3>
+                            <div className="challenge-description">
+                                <p>
+                                    Do you want to play against{' '}
+                                    <span className="highlight-name">{profileData.name}</span>
+                                    {' '}?
+                                </p>
+                            </div>
+                            <div className="modal-footer">
+                                {this.state.isCreatingChallenge ? (
+                                    <div className="lobby-spinner"></div>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={() => this.setState({ showChallengeModal: false })}
+                                            className="cancel-btn"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={this.handleChallengeConfirm}
+                                            className="confirm-btn"
+                                        >
+                                            Send Challenge
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}

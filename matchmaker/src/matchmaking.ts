@@ -66,7 +66,7 @@ class Lobby {
 
     isFull(): boolean {
         // @ts-ignore
-        console.log(`[matchmaker:Lobby:isFull] creatorSocket: ${this.creatorSocket?.uid}, opponentSocket: ${this.opponentSocket?.uid}`);
+        // console.log(`[matchmaker:Lobby:isFull] creatorSocket: ${this.creatorSocket?.uid}, opponentSocket: ${this.opponentSocket?.uid}`);
         return this.creatorSocket != null && this.opponentSocket != null;
     }
 }
@@ -735,4 +735,94 @@ export function processGetPlayerStatus(socket: Socket, data: { playerId: string 
 export function processGetFriendsStatuses(socket: Socket, data: { friendIds: string[] }) {
     const statuses = getFriendsStatuses(data.friendIds);
     socket.emit('friendsStatuses', statuses);
+}
+
+export async function processSendChallenge(socket: any, data: { opponentUID: string }) {
+    try {
+        // Get opponent's socket if they're connected
+        const opponentSocket = getPlayerSocket(data.opponentUID);
+        if (!opponentSocket) {
+            socket.emit('challengeResponse', { 
+                error: 'Player is not currently online' 
+            });
+            return;
+        }
+
+        // Check if opponent is available
+        const opponentStatus = getPlayerStatus(data.opponentUID);
+        if (opponentStatus !== PlayerStatus.ONLINE) {
+            socket.emit('challengeResponse', { 
+                error: 'Player is not available for challenges right now' 
+            });
+            return;
+        }
+
+        // Get challenger's data
+        const challengerData = await apiFetch(
+            `getProfileData?playerId=${socket.uid}`,
+            socket.firebaseToken
+        );
+
+        // Create the friend lobby via API
+        try {
+            const response = await apiFetch(
+                'createLobby',
+                socket.firebaseToken,
+                {
+                    method: 'POST',
+                    body: {
+                        type: 'friend',
+                        opponentUID: data.opponentUID
+                    }
+                }
+            );
+
+            // Notify the challenger
+            socket.emit('challengeResponse', {
+                lobbyId: response.lobbyId
+            });
+
+            // Notify the opponent with challenger's data
+            opponentSocket.emit('challengeReceived', {
+                challengerId: socket.uid,
+                challengerName: challengerData.name,
+                challengerAvatar: challengerData.avatar,
+                lobbyId: response.lobbyId
+            });
+
+            // Update both players' status
+            updatePlayerStatus(socket.uid, PlayerStatus.QUEUING);
+
+            // Log the activity
+            await logQueuingActivity(socket.uid, 'sendChallenge', data.opponentUID);
+
+        } catch (error) {
+            console.error('Error creating friend lobby:', error);
+            socket.emit('challengeResponse', { 
+                error: 'Failed to create challenge lobby' 
+            });
+        }
+
+    } catch (error) {
+        console.error('Error processing challenge:', error);
+        socket.emit('challengeResponse', { 
+            error: 'Internal server error while processing challenge' 
+        });
+    }
+}
+
+export function processChallengeDeclined(socket: Socket, data: { 
+    challengerId: string,
+    lobbyId: string 
+}) {
+    // Get challenger's socket if they're connected
+    const challengerSocket = getPlayerSocket(data.challengerId);
+    if (challengerSocket) {
+        challengerSocket.emit('challengeDeclined');
+    }
+
+    // Update both players' status back to online
+    // @ts-ignore
+    updatePlayerStatus(socket.uid, PlayerStatus.ONLINE);
+    updatePlayerStatus(data.challengerId, PlayerStatus.ONLINE);
 }
