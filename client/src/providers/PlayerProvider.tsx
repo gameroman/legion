@@ -1,7 +1,7 @@
 import { Component, h } from 'preact';
 import { PlayerContextState, PlayerContext } from '../contexts/PlayerContext';
 import { apiFetch } from '../services/apiService';
-import { successToast, errorToast, avatarContext } from '../components/utils';
+import { successToast, errorToast, avatarContext, silentErrorToast } from '../components/utils';
 import { APICharacterData, PlayerContextData, PlayerInventory } from '@legion/shared/interfaces';
 import { League, Stat, StatFields, InventoryActionType, ShopTab
  } from "@legion/shared/enums";
@@ -408,7 +408,11 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       if (!user) return;
       try {
           // console.log(`Fetching friends for ${user.uid}`);
-          const friends = await apiFetch(`listFriends?playerId=${user.uid}`);
+          const friends = await apiFetch(
+            `listFriends?playerId=${user.uid}`,
+            {},
+            3
+          );
           this.setState({ friends });
       } catch (error) {
           console.error('Error fetching friends:', error);
@@ -486,12 +490,13 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
         playSoundEffect(matchFound);
     });
 
-      socket.on('challengeDeclined', () => {
+      socket.on('challengeDeclined', (data: { playerName: string }) => {
         console.log(`[matchmaker:challengeDeclined] Challenge was declined`);
-        errorToast('Challenge was declined');
+        silentErrorToast(`Your challenge to ${data.playerName} was declined!`);
+        route('/profile');
     });
 
-      socket.on('challengeCancelled', () => {
+      socket.on('challengeCancelled', (data?: { challengerName: string }) => {
         // Hide the challenge modal if it's showing
         if (this.state.challengeModal.show) {
             this.setState({
@@ -500,7 +505,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
                     show: false
                 }
             });
-            errorToast('Challenge was cancelled by the opponent');
+            silentErrorToast(`The challenge from ${data?.challengerName || 'Player'} was cancelled`);
         }
     });
 
@@ -587,7 +592,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           {/* Challenge Response Modal */}
           {this.state.challengeModal.show && (
               <div className="modal-overlay">
-                  <div className="modal challenge-response-modal">
+                  <div className="modal challenge-modal">
                       <div 
                           className="challenger-avatar"
                           style={{ 
@@ -605,16 +610,16 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
                               {' '}has challenged you to a duel!
                           </p>
                       </div>
-                      <div className="button-container">
+                      <div className="modal-footer">
                           <button
                               onClick={this.handleChallengeDecline}
-                              className="decline-btn"
+                              className="cancel-btn"
                           >
                               Decline
                           </button>
                           <button
                               onClick={this.handleChallengeAccept}
-                              className="accept-btn"
+                              className="confirm-btn"
                           >
                               Accept
                           </button>

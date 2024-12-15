@@ -669,61 +669,40 @@
     left: -30px;
     width: 80px;
     height: 80px;
-    border-radius: 50%;
+    border-radius: 8px;
     background-size: cover;
     background-position: center;
-    border: 4px solid #cd853f;
+    border: 4px solid #ffd700;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease;
+    animation: glowPulse 2s infinite;
 }
 
-.challenge-modal .challenger-avatar:hover {
-    transform: scale(1.05);
-}
-
-.challenge-modal h3 {
-    position: absolute;
-    top: -18px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--background-color);
-    padding: 0 20px;
-    margin: 0;
-    color: white;
-    font-size: 32px;
-    text-transform: uppercase;
-    text-shadow: -2px -2px 0 #000,  
-                  2px -2px 0 #000,
-                 -2px  2px 0 #000,
-                  2px  2px 0 #000;
-    z-index: 2;
-}
-
-/* Add a pseudo-element to cover the border */
-.challenge-modal::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 120px;
-    height: 4px;
-    background: var(--background-color);
-    z-index: 1;
+/* Add the pulsating glow animation */
+@keyframes glowPulse {
+    0% {
+        box-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 15px #ffd700;
+    }
+    50% {
+        box-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700;
+    }
+    100% {
+        box-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 15px #ffd700;
+    }
 }
 
 .challenge-modal .challenge-description {
     text-align: center;
     margin: 30px 0;
-    color: var(--text-color-secondary);
+    color: white;
     font-size: 24px;
     line-height: 1.4;
 }
 
 .challenge-modal .highlight-name {
-    color: #ffae00;
+    color: #f9d400;
     font-weight: bold;
     font-size: 26px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 /* Add emphasis to the second paragraph */
@@ -748,7 +727,7 @@
 }
 
 .challenge-modal .confirm-btn {
-    background: linear-gradient(135deg, #ffd700, #cd853f);
+    background: linear-gradient(135deg, #ffd700, #daa520);
     border: none;
     padding: 10px 20px;
     font-size: 16px;
@@ -756,8 +735,9 @@
 }
 
 .challenge-modal .confirm-btn:hover {
-    background: linear-gradient(135deg, #ffe44d, #dea164);
+    background: linear-gradient(135deg, #fff700, #ffd700);
     transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
 } 
 
 /* Challenge Response Modal Styles */
@@ -819,7 +799,7 @@
 }
 
 .challenge-response-modal .highlight-name {
-    color: #cd853f;
+    color: #ffd700;
     font-weight: bold;
     font-size: 26px;
 }
@@ -855,3 +835,22 @@
     background: linear-gradient(135deg, #d32f2f, #f44336);
     transform: scale(1.05);
 } 
+
+
+.challenge-modal h3 {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--background-color);
+    padding: 0 20px;
+    margin: 0;
+    color: white;
+    font-size: 32px;
+    text-transform: uppercase;
+    text-shadow: -2px -2px 0 #000,  
+                  2px -2px 0 #000,
+                 -2px  2px 0 #000,
+                  2px  2px 0 #000;
+    z-index: 2;
+}   

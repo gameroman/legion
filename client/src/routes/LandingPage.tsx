@@ -35,7 +35,7 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
         // console.log(`Server warmed up`);
       })
       .catch(error => {
-        console.error(`Error warming up the server: ${error}`);
+        // console.error(`Error warming up the server: ${error}`);
       });
   }
 

@@ -126,7 +126,7 @@ export function fetchGuideTip() {
       showGuideToast(guide[data.guideId], data.route);
       tipLock = false;
   })
-  .catch(error => console.error(`Fetching tip error: ${error}`));
+  // .catch(error => console.error(`Fetching tip error: ${error}`));
 }
 
 export function getSpritePath(fileName: string) {

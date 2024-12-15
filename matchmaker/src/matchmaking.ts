@@ -240,6 +240,21 @@ async function createGame(
     player1: Socket, player2?: Socket, mode: PlayMode = PlayMode.PRACTICE, league: League | null = null, stake: number = 0
 ) {
     try {
+        // Check if players can join game
+        if (!(await tryJoinGame(player1))) return false;
+        if (player2 && !(await tryJoinGame(player2))) {
+            // Reset player1's status if player2 can't join
+            // @ts-ignore
+            updatePlayerStatus(player1.uid, PlayerStatus.ONLINE);
+            return false;
+        }
+
+        // Decline any pending challenges for both players
+        // @ts-ignore
+        declinePendingChallenge(player1.uid);
+        // @ts-ignore
+        if (player2) declinePendingChallenge(player2.uid);
+
         const gameId = uuidv4();
         await apiFetch(
             'createGame',
@@ -277,6 +292,13 @@ async function createGame(
         return true;
     } catch (error) {
         console.error(`Error creating game: ${error}`);
+        // Reset players' status on error
+        // @ts-ignore
+        updatePlayerStatus(player1.uid, PlayerStatus.ONLINE);
+        if (player2) {
+            // @ts-ignore
+            updatePlayerStatus(player2.uid, PlayerStatus.ONLINE);
+        }
         return false;
     }
 }
@@ -402,11 +424,25 @@ export async function processJoinQueue(socket, data: { mode: PlayMode }) {
 
 export async function processJoinLobby(socket, data: { lobbyId: string }) {
     try {
+        // Check if player can join a game
+        if (!(await tryJoinGame(socket))) {
+            socket.emit('lobbyError', { 
+                message: 'Cannot join lobby while in another game' 
+            });
+            return;
+        }
+
         // Get lobby details first
         const lobbyDetails = await apiFetch(
             `getLobbyDetails?lobbyId=${data.lobbyId}`,
             socket.firebaseToken
         );
+
+        // Remove player from queue if they're in one
+        const queuePlayer = playersQueue.find(player => player.socket.id === socket.id);
+        if (queuePlayer) {
+            removePlayerFromQ(queuePlayer);
+        }
 
         // Determine play mode based on lobby type
         const mode = lobbyDetails.type === 'friend' ? 
@@ -460,6 +496,9 @@ export async function processJoinLobby(socket, data: { lobbyId: string }) {
 
         // If lobby is now full, create the game
         if (lobby.isFull()) {
+            // Clear any pending challenge before starting the game
+            pendingChallenges.delete(lobby.opponentId);
+            
             await createGame(
                 lobby.creatorSocket,
                 lobby.opponentSocket,
@@ -470,6 +509,8 @@ export async function processJoinLobby(socket, data: { lobbyId: string }) {
             lobbies.delete(data.lobbyId);
         }
     } catch (error) {
+        // Reset player status on error
+        updatePlayerStatus(socket.uid, PlayerStatus.ONLINE);
         console.error('Error joining lobby:', error);
         socket.emit('lobbyError', { 
             message: error instanceof Error ? error.message : 'Failed to join lobby'
@@ -493,7 +534,11 @@ export async function processLeaveQueue(socket) {
         // Get opponent's socket if they're connected
         const opponentSocket = lobby.opponentSocket || getPlayerSocket(lobby.opponentId);
         if (opponentSocket) {
-            opponentSocket.emit('challengeCancelled');
+            // Get the pending challenge to access the challenger's name
+            const pendingChallenge = pendingChallenges.get(lobby.opponentId);
+            opponentSocket.emit('challengeCancelled', {
+                challengerName: pendingChallenge?.challengerName || 'Player'
+            });
         }
     }
 
@@ -535,21 +580,13 @@ async function handleLobbyDisconnect(socket, lobby: Lobby) {
     // Destroy the lobby
     lobbies.delete(lobby.id);
     
-    // Call the cancelLobby endpoint
-    try {
-        await apiFetch(
-            'cancelLobby',
-            socket.firebaseToken,
-            {
-                method: 'POST',
-                body: {
-                    lobbyId: lobby.id,
-                }
-            }
-        );
-        console.log(`Lobby ${lobby.id} cancelled successfully`);
-    } catch (error) {
-        console.error(`Error cancelling lobby ${lobby.id}:`, error);
+    // Only call cancelLobby if the disconnecting player is the creator
+    if (socket.uid === lobby.creatorId) {
+        try {
+            await cancelLobby(socket.firebaseToken, lobby.id, 'creator disconnected');
+        } catch (error) {
+            // Already logged in cancelLobby
+        }
     }
     
     await logQueuingActivity(socket.uid, 'leaveLobby', lobby.id);
@@ -673,7 +710,8 @@ enum PlayerStatus {
   ONLINE = 'online',
   QUEUING = 'queuing',
   INGAME = 'ingame',
-  OFFLINE = 'offline'
+  OFFLINE = 'offline',
+  JOINING_GAME = 'joining_game'
 }
 
 interface ConnectedPlayer {
@@ -780,7 +818,8 @@ export async function processSendChallenge(socket: any, data: { opponentUID: str
 
         // Check if opponent is available
         const opponentStatus = getPlayerStatus(data.opponentUID);
-        if (opponentStatus !== PlayerStatus.ONLINE) {
+        const allowedStatuses = [PlayerStatus.ONLINE];
+        if (!allowedStatuses.includes(opponentStatus)) {
             socket.emit('challengeResponse', { 
                 error: 'Player is not available for challenges right now' 
             });
@@ -790,6 +829,12 @@ export async function processSendChallenge(socket: any, data: { opponentUID: str
         // Get challenger's data
         const challengerData = await apiFetch(
             `getProfileData?playerId=${socket.uid}`,
+            socket.firebaseToken
+        );
+
+        // Get opponent's data
+        const opponentData = await apiFetch(
+            `getProfileData?playerId=${data.opponentUID}`,
             socket.firebaseToken
         );
 
@@ -806,6 +851,14 @@ export async function processSendChallenge(socket: any, data: { opponentUID: str
                     }
                 }
             );
+
+            // Track the pending challenge
+            pendingChallenges.set(data.opponentUID, {
+                challengerId: socket.uid,
+                challengerName: challengerData.name,
+                targetName: opponentData.name,
+                lobbyId: response.lobbyId
+            });
 
             // Notify the challenger
             socket.emit('challengeResponse', {
@@ -847,30 +900,102 @@ export async function processChallengeDeclined(socket, data: {
 }) {
     console.log(`[matchmaker:processChallengeDeclined] Challenger ${data.challengerId} declined challenge for lobby ${data.lobbyId}`);
     
+    // Get the pending challenge before removing it
+    const pendingChallenge = pendingChallenges.get(socket.uid);
+    // Remove the pending challenge
+    pendingChallenges.delete(socket.uid);
+    
     // Get challenger's socket if they're connected
     const challengerSocket = getPlayerSocket(data.challengerId);
     if (challengerSocket) {
-        challengerSocket.emit('challengeDeclined');
-    }
+        challengerSocket.emit('challengeDeclined', {
+            playerName: pendingChallenge?.targetName || 'Player'
+        });
 
-    // Cancel the lobby
-    try {
-        apiFetch(
-            'cancelLobby',
-            socket.firebaseToken,
-            {
-                method: 'POST',
-                body: {
-                    lobbyId: data.lobbyId,
-                }
-            }
-        );
-        console.log(`Lobby ${data.lobbyId} cancelled successfully`);
-    } catch (error) {
-        console.error(`Error cancelling lobby ${data.lobbyId}:`, error);
+        try {
+            // @ts-ignore
+            await cancelLobby(challengerSocket.firebaseToken, data.lobbyId, 'challenge declined');
+        } catch (error) {
+            // Already logged in cancelLobby
+        }
     }
 
     // Update both players' status back to online
     updatePlayerStatus(socket.uid, PlayerStatus.ONLINE);
     updatePlayerStatus(data.challengerId, PlayerStatus.ONLINE);
+}
+
+async function tryJoinGame(socket: Socket): Promise<boolean> {
+    // @ts-ignore
+    const uid = socket.uid;
+    const status = getPlayerStatus(uid);
+    
+    // If player is already in a game or joining one, prevent joining
+    if (status === PlayerStatus.INGAME || status === PlayerStatus.JOINING_GAME) {
+        socket.emit('gameError', { 
+            message: 'Already in or joining another game' 
+        });
+        return false;
+    }
+    
+    // Set status to joining game
+    updatePlayerStatus(uid, PlayerStatus.JOINING_GAME);
+    return true;
+}
+
+// Add this interface near the other interfaces
+interface PendingChallenge {
+    challengerId: string;
+    challengerName: string;
+    targetName: string;
+    lobbyId: string;
+}
+
+// Add this to track pending challenges, near other global variables
+const pendingChallenges: Map<string, PendingChallenge> = new Map();
+
+// Add this helper function
+function declinePendingChallenge(uid: string) {
+    const pendingChallenge = pendingChallenges.get(uid);
+    if (pendingChallenge) {
+        const { challengerId, lobbyId } = pendingChallenge;
+        
+        // Get challenger's socket if they're connected
+        const challengerSocket = getPlayerSocket(challengerId);
+        if (challengerSocket) {
+            challengerSocket.emit('challengeDeclined');
+            
+            // @ts-ignore
+            cancelLobby(challengerSocket.firebaseToken, lobbyId, 'pending challenge declined')
+                .catch(() => {}); // Error already logged in cancelLobby
+        }
+
+        // Update challenger's status back to online
+        updatePlayerStatus(challengerId, PlayerStatus.ONLINE);
+        
+        // Remove the pending challenge
+        pendingChallenges.delete(uid);
+        
+        console.log(`Declined pending challenge from ${challengerId} (lobby: ${lobbyId}) due to queue match`);
+    }
+}
+
+// Add this helper function near other helper functions
+async function cancelLobby(creatorToken: string, lobbyId: string, reason: string = '') {
+    try {
+        await apiFetch(
+            'cancelLobby',
+            creatorToken,
+            {
+                method: 'POST',
+                body: {
+                    lobbyId,
+                }
+            }
+        );
+        console.log(`Lobby ${lobbyId} cancelled successfully${reason ? ` (${reason})` : ''}`);
+    } catch (error) {
+        console.error(`Error cancelling lobby ${lobbyId}:`, error);
+        throw error; // Re-throw to let caller handle if needed
+    }
 }

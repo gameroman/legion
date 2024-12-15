@@ -52,11 +52,11 @@ class App extends Component<{}, AppState> {
     };
 
     warmUpMatchmaker = () => {
-        fetch(`${process.env.MATCHMAKER_URL}`).then(() => {
-            // console.log('Matchmaker warmed up');
-        }).catch((err) => {
-            console.error('Error warming up matchmaker:', err);
-        });
+        try {
+            fetch(`${process.env.MATCHMAKER_URL}`);
+        } catch (err) {
+            // console.error('Error warming up matchmaker:', err);
+        }
     }
 
     getMainRoute(url: string): string {
@@ -112,7 +112,7 @@ class App extends Component<{}, AppState> {
                                     <Route path="/queue/:mode" component={AuthenticatedHomePage} />
                                     <Route path="/lobby/:id" component={AuthenticatedHomePage} />
                                     <Route path="/elysium" component={AuthenticatedHomePage} />
-                                    <Route path="/profile/:id" component={AuthenticatedHomePage} />
+                                    <Route path="/profile/:id?" component={AuthenticatedHomePage} />
                                     <Route default component={AuthenticatedHomePage} />
                                 </Router>
                             </WalletContextProvider>

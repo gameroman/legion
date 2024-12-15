@@ -23,7 +23,7 @@ const getTokenWithRetry = async (user: firebase.User, maxAttempts = 3, delay = 1
 
 async function getUserWithRetry(maxRetries, interval) {
     for (let i = 0; i < maxRetries; i++) {
-        console.log(`Attempt ${i + 1}/${maxRetries} (${interval}ms): Getting current user...`);
+        // console.log(`Attempt ${i + 1}/${maxRetries} (${interval}ms): Getting current user...`);
         const user = firebaseAuth.currentUser;
         if (user) {
             return user;
@@ -90,7 +90,7 @@ async function apiFetch(endpoint: string, options: ApiFetchOptions = {}, maxRetr
 
             const fullEndpoint = `${apiBaseUrl}/${endpoint}`;
             if (process.env.NODE_ENV === 'development') {
-                console.log(`Attempt ${attempt + 1} of ${maxRetries}: Calling ${fullEndpoint}`);
+                // console.log(`Attempt ${attempt + 1} of ${maxRetries}: Calling ${fullEndpoint}`);
             }
             
             const fetchPromise = fetch(fullEndpoint, {

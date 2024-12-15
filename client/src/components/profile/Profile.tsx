@@ -8,7 +8,7 @@ import { route } from 'preact-router';
 import { apiFetch } from '../../services/apiService';
 
 interface Props {
-    id: string;
+    id?: string;
 }
 
 interface State {
@@ -50,6 +50,11 @@ class Profile extends Component<Props, State> {
         isCreatingChallenge: false,
     };
 
+    getEffectiveId = () => {
+        console.log('getEffectiveId', this.props.id, this.context.player.uid);
+        return this.props.id || this.context.player.uid;
+    };
+
     async componentDidMount() {
         await this.loadProfileData();
         this.setupStatusTracking();
@@ -79,7 +84,7 @@ class Profile extends Component<Props, State> {
     loadProfileData = async () => {
         this.setState({ isLoading: true, error: null });
         try {
-            const response = await fetch(`${process.env.API_URL}/getProfileData?playerId=${this.props.id}`);
+            const response = await fetch(`${process.env.API_URL}/getProfileData?playerId=${this.getEffectiveId()}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch profile data');
             }
@@ -120,13 +125,13 @@ class Profile extends Component<Props, State> {
     };
 
     isOwnProfile = () => {
-        return this.props.id === this.context.player.uid;
+        return this.getEffectiveId() === this.context.player.uid;
     };
 
     handleAddFriend = async () => {
         this.setState({ isAddingFriend: true });
         try {
-            await this.context.addFriend(this.props.id);
+            await this.context.addFriend(this.getEffectiveId());
             successToast('Friend added successfully!');
         } catch (error) {
             console.error('Error adding friend:', error);
@@ -136,7 +141,7 @@ class Profile extends Component<Props, State> {
     };
 
     isAlreadyFriend = () => {
-        return this.context.friends.some(friend => friend.id === this.props.id);
+        return this.context.friends.some(friend => friend.id === this.getEffectiveId());
     };
 
     setupStatusTracking = () => {
@@ -161,7 +166,7 @@ class Profile extends Component<Props, State> {
             } else {
                 // console.log('Getting player status for', this.props.id);
                 // Get single player status
-                socket.emit('getPlayerStatus', { playerId: this.props.id });
+                socket.emit('getPlayerStatus', { playerId: this.getEffectiveId() });
             }
         };
 
@@ -213,9 +218,11 @@ class Profile extends Component<Props, State> {
 
         switch(status) {
             case 'online':
-            case 'queuing':
                 statusMessage = `${this.state.profileData.name} is ready to play!`;
                 showChallengeButton = true;
+                break;
+            case 'queuing':
+                statusMessage = `${this.state.profileData.name} is already queuing!`;
                 break;
             case 'offline':
                 statusMessage = `${this.state.profileData.name} is currently offline`;
@@ -268,7 +275,7 @@ class Profile extends Component<Props, State> {
 
                 // Emit the challenge request
                 socket.emit('sendChallenge', {
-                    opponentUID: this.props.id
+                    opponentUID: this.getEffectiveId()
                 });
 
                 // Set up timeout
