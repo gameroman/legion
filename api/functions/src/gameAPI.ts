@@ -184,6 +184,14 @@ export const getNews = onRequest((request, response) => {
       const newsCollection = db.collection("news");
       const newsSnapshot = await newsCollection.get();
       const newsData = newsSnapshot.docs.map(doc => doc.data());
+      
+      // Sort news by date string (oldest first)
+      newsData.sort((a, b) => {
+        const dateA = a.date || '0000-00-00';
+        const dateB = b.date || '0000-00-00';
+        return dateA.localeCompare(dateB);
+      });
+
       response.status(200).json(newsData);
     } catch (error) {
       console.error("getNews error:", error);
