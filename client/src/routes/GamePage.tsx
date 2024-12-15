@@ -21,7 +21,15 @@ interface GamePageState {
   isPortraitMode: boolean;
   key: number;
   waitingStartTime: number | null;
+  currentMessageIndex: number;
 }
+
+const WAITING_MESSAGES = [
+  "Waiting for server",
+  "Preparing the arena",
+  "Summoning your champions",
+  "Sharpening weapons",
+];
 
 class GamePage extends Component<GamePageProps, GamePageState> {
   static contextType = PlayerContext;
@@ -37,6 +45,7 @@ class GamePage extends Component<GamePageProps, GamePageState> {
       isPortraitMode: false,
       key: 0,
       waitingStartTime: null,
+      currentMessageIndex: 0,
     };
   }
 
@@ -73,6 +82,10 @@ class GamePage extends Component<GamePageProps, GamePageState> {
     window.removeEventListener('orientationchange', this.checkOrientation);
     if (this.waitingTimer) {
       clearTimeout(this.waitingTimer);
+    }
+    const highestId = window.setInterval(() => {}, 0);
+    for (let i = 0; i <= highestId; i++) {
+      window.clearInterval(i);
     }
   }
 
@@ -116,12 +129,21 @@ class GamePage extends Component<GamePageProps, GamePageState> {
 
   startWaitingTimer = () => {
     this.setState({ waitingStartTime: Date.now() });
+    this.startMessageRotation();
     this.waitingTimer = window.setTimeout(() => {
       const waitingDuration = Date.now() - (this.state.waitingStartTime || 0);
       if (waitingDuration >= 30000) {
         console.error('Error: Server connection timeout - Waiting for server exceeded 30 seconds');
       }
     }, 30000);
+  };
+
+  startMessageRotation = () => {
+    setInterval(() => {
+      this.setState(prevState => ({
+        currentMessageIndex: (prevState.currentMessageIndex + 1) % WAITING_MESSAGES.length
+      }));
+    }, 3000);
   };
 
   render() {
@@ -140,7 +162,7 @@ class GamePage extends Component<GamePageProps, GamePageState> {
           )}
           {!this.state.loading && !this.state.initialized && (
             <div className='waiting-container'>
-              <div className='waiting-div'>Waiting for server ...</div>
+              <div className='waiting-div'>{WAITING_MESSAGES[this.state.currentMessageIndex]}</div>
               <QueueTips />
             </div>
           )}
