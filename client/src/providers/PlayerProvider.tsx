@@ -459,7 +459,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
 
       socket.on('connect_error', (error) => {
         console.error('Connection error:', error);
-        errorToast('Connection error, attempting to reconnect...');
+        // errorToast('Connection error, attempting to reconnect...');
         
         // Schedule reconnect on connection error
         this.scheduleReconnect();

@@ -42,8 +42,11 @@ class SearchPlayers extends Component<Props, State> {
 
         // Check cache first
         if (this.searchCache.has(term)) {
+            const cachedResults = this.searchCache.get(term) || [];
+            // Filter out current user from cached results
+            const filteredResults = this.filterOutCurrentUser(cachedResults);
             this.setState({ 
-                results: this.searchCache.get(term) || [],
+                results: filteredResults,
                 isLoading: false 
             });
             return;
@@ -53,9 +56,11 @@ class SearchPlayers extends Component<Props, State> {
 
         try {
             const results = await apiFetch(`searchPlayers?search=${encodeURIComponent(term)}`);
-            this.searchCache.set(term, results);
+            // Filter out current user from API results
+            const filteredResults = this.filterOutCurrentUser(results);
+            this.searchCache.set(term, results); // Cache the original results
             this.setState({ 
-                results,
+                results: filteredResults,
                 error: null,
                 isLoading: false
             });
@@ -66,6 +71,11 @@ class SearchPlayers extends Component<Props, State> {
             });
         }
     }, 300);
+
+    filterOutCurrentUser = (results: PlayerSearchResult[]) => {
+        const currentUserId = this.context.player.uid;
+        return results.filter(player => player.id !== currentUserId);
+    };
 
     handleSearchInput = (event: Event) => {
         const input = event.target as HTMLInputElement;

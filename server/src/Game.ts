@@ -981,23 +981,39 @@ export abstract class Game
     }
 
     computeGameOutcomes(team: Team, otherTeam: Team, winnerTeamId: number): OutcomeData {
-        const isWinner = team.id === winnerTeamId;
-        const eloUpdate = 
-            this.mode == PlayMode.RANKED || this.mode == PlayMode.RANKED_VS_AI ? 
-            this.updateElo(isWinner ? team : otherTeam, isWinner ? otherTeam : team) : 
-            {winnerUpdate: 0, loserUpdate: 0};
-        const grade = this.computeGrade(team, otherTeam);
-        return {
-            isWinner,
-            rawGrade: grade,
-            grade: this.computeLetterGrade(grade),
-            gold: this.computeTeamGold(grade, this.mode),
-            xp: this.computeTeamXP(team, otherTeam, grade, this.mode),
-            elo: isWinner ? eloUpdate.winnerUpdate : eloUpdate.loserUpdate,
-            key: (this.mode == PlayMode.PRACTICE || this.mode == PlayMode.TUTORIAL) ? null : team.getChestKey() as ChestColor,
-            chests: this.computeChests(team.score, this.mode),
-            score: team.score,
-            tokens: isWinner ? this.computeStakeRewards() : 0,
+        try {
+            const isWinner = team.id === winnerTeamId;
+            const eloUpdate = 
+                this.mode == PlayMode.RANKED || this.mode == PlayMode.RANKED_VS_AI ? 
+                this.updateElo(isWinner ? team : otherTeam, isWinner ? otherTeam : team) : 
+                {winnerUpdate: 0, loserUpdate: 0};
+            const grade = this.computeGrade(team, otherTeam);
+            return {
+                isWinner,
+                rawGrade: grade,
+                grade: this.computeLetterGrade(grade),
+                gold: this.computeTeamGold(grade, this.mode),
+                xp: this.computeTeamXP(team, otherTeam, grade, this.mode),
+                elo: isWinner ? eloUpdate.winnerUpdate : eloUpdate.loserUpdate,
+                key: (this.mode == PlayMode.PRACTICE || this.mode == PlayMode.TUTORIAL) ? null : team.getChestKey() as ChestColor,
+                chests: this.computeChests(team.score, this.mode),
+                score: team.score,
+                tokens: isWinner ? this.computeStakeRewards() : 0,
+            }
+        } catch (error) {
+            console.error(error);
+            return {
+                isWinner: false,
+                rawGrade: 0,
+                grade: 'E',
+                gold: 0,
+                xp: 0,
+                elo: 0,
+                key: null,
+                chests: [],
+                score: 0,
+                tokens: 0,
+            }
         }
     }
 
@@ -1023,10 +1039,11 @@ export abstract class Game
             [League.APEX]: [ChestColor.GOLD, ChestColor.GOLD, ChestColor.GOLD],
         };
 
-        const rewards = 
+        let rewards = 
             this.mode == PlayMode.RANKED || this.mode == PlayMode.RANKED_VS_AI ?
             leagueRewards[this.league] :
             casualRewards;
+        if (!rewards) rewards = casualRewards;
         const numberOfChests = Math.floor(score / 500);
     
         for (let i = 0; i < numberOfChests && i < rewards.length; i++) {

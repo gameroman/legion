@@ -51,7 +51,6 @@ class Profile extends Component<Props, State> {
     };
 
     getEffectiveId = () => {
-        console.log('getEffectiveId', this.props.id, this.context.player.uid);
         return this.props.id || this.context.player.uid;
     };
 
@@ -207,8 +206,12 @@ class Profile extends Component<Props, State> {
         );
     }
 
+    UIDready = () => {
+        return !!this.context.player.uid;
+    }
+
     renderStatusBox = () => {
-        if (this.isOwnProfile()) return null;
+        if (!this.UIDready() || this.isOwnProfile()) return null;
 
         const status = this.state.playerStatus.status;
         const gameId = this.state.playerStatus.gameId;
@@ -281,7 +284,7 @@ class Profile extends Component<Props, State> {
                 // Set up timeout
                 setTimeout(() => {
                     reject(new Error('Challenge request timed out'));
-                }, 5000);
+                }, 10000);
             });
 
             // Handle the response
@@ -318,7 +321,7 @@ class Profile extends Component<Props, State> {
             <div className="profile-container">
                 <div className="profile-header">
                     <div className="profile-avatar" style={{ backgroundImage: avatarUrl ? `url(${avatarUrl})` : 'none' }}>
-                        {!isOwnProfile && this.renderPlayerStatus(
+                        {this.UIDready() && !isOwnProfile && this.renderPlayerStatus(
                             this.state.playerStatus.status,
                             this.state.playerStatus.gameId
                         )}
@@ -334,7 +337,7 @@ class Profile extends Component<Props, State> {
                             <div className="profile-join-date">
                                 Member since {this.formatDate(profileData.joinDate)}
                             </div>
-                            {!isOwnProfile && (
+                            {this.UIDready() && !isOwnProfile && (
                                 this.isAlreadyFriend() ? (
                                     <button className="profile-add-friend is-friend">
                                         Friend

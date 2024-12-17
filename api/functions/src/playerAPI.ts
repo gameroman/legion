@@ -24,6 +24,12 @@ import {
   Connection, LAMPORTS_PER_SOL, Keypair, Transaction, SystemProgram, PublicKey,
 } from '@solana/web3.js';
 import bs58 from 'bs58';
+import {
+	RegExpMatcher,
+	TextCensor,
+	englishDataset,
+	englishRecommendedTransformers,
+} from 'obscenity';
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
 const NB_START_CHARACTERS = 3;
@@ -1440,6 +1446,12 @@ export const addFriend = onRequest((request, response) => {
                 return;
             }
 
+            // Prevent adding self as friend
+            if (uid === friendId) {
+                response.status(400).send('Cannot add yourself as a friend');
+                return;
+            }
+
             // Get both player documents
             const [playerDoc, friendDoc] = await Promise.all([
                 db.collection('players').doc(uid).get(),
@@ -1490,4 +1502,52 @@ export const addFriend = onRequest((request, response) => {
             response.status(500).send('Error adding friend');
         }
     });
+});
+
+// Add this near the other endpoints
+export const updatePlayerName = onRequest((request, response) => {
+  const db = admin.firestore();
+
+  corsMiddleware(request, response, async () => {
+    try {
+      const uid = await getUID(request);
+      let newName = request.body.name;
+
+      // Validate name
+      if (!newName || typeof newName !== 'string') {
+        response.status(400).send('Valid name is required');
+        return;
+      }
+
+      if (newName.length > MAX_NICKNAME_LENGTH) {
+        response.status(400).send(`Name must be ${MAX_NICKNAME_LENGTH} characters or less`);
+        return;
+      }
+
+      const matcher = new RegExpMatcher({
+        ...englishDataset.build(),
+        ...englishRecommendedTransformers,
+      });
+      const matches = matcher.getAllMatches(newName);
+      if (matches.length > 0) {
+        response.status(400).send('Name contains profane words');
+        return;
+      }
+
+      // Update both name and name_lower
+      await db.collection('players').doc(uid).update({
+        name: newName,
+        name_lower: newName.toLowerCase()
+      });
+
+      response.send({
+        success: true,
+        name: newName
+      });
+
+    } catch (error) {
+      console.error('Error updating player name:', error);
+      response.status(500).send('Error updating player name');
+    }
+  });
 });
