@@ -73,7 +73,7 @@ function timeoutPromise(duration) {
     });
 }
 
-async function apiFetch(endpoint: string, options: ApiFetchOptions = {}, maxRetries = 1, retryDelay = 300, invisibleErrors = false) {
+async function apiFetch(endpoint: string, options: ApiFetchOptions = {}, maxRetries = 1, retryDelay = 300, invisibleErrors = true) {
     let lastError: Error | ApiError;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {

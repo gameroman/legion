@@ -30,6 +30,9 @@ interface State {
     socketReady: boolean;
     showChallengeModal: boolean;
     isCreatingChallenge: boolean;
+    isEditingName: boolean;
+    newName: string;
+    isUpdatingName: boolean;
 }
 
 class Profile extends Component<Props, State> {
@@ -48,6 +51,9 @@ class Profile extends Component<Props, State> {
         socketReady: false,
         showChallengeModal: false,
         isCreatingChallenge: false,
+        isEditingName: false,
+        newName: '',
+        isUpdatingName: false,
     };
 
     getEffectiveId = () => {
@@ -301,6 +307,60 @@ class Profile extends Component<Props, State> {
         }
     };
 
+    handleEditNameClick = () => {
+        this.setState({ 
+            isEditingName: true,
+            newName: this.state.profileData.name
+        });
+    };
+
+    handleNameChange = (e: Event) => {
+        const target = e.target as HTMLInputElement;
+        this.setState({ newName: target.value });
+    };
+
+    handleNameSubmit = async (e: Event) => {
+        e.preventDefault();
+        
+        this.setState({ isUpdatingName: true });
+        try {
+            const response = await apiFetch('updatePlayerName', {
+                method: 'POST',
+                body: {
+                    name: this.state.newName
+                }
+            });
+
+            if (response.success) {
+                // Update local state
+                this.setState(prevState => ({
+                    profileData: {
+                        ...prevState.profileData,
+                        name: this.state.newName
+                    }
+                }));
+
+                // Update PlayerContext
+                this.context.setPlayerInfo({ name: this.state.newName });
+                
+                successToast('Name updated successfully!');
+            }
+        } catch (error) {
+            console.error('Error updating name:', error);
+            let message = error.message || 'Failed to update name';
+            // Check if 'profane' is in the error message
+            if (message.includes('profane')) {
+                message = 'Name contains profane words';
+            }
+            errorToast(message);
+        } finally {
+            this.setState({ 
+                isEditingName: false,
+                isUpdatingName: false 
+            });
+        }
+    };
+
     render() {
         const { profileData, isLoading, error, avatarUrl } = this.state;
         const isOwnProfile = this.isOwnProfile();
@@ -327,7 +387,53 @@ class Profile extends Component<Props, State> {
                         )}
                     </div>
                     <div className="profile-info">
-                        <h1>{profileData.name}</h1>
+                        <div className="profile-name-container">
+                            {this.state.isEditingName ? (
+                                <form className="name-edit-form" onSubmit={this.handleNameSubmit}>
+                                    <input
+                                        type="text"
+                                        className="name-edit-input"
+                                        value={this.state.newName}
+                                        onChange={this.handleNameChange}
+                                        maxLength={20}
+                                        autoFocus
+                                    />
+                                    {this.state.isUpdatingName ? (
+                                        <div className="name-edit-spinner" />
+                                    ) : (
+                                        <>
+                                            <button type="submit">Save</button>
+                                            <button 
+                                                type="button" 
+                                                onClick={() => this.setState({ isEditingName: false })}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </>
+                                    )}
+                                </form>
+                            ) : (
+                                <>
+                                    <h1>{profileData.name}</h1>
+                                    {isOwnProfile && (
+                                        <svg
+                                            className="edit-name-icon"
+                                            onClick={this.handleEditNameClick}
+                                            width="24"
+                                            height="24"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                                        </svg>
+                                    )}
+                                </>
+                            )}
+                        </div>
                         <div className="profile-details">
                             <div className="player-stats">
                                 <span className="elo-rating">ELO Rating: {profileData.elo}</span>
