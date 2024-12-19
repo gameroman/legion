@@ -934,3 +934,140 @@
     transform: scale(1.05);
     background: linear-gradient(135deg, #777, #555);
 }   
+
+/* Add these styles */
+.profile-avatar {
+    position: relative;
+}
+
+.profile-avatar:hover .edit-avatar-icon {
+    opacity: 1;
+}
+
+.edit-avatar-icon {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 8px;
+}
+
+.edit-avatar-icon svg {
+    stroke: #ffffff;
+    opacity: 0.9;
+    width: 100%;
+    height: 100%;
+}
+
+.edit-avatar-icon:hover {
+    background: rgba(0, 0, 0, 0.9);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.edit-avatar-icon:hover svg {
+    opacity: 1;
+}
+
+.avatar-gallery-modal {
+    background: rgba(0, 0, 0, 0.85);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-gallery {
+    background: #242b37;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.avatar-gallery-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.avatar-gallery-header h3 {
+    margin: 0;
+    color: #fff;
+}
+
+.avatar-gallery-close {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 24px;
+    padding: 0;
+}
+
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+    max-width: 600px;
+}
+
+.avatar-option {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-size: 120%;
+    background-position: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.avatar-option:hover {
+    border-color: #4a90e2;
+    background-size: 130%;
+}
+
+.avatar-option.selected {
+    border-color: #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    background-size: 130%;
+}   
+
+.avatar-gallery .loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.7);  /* Semi-transparent overlay */
+    border-radius: 8px;
+}
+
+.avatar-gallery .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #ffd700;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}   

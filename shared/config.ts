@@ -2,8 +2,10 @@ const isDev = process.env.NODE_ENV === 'development' || process.env.NODE_ENV ===
 
 // Profile
 export const MAX_NICKNAME_LENGTH = 18;
+export const MAX_AVATAR_ID = 31;
 
 // Gameplay
+export const NB_START_CHARACTERS = 3;
 export const MAX_CHARACTERS = 10;
 export const BASE_INVENTORY_SIZE = 20;
 export const BASE_CARRYING_CAPACITY = 3;

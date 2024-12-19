@@ -6,6 +6,7 @@ import './profile.style.css';
 import SearchPlayers from './SearchPlayers';
 import { route } from 'preact-router';
 import { apiFetch } from '../../services/apiService';
+import { MAX_AVATAR_ID } from '@legion/shared/config';
 
 interface Props {
     id?: string;
@@ -33,6 +34,8 @@ interface State {
     isEditingName: boolean;
     newName: string;
     isUpdatingName: boolean;
+    showAvatarGallery: boolean;
+    isUpdatingAvatar: boolean;
 }
 
 class Profile extends Component<Props, State> {
@@ -54,6 +57,8 @@ class Profile extends Component<Props, State> {
         isEditingName: false,
         newName: '',
         isUpdatingName: false,
+        showAvatarGallery: false,
+        isUpdatingAvatar: false,
     };
 
     getEffectiveId = () => {
@@ -361,6 +366,94 @@ class Profile extends Component<Props, State> {
         }
     };
 
+    handleEditAvatarClick = () => {
+        this.setState({ showAvatarGallery: true });
+    };
+
+    handleAvatarSelect = async (avatarId: string) => {
+        // Don't do anything if selecting the same avatar
+        if (avatarId === this.state.profileData.avatar) {
+            this.setState({ showAvatarGallery: false });
+            return;
+        }
+
+        this.setState({ isUpdatingAvatar: true });
+        try {
+            const response = await apiFetch('updatePlayerAvatar', {
+                method: 'POST',
+                body: {
+                    avatarId
+                }
+            });
+
+            if (response.success) {
+                // Update local state
+                this.setState(prevState => ({
+                    avatarUrl: avatarContext(`./${avatarId}.png`),
+                    profileData: {
+                        ...prevState.profileData,
+                        avatar: avatarId
+                    }
+                }));
+
+                // Update PlayerContext
+                this.context.setPlayerInfo({ avatar: avatarId });
+                
+                successToast('Avatar updated successfully!');
+            }
+        } catch (error) {
+            console.error('Error updating avatar:', error);
+            errorToast('Failed to update avatar');
+        } finally {
+            this.setState({ 
+                isUpdatingAvatar: false,
+                showAvatarGallery: false 
+            });
+        }
+    };
+
+    renderAvatarGallery = () => {
+        if (!this.state.showAvatarGallery) return null;
+
+        const avatarOptions = [];
+        for (let i = 1; i <= MAX_AVATAR_ID; i++) {
+            const avatarId = i.toString();
+            avatarOptions.push(
+                <div
+                    key={avatarId}
+                    className={`avatar-option ${this.state.profileData.avatar === avatarId ? 'selected' : ''}`}
+                    style={{ backgroundImage: `url(${avatarContext(`./${avatarId}.png`)})` }}
+                    onClick={() => this.handleAvatarSelect(avatarId)}
+                />
+            );
+        }
+
+        return (
+            <div className="avatar-gallery-modal">
+                <div className="avatar-gallery">
+                    <div className="avatar-gallery-header">
+                        <h3>Choose your Avatar</h3>
+                        <button 
+                            className="avatar-gallery-close"
+                            onClick={() => this.setState({ showAvatarGallery: false })}
+                        >
+                            ×
+                        </button>
+                    </div>
+                    <div className="avatar-grid">
+                        {this.state.isUpdatingAvatar ? (
+                            <div className="loading">
+                                <div className="loading-spinner" />
+                            </div>
+                        ) : (
+                            avatarOptions
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     render() {
         const { profileData, isLoading, error, avatarUrl } = this.state;
         const isOwnProfile = this.isOwnProfile();
@@ -384,6 +477,25 @@ class Profile extends Component<Props, State> {
                         {this.UIDready() && !isOwnProfile && this.renderPlayerStatus(
                             this.state.playerStatus.status,
                             this.state.playerStatus.gameId
+                        )}
+                        {isOwnProfile && (
+                            <div 
+                                className="edit-avatar-icon"
+                                onClick={this.handleEditAvatarClick}
+                            >
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                                </svg>
+                            </div>
                         )}
                     </div>
                     <div className="profile-info">
@@ -632,6 +744,8 @@ class Profile extends Component<Props, State> {
                         </div>
                     </div>
                 )}
+
+                {this.renderAvatarGallery()}
             </div>
         );
     }

@@ -15,7 +15,9 @@ import { getChestContent, ChestReward } from "@legion/shared/chests";
 import {
   STARTING_CONSUMABLES, STARTING_GOLD, BASE_INVENTORY_SIZE, STARTING_GOLD_ADMIN,
   STARTING_SPELLS_ADMIN, STARTING_EQUIPMENT_ADMIN, IMMEDIATE_LOOT, RPC, MIN_WITHDRAW,
-  MAX_NICKNAME_LENGTH
+  MAX_NICKNAME_LENGTH,
+  NB_START_CHARACTERS,
+  MAX_AVATAR_ID
 } from "@legion/shared/config";
 import { logPlayerAction, updateDAU } from "./dashboardAPI";
 import { getEmptyLeagueStats } from "./leaderboardsAPI";
@@ -25,8 +27,6 @@ import { numericalSort } from "@legion/shared/inventory";
 // } from '@solana/web3.js';
 // import bs58 from 'bs58';
 import { onSchedule } from "firebase-functions/v2/scheduler";
-
-const NB_START_CHARACTERS = 3;
 
 const chestsDelays = {
   [ChestColor.BRONZE]: 6 * 60 * 60,
@@ -1582,6 +1582,48 @@ export const updatePlayerName = onRequest({
     } catch (error) {
       console.error('Error updating player name:', error);
       response.status(500).send('Error updating player name');
+    }
+  });
+});
+
+export const updatePlayerAvatar = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
+  const db = admin.firestore();
+
+  corsMiddleware(request, response, async () => {
+    try {
+      const uid = await getUID(request);
+      const avatarId = request.body.avatarId;
+
+      // Validate avatar ID
+      if (!avatarId) {
+        response.status(400).send('Valid avatar ID is required');
+        return;
+      }
+
+      // Convert to number and validate range
+      const numericAvatarId = parseInt(avatarId, 10);
+      if (isNaN(numericAvatarId) || 
+          numericAvatarId < 1 || 
+          numericAvatarId > MAX_AVATAR_ID) {
+        response.status(400).send(`Avatar ID must be between 1 and ${MAX_AVATAR_ID}`);
+        return;
+      }
+
+      // Update avatar
+      await db.collection('players').doc(uid).update({
+        avatar: avatarId
+      });
+
+      response.send({
+        success: true,
+        avatar: avatarId
+      });
+
+    } catch (error) {
+      console.error('Error updating player avatar:', error);
+      response.status(500).send('Error updating player avatar');
     }
   });
 });
