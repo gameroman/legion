@@ -23,7 +23,9 @@ import {
   unequipEquipment,
 } from '@legion/shared/inventory';
 
-export const inventoryData = onRequest((request, response) => {
+export const inventoryData = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   logger.info("Fetching inventoryData");
   const db = admin.firestore();
 
@@ -49,7 +51,9 @@ export const inventoryData = onRequest((request, response) => {
   });
 });
 
-export const purchaseItem = onRequest((request, response) => {
+export const purchaseItem = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -133,7 +137,9 @@ export const purchaseItem = onRequest((request, response) => {
   });
 });
 
-export const inventoryTransaction = onRequest(async (request, response) => {
+export const inventoryTransaction = onRequest({
+  memory: '512MiB'
+}, async (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -238,7 +244,9 @@ export const inventoryTransaction = onRequest(async (request, response) => {
 });
 
 
-export const inventorySave = onRequest((request, response) => {
+export const inventorySave = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -283,7 +291,9 @@ export const inventorySave = onRequest((request, response) => {
   });
 });
 
-export const getReward = onRequest((request, response) => {
+export const getReward = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   logger.info("Getting reward");
 
   corsMiddleware(request, response, async () => {

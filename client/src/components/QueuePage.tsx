@@ -122,7 +122,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
 
         const { socket } = this.context;
         if (!socket) {
-            errorToast('Not connected to matchmaker');
+            errorToast('Not connected to matchmaker, please reload the page');
             return;
         }
 

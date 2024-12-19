@@ -20,16 +20,10 @@ import {
 import { logPlayerAction, updateDAU } from "./dashboardAPI";
 import { getEmptyLeagueStats } from "./leaderboardsAPI";
 import { numericalSort } from "@legion/shared/inventory";
-import {
-  Connection, LAMPORTS_PER_SOL, Keypair, Transaction, SystemProgram, PublicKey,
-} from '@solana/web3.js';
-import bs58 from 'bs58';
-import {
-	RegExpMatcher,
-	TextCensor,
-	englishDataset,
-	englishRecommendedTransformers,
-} from 'obscenity';
+// import {
+//   Connection, LAMPORTS_PER_SOL, Keypair, Transaction, SystemProgram, PublicKey,
+// } from '@solana/web3.js';
+// import bs58 from 'bs58';
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
 const NB_START_CHARACTERS = 3;
@@ -230,7 +224,9 @@ const transformDailyLoot = (dailyloot: DailyLootAllDBData): DailyLootAllAPIData 
 };
 
 
-export const getPlayerData = onRequest((request, response) => {
+export const getPlayerData = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -314,7 +310,9 @@ export const getPlayerData = onRequest((request, response) => {
   });
 });
 
-export const queuingData = onRequest((request, response) => {
+export const queuingData = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -342,7 +340,10 @@ export const queuingData = onRequest((request, response) => {
   });
 });
 
-export const saveGoldReward = onRequest({ secrets: ["API_KEY"] }, (request, response) => {
+export const saveGoldReward = onRequest({ 
+  secrets: ["API_KEY"],
+  memory: '512MiB'
+}, (request, response) => {
   logger.info("Saving gold reward");
   const db = admin.firestore();
 
@@ -445,7 +446,9 @@ export async function awardChestContent(
   }
 }
 
-export const claimChest = onRequest((request, response) => {
+export const claimChest = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -516,7 +519,9 @@ export const claimChest = onRequest((request, response) => {
   });
 });
 
-export const completeTour = onRequest((request, response) => {
+export const completeTour = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -680,7 +685,9 @@ const figureOutConbatTip = (playerData: any) => {
   };
 };
 
-export const fetchGuideTip = onRequest((request, response) => {
+export const fetchGuideTip = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -719,7 +726,9 @@ export const fetchGuideTip = onRequest((request, response) => {
   });
 });
 
-export const registerAddress = onRequest((request, response) => {
+export const registerAddress = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -740,7 +749,10 @@ export const registerAddress = onRequest((request, response) => {
   });
 });
 
-export const setPlayerOnSteroids = onRequest({ secrets: ["API_KEY"] }, (request, response) => {
+export const setPlayerOnSteroids = onRequest({ 
+  secrets: ["API_KEY"],
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -1001,108 +1013,110 @@ export const zombieData = onRequest({ secrets: ["API_KEY"] }, async (req, res) =
   }
 });
 
-export const withdrawSOL = onRequest({ secrets: ["GAME_WALLET_PRIVATE_KEY"] }, async (request, response) => {
-  const db = admin.firestore();
+// export const withdrawSOL = onRequest({ secrets: ["GAME_WALLET_PRIVATE_KEY"] }, async (request, response) => {
+//   const db = admin.firestore();
 
-  return corsMiddleware(request, response, async () => {
-    try {
-      const uid = await getUID(request);
-      const amount = parseFloat(request.body.amount);
-      console.log(`[withdrawSOL] Withdrawing ${amount} SOL for ${uid} on ${RPC}`);
+//   return corsMiddleware(request, response, async () => {
+//     try {
+//       const uid = await getUID(request);
+//       const amount = parseFloat(request.body.amount);
+//       console.log(`[withdrawSOL] Withdrawing ${amount} SOL for ${uid} on ${RPC}`);
 
-      if (isNaN(amount) || amount < MIN_WITHDRAW) {
-        return response.status(400).send({ error: `Invalid withdrawal amount. Minimum is ${MIN_WITHDRAW} SOL.` });
-      }
+//       if (isNaN(amount) || amount < MIN_WITHDRAW) {
+//         return response.status(400).send({ error: `Invalid withdrawal amount. Minimum is ${MIN_WITHDRAW} SOL.` });
+//       }
 
-      const result = await performLockedOperation(uid, async () => {
-        return db.runTransaction(async (transaction) => {
+//       const result = await performLockedOperation(uid, async () => {
+//         return db.runTransaction(async (transaction) => {
           
-          const playerDocRef = db.collection('players').doc(uid);
-          const playerDoc = await transaction.get(playerDocRef);
+//           const playerDocRef = db.collection('players').doc(uid);
+//           const playerDoc = await transaction.get(playerDocRef);
 
-          if (!playerDoc.exists) {
-            throw new Error('Player not found.');
-          }
+//           if (!playerDoc.exists) {
+//             throw new Error('Player not found.');
+//           }
 
-          const playerData = playerDoc.data();
-          if (!playerData) {
-            throw new Error('Player data is null.');
-          }
+//           const playerData = playerDoc.data();
+//           if (!playerData) {
+//             throw new Error('Player data is null.');
+//           }
 
-          const playerAddress = playerData.address;
-          const inGameBalance = playerData.tokens?.[Token.SOL] || 0;
+//           const playerAddress = playerData.address;
+//           const inGameBalance = playerData.tokens?.[Token.SOL] || 0;
 
-          if (!playerAddress) {
-            throw new Error('Player wallet address not registered.');
-          }
+//           if (!playerAddress) {
+//             throw new Error('Player wallet address not registered.');
+//           }
 
-          // Check if the player has enough balance
-          if (amount > inGameBalance) {
-            throw new Error('Insufficient in-game balance.');
-          }
+//           // Check if the player has enough balance
+//           if (amount > inGameBalance) {
+//             throw new Error('Insufficient in-game balance.');
+//           }
 
-          // Load the game wallet keypair from the environment variable
-          const secretKeyString = process.env.GAME_WALLET_PRIVATE_KEY;
-          if (!secretKeyString) {
-            throw new Error('Game wallet private key not set in environment variables.');
-          }
+//           // Load the game wallet keypair from the environment variable
+//           const secretKeyString = process.env.GAME_WALLET_PRIVATE_KEY;
+//           if (!secretKeyString) {
+//             throw new Error('Game wallet private key not set in environment variables.');
+//           }
 
-          const secretKey = bs58.decode(secretKeyString);
-          const gameWalletKeypair = Keypair.fromSecretKey(secretKey);
+//           const secretKey = bs58.decode(secretKeyString);
+//           const gameWalletKeypair = Keypair.fromSecretKey(secretKey);
 
-          // Create a connection to the Solana cluster
-          const connection = new Connection(RPC, 'confirmed');
+//           // Create a connection to the Solana cluster
+//           const connection = new Connection(RPC, 'confirmed');
 
-          // Create a transaction to send SOL from the game wallet to the player
-          const withdrawTransaction = new Transaction().add(
-            SystemProgram.transfer({
-              fromPubkey: gameWalletKeypair.publicKey,
-              toPubkey: new PublicKey(playerAddress),
-              lamports: Math.round(amount * LAMPORTS_PER_SOL),
-            })
-          );
+//           // Create a transaction to send SOL from the game wallet to the player
+//           const withdrawTransaction = new Transaction().add(
+//             SystemProgram.transfer({
+//               fromPubkey: gameWalletKeypair.publicKey,
+//               toPubkey: new PublicKey(playerAddress),
+//               lamports: Math.round(amount * LAMPORTS_PER_SOL),
+//             })
+//           );
 
-          // Sign and send the transaction
-          const signature = await connection.sendTransaction(withdrawTransaction, [gameWalletKeypair]);
-          console.log(`Withdrawal transaction signature: ${signature}`);
+//           // Sign and send the transaction
+//           const signature = await connection.sendTransaction(withdrawTransaction, [gameWalletKeypair]);
+//           console.log(`Withdrawal transaction signature: ${signature}`);
 
-          // Wait for transaction confirmation
-          const confirmedTransaction = await fetchParsedTransactionWithRetry(signature, connection);
+//           // Wait for transaction confirmation
+//           const confirmedTransaction = await fetchParsedTransactionWithRetry(signature, connection);
 
-          if (!confirmedTransaction) {
-            throw new Error('Transaction could not be confirmed after retries.');
-          }
+//           if (!confirmedTransaction) {
+//             throw new Error('Transaction could not be confirmed after retries.');
+//           }
 
-          // Update the player's in-game balance
-          transaction.update(playerDocRef, {
-            [`tokens.${Token.SOL}`]: admin.firestore.FieldValue.increment(-amount),
-          });
+//           // Update the player's in-game balance
+//           transaction.update(playerDocRef, {
+//             [`tokens.${Token.SOL}`]: admin.firestore.FieldValue.increment(-amount),
+//           });
 
-          // Record the withdrawal transaction
-          const withdrawalRef = db.collection('withdrawals').doc();
-          transaction.set(withdrawalRef, {
-            uid: uid,
-            amount: amount,
-            signature: signature,
-            timestamp: admin.firestore.FieldValue.serverTimestamp(),
-          });
+//           // Record the withdrawal transaction
+//           const withdrawalRef = db.collection('withdrawals').doc();
+//           transaction.set(withdrawalRef, {
+//             uid: uid,
+//             amount: amount,
+//             signature: signature,
+//             timestamp: admin.firestore.FieldValue.serverTimestamp(),
+//           });
 
-          return { success: true, signature: signature };
-        });
-      });
+//           return { success: true, signature: signature };
+//         });
+//       });
 
-      return response.status(200).send(result);
-    } catch (error) {
-      console.error('withdrawSOL error:', error);
-      if (error instanceof Error && error.message === 'Failed to acquire lock. Resource is busy.') {
-        return response.status(423).send({ error: "Resource is locked. Please try again later." });
-      }
-      return response.status(500).send({ error: 'An error occurred during withdrawal: ' + (error instanceof Error ? error.message : String(error)) });
-    }
-  });
-});
+//       return response.status(200).send(result);
+//     } catch (error) {
+//       console.error('withdrawSOL error:', error);
+//       if (error instanceof Error && error.message === 'Failed to acquire lock. Resource is busy.') {
+//         return response.status(423).send({ error: "Resource is locked. Please try again later." });
+//       }
+//       return response.status(500).send({ error: 'An error occurred during withdrawal: ' + (error instanceof Error ? error.message : String(error)) });
+//     }
+//   });
+// });
 
-export const recordPlayerAction = onRequest((request, response) => {
+export const recordPlayerAction = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   return corsMiddleware(request, response, async () => {
     try {
       console.log(`[recordPlayerAction] ${JSON.stringify(request.body)}`);
@@ -1217,7 +1231,9 @@ export const updateInactivePlayersStats = onSchedule("every day 00:00", async (e
   }
 });
 
-export const setUtmSource = onRequest((request, response) => {
+export const setUtmSource = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -1241,7 +1257,9 @@ export const setUtmSource = onRequest((request, response) => {
 });
 
 // Update the getProfileData function to include name and avatar in the response
-export const getProfileData = onRequest((request, response) => {
+export const getProfileData = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
     const db = admin.firestore();
 
     corsMiddleware(request, response, async () => {
@@ -1310,7 +1328,9 @@ interface PlayerSearchResult {
 }
 
 // Update the searchPlayers endpoint to use name_lower field
-export const searchPlayers = onRequest((request, response) => {
+export const searchPlayers = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
     const db = admin.firestore();
 
     corsMiddleware(request, response, async () => {
@@ -1348,7 +1368,10 @@ export const searchPlayers = onRequest((request, response) => {
 });
 
 // Add migration endpoint to add name_lower field
-export const migrateLowercaseNames = onRequest({ secrets: ["API_KEY"] }, (request, response) => {
+export const migrateLowercaseNames = onRequest({ 
+  secrets: ["API_KEY"],
+  memory: '512MiB'
+}, (request, response) => {
     const db = admin.firestore();
 
     corsMiddleware(request, response, async () => {
@@ -1383,7 +1406,9 @@ export const migrateLowercaseNames = onRequest({ secrets: ["API_KEY"] }, (reques
 });
 
 // Add new endpoint for listing friends
-export const listFriends = onRequest((request, response) => {
+export const listFriends = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
     const db = admin.firestore();
 
     corsMiddleware(request, response, async () => {
@@ -1433,7 +1458,9 @@ export const listFriends = onRequest((request, response) => {
 });
 
 // Update addFriend endpoint to handle missing friends field
-export const addFriend = onRequest((request, response) => {
+export const addFriend = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
     const db = admin.firestore();
 
     corsMiddleware(request, response, async () => {
@@ -1504,8 +1531,10 @@ export const addFriend = onRequest((request, response) => {
     });
 });
 
-// Add this near the other endpoints
-export const updatePlayerName = onRequest((request, response) => {
+// Update the function declaration to include memory configuration
+export const updatePlayerName = onRequest({ 
+  memory: '512MiB' 
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -1523,6 +1552,11 @@ export const updatePlayerName = onRequest((request, response) => {
         response.status(400).send(`Name must be ${MAX_NICKNAME_LENGTH} characters or less`);
         return;
       }
+
+      // Dynamically import the profanity filter
+      const { RegExpMatcher } = await import('obscenity');
+      const { englishDataset } = await import('obscenity');
+      const { englishRecommendedTransformers } = await import('obscenity');
 
       const matcher = new RegExpMatcher({
         ...englishDataset.build(),

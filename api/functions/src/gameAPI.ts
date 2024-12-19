@@ -6,7 +6,10 @@ import {GameStatus} from "@legion/shared/enums";
 import {logPlayerAction} from "./dashboardAPI";
 
 
-export const createGame = onRequest({ secrets: ["API_KEY"] }, (request, response) => {
+export const createGame = onRequest({ 
+  secrets: ["API_KEY"],
+  memory: '512MiB'
+}, (request, response) => {
   logger.info("Creating game");
   const db = admin.firestore();
 
@@ -51,7 +54,10 @@ export const createGame = onRequest({ secrets: ["API_KEY"] }, (request, response
   });
 });
 
-export const gameData = onRequest({ secrets: ["API_KEY"] }, (request, response) => {
+export const gameData = onRequest({ 
+  secrets: ["API_KEY"],
+  memory: '512MiB'
+}, (request, response) => {
   logger.info("Fetching gameData");
   const db = admin.firestore();
 
@@ -83,7 +89,9 @@ export const gameData = onRequest({ secrets: ["API_KEY"] }, (request, response) 
 });
 
 
-export const completeGame = onRequest((request, response) => {
+export const completeGame = onRequest({ 
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -144,7 +152,10 @@ export const completeGame = onRequest((request, response) => {
   });
 });
 
-export const getRemoteConfig = onRequest({ secrets: ["API_KEY"] }, (request, response) => {
+export const getRemoteConfig = onRequest({ 
+  secrets: ["API_KEY"],
+  memory: '512MiB'
+}, (request, response) => {
   const remoteConfig = admin.remoteConfig();
 
   corsMiddleware(request, response, async () => {
@@ -176,23 +187,44 @@ export const getRemoteConfig = onRequest({ secrets: ["API_KEY"] }, (request, res
   });
 });
 
-export const getNews = onRequest((request, response) => {
+export const getNews = onRequest({ 
+  memory: '512MiB' 
+},(request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
     try {
+      const limit = parseInt(request.query.limit as string) || 3;
       const newsCollection = db.collection("news");
-      const newsSnapshot = await newsCollection.get();
-      const newsData = newsSnapshot.docs.map(doc => doc.data());
       
-      // Sort news by date string (oldest first)
-      newsData.sort((a, b) => {
+      // Get all news
+      const allNewsSnapshot = await newsCollection.get();
+      const allNews = allNewsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      // Separate pinned and unpinned news
+      const pinnedNews = allNews.filter((news: any) => news.pinned);
+      const unpinnedNews = allNews.filter((news: any) => !news.pinned);
+      
+      // Sort both arrays by date (most recent first)
+      const sortByDate = (a: any, b: any) => {
         const dateA = a.date || '0000-00-00';
         const dateB = b.date || '0000-00-00';
         return dateA.localeCompare(dateB);
-      });
-
-      response.status(200).json(newsData);
+      };
+      
+      pinnedNews.sort(sortByDate);
+      unpinnedNews.sort(sortByDate);
+      
+      // Take only what we need to reach the limit
+      const result = [
+        ...pinnedNews,
+        ...unpinnedNews.slice(0, Math.max(0, limit - pinnedNews.length))
+      ];
+      
+      response.status(200).json(result.slice(0, limit));
     } catch (error) {
       console.error("getNews error:", error);
       response.status(500).send("Error fetching news");
@@ -200,7 +232,10 @@ export const getNews = onRequest((request, response) => {
   });
 });
 
-export const addNews = onRequest({secrets: ["API_KEY"]}, (request, response) => {
+export const addNews = onRequest({
+  secrets: ["API_KEY"],
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -210,9 +245,29 @@ export const addNews = onRequest({secrets: ["API_KEY"]}, (request, response) => 
         return;
       }
 
-      const newsData = request.body;
-      await db.collection("news").add(newsData);
-      response.status(200).send("News added successfully");
+      const { title, text, date, link,pinned = false } = request.body;
+
+      // Validate required fields
+      if (!title || !text || !date) {
+        response.status(400).send("Bad Request: Missing required fields (title, content, date)");
+        return;
+      }
+
+      const newsData = {
+        title,
+        text,
+        date,
+        pinned,
+        link,
+        createdAt: new Date()
+      };
+
+      const docRef = await db.collection("news").add(newsData);
+      response.status(200).json({ 
+        status: "success", 
+        message: "News added successfully",
+        id: docRef.id 
+      });
     } catch (error) {
       console.error("addNews error:", error);
       response.status(500).send("Error adding news");
@@ -220,7 +275,10 @@ export const addNews = onRequest({secrets: ["API_KEY"]}, (request, response) => 
   });
 });
 
-export const saveReplay = onRequest({ secrets: ["API_KEY"] }, (request, response) => {
+export const saveReplay = onRequest({ 
+  secrets: ["API_KEY"],
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -267,7 +325,9 @@ export const saveReplay = onRequest({ secrets: ["API_KEY"] }, (request, response
   });
 });
 
-export const getReplay = onRequest((request, response) => {
+export const getReplay = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {

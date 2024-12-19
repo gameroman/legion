@@ -11,7 +11,9 @@ import {OutcomeData, DailyLootAllDBData, CharacterUpdate} from "@legion/shared/i
 import {ChestReward} from "@legion/shared/chests";
 import {logPlayerAction} from "./dashboardAPI";
 
-export const rosterData = onRequest(async (request, response) => {
+export const rosterData = onRequest({
+  memory: '512MiB'
+}, async (request, response) => {
   const db = admin.firestore();
   corsMiddleware(request, response, async () => {
     try {
@@ -64,7 +66,9 @@ export const rosterData = onRequest(async (request, response) => {
   });
 });
 
-export const characterData = onRequest((request, response) => {
+export const characterData = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   logger.info("Fetching characterData");
   const db = admin.firestore();
 
@@ -136,7 +140,10 @@ export async function processChestRewards(
   });
 }
 
-export const postGameUpdate = onRequest({ secrets: ["API_KEY"] }, (request, response) => {
+export const postGameUpdate = onRequest({ 
+  secrets: ["API_KEY"],
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {
@@ -372,7 +379,9 @@ async function monitorCharactersOnSale(db: FirebaseFirestore.Firestore) {
   }
 }
 
-export const generateOnSaleCharacters = onRequest((request, response) => {
+export const generateOnSaleCharacters = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   logger.info("Generating on sale characters");
   const db = admin.firestore();
 
@@ -390,7 +399,9 @@ export const generateOnSaleCharacters = onRequest((request, response) => {
   });
 });
 
-export const listOnSaleCharacters = onRequest((request, response) => {
+export const listOnSaleCharacters = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   logger.info("Listing on sale characters");
   const db = admin.firestore();
 
@@ -426,7 +437,9 @@ export const listOnSaleCharacters = onRequest((request, response) => {
   });
 });
 
-export const deleteOnSaleCharacters = onRequest((request, response) => {
+export const deleteOnSaleCharacters = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   logger.info("Deleting on sale characters");
   const db = admin.firestore();
 
@@ -446,7 +459,9 @@ export const deleteOnSaleCharacters = onRequest((request, response) => {
   });
 });
 
-export const purchaseCharacter = onRequest((request, response) => {
+export const purchaseCharacter = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   logger.info("Purchasing character");
   const db = admin.firestore();
 
@@ -524,7 +539,9 @@ export const purchaseCharacter = onRequest((request, response) => {
   });
 });
 
-export const spendSP = onRequest((request, response) => {
+export const spendSP = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
 
   corsMiddleware(request, response, async () => {

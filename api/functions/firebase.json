@@ -9,12 +9,7 @@
       ".git",
       "firebase-debug.log",
       "firebase-debug.*.log"
-    ],
-    "runtime_options": {
-      "withdrawSOL": {
-        "memory": "512MB"
-      }
-    }
+    ]
   },
   "emulators": {
     "auth": {

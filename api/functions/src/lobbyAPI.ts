@@ -134,7 +134,9 @@ async function createFriendLobby(
     return { lobbyId: newLobbyRef.id };
 }
 
-export const createLobby = onRequest((request, response) => {
+export const createLobby = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
     return corsMiddleware(request, response, async () => {
         try {
             const uid = await getUID(request);
@@ -396,7 +398,9 @@ async function joinFriendLobby(
     return { status: "joined" };
 }
 
-export const joinLobby = onRequest((request, response) => {
+export const joinLobby = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
     return corsMiddleware(request, response, async () => {
         try {
             const uid = await getUID(request);
@@ -471,7 +475,9 @@ export const joinLobby = onRequest((request, response) => {
     });
 });
 
-export const cancelLobby = onRequest((request, response) => {
+export const cancelLobby = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
     return corsMiddleware(request, response, async () => {
         try {
             const uid = await getUID(request);
@@ -515,7 +521,9 @@ export const cancelLobby = onRequest((request, response) => {
     });
 });
 
-export const listLobbies = onRequest((request, response) => {
+export const listLobbies = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
     corsMiddleware(request, response, async () => {
         try {
             const lobbiesSnapshot = await db.collection("lobbies")
@@ -543,7 +551,9 @@ export const listLobbies = onRequest((request, response) => {
     });
 });
 
-export const countLobbies = onRequest((request, response) => {
+export const countLobbies = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
     return corsMiddleware(request, response, async () => {
         try {
             const lobbiesSnapshot = await db.collection("lobbies")
@@ -558,7 +568,9 @@ export const countLobbies = onRequest((request, response) => {
     });
 });
 
-export const getLobbyDetails = onRequest((request, response) => {
+export const getLobbyDetails = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
     return corsMiddleware(request, response, async () => {
         try {
             const uid = await getUID(request);

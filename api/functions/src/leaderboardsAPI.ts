@@ -231,7 +231,9 @@ async function getLeagueLeaderboard(leagueID: number, rankingOnly: boolean, uid?
   return leaderboard;
 }
 
-export const fetchLeaderboard = onRequest((request, response) => {
+export const fetchLeaderboard = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   corsMiddleware(request, response, async () => {
     try {
       const uid = await getUID(request);
@@ -342,7 +344,9 @@ export function getEmptyLeagueStats(rank = 1) {
   };
 }
 
-export const manualLeaguesUpdate = onRequest((request, response) => {
+export const manualLeaguesUpdate = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   corsMiddleware(request, response, async () => {
     try {
       const league = request.query.league ? parseInt(request.query.league as string) : undefined;
