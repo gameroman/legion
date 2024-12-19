@@ -1,4 +1,4 @@
-import { h, Component } from 'preact';
+import { h, Component, Fragment } from 'preact';
 import { route } from 'preact-router';
 import AuthContext from '../contexts/AuthContext';
 import logoBig from '@assets/logobig.png';
@@ -6,6 +6,10 @@ import axios from 'axios';
 import './LandingPage.style.css';
 import Modal from '../components/modal/Modal';
 import { apiFetch } from '../services/apiService';
+import freeIcon from '@assets/free.png';
+import warriorImg from '@assets/warrior.png';
+import blackMageImg from '@assets/blackmage.png';
+import whiteMageImg from '@assets/whitemage.png';
 
 interface LandingPageProps {
   utm_source?: string;
@@ -13,7 +17,6 @@ interface LandingPageProps {
 
 interface LandingPageState {
   showLoginOptions: boolean;
-  isVideoPlaying: boolean;
   showLegalModal: boolean;
   modalContent: 'terms' | 'privacy' | null;
 }
@@ -23,7 +26,6 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
 
   state: LandingPageState = {
     showLoginOptions: false,
-    isVideoPlaying: false,
     showLegalModal: false,
     modalContent: null,
   };
@@ -72,28 +74,126 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
     this.setState({ showLegalModal: false, modalContent: null });
   };
 
-  renderInitialView = (): h.JSX.Element => (
-    <div className="landing-content">
-      <div className="video-section">
-        <div className="video-wrapper">
-          <iframe 
-            className="trailer-video"
-            src="https://www.youtube.com/embed/VM6cGO-e2hY?si=NWHUWMMpdEFMaaki" 
-            title="YouTube video player" 
-            frameBorder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-            allowFullScreen
-          ></iframe>
+  renderHeroSection = (): h.JSX.Element => (
+    <section className="hero-section">
+      <h1 className="visually-hidden">Legion - Free to Play Tactical PvP Game</h1>
+      <div className="video-container" aria-label="Game trailer video">
+        <iframe 
+          className="trailer-video"
+          src="https://www.youtube.com/embed/VM6cGO-e2hY?si=NWHUWMMpdEFMaaki" 
+          title="Legion - Free to Play Tactical PvP Game" 
+          frameBorder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowFullScreen
+        ></iframe>
+      </div>
+      <div className="hero-content">
+        <h2>Easy to learn, thrilling to master</h2>
+        <h3>Tactical PvP - Free to play</h3>
+        <p>Assemble a team of heroes and compete against other players to be the strongest of the arena!</p>
+        <button className="cta-button" onClick={() => route('/game/tutorial')} aria-label="Start playing Legion">Play Now</button>
+      </div>
+    </section>
+  );
+
+  renderNewsSection = (): h.JSX.Element => (
+    <section className="news-section">
+      <h2>Latest News</h2>
+      <div className="news-grid">
+        {[
+          {
+            title: "New Character Class Coming Soon",
+            description: "Get ready for a game-changing addition to your tactical arsenal!",
+            image: "/news/new-class.jpg",
+            category: "Updates",
+            date: "2024-03-20"
+          },
+          {
+            title: "Season 2 Tournament Announced",
+            description: "Compete with the best players and win exclusive rewards!",
+            image: "/news/tournament.jpg",
+            category: "Events",
+            date: "2024-03-18"
+          },
+          {
+            title: "Balance Update 1.2",
+            description: "Major gameplay adjustments to enhance competitive play",
+            image: "/news/balance.jpg",
+            category: "Patch Notes",
+            date: "2024-03-15"
+          }
+        ].map(news => (
+          <div className="news-card" onClick={() => route(`/news/${news.title.toLowerCase().replace(/ /g, '-')}`)}>
+            <div className="news-image" style={{ backgroundImage: `url(${news.image})` }}></div>
+            <div className="news-content">
+              <span className="news-category">{news.category}</span>
+              <h3>{news.title}</h3>
+              <p>{news.description}</p>
+              <time>{new Date(news.date).toLocaleDateString()}</time>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+
+  renderFeaturesSection = (): h.JSX.Element => (
+    <section className="features-section">
+      <h2>Game Features</h2>
+      <div className="features-grid">
+        <div className="feature-card">
+          <h3>Play Anytime</h3>
+          <p>Quick matches that fit your schedule - one game at a time</p>
+        </div>
+        <div className="feature-card">
+          <h3>Always Free</h3>
+          <p>Free to play, now and forever - no pay-to-win</p>
+        </div>
+        <div className="feature-card">
+          <h3>Instant Action</h3>
+          <p>Start with 3 unique characters - jump right into the action</p>
+        </div>
+        <div className="feature-card">
+          <h3>4 Game Modes</h3>
+          <p>Practice, Casual, Ranked or challenge a friend</p>
         </div>
       </div>
-      <div className="login-header">
-        <p>Assemble your team and become the strongest of the arena!</p>
+      <button className="cta-button" onClick={() => route('/game/tutorial')}>Play Now</button>
+    </section>
+  );
+
+  renderClassesSection = (): h.JSX.Element => (
+    <section className="classes-section">
+      <h2>Combine different classes to create your own unique team</h2>
+      <div className="classes-grid">
+        <div className="class-card">
+          <div className="class-image" style={{ backgroundImage: `url(${warriorImg})` }}></div>
+          <h3>Warrior</h3>
+          <p>Masters of close combat, warriors excel at controlling the battlefield and protecting allies</p>
+        </div>
+        <div className="class-card">
+          <div className="class-image" style={{ backgroundImage: `url(${blackMageImg})` }}></div>
+          <h3>Black Mage</h3>
+          <p>Wielders of destructive magic, black mages can devastate enemies from afar</p>
+        </div>
+        <div className="class-card">
+          <div className="class-image" style={{ backgroundImage: `url(${whiteMageImg})` }}></div>
+          <h3>White Mage</h3>
+          <p>Support specialists who turn the tide of battle with powerful healing, buffs and debuffs</p>
+        </div>
       </div>
-      <div className="login-buttons">
-        <button className="get-started" onClick={() => route('/game/tutorial')}>Get Started</button>
-        <button className="already-account" onClick={this.showLoginOptions}>Already have an account?</button>
+      <button className="cta-button" onClick={() => route('/game/tutorial')}>Play Now</button>
+    </section>
+  );
+
+  renderHeader = (): h.JSX.Element => (
+    <header className="main-header">
+      <img src={logoBig} alt="Logo" className="header-logo" />
+      <div className="header-buttons">
+        <button className="login-button" onClick={this.showLoginOptions}>Log in</button>
+        <button className="cta-button" onClick={() => route('/game/tutorial')}>Play Now</button>
       </div>
-    </div>
+    </header>
   );
 
   renderLoginOptions = (): h.JSX.Element => (
@@ -110,13 +210,24 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
     const { showLoginOptions, showLegalModal, modalContent } = this.state;
 
     return (
-      <div className="landingPage">
-        <div className={`login-container ${showLoginOptions ? 'compact' : ''}`}>
-          <img src={logoBig} alt="Logo" className="logo" />
-          <div className="login-dialog">
-            {showLoginOptions ? this.renderLoginOptions() : this.renderInitialView()}
-          </div>
-        </div>
+      <div className="landing-page">
+        {this.renderHeader()}
+        <main className="main-content">
+          {showLoginOptions ? (
+            <div className="login-overlay">
+              <div className="login-dialog">
+                {this.renderLoginOptions()}
+              </div>
+            </div>
+          ) : (
+            <>
+              {this.renderHeroSection()}
+              {this.renderNewsSection()}
+              {this.renderFeaturesSection()}
+              {this.renderClassesSection()}
+            </>
+          )}
+        </main>
         <footer className="legal-footer">
           <button className="legal-link" onClick={() => this.openLegalModal('terms')}>Terms of Service</button>
           <span className="separator">•</span>
