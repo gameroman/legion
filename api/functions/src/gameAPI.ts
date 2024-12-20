@@ -1,9 +1,10 @@
 import {onRequest} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
-import admin, {checkAPIKey, corsMiddleware} from "./APIsetup";
+import admin, {checkAPIKey, corsMiddleware, storage, isDevelopment} from "./APIsetup";
 import {EndGameData, GameReplayMessage} from "@legion/shared/interfaces";
 import {GameStatus} from "@legion/shared/enums";
 import {logPlayerAction} from "./dashboardAPI";
+import Busboy from 'busboy';
 
 
 export const createGame = onRequest({ 
@@ -195,6 +196,7 @@ export const getNews = onRequest({
   corsMiddleware(request, response, async () => {
     try {
       const limit = parseInt(request.query.limit as string) || 3;
+      const isFrontPage = request.query.isFrontPage === 'true';
       const newsCollection = db.collection("news");
       
       // Get all news
@@ -204,27 +206,40 @@ export const getNews = onRequest({
         ...doc.data()
       }));
       
-      // Separate pinned and unpinned news
-      const pinnedNews = allNews.filter((news: any) => news.pinned);
-      const unpinnedNews = allNews.filter((news: any) => !news.pinned);
-      
-      // Sort both arrays by date (most recent first)
-      const sortByDate = (a: any, b: any) => {
-        const dateA = a.date || '0000-00-00';
-        const dateB = b.date || '0000-00-00';
-        return dateA.localeCompare(dateB);
-      };
-      
-      pinnedNews.sort(sortByDate);
-      unpinnedNews.sort(sortByDate);
-      
-      // Take only what we need to reach the limit
-      const result = [
-        ...pinnedNews,
-        ...unpinnedNews.slice(0, Math.max(0, limit - pinnedNews.length))
-      ];
-      
-      response.status(200).json(result.slice(0, limit));
+      if (isFrontPage) {
+        console.log(`[getNews] Front page news requested, limit: ${limit}`);
+        // For front page: just get most recent news, ordered from oldest to newest
+        const sortByDateAsc = (a: any, b: any) => {
+          const dateA = a.date || '0000-00-00';
+          const dateB = b.date || '0000-00-00';
+          return dateA.localeCompare(dateB); 
+        };
+        
+        const sortedNews = allNews.sort(sortByDateAsc);
+        response.status(200).json(sortedNews.slice(0, limit));
+      } else {
+        // Original logic for news page: separate pinned and unpinned
+        const pinnedNews = allNews.filter((news: any) => news.pinned);
+        const unpinnedNews = allNews.filter((news: any) => !news.pinned);
+        
+        // Sort both arrays by date (newest first)
+        const sortByDateDesc = (a: any, b: any) => {
+          const dateA = a.date || '0000-00-00';
+          const dateB = b.date || '0000-00-00';
+          return dateB.localeCompare(dateA); // Changed to sort newest first
+        };
+        
+        pinnedNews.sort(sortByDateDesc);
+        unpinnedNews.sort(sortByDateDesc);
+        
+        // Take only what we need to reach the limit
+        const result = [
+          ...pinnedNews,
+          ...unpinnedNews.slice(0, Math.max(0, limit - pinnedNews.length))
+        ];
+        
+        response.status(200).json(result.slice(0, limit));
+      }
     } catch (error) {
       console.error("getNews error:", error);
       response.status(500).send("Error fetching news");
@@ -244,33 +259,120 @@ export const addNews = onRequest({
         response.status(401).send('Unauthorized');
         return;
       }
+      console.log(`[addNews] Processing news upload...`);
 
-      const { title, text, date, link,pinned = false } = request.body;
+      // Handle multipart form data
+      const busboy = Busboy({ headers: request.headers });
+      const fields: any = {};
+      let imageBuffer: Buffer | null = null;
+      let imageType: string | null = null;
 
-      // Validate required fields
-      if (!title || !text || !date) {
-        response.status(400).send("Bad Request: Missing required fields (title, content, date)");
-        return;
+      // Handle regular fields
+      busboy.on('field', (fieldname: string, val: any) => {
+        fields[fieldname] = val;
+      });
+
+      // Handle file upload - skip in development
+      if (!isDevelopment) {
+        busboy.on('file', (_fieldname: string, file: any, { mimeType }: { mimeType: string }) => {
+          console.log(`[addNews] Processing file upload...`);
+          const chunks: Buffer[] = [];
+          imageType = mimeType;
+
+          file.on('data', (data: Buffer) => {
+            chunks.push(data);
+          });
+
+          file.on('end', () => {
+            if (chunks.length) {
+              imageBuffer = Buffer.concat(chunks);
+            }
+          });
+        });
       }
 
-      const newsData = {
-        title,
-        text,
-        date,
-        pinned,
-        link,
-        createdAt: new Date()
-      };
+      console.log(`[addNews] Busboy setup complete...`);
+      // Process the upload when everything is done
+      const result = await new Promise((resolve, reject) => {
+        busboy.on('finish', async () => {
+          try {
+            console.log(`[addNews] Processing finished...`);
+            // Validate required fields
+            if (!fields.title || !fields.text || !fields.date) {
+              reject(new Error("Missing required fields (title, text, date)"));
+              return;
+            }
 
-      const docRef = await db.collection("news").add(newsData);
-      response.status(200).json({ 
-        status: "success", 
-        message: "News added successfully",
-        id: docRef.id 
+            let imageUrl = null;
+
+            // Handle image upload if present and not in development
+            if (imageBuffer && !isDevelopment) {
+              const ext = imageType?.split('/')[1] || 'jpg';
+              const filename = `news-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+              
+              console.log(`[addNews] Uploading image to ${filename} ...`);
+              const bucket = storage.bucket('legion-32c6d.firebasestorage.app');
+              console.log(`[addNews] Bucket name: ${bucket.name}`);
+              
+              try {
+                const file = bucket.file(filename);
+                await file.save(imageBuffer, {
+                  metadata: {
+                    contentType: imageType,
+                  }
+                });
+                await file.makePublic();
+                imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filename)}?alt=media`;
+              } catch (error) {
+                console.error('[addNews] Storage error:', error);
+                // @ts-ignore
+                throw new Error(`Storage error: ${error.message}`);
+              }
+            }
+
+            const newsData = {
+              title: fields.title,
+              text: fields.text,
+              date: fields.date,
+              pinned: fields.pinned === 'true',
+              link: fields.link || null,
+              category: fields.category || 'general',
+              imageUrl: isDevelopment ? (fields.imageUrl || null) : imageUrl,
+              createdAt: new Date()
+            };
+
+            const docRef = await db.collection("news").add(newsData);
+            resolve({ 
+              status: "success", 
+              message: "News added successfully",
+              id: docRef.id,
+              imageUrl: newsData.imageUrl 
+            });
+          } catch (error) {
+            reject(error);
+          }
+        });
+
+        busboy.on('error', reject);
+        
+        // Feed the request data into busboy
+        if (request.rawBody) {
+          busboy.end(request.rawBody);
+        } else {
+          request.pipe(busboy);
+        }
       });
+
+      response.status(200).json(result);
     } catch (error) {
       console.error("addNews error:", error);
-      response.status(500).send("Error adding news");
+      // @ts-ignore
+      if (error.message === "Missing required fields (title, text, date)") {
+        // @ts-ignore
+        response.status(400).send(error.message);
+      } else {
+        response.status(500).send("Error adding news");
+      }
     }
   });
 });

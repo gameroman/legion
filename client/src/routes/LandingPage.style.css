@@ -667,3 +667,19 @@ time {
 .feature-icon {
   display: none;
 }
+
+.news-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 300px;
+  grid-column: 1 / -1;
+}
+
+.no-news {
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 2rem;
+  color: #666;
+}

@@ -3,8 +3,11 @@ import * as admin from "firebase-admin";
 import cors from "cors";
 import {Request} from "express";
 import firebaseConfig from '@legion/shared/firebaseConfig';
+import { getStorage } from 'firebase-admin/storage';
 
 admin.initializeApp(firebaseConfig);
+
+export const storage = getStorage();
 
 const LOCK_TIMEOUT = 10000; 
 

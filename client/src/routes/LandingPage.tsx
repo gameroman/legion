@@ -6,19 +6,31 @@ import axios from 'axios';
 import './LandingPage.style.css';
 import Modal from '../components/modal/Modal';
 import { apiFetch } from '../services/apiService';
-import freeIcon from '@assets/free.png';
 import warriorImg from '@assets/warrior.png';
 import blackMageImg from '@assets/blackmage.png';
 import whiteMageImg from '@assets/whitemage.png';
+import { useState, useEffect } from 'preact/hooks';
+import Spinner from '../components/spinner/Spinner';
 
 interface LandingPageProps {
   utm_source?: string;
+}
+
+interface NewsItem {
+  title: string;
+  text: string;
+  imageUrl: string;
+  category: string;
+  date: string;
+  link: string | null;
 }
 
 interface LandingPageState {
   showLoginOptions: boolean;
   showLegalModal: boolean;
   modalContent: 'terms' | 'privacy' | null;
+  news: NewsItem[];
+  isLoadingNews: boolean;
 }
 
 class LandingPage extends Component<LandingPageProps, LandingPageState> {
@@ -28,6 +40,8 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
     showLoginOptions: false,
     showLegalModal: false,
     modalContent: null,
+    news: [],
+    isLoadingNews: true,
   };
 
   private firebaseUIContainer: HTMLDivElement | null = null;
@@ -51,7 +65,23 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
         this.context.setUtmSource(this.props.utm_source);
       }
     }
+    
+    this.fetchNews();
   }
+
+  fetchNews = async (): Promise<void> => {
+    try {
+      const response = await fetch(`${process.env.API_URL}/getNews?isFrontPage=true&limit=3`);
+      const data = await response.json();
+      this.setState({ 
+        news: data,
+        isLoadingNews: false 
+      });
+    } catch (error) {
+      console.error('Error fetching news:', error);
+      this.setState({ isLoadingNews: false });
+    }
+  };
 
   showLoginOptions = (): void => {
     this.setState({ showLoginOptions: true }, () => {
@@ -100,39 +130,36 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
     <section className="news-section">
       <h2>Latest News</h2>
       <div className="news-grid">
-        {[
-          {
-            title: "New Character Class Coming Soon",
-            description: "Get ready for a game-changing addition to your tactical arsenal!",
-            image: "/news/new-class.jpg",
-            category: "Updates",
-            date: "2024-03-20"
-          },
-          {
-            title: "Season 2 Tournament Announced",
-            description: "Compete with the best players and win exclusive rewards!",
-            image: "/news/tournament.jpg",
-            category: "Events",
-            date: "2024-03-18"
-          },
-          {
-            title: "Balance Update 1.2",
-            description: "Major gameplay adjustments to enhance competitive play",
-            image: "/news/balance.jpg",
-            category: "Patch Notes",
-            date: "2024-03-15"
-          }
-        ].map(news => (
-          <div className="news-card" onClick={() => route(`/news/${news.title.toLowerCase().replace(/ /g, '-')}`)}>
-            <div className="news-image" style={{ backgroundImage: `url(${news.image})` }}></div>
-            <div className="news-content">
-              <span className="news-category">{news.category}</span>
-              <h3>{news.title}</h3>
-              <p>{news.description}</p>
-              <time>{new Date(news.date).toLocaleDateString()}</time>
-            </div>
+        {this.state.isLoadingNews ? (
+          <div className="news-loading">
+            <Spinner />
           </div>
-        ))}
+        ) : this.state.news.length > 0 ? (
+          this.state.news.map(news => (
+            <div 
+              className="news-card" 
+              onClick={() => {
+                if (news.link) {
+                  window.open(news.link, '_blank');
+                } else {
+                  route(`/news/${news.title.toLowerCase().replace(/ /g, '-')}`);
+                }
+              }}
+            >
+              <div className="news-image" style={{ 
+                backgroundImage: `url(${news.imageUrl || '/assets/news-placeholder.jpg'})` 
+              }}></div>
+              <div className="news-content">
+                <span className="news-category">{news.category}</span>
+                <h3>{news.title}</h3>
+                <p>{news.text}</p>
+                <time>{new Date(news.date).toLocaleDateString()}</time>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="no-news">No news available at the moment.</p>
+        )}
       </div>
     </section>
   );
