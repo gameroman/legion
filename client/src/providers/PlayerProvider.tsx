@@ -487,7 +487,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
         });
 
         // Play sound effect
-        playSoundEffect(matchFound);
+        playSoundEffect(matchFound, 0.5);
     });
 
       socket.on('challengeDeclined', (data: { playerName: string }) => {

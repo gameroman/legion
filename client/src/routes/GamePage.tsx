@@ -155,7 +155,7 @@ class GamePage extends Component<GamePageProps, GamePageState> {
           {this.state.loading && (
             <div className="loading-div">
               <div className="loading-game-spinner">
-                <div className="spinner"></div>
+                <div className="game-spinner"></div>
                 <div className="loading-text">{this.state.progress}%</div>
               </div>
             </div>

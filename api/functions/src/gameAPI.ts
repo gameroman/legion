@@ -197,48 +197,42 @@ export const getNews = onRequest({
     try {
       const limit = parseInt(request.query.limit as string) || 3;
       const isFrontPage = request.query.isFrontPage === 'true';
-      const newsCollection = db.collection("news");
       
       // Get all news
+      const newsCollection = db.collection("news");
       const allNewsSnapshot = await newsCollection.get();
       const allNews = allNewsSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
       
-      if (isFrontPage) {
-        console.log(`[getNews] Front page news requested, limit: ${limit}`);
-        // For front page: just get most recent news, ordered from oldest to newest
-        const sortByDateAsc = (a: any, b: any) => {
-          const dateA = a.date || '0000-00-00';
-          const dateB = b.date || '0000-00-00';
-          return dateA.localeCompare(dateB); 
-        };
-        
-        const sortedNews = allNews.sort(sortByDateAsc);
-        response.status(200).json(sortedNews.slice(0, limit));
-      } else {
-        // Original logic for news page: separate pinned and unpinned
+      // Sort by date (newest first)
+      const sortByDateDesc = (a: any, b: any) => {
+        const dateA = a.date || '0000-00-00';
+        const dateB = b.date || '0000-00-00';
+        return dateB.localeCompare(dateA);
+      };
+      
+      if (!isFrontPage) {
+        // Separate pinned and unpinned news
         const pinnedNews = allNews.filter((news: any) => news.pinned);
         const unpinnedNews = allNews.filter((news: any) => !news.pinned);
         
-        // Sort both arrays by date (newest first)
-        const sortByDateDesc = (a: any, b: any) => {
-          const dateA = a.date || '0000-00-00';
-          const dateB = b.date || '0000-00-00';
-          return dateB.localeCompare(dateA); // Changed to sort newest first
-        };
+        // Sort unpinned news by date
+        const sortedUnpinnedNews = unpinnedNews.sort(sortByDateDesc);
         
-        pinnedNews.sort(sortByDateDesc);
-        unpinnedNews.sort(sortByDateDesc);
-        
-        // Take only what we need to reach the limit
+        // Take only what we need from unpinned news, considering we'll add pinned ones
+        const unpinnedToKeep = Math.max(0, limit - pinnedNews.length);
         const result = [
-          ...pinnedNews,
-          ...unpinnedNews.slice(0, Math.max(0, limit - pinnedNews.length))
+          ...sortedUnpinnedNews.slice(0, unpinnedToKeep),
+          ...pinnedNews
         ];
         
-        response.status(200).json(result.slice(0, limit));
+        response.status(200).json(result);
+      } else {
+        // Regular sorting by date only
+        const sortedNews = allNews.sort(sortByDateDesc);
+        response.status(200).json(sortedNews.slice(0, limit));
       }
     } catch (error) {
       console.error("getNews error:", error);

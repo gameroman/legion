@@ -126,6 +126,19 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
     </section>
   );
 
+  formatDate = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric', 
+      year: 'numeric'
+    }).replace(/(\d+)(?=(,))/, (match) => {
+      const num = parseInt(match);
+      const suffix = ['th', 'st', 'nd', 'rd'][(num % 10 > 3 || num % 100 - num % 10 == 10) ? 0 : num % 10];
+      return num + suffix;
+    });
+  };
+
   renderNewsSection = (): h.JSX.Element => (
     <section className="news-section">
       <h2>Latest News</h2>
@@ -135,7 +148,7 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
             <Spinner />
           </div>
         ) : this.state.news.length > 0 ? (
-          this.state.news.map(news => (
+          [...this.state.news].reverse().map(news => (
             <div 
               className="news-card" 
               onClick={() => {
@@ -153,7 +166,7 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
                 <span className="news-category">{news.category}</span>
                 <h3>{news.title}</h3>
                 <p>{news.text}</p>
-                <time>{new Date(news.date).toLocaleDateString()}</time>
+                <time>{this.formatDate(news.date)}</time>
               </div>
             </div>
           ))

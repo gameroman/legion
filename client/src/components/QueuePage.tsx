@@ -381,7 +381,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
                 {ENABLE_Q_NEWS && (
                     <div className="queue-news">
                         {newsLoaded ? (
-                            news.map((newsItem) => (
+                            [...news].reverse().map((newsItem) => (
                                 <div className="queue-news-container" key={newsItem.title}>
                                     <div className="queue-news-title">
                                         <div><span style={{ color: 'cyan' }}>{newsItem.title}</span></div>
