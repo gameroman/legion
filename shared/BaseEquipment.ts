@@ -1,4 +1,4 @@
-import { Effect, EquipmentData } from "./interfaces";
+import { Effect, EquipmentData, WeaponStatusEffect } from "./interfaces";
 import { EquipmentSlot, Rarity, Class } from "./enums";
 import { getPrice, getRarity } from "./economy";
 
@@ -10,6 +10,7 @@ export class BaseEquipment {
     frame: number = 0;
     slot: EquipmentSlot = EquipmentSlot.WEAPON;
     effects: Effect[] = [];
+    statusEffects: WeaponStatusEffect[] = [];
     price: number = 0; 
     effort: number = 0;
     rarity: Rarity = Rarity.COMMON;

@@ -541,6 +541,15 @@ export abstract class Game
         
         const damage = this.calculateDamage(player, opponent);
         opponent.takeDamage(damage);
+        
+        const weapon = player.getWeapon();
+        console.log(`[Game:processAttack] Weapon: ${weapon?.name}`);
+        if (weapon) {
+            weapon.statusEffects?.forEach(effect => {
+                opponent.addStatusEffect(effect.effect, effect.chance);
+            });
+        }
+        
         player.increaseDamageDealt(damage);
         player.team.incrementOffensiveActions();
         player.addInteractedTarget(opponent);

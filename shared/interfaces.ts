@@ -83,11 +83,17 @@ export interface EquipmentData {
     description: string;
     frame: number;
     effects: Effect[];
+    statusEffects?: WeaponStatusEffect[];
     slot: EquipmentSlot,
     minLevel?: number;
     classes?: Class[];
     beltSize?: number;
     effort: number;
+}
+
+export interface WeaponStatusEffect {
+    effect: StatusEffect;
+    chance: number;
 }
 
 export interface CharacterUpdate {

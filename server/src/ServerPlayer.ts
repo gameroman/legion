@@ -1,14 +1,15 @@
 import { Team } from './Team';
 import { Item } from './Item';
 import { Spell } from './Spell';
-import { Stat, Terrain, StatusEffect, Class } from "@legion/shared/enums";
+import { Stat, Terrain, StatusEffect, Class, EquipmentSlot } from "@legion/shared/enums";
 import { getConsumableById } from '@legion/shared/Items';
 import { getSpellById } from '@legion/shared/Spells';
 import { getXPThreshold } from '@legion/shared/levelling';
-import { CharacterStats, PlayerNetworkData, StatusEffects } from '@legion/shared/interfaces';
+import { CharacterStats, Equipment, PlayerNetworkData, StatusEffects } from '@legion/shared/interfaces';
 import { INITIAL_COOLDOWN, TIME_COEFFICIENT, INJURED_MODE } from "@legion/shared/config";
 import { CooldownManager } from './CooldownManager';
 import { paralyzingStatuses } from '@legion/shared/utils';
+import { getEquipmentById } from '@legion/shared/Equipments';
 
 
 const terrainDot = {
@@ -65,6 +66,7 @@ export class ServerPlayer {
     inventoryCapacity: number = 3;
     inventory: Item[] = [];
     spells: Spell[] = [];
+    equipment: Equipment;
     isCasting: boolean = false;
     damageDealt: number = 0;
     entranceTime: number = 2.5;
@@ -337,6 +339,7 @@ export class ServerPlayer {
         this.setStat(Stat.SPATK, this.getStatValue(data, "spatk"));
         this.setStat(Stat.SPDEF, this.getStatValue(data, "spdef"));
         this.setInventory(data.carrying_capacity, data.inventory);
+        this.setEquipment(data.equipment);
         this.setSpells(data.skill_slots, data.skills);
         this.level = data.level;
         this.xp = data.xp;
@@ -414,6 +417,10 @@ export class ServerPlayer {
         return this.inventory[index];
     }
 
+    setEquipment(equipment: Equipment) {
+        this.equipment = equipment;
+    }
+
     setSpells(slots: number, spellsIds: number[]) {
         this.spells = spellsIds.map(id => new Spell(getSpellById(id)));
     }
@@ -483,7 +490,9 @@ export class ServerPlayer {
 
     addStatusEffect(status: StatusEffect, duration: number, chance: number = 1) {
         if (this.isDead()) return false;
-        if (Math.random() > chance) return false;
+        const r = Math.random();
+        console.log(`[ServerPlayer:addStatusEffect] Adding status ${status} for ${duration} s, ${chance}, r = ${r} / ${chance}`);
+        if (r > chance) return false;
         // console.log(`[ServerPlayer:addStatusEffect] Adding status ${status} for ${duration} seconds`);
         this.statuses[status] = duration;
         
@@ -627,6 +636,10 @@ export class ServerPlayer {
 
     isMage() {
         return this.class === Class.WHITE_MAGE || this.class === Class.BLACK_MAGE;
+    }
+
+    getWeapon() {
+        return getEquipmentById(this.equipment.weapon);
     }
 }
 

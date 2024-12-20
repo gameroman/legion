@@ -1,5 +1,5 @@
 import { BaseEquipment } from "./BaseEquipment";
-import { Stat, EquipmentSlot, Rarity, Class } from ".";
+import { Stat, EquipmentSlot, Rarity, Class, StatusEffect } from ".";
 import { getPrice } from "./economy";
 
 export const equipments:BaseEquipment[] = [];
@@ -378,6 +378,47 @@ equipments[31] = new BaseEquipment({
     slot: EquipmentSlot.WEAPON,
     effort: 6,
     minLevel: 3,
+    classes: [Class.WARRIOR],
+});
+
+equipments[32] = new BaseEquipment({
+    id: 32,
+    name: "Serpent's Fang",
+    description: "80% chance to poison enemy on melee attacks.",
+    frame: 22,
+    effects: [
+        {stat: Stat.ATK, value: 35},
+        {stat: Stat.MP, value: 35},
+    ],
+    statusEffects: [
+        {
+            effect: StatusEffect.POISON,
+            chance: 0.8,
+        }
+    ],
+    slot: EquipmentSlot.WEAPON,
+    effort: 25,
+    minLevel: 5,
+    classes: [Class.BLACK_MAGE, Class.WHITE_MAGE],
+});
+
+equipments[33] = new BaseEquipment({
+    id: 33,
+    name: "Viridian Striker",
+    description: "30% chance to poison enemy on melee attacks.",
+    frame: 3, 
+    effects: [
+        {stat: Stat.ATK, value: 40},
+    ],
+    statusEffects: [
+        {
+            effect: StatusEffect.POISON,
+            chance: 0.3,
+        }
+    ],
+    slot: EquipmentSlot.WEAPON,
+    effort: 20,
+    minLevel: 5,
     classes: [Class.WARRIOR],
 });
 

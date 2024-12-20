@@ -424,9 +424,22 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       if (!user || this.state.socket) return;
 
       console.log(`Connecting to ${process.env.MATCHMAKER_URL} ...`);
+      
+      const token = await getFirebaseIdToken();
+      if (!token) {
+        console.error('Could not obtain authentication token');
+        // Clear any existing reconnect timeout
+        if (this.reconnectTimeout) {
+          clearTimeout(this.reconnectTimeout);
+          this.reconnectTimeout = null;
+        }
+        errorToast('Connection error - Please reload the page');
+        return;
+      }
+
       const socket = io(process.env.MATCHMAKER_URL, {
         auth: {
-          token: await getFirebaseIdToken()
+          token
         },
         reconnection: true,
         reconnectionAttempts: 5,
@@ -475,41 +488,41 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
         challengerAvatar: string,
         lobbyId: string 
     }) => {
-        // Show the challenge modal with the received data
-        this.setState({
-            challengeModal: {
-                show: true,
-                challengerId: data.challengerId,
-                challengerName: data.challengerName,
-                challengerAvatar: data.challengerAvatar,
-                lobbyId: data.lobbyId
-            }
-        });
+          // Show the challenge modal with the received data
+          this.setState({
+              challengeModal: {
+                  show: true,
+                  challengerId: data.challengerId,
+                  challengerName: data.challengerName,
+                  challengerAvatar: data.challengerAvatar,
+                  lobbyId: data.lobbyId
+              }
+          });
 
-        // Play sound effect
-        playSoundEffect(matchFound, 0.5);
-    });
+          // Play sound effect
+          playSoundEffect(matchFound, 0.5);
+      });
 
-      socket.on('challengeDeclined', (data: { playerName: string }) => {
-        console.log(`[matchmaker:challengeDeclined] Challenge was declined`);
-        silentErrorToast(`Your challenge to ${data.playerName} was declined!`);
-        route('/profile');
-    });
+        socket.on('challengeDeclined', (data: { playerName: string }) => {
+          console.log(`[matchmaker:challengeDeclined] Challenge was declined`);
+          silentErrorToast(`Your challenge to ${data.playerName} was declined!`);
+          route('/profile');
+      });
 
-      socket.on('challengeCancelled', (data?: { challengerName: string }) => {
-        // Hide the challenge modal if it's showing
-        if (this.state.challengeModal.show) {
-            this.setState({
-                challengeModal: {
-                    ...this.state.challengeModal,
-                    show: false
-                }
-            });
-            silentErrorToast(`The challenge from ${data?.challengerName || 'Player'} was cancelled`);
-        }
-    });
+        socket.on('challengeCancelled', (data?: { challengerName: string }) => {
+          // Hide the challenge modal if it's showing
+          if (this.state.challengeModal.show) {
+              this.setState({
+                  challengeModal: {
+                      ...this.state.challengeModal,
+                      show: false
+                  }
+              });
+              silentErrorToast(`The challenge from ${data?.challengerName || 'Player'} was cancelled`);
+          }
+      });
 
-      this.setState({ socket });
+        this.setState({ socket });
     }
 
     private scheduleReconnect = () => {
