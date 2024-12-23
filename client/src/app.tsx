@@ -94,6 +94,13 @@ class App extends Component<{}, AppState> {
         }
     };
 
+    shouldComponentUpdate(nextProps: {}, nextState: AppState) {
+        return (
+            this.state.currentUrl !== nextState.currentUrl ||
+            this.state.currentMainRoute !== nextState.currentMainRoute
+        );
+    }
+
     render() {
         return (
             <AuthProvider>

@@ -101,9 +101,6 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       this.setState(this.getInitialState());
     }
 
-    componentDidMount() {
-    }
-
     componentDidUpdate() {
       const user = firebaseAuth.currentUser;
       if (!user && this.state.player.isLoaded) {
@@ -415,7 +412,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           );
           this.setState({ friends });
       } catch (error) {
-          console.error('Error fetching friends:', error);
+          console.warn('Error fetching friends:', error);
       }
     };
   

@@ -77,6 +77,30 @@ export async function updateDAU(userId: string) {
     });
 }
 
+
+export async function updateDailyVisits(visitorId?: string) {
+    if (!visitorId) return;
+    
+    const db = admin.firestore();
+    const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+    const docRef = db.collection("dailyVisits").doc(today);
+
+    await db.runTransaction(async (transaction) => {
+        const doc = await transaction.get(docRef);
+        if (!doc.exists) {
+            transaction.set(docRef, {visitors: [visitorId]});
+        } else {
+            const docData = doc.data();
+            const visitors = docData && docData.visitors ? docData.visitors : [];
+            if (!visitors.includes(visitorId)) {
+                visitors.push(visitorId);
+                transaction.update(docRef, {visitors: visitors});
+            }
+        }
+    });
+}
+
+
 export async function logPlayerAction(playerId: string, actionType: string, details: any) {
     if (!playerId || playerId === '' || playerId === undefined || playerId === null) return;
     console.log(`[logPlayerAction] playerId: ${playerId}, actionType: ${actionType}, details: ${JSON.stringify(details)}`);

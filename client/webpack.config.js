@@ -19,6 +19,9 @@ module.exports = {
 
   devServer: {
     historyApiFallback: true,
+    headers: {
+      'Permissions-Policy': '*=()'
+    }
   },
 
   module: {

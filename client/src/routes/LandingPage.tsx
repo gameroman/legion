@@ -5,7 +5,7 @@ import logoBig from '@assets/logobig.png';
 import axios from 'axios';
 import './LandingPage.style.css';
 import Modal from '../components/modal/Modal';
-import { apiFetch } from '../services/apiService';
+import { apiFetch, generateVisitorId } from '../services/apiService';
 import warriorImg from '@assets/warrior.png';
 import blackMageImg from '@assets/blackmage.png';
 import whiteMageImg from '@assets/whitemage.png';
@@ -66,12 +66,17 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
       }
     }
     
-    this.fetchNews();
+    const visitorId = generateVisitorId();
+    // console.log(`[LandingPage:componentDidMount] visitorId: ${visitorId}`);
+    this.fetchNews(undefined, visitorId);
   }
 
-  fetchNews = async (): Promise<void> => {
+  fetchNews = async (retries = 3, visitorId?: string): Promise<void> => {
     try {
-      const response = await fetch(`${process.env.API_URL}/getNews?isFrontPage=true&limit=3`);
+      const response = await fetch(`${process.env.API_URL}/getNews?isFrontPage=true&limit=3${visitorId ? `&visitorId=${visitorId}` : ''}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       this.setState({ 
         news: data,
@@ -79,6 +84,11 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
       });
     } catch (error) {
       console.error('Error fetching news:', error);
+      if (retries > 0) {
+        // Wait 500ms before retrying
+        await new Promise(resolve => setTimeout(resolve, 500));
+        return this.fetchNews(retries - 1, visitorId);
+      }
       this.setState({ isLoadingNews: false });
     }
   };

@@ -138,3 +138,39 @@ async function apiFetch(endpoint: string, options: ApiFetchOptions = {}, maxRetr
 }
 
 export { apiFetch };
+
+export function generateVisitorId(): string {
+  // Try to get existing visitor ID from localStorage
+  const existingId = localStorage.getItem('visitorId');
+  if (existingId) {
+    return existingId;
+  }
+
+  // Generate a new visitor ID based on browser information
+  const browserInfo = {
+    userAgent: navigator.userAgent,
+    language: navigator.language,
+    platform: navigator.platform,
+    screenResolution: `${window.screen.width}x${window.screen.height}`,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    // Add a random component to reduce collision probability
+    random: Math.random().toString(36).substring(2, 15)
+  };
+
+  // Create a hash of the browser info
+  const str = JSON.stringify(browserInfo);
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+
+  // Convert to base36 and ensure it's positive
+  const visitorId = Math.abs(hash).toString(36);
+  
+  // Store in localStorage
+  localStorage.setItem('visitorId', visitorId);
+  
+  return visitorId;
+}

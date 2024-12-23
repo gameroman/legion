@@ -3,7 +3,7 @@ import * as logger from "firebase-functions/logger";
 import admin, {checkAPIKey, corsMiddleware, storage, isDevelopment} from "./APIsetup";
 import {EndGameData, GameReplayMessage} from "@legion/shared/interfaces";
 import {GameStatus} from "@legion/shared/enums";
-import {logPlayerAction} from "./dashboardAPI";
+import {logPlayerAction, updateDailyVisits} from "./dashboardAPI";
 import Busboy from 'busboy';
 
 
@@ -197,6 +197,12 @@ export const getNews = onRequest({
     try {
       const limit = parseInt(request.query.limit as string) || 3;
       const isFrontPage = request.query.isFrontPage === 'true';
+      const visitorId = request.query.visitorId;
+      
+      // If this is a front page visit, update the daily visits counter
+      if (isFrontPage) {
+        await updateDailyVisits(visitorId as string);
+      }
       
       // Get all news
       const newsCollection = db.collection("news");

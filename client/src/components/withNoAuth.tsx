@@ -11,6 +11,7 @@ const withNoAuth = (WrappedComponent) => {
             if (isAuthenticated) {
                 route('/play'); 
             }
+
         }
 
         componentDidUpdate() {
@@ -27,3 +28,4 @@ const withNoAuth = (WrappedComponent) => {
 };
 
 export default withNoAuth;
+
