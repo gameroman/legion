@@ -863,7 +863,12 @@ export const setPlayerOnSteroids = onRequest({
   });
 });
 
-export const zombieData = onRequest({ secrets: ["API_KEY"] }, async (req, res) => {
+export const zombieData = onRequest(
+  { 
+    secrets: ["API_KEY"], 
+    memory: '512MiB' 
+  }, 
+  async (req, res) => {
   try {
     if (!checkAPIKey(req)) {
       res.status(401).send('Unauthorized');
@@ -871,7 +876,6 @@ export const zombieData = onRequest({ secrets: ["API_KEY"] }, async (req, res) =
     }
 
     const db = admin.firestore();
-    const auth = admin.auth();
 
     // Get the league and elo parameters from the request
     const league = parseInt(req.query.league as string, 10);
@@ -885,10 +889,16 @@ export const zombieData = onRequest({ secrets: ["API_KEY"] }, async (req, res) =
       return;
     }
 
+    // Calculate date 7 days ago
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const cutoffDate = oneWeekAgo.toISOString().replace('T', ' ').slice(0, 19);
+
     // Prepare the query
-    let playersQuery = db.collection('players');
+    let playersQuery = db.collection('players')
+      .where('lastActiveDate', '<', cutoffDate);
+    
     if (league !== -1) {
-      // @ts-ignore
       playersQuery = playersQuery.where('league', '==', league);
     }
 
@@ -896,7 +906,12 @@ export const zombieData = onRequest({ secrets: ["API_KEY"] }, async (req, res) =
     const playersSnapshot = await playersQuery.get();
     const playerDocs = playersSnapshot.docs;
 
-    console.log(`[zombieData] Found ${playerDocs.length} players`);
+    console.log(`[zombieData] Found ${playerDocs.length} inactive players`);
+
+    if (playerDocs.length === 0) {
+      res.json({});
+      return;
+    }
 
     // Shuffle the array of player documents
     for (let i = playerDocs.length - 1; i > 0; i--) {
@@ -907,27 +922,17 @@ export const zombieData = onRequest({ secrets: ["API_KEY"] }, async (req, res) =
     // Select up to 10 random players
     const selectedPlayers = playerDocs.slice(0, 10);
 
-    // Find the dangling player with the closest ELO
+    // Find the player with the closest ELO
     let closestPlayer = null;
     let closestEloDiff = Infinity;
 
     for (const playerDoc of selectedPlayers) {
-      const playerId = playerDoc.id;
-      try {
-        await auth.getUser(playerId);
-      } catch (error) {
-        // @ts-ignore
-        if (error.code === 'auth/user-not-found') {
-          const playerData = playerDoc.data();
-          if (playerData) {
-            const eloDiff = Math.abs(playerData.elo - targetElo);
-            if (eloDiff < closestEloDiff) {
-              closestEloDiff = eloDiff;
-              closestPlayer = { id: playerId, data: playerData };
-            }
-          }
-        } else {
-          console.error(`Error checking user ${playerId}:`, error);
+      const playerData = playerDoc.data();
+      if (playerData) {
+        const eloDiff = Math.abs(playerData.elo - targetElo);
+        if (eloDiff < closestEloDiff) {
+          closestEloDiff = eloDiff;
+          closestPlayer = { id: playerDoc.id, data: playerData };
         }
       }
     }
@@ -938,9 +943,9 @@ export const zombieData = onRequest({ secrets: ["API_KEY"] }, async (req, res) =
       // Get character data
       const characterRefs = playerData.characters || [];
       const characterDocs = await db.getAll(...characterRefs, {
-        fieldMask: ['name', 'portrait', 'level', 'class', 'experience', 'xp', 'sp', 'stats', 'carrying_capacity',
-          'carrying_capacity_bonus', 'skill_slots', 'inventory', 'equipment', 'equipment_bonuses', 'sp_bonuses',
-          'skills',
+        fieldMask: ['name', 'portrait', 'level', 'class', 'experience', 'xp', 'sp', 'stats', 
+          'carrying_capacity', 'carrying_capacity_bonus', 'skill_slots', 'inventory', 'equipment', 
+          'equipment_bonuses', 'sp_bonuses', 'skills',
         ],
       });
 
@@ -1004,7 +1009,7 @@ export const zombieData = onRequest({ secrets: ["API_KEY"] }, async (req, res) =
 
       res.json(responseData);
     } else {
-      console.log(`[zombieData] No dangling player IDs found${league !== -1 ? ` in league ${league}` : ''}`);
+      console.log(`[zombieData] No suitable inactive players found${league !== -1 ? ` in league ${league}` : ''}`);
       res.json({});
     }
   } catch (error) {
@@ -1171,7 +1176,12 @@ async function incrementCompletedGame(uid: string) {
   }, { merge: true });
 }
 
-export const updateInactivePlayersStats = onSchedule("every day 00:00", async (event) => {
+export const updateInactivePlayersStats = onSchedule(
+  {
+    schedule: "every day 00:00",
+    memory: "512MiB",
+  }, 
+  async (event) => {
   const db = admin.firestore();
   const now = new Date();
   
@@ -1180,7 +1190,6 @@ export const updateInactivePlayersStats = onSchedule("every day 00:00", async (e
   const cutoffDateString = cutoffDate.toISOString().replace('T', ' ').slice(0, 19);
 
   try {
-    // Query for inactive players who have no wins/losses
     const snapshot = await db.collection("players")
       .where("lastActiveDate", "<", cutoffDateString)
       .where("leagueStats.wins", "==", 0)
@@ -1191,29 +1200,40 @@ export const updateInactivePlayersStats = onSchedule("every day 00:00", async (e
     let updatedCount = 0;
 
     snapshot.forEach(doc => {
-      // Generate random number using Box-Muller transform for normal distribution
+      // Generate total games using exponential distribution for more variation
+      const lambda = 0.1; // Parameter for exponential distribution
+      const randomGames = Math.round(-Math.log(1 - Math.random()) / lambda);
+      const cappedGames = Math.min(Math.max(randomGames, 1), 50); // Cap between 1 and 50 games
+      
+      // Generate win ratio using beta distribution for more natural variation
+      // Beta distribution parameters (can be adjusted)
+      const alpha = 2;
+      const beta = 2;
+      
+      // Approximate beta distribution using normal distribution
       let u1 = Math.random();
       let u2 = Math.random();
       let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
       
-      // Mean = 0, Standard deviation = 4
-      const randomGames = Math.max(0, Math.round(Math.abs(z0 * 4))); // We want a positive number of games
+      // Transform to beta-like distribution centered around 0.45
+      let winRatio = 0.45 + (z0 * 0.15); // Standard deviation of 0.15
+      winRatio = Math.max(0.1, Math.min(0.8, winRatio)); // Clamp between 0.1 and 0.8
       
-      // Generate win ratio with slight negative bias (0.45 instead of 0.5)
-      const wins = Math.round(randomGames * 0.45);
-      const losses = randomGames - wins;
+      const wins = Math.round(cappedGames * winRatio);
+      const losses = cappedGames - wins;
       
-      // Adjust ELO based on win/loss difference
-      // Small ELO adjustment: +/- 1 point per net win/loss
-      const netWinLoss = wins - losses;
-      const eloAdjustment = netWinLoss;
+      // More dramatic ELO adjustments based on performance
+      const winRateDeviation = winRatio - 0.45; // Deviation from expected 0.45
+      const eloAdjustment = Math.round(winRateDeviation * 100); // Scale factor of 50
       
       const currentElo = doc.data()?.elo || 100;
+      const newElo = currentElo + eloAdjustment;
       
       batch.update(doc.ref, {
         'leagueStats.wins': wins,
         'leagueStats.losses': losses,
-        elo: currentElo + eloAdjustment
+        'leagueStats.nbGames': cappedGames,
+        elo: newElo
       });
       
       updatedCount++;

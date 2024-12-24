@@ -111,23 +111,23 @@ class LeaderboardTable extends Component<LeaderboardTableProps, LeaderboardTable
         }
     };
 
+    getUpgradeImage = (isPromoted: boolean, isDemoted: boolean): string => {
+        if (this.state.league == 5) {
+            return '';
+        }
+
+        if (isPromoted) {
+            return `url(${promoteIcon})`;
+        }
+        if (isDemoted) {
+            return `url(${demoteIcon})`;
+        }
+        return '';
+    }
+
     render() {
         const { rankRowNumberStyle, camelCaseToNormal } = this.props;
         const columns = ['rank', 'player name', 'elo', 'wins', 'losses', 'wins ratio', 'rewards'];
-
-        const getUpgradeImage = (isPromoted: boolean, isDemoted: boolean): React.CSSProperties => {
-            if (this.state.league == 5) {
-                return { backgroundImage: 'none' };
-            }
-
-            return {
-                backgroundImage: isPromoted
-                    ? `url(${promoteIcon})`
-                : isDemoted
-                    ? `url(${demoteIcon})`
-                    : 'none'
-            }
-        }
 
         const rankRowAvatar = (index: number) => { 
             return {
@@ -169,7 +169,10 @@ class LeaderboardTable extends Component<LeaderboardTableProps, LeaderboardTable
                                 <td className="rank-row">
                                     <div className="rank-row-number" style={rankRowNumberStyle(item.rank)}>{item.rank}</div>
                                     <div className="rank-row-avatar" style={rankRowAvatar(index)}></div>
-                                    <div className="rank-row-upgrade" style={getUpgradeImage(item.isPromoted, item.isDemoted)}></div>
+                                    <div 
+                                        className="rank-row-upgrade" 
+                                        style={{ backgroundImage: this.getUpgradeImage(item.isPromoted, item.isDemoted) }}
+                                    ></div>
                                 </td>
                                 <td>{item.player}</td>
                                 <td>{item.elo}</td>

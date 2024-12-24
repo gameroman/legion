@@ -129,11 +129,16 @@
 }
 
 .rank-row-upgrade {
-    background-size: 100% 100%;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
     width: 24px;
     height: 24px;
-    position: absolute;
-    right: 12px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 2;
 }
 
 .rank-row-win {
@@ -156,4 +161,10 @@
 
 .clickable-row:hover {
     filter: brightness(1.2);
+}
+
+.rank-table tr {
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
 }

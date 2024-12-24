@@ -9,6 +9,7 @@ import {logPlayerAction} from "./dashboardAPI";
 import {awardChestContent} from "./playerAPI";
 import {DBPlayerData, LeaderboardRow} from "@legion/shared/interfaces";
 import {PROMOTION_RATIO, DEMOTION_RATIO, SEASON_END_CRON} from "@legion/shared/config";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 interface APILeaderboardResponse {
   league: number;
   seasonEnd: number;
@@ -370,14 +371,27 @@ export const manualLeaguesUpdate = onRequest({
   });
 });
 
-export const leaguesUpdate = functions.pubsub.schedule(SEASON_END_CRON)
-  .onRun(async (context) => {
+// export const leaguesUpdate = functions.pubsub.schedule(SEASON_END_CRON)
+//   .onRun(async (context) => {
+//     try {
+//       await updateLeagues(undefined);
+//     } catch (error) {
+//       console.error("leaguesUpdate error:", error);
+//     }
+// });
+
+export const leaguesUpdate = onSchedule(
+  {
+    schedule: SEASON_END_CRON,
+    memory: "512MiB",
+  }, 
+  async (event) => {
     try {
       await updateLeagues(undefined);
     } catch (error) {
       console.error("leaguesUpdate error:", error);
     }
-  });
+});
 
 export const updateRanksOnEloChange = functions.firestore
   .document("players/{playerId}")

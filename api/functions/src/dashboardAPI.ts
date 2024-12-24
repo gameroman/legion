@@ -30,6 +30,7 @@ interface GamesPerModePerDay {
 interface EngagementMetrics {
     landingPageCvRate: number;
     totalPlayers: number;
+    totalVisits: number;
     tutorialCompletionRate: number;
     playedOneGameRate: number;
     playedMultipleGamesRate: number;
@@ -504,6 +505,7 @@ export const getEngagementMetrics = onRequest({ memory: '512MiB' }, async (reque
             const metrics: EngagementMetrics = {
                 landingPageCvRate,
                 totalPlayers,
+                totalVisits: totalVisitors,
                 tutorialCompletionRate: (completedTutorialCount / totalPlayers) * 100,
                 playedOneGameRate: (playedOneGame / totalPlayers) * 100,
                 playedMultipleGamesRate: (playedMultipleGames / totalPlayers) * 100,

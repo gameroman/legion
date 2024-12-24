@@ -134,6 +134,10 @@ class Profile extends Component<Props, State> {
         }).format(number);
     };
 
+    getMaxStats = (allTime: number, season: number) => {
+        return Math.max(allTime, season);
+    };
+
     isOwnProfile = () => {
         return this.getEffectiveId() === this.context.player.uid;
     };
@@ -585,32 +589,51 @@ class Profile extends Component<Props, State> {
                         <h2>All Time Ranked Stats</h2>
                         <div className="stat-row">
                             <span>Games Played</span>
-                            <span className="value">{profileData.allTimeStats.nbGames}</span>
+                            <span className="value">
+                                {this.getMaxStats(
+                                    profileData.allTimeStats.nbGames,
+                                    profileData.leagueStats.gamesPlayed
+                                )}
+                            </span>
                         </div>
                         <div className="stat-row">
                             <span>Total Wins</span>
-                            <span className="value">{profileData.allTimeStats.wins}</span>
+                            <span className="value">
+                                {this.getMaxStats(
+                                    profileData.allTimeStats.wins,
+                                    profileData.leagueStats.wins
+                                )}
+                            </span>
                         </div>
-                        {/* <div className="stat-row">
-                            <span>Total Losses</span>
-                            <span className="value">{profileData.allTimeStats.losses}</span>
-                        </div> */}
                         <div className="stat-row">
                             <span>Win Rate</span>
                             <span className="value">
                                 {this.formatNumber(
-                                    (profileData.allTimeStats.wins / 
-                                    (profileData.allTimeStats.wins + profileData.allTimeStats.losses)) * 100 || 0
+                                    this.getMaxStats(
+                                        (profileData.allTimeStats.wins / 
+                                        (profileData.allTimeStats.wins + profileData.allTimeStats.losses)) * 100 || 0,
+                                        (profileData.leagueStats.wins / profileData.leagueStats.gamesPlayed) * 100 || 0
+                                    )
                                 )}%
                             </span>
                         </div>
                         <div className="stat-row">
                             <span>Best Win Streak</span>
-                            <span className="value">{profileData.allTimeStats.winStreak}</span>
+                            <span className="value">
+                                {this.getMaxStats(
+                                    profileData.allTimeStats.winStreak,
+                                    profileData.leagueStats.winStreak
+                                )}
+                            </span>
                         </div>
                         <div className="stat-row">
                             <span>Worst Loss Streak</span>
-                            <span className="value">{profileData.allTimeStats.lossStreak}</span>
+                            <span className="value">
+                                {this.getMaxStats(
+                                    profileData.allTimeStats.lossStreak,
+                                    profileData.leagueStats.lossStreak
+                                )}
+                            </span>
                         </div>
                     </div>
 

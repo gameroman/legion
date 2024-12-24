@@ -170,12 +170,14 @@ export class AIGame extends Game {
 
         const nb = playerTeam.getMembers().length;
         const levels = playerTeam.getMembers().map(player => player.level);
+        let isVsZombie = false;
         if (this.mode === PlayMode.CASUAL_VS_AI || this.mode === PlayMode.RANKED_VS_AI) {
             const zombieData = await this.fetchZombieData(playerTeam.teamData.elo);
             console.log(`[AIGame:populateTeams] Fetched zombie data: ${JSON.stringify(zombieData)}`);
             // Check if the zombieData is not empty
             if (Object.keys(zombieData).length > 0 && zombieData?.playerData && zombieData?.rosterData) {
                 await this.createZombieTeam(aiTeam!, zombieData);
+                isVsZombie = true;
             } else {
                 console.log('[AIGame:populateTeams] Failed to fetch zombie data. Falling back to createAITeam.');
                 this.createAITeam(aiTeam!, nb, levels);
@@ -205,7 +207,7 @@ export class AIGame extends Game {
             if (winRatio <= 0.6) aiTeam.banSpells([6,7,8]);
             if (winRatio > 0.8) aiTeam.setSpeed(1.2);
             if (winRatio > 0.9) {
-                this.addExtraTeamMember(aiTeam!);
+                if (!isVsZombie) this.addExtraTeamMember(aiTeam!);
                 aiTeam.scaleStats(1.2);
             }
         }
