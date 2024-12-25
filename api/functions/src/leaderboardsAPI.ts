@@ -393,13 +393,19 @@ export const leaguesUpdate = onSchedule(
     }
 });
 
-export const updateRanksOnEloChange = functions.firestore
+export const updateRanksOnEloChange = functions.runWith({ memory: '512MB' }).firestore
   .document("players/{playerId}")
   .onUpdate((change, context) => {
       const newValue = change.after.data();
       const previousValue = change.before.data();
 
-      // Check if ELO has changed
+      // Check if either leagueStats is undefined
+      if (!newValue.leagueStats || !previousValue.leagueStats) {
+          console.error("leagueStats is undefined for player", context.params.playerId);
+          return null;
+      }
+
+      // Check if ELO has changed or wins have changed
       if (newValue.elo !== previousValue.elo || newValue.leagueStats.wins !== previousValue.leagueStats.wins) {
           const league = newValue.league as League;
           if (league === undefined) {

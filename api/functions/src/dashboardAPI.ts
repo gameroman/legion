@@ -148,7 +148,7 @@ export const logQueuingActivity = onRequest({ secrets: ["API_KEY"] }, async (req
     response.send({status: 0});
 });
 
-export const insertGameAction = onRequest(async (request, response) => {
+export const insertGameAction = onRequest({memory: '512MiB'}, async (request, response) => {
     const { gameId, playerId, actionType, details } = request.body;
     await logGameAction(gameId, playerId, actionType, details);
     response.send({status: 0});

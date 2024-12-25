@@ -1,20 +1,23 @@
 // apiService.js
 import firebase from 'firebase/compat/app';
 import { firebaseAuth } from './firebaseService'; 
-import { errorToast } from '../components/utils';
+import { errorToast, silentErrorToast } from '../components/utils';
 
 const apiBaseUrl = process.env.API_URL;
 
 const TIMEOUT_DURATION = 10000;
 
 const getTokenWithRetry = async (user: firebase.User, maxAttempts = 3, delay = 100) => {
+    let lastError;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
             return await user.getIdToken(true);
         } catch (error) {
+            lastError = error;
             if (attempt === maxAttempts - 1) {
-                errorToast(`Failed to get ID token: ${error.message}`);
-                throw error;
+                console.error(`Failed to get ID token: ${lastError.message}`);
+                silentErrorToast('Failed to get ID token, please refresh the page');
+                throw lastError;
             }
             await new Promise(resolve => setTimeout(resolve, delay));
         }

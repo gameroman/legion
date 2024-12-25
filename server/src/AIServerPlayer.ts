@@ -90,7 +90,7 @@ export class AIServerPlayer extends ServerPlayer {
         // console.log(`[AIServerPlayer:takeAction] ${this.name} is taking action`);
         if (this.team?.game.isTutorial()) {
             if (this.attackMode === AIAttackMode.IDLE) {
-                console.log(`[AIServerPlayer:takeAction] ${this.name} is idle`);
+                // console.log(`[AIServerPlayer:takeAction] ${this.name} is idle`);
                 return 0;
             }
             if (this.actionCount > 0 && this.attackMode === AIAttackMode.ATTACK_ONCE) {

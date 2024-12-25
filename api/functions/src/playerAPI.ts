@@ -34,6 +34,24 @@ const chestsDelays = {
   [ChestColor.GOLD]: 24 * 60 * 60,
 };
 
+function getDefaultDailyLoot(): DailyLootAllDBData {
+  const now = Date.now() / 1000;
+  return {
+    [ChestColor.BRONZE]: {
+      time: now + chestsDelays[ChestColor.BRONZE],
+      hasKey: false,
+    },
+    [ChestColor.SILVER]: {
+      time: now + chestsDelays[ChestColor.SILVER],
+      hasKey: false,
+    },
+    [ChestColor.GOLD]: {
+      time: now + chestsDelays[ChestColor.GOLD],
+      hasKey: false,
+    },
+  };
+}
+
 function selectRandomAvatar(): string {
   // Return a random value betweem 1 and 31 included
   return (Math.floor(Math.random() * 31) + 1).toString();
@@ -87,7 +105,6 @@ function generateName() {
 export const createPlayer = functions.runWith({ memory: '512MB' }).auth.user().onCreate(async (user) => {
   const db = admin.firestore();
   const playerRef = db.collection("players").doc(user.uid);
-  const now = Date.now() / 1000;
   const today = new Date().toISOString().replace('T', ' ').slice(0, 19);
   const startLeague = League.BRONZE;
   const isAdmin = (process.env.ADMIN_MODE == 'true');
@@ -118,20 +135,7 @@ export const createPlayer = functions.runWith({ memory: '512MB' }).auth.user().o
     league: startLeague,
     xp: 0,
     lvl: 1,
-    dailyloot: {
-      [ChestColor.BRONZE]: {
-        time: now + chestsDelays.bronze,
-        hasKey: false,
-      },
-      [ChestColor.SILVER]: {
-        time: now + chestsDelays.silver,
-        hasKey: false,
-      },
-      [ChestColor.GOLD]: {
-        time: now + chestsDelays.gold,
-        hasKey: false,
-      },
-    } as DailyLootAllDBData,
+    dailyloot: getDefaultDailyLoot(),
     leagueStats: getEmptyLeagueStats(bronzePlayersCount.data().count + 1),
     allTimeStats: getEmptyLeagueStats(-1),
     casualStats: {
@@ -257,6 +261,15 @@ export const getPlayerData = onRequest({
             lastActiveDate: today,
           });
           updateDAU(uid);
+        }
+
+        // Check if dailyloot exists, if not create it
+        if (!playerData.dailyloot) {
+          const defaultDailyLoot = getDefaultDailyLoot();
+          await db.collection("players").doc(uid).update({
+            dailyloot: defaultDailyLoot,
+          });
+          playerData.dailyloot = defaultDailyLoot;
         }
 
         // Transform the chest field so that the `time` field becomes
