@@ -155,7 +155,9 @@ export const insertGameAction = onRequest({memory: '512MiB'}, async (request, re
 });
 
 
-export const getDashboardData = onRequest(async (request, response) => {
+export const getDashboardData = onRequest(
+    { memory: '512MiB' },
+    async (request, response) => {
     const db = admin.firestore();
 
     corsMiddleware(request, response, async () => {
@@ -294,7 +296,9 @@ export const getDashboardData = onRequest(async (request, response) => {
     });
 });
 
-export const getActionLog = onRequest(async (request, response) => {
+export const getActionLog = onRequest(
+    { memory: '512MiB' },
+    async (request, response) => {
     const db = admin.firestore();
 
     corsMiddleware(request, response, async () => {
@@ -416,7 +420,9 @@ export const getGameLog = onRequest(async (request, response) => {
     });
 });
 
-export const listPlayerIDs = onRequest(async (request, response) => {
+export const listPlayerIDs = onRequest(
+    { memory: '512MiB' },
+    async (request, response) => {
     const db = admin.firestore();
     corsMiddleware(request, response, async () => {
         // if (!checkAPIKey(request)) {

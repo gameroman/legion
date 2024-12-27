@@ -1209,6 +1209,7 @@ export const updateInactivePlayersStats = onSchedule(
       .where("lastActiveDate", "<", cutoffDateString)
       .where("leagueStats.wins", "==", 0)
       .where("leagueStats.losses", "==", 0)
+      .where("engagementStats.completedGames", "<", 2)
       .get();
 
     const batch = db.batch();

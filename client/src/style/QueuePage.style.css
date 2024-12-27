@@ -299,10 +299,10 @@
   }
   
   .queue-news-title {
-    width: 21.4vw;
+    width: 100%;
     height: 2vw;
     background-image: url('@assets/queue/news_title_bg.png');
-    font-size: 16px;
+    font-size: 0.9vw;
     padding: 5px;
     display: flex;
     align-items: center;
@@ -310,7 +310,8 @@
   }
   
   .queue-news-date {
-    font-size: 14px;
+    font-size: 0.75vw;
+    min-width: 4vw;
   }
   
   .queue-news-readmore {
