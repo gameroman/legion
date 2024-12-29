@@ -765,7 +765,9 @@ export const migrateMetricsToStats = onRequest(async (request, response) => {
     });
 });
 
-export const getPlayerGameHistory = onRequest(async (request, response) => {
+export const getPlayerGameHistory = onRequest(
+    { memory: '512MiB' },
+    async (request, response) => {
     const db = admin.firestore();
 
     corsMiddleware(request, response, async () => {

@@ -10,6 +10,7 @@ import { INITIAL_COOLDOWN, TIME_COEFFICIENT, INJURED_MODE } from "@legion/shared
 import { CooldownManager } from './CooldownManager';
 import { paralyzingStatuses } from '@legion/shared/utils';
 import { getEquipmentById } from '@legion/shared/Equipments';
+import { getSpells, setUpInventory } from '@legion/shared/NewCharacter';
 
 
 const terrainDot = {
@@ -624,6 +625,16 @@ export class ServerPlayer {
         }
         this.setHP(this.getStat(Stat.HP) * scale);
         this.setMP(this.getStat(Stat.MP) * scale);
+    }
+
+    setZombieInventory() {
+        const inventory = setUpInventory(this.class, this.level, this.inventoryCapacity);
+        this.inventory = inventory.map(id => new Item(getConsumableById(id)));
+    }
+
+    setZombieSpells() {
+        const spells = getSpells(this.class, this.level, this.spells.length);
+        this.spells = spells.map(id => new Spell(getSpellById(id)));
     }
 
     halveSpeed() {

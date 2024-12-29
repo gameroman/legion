@@ -8,7 +8,7 @@ import { getPrice } from "./economy";
 import { getStarterConsumables, MAGE_SPECIFIC_ITEMS } from "./Items";
 
 import { LOTSA_MP, BASE_CARRYING_CAPACITY, STARTING_WHITE_MAGE_SPELLS, STARTING_BLACK_MAGE_SPELLS } from "@legion/shared/config";
-import { getSpellsUpToLevel } from "./Spells";
+import { getSpellById, getSpellsUpToLevel } from "./Spells";
 
 enum Gender {
   M,
@@ -63,7 +63,10 @@ export class NewCharacter {
       right_ring: -1,
       necklace: -1,
     };
-    this.skills = this.getSpells(isAI);
+    this.skills = getSpells(this.characterClass, this.level, this.skill_slots, isAI);
+    // console.log("========================");
+    console.log(`[NewCharacter:constructor] AI spells: ${this.skills.map(spell => getSpellById(spell)?.name).join(", ")}`);
+    // console.log("========================");
     this.stats = {
       [Stat.HP]: this.getHP() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
       [Stat.MP]: this.getMP() * (unicornBonus && Math.random() < 0.1 ? 2 : 1),
@@ -94,7 +97,8 @@ export class NewCharacter {
     }
 
     if (isAI) {
-      this.setUpInventory();
+      this.inventory = setUpInventory(this.characterClass, this.level, this.carrying_capacity);
+      console.log(`[NewCharacter:constructor] AI inventory: ${this.inventory}`);
     }
   }
 
@@ -262,39 +266,6 @@ export class NewCharacter {
     return 5;
   }
 
-  getSpells(isAI = false): number[] {
-    switch (this.characterClass) {
-      case Class.WARRIOR:
-        return [];
-      case Class.WHITE_MAGE:
-        return isAI ? getSpellsUpToLevel(this.characterClass, this.level) : STARTING_WHITE_MAGE_SPELLS;
-      case Class.BLACK_MAGE:
-        return isAI ? getSpellsUpToLevel(this.characterClass, this.level) : STARTING_BLACK_MAGE_SPELLS;
-      case Class.THIEF:
-        return [];
-    }
-    return [];
-  }
-
-  setUpInventory() {
-    this.inventory = [1,1,1];
-    // let consumables = getStarterConsumables(this.level / 2);
-    // if (consumables.length === 0) return;
-
-    // // If the character is not a mage, filter out mage specific items
-    // if (this.characterClass !== Class.WHITE_MAGE && this.characterClass !== Class.BLACK_MAGE) {
-    //   consumables = consumables.filter(item => !MAGE_SPECIFIC_ITEMS.includes(item));
-    // }
-
-    // // For each available slot, add a random consumable or possibly nothing
-    // for (let i = 0; i < this.carrying_capacity; i++) {
-    //   if (Math.random() < 0.6) {
-    //     // Pick a random consumable
-    //     this.inventory.push(consumables[Math.floor(Math.random() * consumables.length)]);
-    //   }
-    // }
-  }
-
   getPrice(): number {
     const reference = 135;
     // Returns the sum of all stats
@@ -349,3 +320,51 @@ export class NewCharacter {
   }
 }
 
+export function getSpells(characterClass: Class, level: number, skill_slots: number, isAI = false): number[] {
+  let spells = getSpellsUpToLevel(characterClass, level);
+  switch (characterClass) {
+    case Class.WARRIOR:
+      return [];
+    case Class.WHITE_MAGE:
+      if (!isAI) return STARTING_WHITE_MAGE_SPELLS;
+      // Remove spells that are already in STARTING_WHITE_MAGE_SPELLS
+      spells = spells.filter(spell => !STARTING_WHITE_MAGE_SPELLS.includes(spell));
+      // Select `skill_slots` random spells from spells
+      return STARTING_WHITE_MAGE_SPELLS.concat(spells.sort(() => Math.random() - 0.5).slice(0, skill_slots - STARTING_WHITE_MAGE_SPELLS.length ));
+    case Class.BLACK_MAGE:
+      if (!isAI) return STARTING_BLACK_MAGE_SPELLS;
+      // Remove spells that are already in STARTING_BLACK_MAGE_SPELLS
+      spells = spells.filter(spell => !STARTING_BLACK_MAGE_SPELLS.includes(spell));
+      // console.log(`[getSpells] Black mage spells: ${spells.map(spell => `${getSpellById(spell)?.name} (${getSpellById(spell)?.minLevel})`).join(", ")}`);
+      // Select `skill_slots` random spells from spells
+      const randomSpells = spells.sort(() => Math.random() - 0.5).slice(0, skill_slots - STARTING_BLACK_MAGE_SPELLS.length );
+      // console.log(`[getSpells] starting spells: ${STARTING_BLACK_MAGE_SPELLS.map(spell => `${getSpellById(spell)?.name} (${getSpellById(spell)?.minLevel})`).join(", ")}`);
+      // console.log(`[getSpells] Random spells: ${randomSpells.map(spell => `${getSpellById(spell)?.name} (${getSpellById(spell)?.minLevel})`).join(", ")}`);
+      const result = STARTING_BLACK_MAGE_SPELLS.concat(randomSpells);
+      // console.log(`[getSpells] Result: ${result.map(spell => `${getSpellById(spell)?.name} (${getSpellById(spell)?.minLevel})`).join(", ")}`);
+      return result;
+    case Class.THIEF:
+      return [];
+  }
+  return [];
+}
+
+export function setUpInventory(characterClass: Class, level: number, carrying_capacity: number): number[] {
+  const inventory: number[] = [];
+  let consumables = getStarterConsumables(level / 2);
+  if (consumables.length === 0) return [];
+
+  // If the character is not a mage, filter out mage specific items
+  if (characterClass !== Class.WHITE_MAGE && characterClass !== Class.BLACK_MAGE) {
+    consumables = consumables.filter(item => !MAGE_SPECIFIC_ITEMS.includes(item));
+  }
+
+  // For each available slot, add a random consumable or possibly nothing
+  for (let i = 0; i < carrying_capacity; i++) {
+    if (Math.random() < 0.6) {
+      // Pick a random consumable
+      inventory.push(consumables[Math.floor(Math.random() * consumables.length)]);
+    }
+  }
+  return inventory;
+}

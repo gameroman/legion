@@ -212,7 +212,7 @@ async function getLeagueLeaderboard(leagueID: number, rankingOnly: boolean, uid?
       statsObject.wins > 0 &&
       statsObject.rank <= promotionRank;
     // Only mark as demoted if not in the lowest league (0)
-    const isDemoted = leagueID !== 0 && hasPlayedGames && statsObject.rank >= demotionRank;
+    const isDemoted = leagueID !== 0 && statsObject.rank >= demotionRank;
 
     return {
       rank: statsObject.rank,

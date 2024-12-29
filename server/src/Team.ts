@@ -301,6 +301,20 @@ export class Team {
         }
     }
 
+    setZombieInventories() {
+        console.log(`[Team:setZombieInventories] Setting zombie inventories for team ${this.id}`);
+        for (let i = 0; i < this.members.length; i++) {
+            this.members[i].setZombieInventory();
+        }
+    }
+
+    setZombieSpells() {
+        console.log(`[Team:setZombieSpells] Setting zombie spells for team ${this.id}`);
+        for (let i = 0; i < this.members.length; i++) {
+            this.members[i].setZombieSpells();
+        }
+    }
+
     halveSpeed() {
         console.log(`[Team:halveSpeed] Halving speed for team ${this.id}`);
         for (let i = 0; i < this.members.length; i++) {

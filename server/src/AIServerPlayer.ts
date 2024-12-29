@@ -100,7 +100,7 @@ export class AIServerPlayer extends ServerPlayer {
         }
 
         if (!this.canAct()) {
-            console.log(`[AIServerPlayer:takeAction] ${this.name} cannot act`);
+            // console.log(`[AIServerPlayer:takeAction] ${this.name} cannot act`);
             return 0;
         }
 
@@ -135,15 +135,15 @@ export class AIServerPlayer extends ServerPlayer {
         }
         
         if (!this.target) {
-            console.log(`[AIServerPlayer:takeAction] ${this.name} has no valid target`);
+            // console.log(`[AIServerPlayer:takeAction] ${this.name} has no valid target`);
             return 0;
         }
 
         if (this.isNextTo(this.target.x, this.target.y)) {
-            console.log(`[AIServerPlayer:takeAction] ${this.name} is next to target`);
+            // console.log(`[AIServerPlayer:takeAction] ${this.name} is next to target`);
             this.attack(this.target);
         } else {
-            console.log(`[AIServerPlayer:takeAction] ${this.name} is not next to target`);
+            // console.log(`[AIServerPlayer:takeAction] ${this.name} is not next to target`);
             this.moveTowards(this.target.x, this.target.y);
         }
 
@@ -163,7 +163,7 @@ export class AIServerPlayer extends ServerPlayer {
     checkForItemUse() {
         // console.log(`[AIServerPlayer:checkForItemUse] Checking for items among ${this.inventory.map(item => item.id)}`);
         if (!this.canUseItems) {
-            console.log(`[AIServerPlayer:checkForItemUse] ${this.name} cannot use items`);
+            // console.log(`[AIServerPlayer:checkForItemUse] ${this.name} cannot use items`);
             return false;
         }
         for (let i = 0; i < this.inventory.length; i++) {
@@ -188,13 +188,16 @@ export class AIServerPlayer extends ServerPlayer {
     checkForSpellUse(): number {
         // console.log(`[AIServerPlayer:checkForSpellUse] Checking for spells among ${this.spells.map(spell => spell.id)}`);
         let delay = -1;
-        for (let i = 0; i < this.spells.length; i++) {
-            const spell = this.getSpellAtIndex(i);
+        // Randomize the order of spells
+        const spells = this.spells.sort(() => Math.random() - 0.5);
+        for (let i = 0; i < spells.length; i++) {
+            const spell = spells[i];
+            // console.log(`[AIServerPlayer:checkForSpellUse] Checking spell ${spell.name}`);
             if (this.bannedSpells.includes(spell.id)) continue;
             if (spell.isStatusEffectSpell() && !this.canUseStatusEffects) continue;
             // console.log(`[AIServerPlayer:checkForSpellUse] Checking spell ${spell.id}`);
             if (spell.cost > this.mp) {
-                console.log(`[AIServerPlayer:checkForSpellUse] Spell ${spell.id} costs ${spell.cost} MP, which is more than the AI has`);
+                // console.log(`[AIServerPlayer:checkForSpellUse] Spell ${spell.id} costs ${spell.cost} MP, which is more than the AI has`);
                 continue;
             }
 

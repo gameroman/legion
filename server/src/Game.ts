@@ -534,8 +534,8 @@ export abstract class Game
             !player.isNextTo(opponent.x, opponent.y) || 
             !opponent.isAlive()
         ) {
-            console.log(`[Game:processAttack] Action refused: canAct = ${player.canAct()}, isNextTo = ${player.isNextTo(opponent.x, opponent.y)}, isAlive = ${opponent.isAlive()}!`);
-            console.log(`[Game:processAttack] Player ${num} at ${player.x},${player.y}, target ${target} at ${opponent.x},${opponent.y}`);
+            // console.log(`[Game:processAttack] Action refused: canAct = ${player.canAct()}, isNextTo = ${player.isNextTo(opponent.x, opponent.y)}, isAlive = ${opponent.isAlive()}!`);
+            // console.log(`[Game:processAttack] Player ${num} at ${player.x},${player.y}, target ${target} at ${opponent.x},${opponent.y}`);
             return
         };
         
@@ -543,7 +543,7 @@ export abstract class Game
         opponent.takeDamage(damage);
         
         const weapon = player.getWeapon();
-        console.log(`[Game:processAttack] Weapon: ${weapon?.name}`);
+        // console.log(`[Game:processAttack] Weapon: ${weapon?.name}`);
         if (weapon) {
             weapon.statusEffects?.forEach(effect => {
                 opponent.addStatusEffect(effect.effect, effect.chance);
