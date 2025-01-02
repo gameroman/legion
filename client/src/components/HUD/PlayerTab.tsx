@@ -5,6 +5,7 @@ import TabBar from './TabBar';
 import { mapFrameToCoordinates, getSpritePath, cropFrame, statusIcons } from '../utils';
 import { PlayerProps } from '@legion/shared/interfaces';
 import { BaseSpell } from '@legion/shared/BaseSpell';
+import './PlayerTab.style.css';
 
 import consumablesSpritesheet from '@assets/consumables.png';
 import spellsSpritesheet from '@assets/spells.png';

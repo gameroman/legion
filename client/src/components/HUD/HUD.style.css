@@ -55,7 +55,7 @@
   width: 100%;
   z-index: 2;
   padding: 10px;
-  pointer-events: none; /* Allow clicking through the container */
+  pointer-events: none;
 }
 
 .overview {
@@ -549,130 +549,6 @@
   bottom: 0;
 }
 
-.player_tab_container {
-  background-image: url("@assets/HUD/char_info_bg.png");
-  background-size: 100% 100%;
-  width: 100%;
-  max-width: 800px;
-  height: 158px;
-  display: flex;
-  justify-content: space-between;
-  gap: 4px;
-  font-family: 'Kim';
-  position: relative;
-  margin-top: 10px;
-  margin-left: 10px;
-  z-index: 2;
-  align-self: start;
-
-  position: absolute;
-  top: 10px; 
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  margin-top: 0;
-  margin-left: 0;
-  transition: all .2s;
-
-
-  @media screen and (max-width: 1500px) and (orientation: landscape) {
-    transform: scale(0.9) translateX(-50%);
-    transform-origin: top left;
-  }
-
-  @media screen and (max-width: 1400px) and (orientation: landscape) {
-    transform: scale(0.75) translateX(-50%);
-  }
-
-  @media screen and (max-width: 1100px) and (orientation: landscape) {
-    transform: scale(0.65) translateX(-50%);
-  }
-
-  @media screen and (max-width: 980px) and (orientation: landscape) {
-    transform: scale(0.55) translateX(-50%);
-  }
-}
-
-.player_content_container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 50%;
-}
-
-.player_content {
-  display: flex;
-  gap: 8px;
-  padding: 0 8px;
-  padding-left: 16px;
-  width: 100%;
-}
-
-.player_content_portrait {
-  width: 96px;
-  height: 96px;
-  border-radius: 8px;
-  padding-bottom: 6px;
-  background-size: 100% 100%;
-  z-index: 20;
-  background-image: url("@assets/HUD/char_frame.png");
-  background-size: 100% 100%;
-}
-
-.character_portrait {
-  width: 100%;
-  height: 100%;
-  margin-left: 10px;
-  background-position: -40px -40px;
-  background-repeat: no-repeat;
-  animation: animate-sprite 0.7s steps(1) infinite;
-  transform: scale(0.6);
-}
-
-.player_content_name {
-  display: flex;
-  align-items: center;
-}
-
-.player_content_flag {
-  background-image: url("@assets/HUD/no_bg.png");
-  background-size: 100% 100%;
-  padding: 8px 10px;
-
-  font-size: 14px;
-  color: #ffffff;
-}
-
-.player_content_char_name {
-  background-image: url("@assets/HUD/charname_bg.png");
-  background-size: 100% 100%;
-  padding: 4px 8px;
-  width: 100%;
-  text-transform: capitalize;
-
-  font-size: 16px;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.player_content_stats_bar {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.player_content_stats_icon {
-  background-image: url("@assets/HUD/small_box_btn_bg_active.png");
-  background-size: 100% 100%;
-  padding: 4px 4px 1px;
-}
-
-.player_content_stats_icon img {
-  width: 16px;
-  height: 16px;
-}
-
 .hud_bar_container {
   display: flex;
   align-items: center;
@@ -694,32 +570,6 @@
   color: #ffffff;
   min-width: 60px;
   text-align: right;
-}
-
-.player_content_statuses {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  padding-top: 4px;
-  min-height: 34px;
-}
-
-.player_content_statuses div {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  font-size: 10px;
-  color: #ffffff;
-}
-
-.player_content_statuses img {
-  width: 16px;
-  height: 18px;
-  background-color: #1c1f25;
-  padding: 2px;
-  border-radius: 2px;
 }
 
 .xp_bar_bg_container {
@@ -753,14 +603,6 @@
   border-radius: 2px;
 }
 
-.hud_actions_title {
-  width: 100%;
-  font-size: 12px;
-  text-transform: uppercase;
-  color: #ffffff;
-  border-bottom: 1px solid #ffa600;
-}
-
 .player_hud_skills {
   width: 100%;
   max-width: 48px;
@@ -772,25 +614,8 @@
   cursor: var(--game-pointer);
 }
 
-.player_hud_skills:hover,
-.player_hud_skills:active,
-.player_hud_skills:focus,
-.player_hud_skills:focus-within,
-.player_hud_skills:visited,
-.player_hud_skills:target {
-  border: 1px solid #71deff !important;
-}
-
-
 .goldend_background {
   background-color: goldenrod;
-}
-
-.player_hud_action_container {
-  grid-template-columns: repeat(3, 48px);
-  grid-template-rows: repeat(2, 48px);
-  cursor: var(--game-pointer);
-  width: fit-content; /* This ensures the grid takes only the space it needs */
 }
 
 .spectator_container {
@@ -1498,42 +1323,6 @@
   bottom: 18px;
 }
 
-.spell_target_container {
-  position: absolute; /* or fixed, depending on your needs */
-  top: 20%;
-
-  z-index: 10;
-  transition: all .2s;
-
-  @media screen and (max-width: 1500px) and (orientation: landscape) {
-    transform: scale(0.9);
-    transform-origin: top center;
-    top: 21%;
-  }
-
-  @media screen and (max-width: 1400px) and (orientation: landscape) {
-    transform: scale(0.75);
-  }
-
-  @media screen and (max-width: 1100px) and (orientation: landscape) {
-    transform: scale(0.65);
-  }
-
-  @media screen and (max-width: 980px) and (orientation: landscape) {
-    transform: scale(0.55);
-  }
-}
-
-.spell_target {
-  background-color: #1c1f25;
-  border: 1px solid #3c616c;
-  border-radius: 4px;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
 .spell_target .equip-dialog-image {
   width: 34px;
   height: 36px;
@@ -1541,14 +1330,6 @@
 
 .spell_target .dialog-spell-info {
   gap: 2px;
-}
-
-.cd-icon {
-  margin-top: 1px;
-}
-
-.cooldown_bar_flash {
-  animation: bgflash 0.3s linear infinite;
 }
 
 .spectator_div {
@@ -1574,29 +1355,6 @@
 
 .flip {
   transform: scale(0.6) scaleX(-1);
-}
-
-.spell_target_title {
-  line-height: 20px;
-  font-size: 12px;
-  text-transform: uppercase;
-  text-align: center;
-  color: #51fdff;
-  font-family: 'Kim';
-}
-
-@keyframes bgflash {
-  0% {
-    background-color: #1c1f25;
-  }
-
-  50% {
-    background-color: #ffffff;
-  }
-
-  100% {
-    background-color: #1c1f25;
-  }
 }
 
 @keyframes rotate {
