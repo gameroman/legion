@@ -1,7 +1,7 @@
 // ShopCharacterCard.tsx
 import './shopCharacterCard.style.css';
 import { h, Component } from 'preact';
-import { classEnumToString, getSpritePath, getStatEnum } from '../utils';
+import { classEnumToString, getSpeedClass, getSpritePath, getStatEnum } from '../utils';
 import { modalData } from '../shopContent/ShopContent';
 
 import goldIcon from '@assets/gold_icon.png';
@@ -135,7 +135,7 @@ class ShopCharacterCard extends Component<ShopCharacteCardProps, ShopCharacterCa
                 </div>
                 <div className="shop-character-card-dialog-info">
                   <img src={'/inventory/cd_icon.png'} alt="cd" />
-                  <span>{this.state.curItem?.cooldown}s</span>
+                  <span>{getSpeedClass(this.state.curItem?.speedClass)}</span>
                 </div>
                 <div className="shop-character-card-dialog-info">
                   <img src={'/inventory/target_icon.png'} alt="target" />

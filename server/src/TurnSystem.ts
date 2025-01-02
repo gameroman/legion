@@ -9,7 +9,7 @@ interface TurnQueueItem {
 
 const ACTION_COOLDOWNS = {
     [SpeedClass.PASS]: 50,      // Base cooldown for passing
-    [SpeedClass.QUICK]: 100,    
+    [SpeedClass.FAST]: 100,    
     [SpeedClass.NORMAL]: 150,   
     [SpeedClass.SLOW]: 250      
 };
@@ -30,6 +30,8 @@ export class TurnSystem {
             nextActionTime: this.getInitialActionTime(char.getStat(Stat.SPEED)),
             passCount: 0
         }));
+        // Print the speed of all characters
+        console.log(`[TurnSystem:initializeTurnOrder] ${this.turnQueue.map(item => item.character.getStat(Stat.SPEED)).join(', ')}`);
         
         // Sort by nextActionTime ascending
         this.sortQueue();

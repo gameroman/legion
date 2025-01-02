@@ -3,7 +3,7 @@ import './ShopSpellCard.style.css'
 import { h, Component } from 'preact';
 import { Class, InventoryType, RarityColor, Target } from "@legion/shared/enums";
 import { BaseSpell } from '@legion/shared/BaseSpell';
-import { mapFrameToCoordinates } from '../utils';
+import { getSpeedClass, mapFrameToCoordinates } from '../utils';
 import { Tooltip as ReactTooltip } from "react-tooltip";
 
 // Import image assets
@@ -105,7 +105,7 @@ class ShopSpellCard extends Component<ShopCardProps> {
           </div>
           <div className="spell-card-effect">
             <img src={cdIcon} alt="cooldown" />
-            <span>{data.getCooldown()}</span>
+            <span>{getSpeedClass(data.speedClass)}</span>
           </div>
           <div className="spell-card-effect">
             <img src={targetIcon} alt="target" />

@@ -40,10 +40,6 @@ export class Player extends Phaser.GameObjects.Container {
     mp: number;
     healthBar: HealthBar;
     MPBar: HealthBar;
-    cooldown: CircularProgress;
-    cooldownTween: Phaser.Tweens.Tween;
-    cooldownDuration: number;
-    totalCooldownDuration: number;
     hurtTween: Phaser.Tweens.Tween;
     inventory: BaseItem[] = [];
     spells: BaseSpell[] = [];
@@ -126,9 +122,6 @@ export class Player extends Phaser.GameObjects.Container {
         if (isPlayer) {
             this.numKey = scene.add.text(30, 70, num.toString(), { fontFamily: 'Kim', fontSize: '12px', color: '#fff', stroke: '#000', strokeThickness: 3 }).setOrigin(1,1);
             this.add(this.numKey);
-
-            this.cooldown = new CircularProgress(scene, -8, 28, 10, 0xffc400).setVisible(false);
-            this.add(this.cooldown);
         } 
 
         this.baseSquare.fillStyle(isPlayer ? 0x0000ff : 0xff0000); // Must be called before strokeRect
@@ -212,8 +205,6 @@ export class Player extends Phaser.GameObjects.Container {
             maxHp: this.maxHP,
             mp: this.mp,
             maxMp: this.maxMP,
-            cooldown: this.cooldownDuration / 1000,
-            maxCooldown: this.totalCooldownDuration / 1000,
             spells: this.spells,
             items: this.inventory,
             casting: this.casting,
@@ -376,12 +367,8 @@ export class Player extends Phaser.GameObjects.Container {
         return this.statuses[StatusEffect.HASTE] != 0;
     }
 
-    isReady() {
-        return this.cooldownDuration == 0;
-    }
-
     canAct() {
-        return this.cooldownDuration == 0 && this.isAlive() && !this.casting && !this.isParalyzed();
+        return this.isAlive() && !this.casting && !this.isParalyzed();
     }
 
     setDistance(distance: number) {
@@ -724,10 +711,6 @@ export class Player extends Phaser.GameObjects.Container {
             this.die();
         } else {
             this.showBaseSquare(); // Show baseSquare when alive
-            
-            if (!(this.isPlayer && this.cooldownDuration === 0)) {
-                this.setBaseSquareColor(this.normalColor); // Ensure normal color
-            }
 
             if (!this.casting) this.playAnim('hurt', true);
             
@@ -849,41 +832,6 @@ export class Player extends Phaser.GameObjects.Container {
         this.animationSprite.setVisible(true).play(name);
     }
 
-    setCooldown(duration) {
-        this.cooldownDuration = duration;
-        this.totalCooldownDuration = duration;
-        this.arena.emitEvent('cooldownStarted', {num: this.num})
-        this.cooldown.setVisible(true);
-        
-        if (this.isSelected()) this.hideMovementRange();
-        if (this.cooldownTween) this.cooldownTween.stop();
-        if (this.isPlayer) this.stopBlinkingBaseSquare();
-
-        this.cooldownTween = this.scene.tweens.add({
-            targets: this.cooldown,
-            progress: { from: 0, to: 1 }, // Start at 0 progress and tween to 1
-            duration, // Duration of the tween in milliseconds
-            ease: 'Linear', // Use a linear easing function
-            onUpdate: () => {
-                this.cooldownDuration = Math.floor(this.totalCooldownDuration * (1 - this.cooldown.progress));
-                this.cooldown.draw(); // Redraw the circle on each update of the tween
-                this.arena.emitEvent('cooldownChange', {num: this.num})
-            },
-            onComplete: () => {
-                this.cooldown.setVisible(false);
-                this.cooldownDuration = 0;
-                if (this.isSelected()) this.displayMovementRange();
-                this.arena.emitEvent('cooldownEnded', {num: this.num})
-                this.arena.relayEvent(`cooldownEnded_${this.num - 1}`);
-                this.arena.playSound('cooldown');
-
-                // if (this.isPlayer) {
-                //     this.startBlinkingBaseSquare();
-                // }
-            }
-        });
-    }
-
     setInventory(inventory: number[]) {
         this.inventory = [];
         inventory.forEach(itemId => {
@@ -985,10 +933,8 @@ export class Player extends Phaser.GameObjects.Container {
         if (flag) 
         {
             this.sprite.anims.stop();   
-            if (this.cooldownTween?.progress < 1) this.cooldownTween?.pause();
         } else {
             this.playAnim(this.getIdleAnim());
-            if (this.cooldownTween?.paused) this.cooldownTween?.play();
         }   
     }
 

@@ -7,7 +7,7 @@ import { BaseSpell } from '@legion/shared/BaseSpell';
 import { BaseEquipment } from '@legion/shared/BaseEquipment';
 import { InventoryActionType, Stat, Target, statFieldsByIndex, SPSPendingData, STATS_BG_COLOR, ItemDialogType, StatLabels } from '@legion/shared/enums';
 import { apiFetch } from '../../services/apiService';
-import { errorToast, successToast, mapFrameToCoordinates, classEnumToString, cropFrame } from '../utils';
+import { errorToast, successToast, mapFrameToCoordinates, classEnumToString, cropFrame, getSpeedClass } from '../utils';
 import { getMaxStatValue, getSPIncrement } from '@legion/shared/levelling';
 import { PlayerContext } from '../../contexts/PlayerContext';
 
@@ -298,7 +298,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
         <div className="dialog-consumable-info-container">
           <div className="dialog-consumable-info">
             <img src={cdIcon} alt="cd" />
-            <span>{dialogData.getCooldown()}</span>
+            <span>{getSpeedClass(dialogData.speedClass)}</span>
           </div>
           <div className="dialog-consumable-info">
             <img src={targetIcon} alt="target" />
@@ -346,7 +346,7 @@ class ItemDialog extends Component<DialogProps, DialogState> {
           </div>
           <div className="dialog-spell-info">
             <img src={cdIcon} alt="cd" />
-            <span>{dialogData.getCooldown()}</span>
+            <span>{getSpeedClass(dialogData.speedClass)}</span>
           </div>
           <div className="dialog-spell-info">
             <img src={targetIcon} alt="target" />

@@ -1,4 +1,4 @@
-import {Class, Stat, StatFields} from "@legion/shared/enums";
+import {Class, SpeedClass, Stat, StatFields} from "@legion/shared/enums";
 import { apiFetch } from '../services/apiService';
 import { guide } from './tips';
 import { LeaguesNames } from "@legion/shared/enums";
@@ -259,4 +259,8 @@ export function isTabletDevice(): boolean {
 // Convert stat key string to Stat enum value
 export const getStatEnum = (key: string): Stat => {
   return Object.entries(StatFields).find(([_, value]) => value === key)?.[0] as unknown as Stat;
+}
+
+export const getSpeedClass = (speedClass: SpeedClass): string => {
+  return SpeedClass[speedClass];
 }

@@ -8,10 +8,7 @@ import { EventEmitter } from 'eventemitter3';
 import { CharacterUpdate, GameOutcomeReward, OutcomeData, PlayerProps, TeamOverview } from "@legion/shared/interfaces";
 import SpectatorFooter from './SpectatorFooter';
 import { PlayMode, ChestColor } from '@legion/shared/enums';
-import { apiFetch } from '../../services/apiService';
-import { recordCompletedGame, showGuideToast } from '../utils';
-import { guide } from '../tips';
-import { firebaseAuth } from '../../services/firebaseService';
+import { recordCompletedGame } from '../utils';
 import TutorialDialogue from './TutorialDialogue';
 
 interface GameHUDProps {

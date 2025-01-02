@@ -2,7 +2,7 @@ import './ShopConsumableCard.style.css';
 import { h, Component } from 'preact';
 import { InventoryType, RarityColor, Target } from "@legion/shared/enums";
 import { BaseItem } from '@legion/shared/BaseItem';
-import { mapFrameToCoordinates } from '../utils';
+import { getSpeedClass, mapFrameToCoordinates } from '../utils';
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { Effect } from '@legion/shared/interfaces';
 
@@ -110,7 +110,7 @@ class ShopConsumableCard extends Component<ShopCardProps> {
           ))}
           <div className="consumable-card-effect">
             <img src={cdIcon} style={{transform: 'scaleX(0.8)'}} alt="cooldown" />
-            <span>{data.getCooldown()}</span>
+            <span>{getSpeedClass(data.speedClass)}</span>
           </div>
           <div className="consumable-card-effect">
             <img src={targetIcon} alt="target" />

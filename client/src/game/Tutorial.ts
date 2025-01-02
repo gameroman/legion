@@ -313,7 +313,8 @@ export class Tutorial {
             },
             waitForCooldown: {
                 onEnter: () => {
-                    if (this.game.isCharacterReady(1)) {
+                    if (true) {
+                    // if (this.game.isCharacterReady(1)) {
                         this.transition('cooldownEnded_BLACK_MAGE');
                     } else {
                         this.showMessages([

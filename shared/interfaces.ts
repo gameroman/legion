@@ -308,8 +308,6 @@ export interface PlayerProps {
     maxHp: number;
     mp: number;
     maxMp: number;
-    cooldown: number;
-    maxCooldown: number;
     spells: BaseSpell[];
     items: BaseItem[];
     casting: boolean;
@@ -332,8 +330,6 @@ export interface TeamMember {
     maxMP: number;
     isAlive: boolean;
     isPlayer: boolean;
-    cooldown: number;
-    totalCooldown: number;
     class: Class;
     statuses: StatusEffects;
 }

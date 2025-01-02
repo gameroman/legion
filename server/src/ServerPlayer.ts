@@ -311,19 +311,21 @@ export class ServerPlayer {
         return this.mp;
     }
 
-    getStatValue(data, stat) {
+    getFullStatValue(data, stat) {
         return data.stats[stat] + data.equipment_bonuses[stat] + data.sp_bonuses[stat];
     }
 
     setUpCharacter(data, isAI = false) {
         console.log(`[ServerPlayer:setUpCharacter] ${this.name} set up with data: ${JSON.stringify(data)}`);
         // console.log(`[ServerPlayer:setUpCharacter] Spells: ${JSON.stringify(data.skills)}`);
-        this.setHP(this.getStatValue(data, "hp"));
-        this.setMP(this.getStatValue(data, "mp"));
-        this.setStat(Stat.ATK, this.getStatValue(data, "atk"));
-        this.setStat(Stat.DEF, this.getStatValue(data, "def"));
-        this.setStat(Stat.SPATK, this.getStatValue(data, "spatk"));
-        this.setStat(Stat.SPDEF, this.getStatValue(data, "spdef"));
+        this.setHP(this.getFullStatValue(data, "hp"));
+        this.setMP(this.getFullStatValue(data, "mp"));
+        this.setStat(Stat.ATK, this.getFullStatValue(data, "atk"));
+        this.setStat(Stat.DEF, this.getFullStatValue(data, "def"));
+        this.setStat(Stat.SPDEF, this.getFullStatValue(data, "spdef"));
+        this.setStat(Stat.SPATK, this.getFullStatValue(data, "spatk"));
+        this.setStat(Stat.SPEED, this.getFullStatValue(data, "speed"));
+        console.log(`[ServerPlayer:setUpCharacter] Stats: ${JSON.stringify(this.stats)}`);
         this.setInventory(data.carrying_capacity, data.inventory);
         this.setEquipment(data.equipment);
         this.setSpells(data.skill_slots, data.skills);
@@ -533,7 +535,7 @@ export class ServerPlayer {
     scaleStats(scale: number) {
         // Iterate over the keys of the stats object
         for (const stat in this.stats) {
-            this.stats[stat] *= scale;
+            this.stats[stat] = Math.floor(this.stats[stat] * scale);
         }
         this.setHP(this.getStat(Stat.HP) * scale);
         this.setMP(this.getStat(Stat.MP) * scale);

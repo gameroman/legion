@@ -19,7 +19,7 @@ class SpectatorFooter extends Component<SpectatorFooterProps> {
     return (
       <div className="spectator_footer_wrapper">
         <div className="spectator_footer_container">
-          {!isTutorial && (
+          {/* {!isTutorial && (
             <div className="spectator_progress">
               <div className="spectator_progress_bar_bg">
                 <div className="spectator_progress_fill">
@@ -40,7 +40,7 @@ class SpectatorFooter extends Component<SpectatorFooterProps> {
                 </>
               )}
             </div>
-          )}
+          )} */}
         </div>
         {isTutorial && (
           <div className="skip_tutorial" onClick={closeGame}>

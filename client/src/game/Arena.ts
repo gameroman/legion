@@ -122,7 +122,6 @@ export class Arena extends Phaser.Scene
             ['move', this.processMove.bind(this)],
             ['attack', this.processAttack.bind(this)],
             ['obstacleattack', this.processObstacleAttack.bind(this)],
-            ['cooldown', this.processCooldown.bind(this)],
             ['inventory', this.processInventory.bind(this)],
             ['hpchange', this.processHPChange.bind(this)],
             ['statuseffectchange', this.processStatusChange.bind(this)],
@@ -142,6 +141,8 @@ export class Arena extends Phaser.Scene
             ['gameEnd', this.processGameEnd.bind(this)],
             ['score', this.processScoreUpdate.bind(this)],
             ['addCharacter', this.processAddCharacter.bind(this)],
+            ['queueData', this.processQueueData.bind(this)],
+            ['turnee', this.processTurnee.bind(this)],
         ]);
     }
 
@@ -833,12 +834,6 @@ export class Arena extends Phaser.Scene
         this.displayAttackImpact(x, y);
     }
 
-    processCooldown({num, cooldown}) {
-        if (this.gameEnded) return;
-        const player = this.getPlayer(this.playerTeamId, num);
-        player.setCooldown(cooldown);
-    }
-
     processInventory({num, inventory}) {
         if (this.gameEnded) return;
         const player = this.getPlayer(this.playerTeamId, num);
@@ -1028,6 +1023,16 @@ export class Arena extends Phaser.Scene
     processAddCharacter(data: {team: number, character: PlayerNetworkData}) {
         const team = this.teamsMap.get(data.team);
         this.placeCharacter(data.character, team, false);
+    }
+
+    processQueueData(data: any[]) {
+        // this.turnSystem.processQueueData(data.queue);
+        console.log(`[Arena:processQueueData] ${JSON.stringify(data)}`);
+    }
+
+    processTurnee(data: {num: number, team: number}) {
+        // this.turnSystem.processTurnee(data.turnee);
+        console.log(`[Arena:processTurnee] ${JSON.stringify(data)}`);
     }
 
     updateMusicIntensity(ratio){
@@ -1311,7 +1316,6 @@ export class Arena extends Phaser.Scene
         
         if (isPlayer) {
             player.setDistance(character.distance);
-            player.setCooldown(1); // hack
             player.setInventory(character.inventory);
             player.setSpells(character.spells);
         }
@@ -1746,7 +1750,7 @@ export class Arena extends Phaser.Scene
         });
 
         const firstDelay = 0;
-        const secondDelay = firstDelay + KILL_CAM_DURATION;
+        const secondDelay = firstDelay + KILL_CAM_DURATION * 1000;
         const cameraSpeed = 200;
 
         this.time.delayedCall(firstDelay, () => {
@@ -1948,10 +1952,6 @@ export class Arena extends Phaser.Scene
 
     isCharacterSelected(index: number) {
         return this.selectedPlayer?.num === index;
-    }
-
-    isCharacterReady(index: number) {
-        return this.teamsMap.get(this.playerTeamId).members[index].isReady();
     }
 
     isTutorial() {

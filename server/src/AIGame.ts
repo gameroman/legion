@@ -122,7 +122,7 @@ export class AIGame extends Game {
     async createZombieTeam(team: Team, zombieData) {
         team.setPlayerData(zombieData.playerData);
         zombieData.rosterData.characters.forEach((character: DBCharacterData, index: number) => {
-            this.addAICharacter(team, character);
+            this.addAICharacter(team, character).setZombie(true);
         });
     }
 
@@ -258,7 +258,6 @@ export class AIGame extends Game {
     async start() {
         if (this.teams.size < this.nbExpectedPlayers) return;
         super.start();
-        this.tickTimer = setInterval(this.AItick.bind(this), TICK);
     }
 
     endGame(winner: number) {
@@ -286,55 +285,6 @@ export class AIGame extends Game {
             case 'slowDownCooldowns':
                 this.tutorialSettings.shortCooldowns = false;
                 break;
-        }
-    }
-
-    AItick() {
-        if (this.gameOver) {
-            clearInterval(this.tickTimer!);
-            return;
-        }
-
-        if (FREEZE_AI) return;
-
-        const currentTime = Date.now();
-        const AIteams = AI_VS_AI ? [1, 2] : [2];
-
-        // Initialize lastAIActionTime if not set
-        if (this.lastAIActionTime === 0) {
-            this.lastAIActionTime = currentTime;
-        }
-
-        // Calculate delay based on game mode
-        let minDelay = MIN_AI_DECISION_TIME;
-        let maxDelay = MAX_AI_DECISION_TIME;
-
-        // Make AI more responsive in competitive modes
-        if (COMPETITIVE_MODES.includes(this.mode)) {
-            minDelay = Math.floor(MIN_AI_DECISION_TIME * 0.7);
-            maxDelay = Math.floor(MAX_AI_DECISION_TIME * 0.8);
-        }
-
-        const timeSinceLastAction = currentTime - this.lastAIActionTime;
-        const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay)) + minDelay;
-
-        // Only allow an action if enough time has passed since the last AI action
-        if (timeSinceLastAction >= randomDelay) {
-            // Get all AI players
-            const aiPlayers: AIServerPlayer[] = [];
-            AIteams.forEach(teamNum => {
-                const team = this.teams.get(teamNum);
-                if (team) {
-                    aiPlayers.push(...(team.getMembers() as AIServerPlayer[]));
-                }
-            });
-
-            // Randomly select one AI player to take action
-            if (aiPlayers.length > 0) {
-                const randomIndex = Math.floor(Math.random() * aiPlayers.length);
-                aiPlayers[randomIndex].takeAction();
-                this.lastAIActionTime = currentTime;
-            }
         }
     }
 }

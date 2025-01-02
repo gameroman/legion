@@ -1,6 +1,6 @@
 import { ServerPlayer, ActionType } from './ServerPlayer';
 import { AIAttackMode, PlayMode, StatusEffect, Target } from "@legion/shared/enums";
-import { INITIAL_COOLDOWN } from "@legion/shared/config";
+import { FREEZE_AI, INITIAL_COOLDOWN } from "@legion/shared/config";
 
 
 type Comparator<T> = (a: T, b: T) => number;
@@ -26,6 +26,7 @@ export class AIServerPlayer extends ServerPlayer {
     canUseStatusEffects: boolean = true;
     bannedSpells: number[] = [];
     healRandomThreshold: number = 1.0;
+    isZombie: boolean = false;
 
     attackMode: AIAttackMode = AIAttackMode.IDLE;
     actionCount: number = 0;
@@ -419,5 +420,19 @@ export class AIServerPlayer extends ServerPlayer {
 
     getIQ() {
         return this.team?.teamData.AIwinRatio;
+    }
+
+    setZombie(isZombie: boolean) {
+        this.isZombie = isZombie;
+    }
+
+    startTurn() {
+        super.startTurn();
+        if (FREEZE_AI) return;
+        // If is zombie, take between 1 and 4 seconds to act, otherwise between 1 and 2
+        const delay = this.isZombie ? Math.floor(Math.random() * 3000) + 1000 : Math.floor(Math.random() * 1000) + 1000;
+        setTimeout(() => {
+            this.takeAction();
+        }, delay);
     }
 }

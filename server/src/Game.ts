@@ -12,7 +12,7 @@ import { OutcomeData, TerrainUpdate, PlayerContextData, GameOutcomeReward, GameD
 import { getChestContent } from '@legion/shared/chests';
 import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL, CAST_DELAY,
     PRACTICE_XP_COEF, PRACTICE_GOLD_COEF, RANKED_XP_COEF, RANKED_GOLD_COEF, remoteConfig,
-    LEGION_CUT, TURN_DURATION } from '@legion/shared/config';
+    LEGION_CUT, TURN_DURATION, KILL_CAM_DURATION } from '@legion/shared/config';
 import { TerrainManager } from './TerrainManager';
 import { TurnSystem } from './TurnSystem';
 
@@ -246,19 +246,21 @@ export abstract class Game
         }
     }
 
-    resetTurnTimer() {
+    resetTurnTimer(turnLength: number = TURN_DURATION) {
         clearTimeout(this.turnTimer!);
-        this.turnTimer = setTimeout(this.processTurn.bind(this), TURN_DURATION * 1000);
+        this.turnSystem.processAction(this.turnee, SpeedClass.NORMAL);
+        this.turnTimer = setTimeout(this.processTurn.bind(this), turnLength);
     }
 
-    processTurn() {
+    processTurn(isKill: boolean = false) {
         this.broadcastQueueData();
         this.turnee = this.turnSystem.getNextActor();
         this.broadcast('turnee', {
             num: this.turnee.num,
             team: this.turnee.team.id,
         });
-        this.resetTurnTimer();
+        const turnLength = TURN_DURATION + (isKill ? KILL_CAM_DURATION : 0);
+        this.resetTurnTimer(turnLength);
         this.turnee.startTurn();
     }
 
@@ -508,7 +510,7 @@ export abstract class Game
         
         this.broadcastMove(team, num, tile);
 
-        this.turnSystem.processAction(player, SpeedClass.QUICK);
+        this.turnSystem.processAction(player, SpeedClass.FAST);
         this.processTurn();
     }
 
@@ -590,13 +592,14 @@ export abstract class Game
             opponent.removeStatusEffect(StatusEffect.FREEZE);
         }
 
+        const isKill = opponent.justDied;
         this.broadcast('attack', {
             team: team.id,
             target,
             num,
             damage: -damage,
             hp: opponent.getHP(),
-            isKill: opponent.justDied,
+            isKill,
             sameTeam,
         });
 
@@ -605,7 +608,7 @@ export abstract class Game
         }
 
         this.turnSystem.processAction(player, SpeedClass.NORMAL);
-        this.processTurn();
+        this.processTurn(isKill);
     }
 
     processObstacleAttack({num, x, y}: {num: number, x: number, y: number}, team: Team) {
@@ -757,11 +760,12 @@ export abstract class Game
         const nbFrozen_ = targets.filter(target => target.hasStatusEffect(StatusEffect.FREEZE)).length;
         const nbBurning_ = this.terrainManager.getNbBurning();
         
+        const isKill = nbKills > 0;
         this.broadcast('localanimation', {
             x,
             y,
             id: spell.id,
-            isKill: nbKills > 0,
+            isKill,
         });
 
         const GENs = [];
@@ -781,7 +785,7 @@ export abstract class Game
         team.sendScore();
 
         this.turnSystem.processAction(player, spell.speedClass);
-        this.processTurn();
+        this.processTurn(isKill);
     }
 
     broadcastGEN(GENs: GEN[]) {

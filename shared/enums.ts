@@ -234,7 +234,7 @@ export type SPSPendingData = {
 
 export enum SpeedClass {
     PASS,
-    QUICK,
+    FAST,
     NORMAL,
     SLOW,
 }

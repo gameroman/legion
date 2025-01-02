@@ -24,7 +24,7 @@ export const MAX_AUDIENCE_SCORE = 1500;
 export const PROMOTION_RATIO = 0.4;
 export const DEMOTION_RATIO = 0.3;
 export const SEASON_END_CRON = '0 19 * * 5' // UTC
-export const KILL_CAM_DURATION = 3000;
+export const KILL_CAM_DURATION = 3;
 export const BASE_ANIM_FRAME_RATE = 5;
 
 
@@ -63,7 +63,7 @@ export const ENABLE_SETTINGS = true;
 export const ENABLE_ELYSIUM = false;
 
 // Admin
-export let FREEZE_AI = false;
+export let FREEZE_AI = true;
 export const STARTING_GOLD_ADMIN = 100000;
 export const STARTING_SPELLS_ADMIN = [2];
 export const STARTING_EQUIPMENT_ADMIN = [2];

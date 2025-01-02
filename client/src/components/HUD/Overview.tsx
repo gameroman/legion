@@ -22,21 +22,15 @@ interface Props {
 }
 
 interface State {
-  cooldowns: number[];
   previousHPs: number[];
   blinking: boolean[];
   selected: number;
 }
 
 class Overview extends Component<Props, State> {
-  timerID: NodeJS.Timeout;
-
   constructor(props: Props) {
     super(props);
     this.state = {
-      cooldowns: props.members
-        ? props.members.map(member => member.cooldown)
-        : [],
       previousHPs: props.members
         ? props.members.map(member => member.hp)
         : [],
@@ -47,14 +41,8 @@ class Overview extends Component<Props, State> {
     };
   }
 
-
-  componentDidMount() {
-    this.timerID = setInterval(() => this.tick(), 10);
-  }
-
   componentDidUpdate(prevProps: Props) {
     if (this.props.members !== prevProps.members && this.props.members) {
-      const cooldowns = this.props.members.map(member => member.cooldown);
       const previousHPs = this.state.previousHPs;
       const blinking = this.state.blinking;
       this.props.members.forEach((member, memberIndex) => {
@@ -71,25 +59,14 @@ class Overview extends Component<Props, State> {
         previousHPs[memberIndex] = member.hp;
       });
       // eslint-disable-next-line react/no-did-update-set-state
-      this.setState({ cooldowns, previousHPs, blinking });
+      this.setState({ previousHPs, blinking });
     }
   }
 
-  componentWillUnmount() {
-    clearInterval(this.timerID);
-  }
-
-  tick() {
-    this.setState(prevState => ({
-      cooldowns: prevState.cooldowns.map(cooldown => Math.max(0, cooldown - 10))
-    }));
-  }
-
-  render({ members, position, selectedPlayer, isSpectator }: Props, { cooldowns, blinking }: State) {
+  render({ members, position, selectedPlayer, isSpectator }: Props, { blinking }: State) {
     if (!members || !blinking.length) {
       return <div />;
     }
-    let cooldownIndex = 0;
 
     return (
       <div className={`overview ${this.props.isPlayerTeam && 'overview_playerteam'} ${position === 'right' && 'overview_right'}`}>
@@ -97,10 +74,7 @@ class Overview extends Component<Props, State> {
         <div className="member_container">
           {members.map((member, memberIndex) => {
             const isAlive = member.hp > 0;
-            const cooldown = cooldowns[cooldownIndex++];
-            let cooldownPct = cooldown / member.totalCooldown;
             const isParalyzed = member.statuses[StatusEffect.PARALYZE] != 0 || member.statuses[StatusEffect.FREEZE] != 0;
-            if (!isAlive || isParalyzed) cooldownPct = 1;
 
             const portraitStyle = {
               backgroundImage: `url(${getSpritePath(member.texture)})`,
@@ -109,7 +83,8 @@ class Overview extends Component<Props, State> {
             const charProfileStyle = (idx: number) => {
               const isSelected = this.props.selectedPlayer?.number === idx + 1 && this.props.isPlayerTeam;
 
-              if (cooldown === 0 && isAlive) {
+              const isTurnee = false;
+              if (isTurnee && isAlive) {
                 return {
                   backgroundImage: `url(${charProfileReady})`,
                   transform: 'scale(1.1)'
@@ -152,14 +127,6 @@ class Overview extends Component<Props, State> {
                     <div className="char_stats_mp" style={{ width: `${(member.mp / member.maxMP) * 100}%` }}></div>
                   </div>}
                 </div>
-                {this.props.isPlayerTeam && 
-                  <div className={
-                    `char_stats_cooldown_bar
-                    ${member.isAlive && !isParalyzed && member.totalCooldown && cooldown === 0 ? 'cooldown_bar_flash' : ''}`
-                    } 
-                    style={position === 'left' && { justifyContent: 'flex-start', marginLeft: '40px' }}>
-                      <div className="char_stats_cooldown" style={{ width: `${(1 - cooldownPct) * 100}%` }}></div>
-                  </div>}
                 <div className={`char_statuses ${position === 'right' && 'char_statuses_right'}`}>
                   {Object.keys(member?.statuses).map((status: StatusEffect) => {
                     return member.statuses[status] !== 0 && <img key={`${memberIndex}-${status}`} src={statusIcons[status]}  alt="" />

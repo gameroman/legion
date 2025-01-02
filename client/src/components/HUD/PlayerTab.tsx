@@ -26,7 +26,6 @@ interface State {
   croppedImages: {
     [key: string]: string;
   };
-  cooldownVisible: boolean;
   itemsVisible: boolean;
 }
 
@@ -39,14 +38,9 @@ class PlayerTab extends Component<Props, State> {
     this.state = {
       player: this.props.player,
       croppedImages: {},
-      cooldownVisible: !props.isTutorial,
       itemsVisible: !props.isTutorial,
     };
     this.events = this.props.eventEmitter;
-
-    this.events.on('revealCooldown', () => {
-      this.setState({ cooldownVisible: true });
-    });
 
     this.events.on('revealItems', () => {
       this.setState({ itemsVisible: true });
@@ -105,10 +99,6 @@ class PlayerTab extends Component<Props, State> {
     this.actionClick(index);
   } 
 
-  getCooldownRatio(player: PlayerProps): number {
-    return (player.maxCooldown - player.cooldown) / player.maxCooldown;
-  }
-
   renderActionContainer(title: string, actions: any[], canAct: boolean, isMuted: boolean, startIndex: number, inventoryType: InventoryType) {
     const { player } = this.props;
     const goldenGradient = 'linear-gradient(to bottom right, #bf9b30, #1c1f25)';
@@ -164,7 +154,7 @@ class PlayerTab extends Component<Props, State> {
             )}
             <div className="dialog-spell-info">
               <img src={cdIcon} alt="cd" className={type === 'spell' ? 'cd-icon' : ''} />
-              <span>{action.getCooldown()}s</span>
+              <span>{action.speedClass}</span>
             </div>
             <div className="dialog-spell-info">
               <img src={targetIcon} alt="target" />
@@ -185,14 +175,9 @@ class PlayerTab extends Component<Props, State> {
     const portraitStyle = {
       backgroundImage: `url(${getSpritePath(player.portrait)})`,
     };
-    const isCooldownActive = player.cooldown > 0;
     const isDead = player.hp <= 0;
-    const canAct = !isCooldownActive && !isDead && !player.casting && !player.isParalyzed;
+    const canAct = !isDead && !player.casting && !player.isParalyzed;
     const isMuted = player.statuses[StatusEffect.MUTE] != 0;
-    const cooldownRatio = this.getCooldownRatio(player);
-    const cooldownBarStyle = {
-      width: `${cooldownRatio * 100}%`,
-    }; 
 
     const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
     const itemsIndex = keyboardLayout.indexOf('Z');
@@ -229,14 +214,6 @@ class PlayerTab extends Component<Props, State> {
                   </div>
                   )}
                 </div>
-              </div>
-            </div>
-            <div className="xp_bar_bg_container" style={{ 
-              visibility: this.state.cooldownVisible ? 'visible' : 'hidden' 
-            }}>
-              <img src={cdIcon} alt="" />
-              <div className={`xp_bar_bg ${cooldownRatio === 1 ? 'cooldown_bar_flash' : ''}`}>
-                <div className="cooldown_bar" style={cooldownBarStyle}></div>
               </div>
             </div>
           </div>

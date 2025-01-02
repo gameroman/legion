@@ -80,8 +80,6 @@ export class Team {
                 maxMP: member.maxMP,
                 isAlive: member.isAlive(),
                 isPlayer: member.isPlayer,
-                cooldown: member.cooldownDuration,
-                totalCooldown: member.totalCooldownDuration,
                 statuses: member.statuses,
                 class: member.class,
                 xp: member.xp,
