@@ -426,6 +426,9 @@ export abstract class Game
                 this.processMagic(data, team!);
                 this.saveGameAction(team.teamData.playerUID, GameAction.SPELL_USE, data);
                 break;
+            case 'passTurn':
+                this.processPassTurn(team!);
+                break;
         }
     }
 
@@ -851,6 +854,11 @@ export abstract class Game
         const delay = CAST_DELAY * 1000;
         setTimeout(this.applyMagic.bind(this, spell, player, x, y, team, targetPlayer), delay);
         return delay;
+    }
+
+    processPassTurn(team: Team) {
+        this.turnSystem.processAction(team.getMembers()[0], SpeedClass.PASS);
+        this.processTurn();
     }
 
     broadcastScoreChange(team: Team) {

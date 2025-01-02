@@ -1511,6 +1511,10 @@ export class Arena extends Phaser.Scene
             this.selectedPlayer?.onKey(keyIndex);
         });
 
+        events.on('passTurn', () => {
+            this.socket.emit('passTurn');
+        });
+
         events.on('abandonGame', () => {
             this.abandonGame();
         });

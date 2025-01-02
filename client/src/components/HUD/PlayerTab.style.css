@@ -225,4 +225,54 @@
 
 .cd-icon {
   margin-top: 1px;
+}
+
+.player_content_left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.pass-turn-button {
+  width: 96px;
+  padding: 4px 0;
+  font-family: 'Kim';
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: linear-gradient(to bottom, #2a3746 0%, #1c1f25 100%);
+  border: 1px solid #3c616c;
+  border-radius: 4px;
+  cursor: var(--game-pointer);
+  position: relative;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.pass-turn-button:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 3px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.pass-turn-button:hover {
+  border-color: #51fdff;
+  box-shadow: 0 0 10px rgba(81, 253, 255, 0.3);
+}
+
+.pass-turn-button:hover:before {
+  opacity: 1;
+}
+
+.pass-turn-button:active {
+  transform: scale(0.98);
+  background: linear-gradient(to bottom, #1c1f25 0%, #2a3746 100%);
 } 

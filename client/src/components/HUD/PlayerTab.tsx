@@ -100,6 +100,11 @@ class PlayerTab extends Component<Props, State> {
     this.actionClick(index);
   } 
 
+  passTurn = (event: Event) => {
+    event.stopPropagation();
+    this.events.emit('passTurn');
+  }
+
   renderActionContainer(title: string, actions: any[], canAct: boolean, isMuted: boolean, startIndex: number, inventoryType: InventoryType) {
     const { player } = this.props;
     const goldenGradient = 'linear-gradient(to bottom right, #bf9b30, #1c1f25)';
@@ -188,8 +193,13 @@ class PlayerTab extends Component<Props, State> {
         <div className="player_tab_container">
           <div className="player_content_container">
             <div className="player_content">
-              <div className="player_content_portrait">
-                <div className="character_portrait" style={portraitStyle}></div>
+              <div className="player_content_left">
+                <div className="player_content_portrait">
+                  <div className="character_portrait" style={portraitStyle}></div>
+                </div>
+                <div className="pass-turn-button" onClick={this.passTurn}>
+                  PASS TURN
+                </div>
               </div>
               <div style={{ flex: '1', height: '100%' }}>
                 <div className="player_content_name">

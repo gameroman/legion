@@ -206,6 +206,11 @@ io.on('connection', async (socket: any) => {
           game.endTutorial();
         }
       });
+
+      socket.on('passTurn', () => {
+        const game = socketMap.get(socket);
+        game?.processAction('passTurn', null, socket);
+      });
     } catch (error) {
         console.error(`[server:connection] Error joining game server: ${error}`);
     }
