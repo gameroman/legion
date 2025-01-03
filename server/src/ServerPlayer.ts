@@ -202,6 +202,7 @@ export class ServerPlayer {
         this.justDied = true;
         this.clearStatusEffects();
         this.team!.game.handleTeamKill(this.team);
+        this.team!.game.processDeath(this);
     }
 
     heal(amount: number) {

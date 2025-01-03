@@ -277,6 +277,12 @@ export abstract class Game
         this.processTurn();
     }
 
+    processDeath(player: ServerPlayer) {
+        if (this.turnee == player) {
+            this.processTurn();
+        }
+    }
+
     sendGameStatus(socket: Socket, reconnect: boolean = false) {
         if (reconnect) {
             console.log(`[Game:sendGameStatus] Reconnect`);

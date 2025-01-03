@@ -433,11 +433,14 @@ export class Player extends Phaser.GameObjects.Container {
     select() {
         this.glowFx.color = GlowColors.Selected;
         this.glowFx.setActive(true);
-        this.displayMovementRange();
-        this.selected = true;
 
-        this.checkHeartbeat();
-        this.arena.relayEvent(`selectCharacter_${this.class}`);
+        if (this.isPlayer) {
+            this.displayMovementRange();
+            this.selected = true;
+
+            this.checkHeartbeat();
+            this.arena.relayEvent(`selectCharacter_${this.class}`);
+        }
     }
 
     deselect() {

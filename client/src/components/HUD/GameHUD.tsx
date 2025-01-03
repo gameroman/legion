@@ -197,6 +197,8 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
 
     const isTutorialMode = mode === PlayMode.TUTORIAL;
 
+    const showEnemyTurnBanner = !playerVisible && gameInitialized && !this.state.gameOver;
+
     return (
       <div className="gamehud height_full flex flex_col justify_between padding_bottom_16">
         <>
@@ -204,6 +206,12 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
             <div className="hud-container">
               <Overview position="left" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team1} />
               <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team2} />
+            </div>
+          )}
+          {showEnemyTurnBanner && (
+            <div className="enemy_turn_banner">
+              <div className="enemy_turn_banner_particles" />
+              Enemy Turn
             </div>
           )}
           {showTopMenu && playerVisible && player ? (

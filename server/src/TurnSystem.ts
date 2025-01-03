@@ -78,19 +78,22 @@ export class TurnSystem {
     // Get the next character that can act
     getNextActor(): ServerPlayer {
         if (this.turnQueue.length === 0) return null;
+
+        // Get the first character that is alive
+        const aliveQueue = this.turnQueue.filter(item => item.character.isAlive());
+        if (aliveQueue.length === 0) return null;
         
         // Advance time to next action
-        this.currentTime = this.turnQueue[0].nextActionTime;
-        return this.turnQueue[0].character;
+        this.currentTime = aliveQueue[0].nextActionTime;
+        return aliveQueue[0].character;
     }
 
-    // Helper functions
     sortQueue() {
         this.turnQueue.sort((a, b) => a.nextActionTime - b.nextActionTime);
     }
 
     getQueueData() {
-        return this.turnQueue.map((item, i) => {
+        return this.turnQueue.filter(item => item.character.isAlive()).map((item, i) => {
             return {
                 num: item.character.num,
                 team: item.character.team.id,

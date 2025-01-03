@@ -767,8 +767,11 @@ export class Arena extends Phaser.Scene
         }
         this.selectedPlayer = player;
         this.selectedPlayer.select();
-        this.emitEvent('selectPlayer', {num: this.selectedPlayer.num})
-        events.emit('selectPlayer', {num: this.selectedPlayer.num}); // TODO: consolidate
+
+        if (this.selectedPlayer.isPlayer) {
+            this.emitEvent('selectPlayer', {num: this.selectedPlayer.num})
+            events.emit('selectPlayer', {num: this.selectedPlayer.num}); // TODO: consolidate
+        }
     }
 
     deselectPlayer() {
@@ -1459,7 +1462,7 @@ export class Arena extends Phaser.Scene
 
     selectTurnee() {
         this.deselectPlayer();
-        if (this.turnee && this.turnee.team == this.playerTeamId) this.selectPlayer(this.getPlayer(this.turnee.team, this.turnee.num));
+        if (this.turnee) this.selectPlayer(this.getPlayer(this.turnee.team, this.turnee.num));
     }
 
     initializeGame(data: GameData): void {

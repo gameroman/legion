@@ -52,10 +52,16 @@ class SpectatorFooter extends Component<SpectatorFooterProps, SpectatorFooterSta
     // Sort queue by position
     const sortedQueue = [...(queue || [])].sort((a, b) => a.position - b.position);
 
+    // Inside the render method, calculate the required width
+    const timelineWidth = Math.max(400, sortedQueue.length * 72); // 72px per character
+
     return (
       <div className="spectator_footer_wrapper">
         <div className="spectator_footer_container">
-          <div className="turn_timeline">
+          <div 
+            className="turn_timeline"
+            style={{ minWidth: `${timelineWidth}px` }}
+          >
             {sortedQueue.map((queueItem, index) => {
               const character = getCharacterFromQueue(queueItem);
               if (!character) return null;
