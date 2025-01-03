@@ -65,6 +65,7 @@ export class ServerPlayer {
     activeTerrainDoT: Terrain | null = null;
     class: Class;
     isAI = false;
+    hasActed: boolean = false;
 
     constructor(num: number, name: string, frame: string, x: number, y: number) {
         this.num = num;
@@ -599,6 +600,10 @@ export class ServerPlayer {
                 this.team!.game.processTurn();
             }, PARALYZED_DELAY * 1000);
         }
+    }
+
+    setHasActed(hasActed: boolean) {
+        this.hasActed = hasActed;
     }
 }
 

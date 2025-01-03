@@ -226,7 +226,7 @@ export abstract class Game
         this.turnSystem.initializeTurnOrder(allCharacters);
 
         this.sockets.forEach(socket => this.sendGameStatus(socket));
-        this.resetTurnTimer();
+        setTimeout(this.processTurn.bind(this), 2000);
         
         this.audienceTimer = setInterval(() => {
             this.teams.forEach(team => {
@@ -248,24 +248,32 @@ export abstract class Game
 
     resetTurnTimer(turnLength: number = TURN_DURATION) {
         clearTimeout(this.turnTimer!);
-        this.turnSystem.processAction(this.turnee, SpeedClass.NORMAL);
-        this.turnTimer = setTimeout(this.processTurn.bind(this), turnLength);
+        this.turnTimer = setTimeout(this.processTurn.bind(this), turnLength * 1000);
     }
 
     processTurn(isKill: boolean = false) {
+        // Check if the previous turnee has acted
+        if (this.turnee && !this.turnee.hasActed) {
+            this.turnSystem.processAction(this.turnee, SpeedClass.NORMAL);
+        }
+    
         this.broadcastQueueData();
         this.turnee = this.turnSystem.getNextActor();
+        this.turnee.setHasActed(false);
+    
+        console.log(`[Game:processTurn] Turnee: ${this.turnee.num} from team ${this.turnee.team.id}`);
         this.broadcast('turnee', {
             num: this.turnee.num,
             team: this.turnee.team.id,
         });
+    
         const turnLength = TURN_DURATION + (isKill ? KILL_CAM_DURATION : 0);
-        // this.resetTurnTimer(turnLength);
+        this.resetTurnTimer(turnLength);
         this.turnee.startTurn();
     }
 
-    processPassTurn(team: Team) {
-        this.turnSystem.processAction(team.getMembers()[0], SpeedClass.PASS);
+    processPassTurn() {
+        this.turnSystem.processAction(this.turnee, SpeedClass.PASS);
         this.processTurn();
     }
 
@@ -317,6 +325,7 @@ export abstract class Game
                 spectator: false,
                 mode: this.mode,
             },
+            queue: this.turnSystem.getQueueData(),
             player: {
                 teamId: playerTeamId,
                 player: team.getPlayerData(),
@@ -397,42 +406,38 @@ export abstract class Game
             team = this.teams.get(2);
         }
 
-        const character = team.getMembers()[data.num - 1];
-        if (!character) {
-            console.log(`[Game:processAction] Invalid character number ${data.num}!`);
-            return;
-        }
-
-        if (character !== this.turnee) {
-            console.log(`[Game:processAction] Character ${data.num} is not the current turnee!`);
+        if (team.id !== this.turnee.team.id) {
+            console.log(`[Game:processAction] Team ${team.id} is not the current turnee's team!`);
             return;
         }
 
         team!.incrementActions();
         team!.snapshotScore();
 
+        this.turnee.setHasActed(true);
+
         switch (action) {
             case 'move':
-                this.processMove(data, team!);
+                this.processMove(data);
                 this.saveGameAction(team.teamData.playerUID, GameAction.MOVE, data);
                 break;
             case 'attack':
-                this.processAttack(data, team!);
+                this.processAttack(data);
                 this.saveGameAction(team.teamData.playerUID, GameAction.ATTACK, data);
                 break;
             case 'obstacleattack':
-                this.processObstacleAttack(data, team!);
+                this.processObstacleAttack(data);
                 break;
             case 'useitem':
-                this.processUseItem(data, team!);
+                this.processUseItem(data);
                 this.saveGameAction(team.teamData.playerUID, GameAction.ITEM_USE, data);
                 break;
             case 'spell':
-                this.processMagic(data, team!);
+                this.processMagic(data);
                 this.saveGameAction(team.teamData.playerUID, GameAction.SPELL_USE, data);
                 break;
             case 'passTurn':
-                this.processPassTurn(team!);
+                this.processPassTurn();
                 break;
         }
     }
@@ -493,8 +498,8 @@ export abstract class Game
         }
     }
 
-    processMove({tile, num}: {tile: Tile, num: number}, team: Team) {
-        const player = team.getMembers()[num - 1];
+    processMove({tile}: {tile: Tile}) {
+        const player = this.turnee;
         if (!player.canAct()) {
             return;
         }
@@ -503,7 +508,7 @@ export abstract class Game
             return;
         }
         if (!player.canMoveTo(tile.x, tile.y)) {
-            console.log(`[Game:processMove] Player ${num} cannot move to ${tile.x},${tile.y}!`);
+            console.log(`[Game:processMove] Player ${player.num} cannot move to ${tile.x},${tile.y}!`);
             return;
         }
 
@@ -516,7 +521,7 @@ export abstract class Game
         
         this.checkForStandingOnTerrain(player);
         
-        this.broadcastMove(team, num, tile);
+        this.broadcastMove(player.team, player.num, tile);
 
         this.turnSystem.processAction(player, SpeedClass.FAST);
         this.processTurn();
@@ -558,10 +563,10 @@ export abstract class Game
         return this.terrainManager.getTerrain(x, y) === Terrain.FIRE;
     }
 
-    processAttack({num, target, sameTeam}: {num: number, target: number, sameTeam: boolean}, team: Team) {
+    processAttack({target, sameTeam}: {target: number, sameTeam: boolean}) {
         // console.log(`[Game:processAttack] Player ${num} attacking target ${target}`);
-        const player = team.getMembers()[num - 1];
-        const opponentTeam = sameTeam ? team : this.getOtherTeam(team.id);
+        const player = this.turnee;
+        const opponentTeam = sameTeam ? player.team : this.getOtherTeam(player.team.id);
         const opponent = opponentTeam.getMembers()[target - 1];
         
         if (
@@ -602,9 +607,9 @@ export abstract class Game
 
         const isKill = opponent.justDied;
         this.broadcast('attack', {
-            team: team.id,
+            team: player.team.id,
             target,
-            num,
+            num: player.num,
             damage: -damage,
             hp: opponent.getHP(),
             isKill,
@@ -619,8 +624,8 @@ export abstract class Game
         this.processTurn(isKill);
     }
 
-    processObstacleAttack({num, x, y}: {num: number, x: number, y: number}, team: Team) {
-        const player = team.getMembers()[num - 1];
+    processObstacleAttack({x, y}: {x: number, y: number}) {
+        const player = this.turnee;
         
         if (
             !player.canAct() || 
@@ -632,8 +637,8 @@ export abstract class Game
         this.broadcastTerrain(terrainUpdates);
 
         this.broadcast('obstacleattack', {
-            team: team.id,
-            num,
+            team: player.team.id,
+            num: player.num,
             x, y,
         });
 
@@ -641,11 +646,14 @@ export abstract class Game
         this.processTurn();
     }
 
-    processUseItem({num, x, y, index, targetTeam, target}: {num: number, x: number, y: number, index: number,  targetTeam: number, target: number | null}, team: Team) {
-        const player = team.getMembers()[num - 1];
-        console.log(`[Game:processUseItem] Player ${num} using item ${index}`);
+    processUseItem(
+        {x, y, index, targetTeam, target}: 
+        {x: number, y: number, index: number,  targetTeam: number, target: number | null}
+    ) {
+        const player = this.turnee;
+        console.log(`[Game:processUseItem] Player ${player.num} using item ${index}`);
         if (!player.canAct()) {
-            console.log(`[Game:processUseItem] Player ${num} cannot act!`);
+            console.log(`[Game:processUseItem] Player ${player.num} cannot act!`);
             return;
         }
 
@@ -685,8 +693,8 @@ export abstract class Game
         player.removeItem(item);
 
         this.broadcast('useitem', {
-            team: team.id,
-            num,
+            team: player.team.id,
+            num: player.num,
             animation: item.animation,
             name: item.name,
             sfx: item.sfx,
@@ -701,8 +709,8 @@ export abstract class Game
             }
         });    
 
-        team.socket?.emit('inventory', {
-            num,
+        player.team.socket?.emit('inventory', {
+            num: player.num,
             inventory: player.getNetworkInventory(),
         });
 
@@ -812,9 +820,12 @@ export abstract class Game
         this.broadcast('gen', GENs);
     }
 
-    processMagic({num, x, y, index, targetTeam, target}: {num: number, x: number, y: number, index: number, targetTeam: number, target: number}, team: Team ) {
+    processMagic(
+        {x, y, index, targetTeam, target}: 
+        {x: number, y: number, index: number, targetTeam: number, target: number}, 
+    ) {
         // console.log(`Processing magic for team ${team.id}, player ${num}, spell ${index}, target team ${targetTeam}, target ${target}`);
-        const player = team.getMembers()[num - 1];
+        const player = this.turnee;
         if (!player.canAct()) {
             console.log('[Game:processMagic] cannot act');
             return;
@@ -847,17 +858,17 @@ export abstract class Game
         player.team.incrementSpellCasts();
 
         this.broadcast('cast', {
-            team: team.id,
-            num,
+            team: player.team.id,
+            num: player.num,
             id: spell.id,
             location: {x, y},
         });
 
-        this.emitMPchange(team, num, mp);
+        this.emitMPchange(player.team, player.num, mp);
         player.setCasting(true);
 
         const delay = CAST_DELAY * 1000;
-        setTimeout(this.applyMagic.bind(this, spell, player, x, y, team, targetPlayer), delay);
+        setTimeout(this.applyMagic.bind(this, spell, player, x, y, player.team, targetPlayer), delay);
         return delay;
     }
 

@@ -65,12 +65,12 @@ export class TurnSystem {
                             randomVariation;
 
         // For PASS specifically, add an increasing penalty for consecutive passes
-        if (actionType === SpeedClass.PASS) {
-            queueItem.passCount++;
-            queueItem.nextActionTime += (queueItem.passCount * 25); // Each consecutive pass adds 25 to cooldown
-        } else {
-            queueItem.passCount = 0;
-        }
+        // if (actionType === SpeedClass.PASS) {
+        //     queueItem.passCount++;
+        //     queueItem.nextActionTime += (queueItem.passCount * 25); // Each consecutive pass adds 25 to cooldown
+        // } else {
+        //     queueItem.passCount = 0;
+        // }
 
         this.sortQueue();
     }

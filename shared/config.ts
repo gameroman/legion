@@ -8,7 +8,7 @@ export const MAX_AVATAR_ID = 31;
 
 // Gameplay
 export const NB_START_CHARACTERS = 3;
-export const MAX_CHARACTERS = 10;
+export const MAX_CHARACTERS = 6;
 export const TURN_DURATION = 5;
 export const CAST_DELAY = 1;
 export const PARALYZED_DELAY = 1.5;
@@ -63,7 +63,7 @@ export const ENABLE_SETTINGS = true;
 export const ENABLE_ELYSIUM = false;
 
 // Admin
-export let FREEZE_AI = true;
+export let FREEZE_AI = false;
 export const STARTING_GOLD_ADMIN = 100000;
 export const STARTING_SPELLS_ADMIN = [2];
 export const STARTING_EQUIPMENT_ADMIN = [2];

@@ -1474,6 +1474,7 @@
   padding: 10px;
   gap: 12px;
   position: relative;
+  min-width: 400px;
 }
 
 .timeline_character {
@@ -1481,7 +1482,18 @@
   align-items: center;
   gap: 16px;
   position: relative;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  position: absolute;
+  left: 0;
 }
+
+.timeline_character:nth-child(1) { transform: translateX(calc(0 * (72px))); }
+.timeline_character:nth-child(2) { transform: translateX(calc(1 * (72px))); }
+.timeline_character:nth-child(3) { transform: translateX(calc(2 * (72px))); }
+.timeline_character:nth-child(4) { transform: translateX(calc(3 * (72px))); }
+.timeline_character:nth-child(5) { transform: translateX(calc(4 * (72px))); }
+.timeline_character:nth-child(6) { transform: translateX(calc(5 * (72px))); }
 
 .timeline_portrait_container {
   width: 60px;
@@ -1502,7 +1514,7 @@
 .timeline_character:first-child .timeline_portrait_container {
   transform: scale(1.15);
   box-shadow: 0 0 20px rgba(113, 222, 255, 0.5);
-  animation: pulsate 2s infinite;
+  animation: pulsate 0.5s infinite;
 }
 
 .timeline_portrait {
@@ -1596,18 +1608,6 @@
   display: none;
 }
 
-/* Future turns get progressively dimmer */
-/* .timeline_character:nth-child(2) .timeline_portrait_container {
-  opacity: 0.8;
-}
-
-.timeline_character:nth-child(3) .timeline_portrait_container {
-  opacity: 0.6;
-}
-
-.timeline_character:nth-child(n+4) .timeline_portrait_container {
-  opacity: 0.4;
-} */
 
 /* Animations */
 @keyframes pulsate {

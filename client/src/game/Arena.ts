@@ -270,7 +270,7 @@ export class Arena extends Phaser.Scene
         const scene = this;
         this.socket.onevent = function (packet) {
             if (!scene.sceneCreated){
-                // console.warn('queueing ',packet.data[0]);
+                console.warn('queueing ',packet.data[0]);
                 scene.eventsQueue.push(packet);
             } else {
                 onevent.call(this, packet);    // original call
@@ -314,7 +314,6 @@ export class Arena extends Phaser.Scene
     sendMove(x, y) {
         const data = {
             tile: { x, y},
-            num: this.selectedPlayer.num,
         };
         this.send('move', data);
     }
@@ -322,7 +321,6 @@ export class Arena extends Phaser.Scene
     sendAttack(player: Player) {
         if (!this.selectedPlayer.canAct()) return;
         const data = {
-            num: this.selectedPlayer.num,
             target: player.num,
             sameTeam: player.team.id === this.selectedPlayer.team.id,
         };
@@ -333,7 +331,6 @@ export class Arena extends Phaser.Scene
     sendObstacleAttack(x, y) {
         if (!this.selectedPlayer.canAct()) return;
         const data = {
-            num: this.selectedPlayer.num,
             x,
             y,
         };
@@ -343,7 +340,6 @@ export class Arena extends Phaser.Scene
     sendSpell(x: number, y: number, player: Player | null) {
         if (!this.selectedPlayer || !this.selectedPlayer.canAct()) return;
         const data = {
-            num: this.selectedPlayer.num,
             x,
             y,
             index: this.selectedPlayer.pendingSpell,
@@ -359,7 +355,6 @@ export class Arena extends Phaser.Scene
         if (this.gameSettings.tutorial && !this.tutorialSettings.allowUseItem) return;
         if (!this.selectedPlayer.canAct()) return;
         const data = {
-            num: this.selectedPlayer.num,
             x,
             y,
             index,
@@ -586,15 +581,15 @@ export class Arena extends Phaser.Scene
         // Check if the pressed key is a number
         const isNumberKey = (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NINE) || (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NUMPAD_NINE);
         if (isNumberKey) {
-            let number;
-            if (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NINE) {
-                // Convert the key code to a number
-                number = event.keyCode - Phaser.Input.Keyboard.KeyCodes.ZERO;
-            } else if (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NUMPAD_NINE) {
-                // Convert the key code to a number (for numpad keys)
-                number = event.keyCode - Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO;
-            } 
-            this.teamsMap.get(this.playerTeamId)?.getMember(number)?.onClick();
+            // let number;
+            // if (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NINE) {
+            //     // Convert the key code to a number
+            //     number = event.keyCode - Phaser.Input.Keyboard.KeyCodes.ZERO;
+            // } else if (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NUMPAD_NINE) {
+            //     // Convert the key code to a number (for numpad keys)
+            //     number = event.keyCode - Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO;
+            // } 
+            // this.teamsMap.get(this.playerTeamId)?.getMember(number)?.onClick();
         } else {
             const isLetterKey = (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.A && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.Z);
             if (isLetterKey) {
@@ -1027,15 +1022,16 @@ export class Arena extends Phaser.Scene
     }
 
     processQueueData(data: any[]) {
-        console.log(`[Arena:processQueueData] ${JSON.stringify(data)}`);
+        // console.log(`[Arena:processQueueData] ${JSON.stringify(data)}`);
         this.queue = data;
         this.emitEvent('overviewChange');
     }
 
     processTurnee(data: {num: number, team: number}) {
-        console.log(`[Arena:processTurnee] ${JSON.stringify(data)}`);
+        // console.log(`[Arena:processTurnee] Selecting player ${data.num} from team ${data.team}`);
         this.turnee = data;
-        this.emitEvent('overviewChange');
+        this.selectTurnee();
+        // this.emitEvent('overviewChange');
     }
 
     updateMusicIntensity(ratio){
@@ -1306,7 +1302,7 @@ export class Arena extends Phaser.Scene
     }
 
     placeCharacter(character: PlayerNetworkData, team: Team, isReconnect = false) {
-        console.log(`[Arena:placeCharacter] Placing character ${character.name} with data ${JSON.stringify(character)}`);
+        // console.log(`[Arena:placeCharacter] Placing character ${character.name} with data ${JSON.stringify(character)}`);
         const isPlayer = team.id === this.playerTeamId;
         const {x, y} = this.gridToPixelCoords(character.x, character.y);
 
@@ -1461,9 +1457,15 @@ export class Arena extends Phaser.Scene
         });
     }
 
+    selectTurnee() {
+        this.deselectPlayer();
+        if (this.turnee && this.turnee.team == this.playerTeamId) this.selectPlayer(this.getPlayer(this.turnee.team, this.turnee.num));
+    }
+
     initializeGame(data: GameData): void {
         recordLoadingStep('finish');
         const isReconnect = data.general.reconnect || this.isLateToTheParty;
+        // console.log(`[Arena:initializeGame] Reconnecting to game: ${isReconnect}`);
 
         this.playerTeamId = data.player.teamId;
 
@@ -1474,6 +1476,7 @@ export class Arena extends Phaser.Scene
         this.gameSettings.tutorial = (data.general.mode == PlayMode.TUTORIAL);
         this.gameSettings.spectator = data.general.spectator;
         this.gameSettings.mode = data.general.mode;
+        this.queue = data.queue;
 
         if (this.gameSettings.tutorial) {
             this.tutorialSettings.showHealthBars = false;
@@ -1502,6 +1505,7 @@ export class Arena extends Phaser.Scene
             setTimeout(() => {
                 if (!this.gameSettings.tutorial) this.displayGEN(GEN.COMBAT_BEGINS);
                 this.setGameInitialized();
+                this.selectTurnee();
             }, delay);
         }
 

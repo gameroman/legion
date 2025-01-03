@@ -164,14 +164,13 @@ export class AIServerPlayer extends ServerPlayer {
             if (!item) continue;
             if (item.effectsAreApplicable(this)) {
                 const data = {
-                    num: this.num,
                     x: this.x,
                     y: this.y,
                     index: i,
                     targetTeam: null,
                     target: null,
                 };
-                this.team?.game.processUseItem(data, this.team);
+                this.team?.game.processUseItem(data);
                 return true;
             }
         }
@@ -239,14 +238,13 @@ export class AIServerPlayer extends ServerPlayer {
         const healAmount = spell.getHealAmount();
         if (ally.hp <= (ally.getMaxHP() - healAmount)) {
             const data = {
-                num: this.num,
                 x: ally.x,
                 y: ally.y,
                 index,
                 targetTeam: ally.team.id,
                 target: ally.num,
             };
-            this.team?.game.processMagic(data, this.team);
+            this.team?.game.processMagic(data);
             return spell.castTime * 1000;
         }
         return -1;
@@ -261,14 +259,13 @@ export class AIServerPlayer extends ServerPlayer {
         const tile = this.team?.game.scanGridForAoE(this, spell.size, spell.size - 1);
         if (tile) {
             const data = {
-                num: this.num,
                 x: tile!.x,
                 y: tile!.y,
                 index,
                 targetTeam: null,
                 target: null,
             };
-            this.team?.game.processMagic(data, this.team);
+            this.team?.game.processMagic(data);
             return spell.castTime * 1000;
         }
         return -1;
@@ -290,14 +287,13 @@ export class AIServerPlayer extends ServerPlayer {
         
         if (target) {
             const data = {
-                num: this.num,
                 x: target.x,
                 y: target.y,
                 index,
                 targetTeam: target.team.id,
                 target: target.num,
             };
-            this.team?.game.processMagic(data, this.team);
+            this.team?.game.processMagic(data);
             return spell.castTime * 1000;
         }
         return -1;
@@ -384,11 +380,10 @@ export class AIServerPlayer extends ServerPlayer {
 
     attack(target: ServerPlayer) {
         const data = {
-            num: this.num,
             target: target.num,
             sameTeam: target.team.id === this.team!.id,
         }
-        this.team?.game.processAttack(data, this.team);
+        this.team?.game.processAttack(data);
     }
 
     moveTowards(x: number, y: number) {
@@ -412,10 +407,9 @@ export class AIServerPlayer extends ServerPlayer {
         }
 
         const data = {
-            num: this.num,
             tile: closestTile,
         }
-        this.team?.game.processMove(data, this.team);
+        this.team?.game.processMove(data);
     }
 
     getIQ() {

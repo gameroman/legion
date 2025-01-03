@@ -130,6 +130,7 @@ describe('Arena', () => {
                     player: mockPlayerProfile,
                     score: 0
                 },
+                queue: [],
                 opponent: {
                     teamId: 2,
                     team: [],

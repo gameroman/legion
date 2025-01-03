@@ -295,6 +295,7 @@ export interface GameData {
         spectator: boolean;
         mode: PlayMode;
     },
+    queue: any[];
     player: GamePlayerData,
     opponent: GamePlayerData,
     terrain: TerrainUpdate[],

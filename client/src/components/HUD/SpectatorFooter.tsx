@@ -18,9 +18,31 @@ interface SpectatorFooterProps {
   closeGame: () => void;
 }
 
-class SpectatorFooter extends Component<SpectatorFooterProps> {
+interface SpectatorFooterState {
+  positions: { [key: string]: number };
+}
+
+class SpectatorFooter extends Component<SpectatorFooterProps, SpectatorFooterState> {
+  state = {
+    positions: {}
+  };
+
+  componentDidUpdate(prevProps: SpectatorFooterProps) {
+    if (prevProps.queue !== this.props.queue) {
+      // Calculate new positions
+      const newPositions = {};
+      this.props.queue.forEach((item, index) => {
+        const key = `${item.team}-${item.num}`;
+        newPositions[key] = index;
+      });
+      
+      this.setState({ positions: newPositions });
+    }
+  }
+
   render() {
     const { isTutorial, queue, team1, team2, closeGame } = this.props;
+    const { positions } = this.state;
 
     const getCharacterFromQueue = (queueItem: { team: number; num: number }) => {
       const team = queueItem.team === 1 ? team1 : team2;
@@ -42,10 +64,19 @@ class SpectatorFooter extends Component<SpectatorFooterProps> {
                 backgroundImage: `url(${getSpritePath(character.texture)})`,
               };
 
+              const characterKey = `${queueItem.team}-${queueItem.num}`;
+              const position = positions[characterKey] || index;
+
+              const style = {
+                transform: `translateX(calc(${position} * 72px))`,
+                zIndex: sortedQueue.length - position // Ensure proper stacking during animation
+              };
+
               return (
                 <div 
-                  key={index} 
+                  key={characterKey}  // Changed to stable key based on character
                   className={`timeline_character ${queueItem.team === 1 ? 'timeline_ally' : 'timeline_enemy'}`}
+                  style={style}
                 >
                   <div className="timeline_portrait_container">
                     <div 
@@ -53,9 +84,6 @@ class SpectatorFooter extends Component<SpectatorFooterProps> {
                       style={portraitStyle}
                     />
                   </div>
-                  {index < sortedQueue.length - 1 && (
-                    <div className="timeline_arrow">→</div>
-                  )}
                 </div>
               );
             })}
