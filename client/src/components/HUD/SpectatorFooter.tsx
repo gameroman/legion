@@ -3,6 +3,7 @@ import { h, Fragment, Component } from 'preact';
 import { PlayMode } from '@legion/shared/enums';
 import { TeamOverview } from "@legion/shared/interfaces";
 import { getSpritePath } from '../utils';
+import './SpectatorFooter.style.css';
 
 interface SpectatorFooterProps {
   isTutorial: boolean;
