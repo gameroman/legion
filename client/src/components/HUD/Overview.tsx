@@ -73,6 +73,9 @@ class Overview extends Component<Props, State> {
       <div className={`overview ${this.props.isPlayerTeam && 'overview_playerteam'} ${position === 'right' && 'overview_right'}`}>
         <PlayerInfo player={this.props.player} isPlayerTeam={this.props.isPlayerTeam} position={this.props.position} isSpectator={isSpectator} eventEmitter={this.props.eventEmitter} />
         <div className="member_container">
+          <div className="team_label">
+            {this.props.isPlayerTeam ? 'Your team' : 'Enemy team'}
+          </div>
           {members.map((member, memberIndex) => {
             const isAlive = member.hp > 0;
 
