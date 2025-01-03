@@ -215,11 +215,17 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
             </div>
           )}
           {showTopMenu && playerVisible && player ? (
-            <PlayerTab 
+            <>
+              <div className="player_turn_banner">
+                <div className="player_turn_banner_particles" />
+                Your Turn!
+              </div>
+              <PlayerTab 
                 player={player} 
                 eventEmitter={events} 
                 isTutorial={isTutorialMode} 
-            />
+              />
+            </>
           ) : null}
         </>
         <SpectatorFooter
