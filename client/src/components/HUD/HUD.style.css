@@ -1627,12 +1627,11 @@
 
 .player_turn_banner {
   position: fixed;
-  top: 180px;
+  top: 18vh;
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
   
-  /* Make the banner smaller */
   background: linear-gradient(
     90deg,
     rgba(28, 31, 37, 0) 0%,
@@ -1641,13 +1640,12 @@
     rgba(69, 131, 208, 0.3) 80%,
     rgba(28, 31, 37, 0) 100%
   );
-  padding: 8px 30px;
+  padding: clamp(6px, 1vh, 8px) clamp(20px, 3vw, 30px);
   border-radius: 4px;
-  min-width: 200px;
+  min-width: clamp(160px, 20vw, 200px);
   
-  /* Smaller text */
   font-family: 'Kim', sans-serif;
-  font-size: 18px;
+  font-size: clamp(14px, 2vw, 18px);
   color: #ffffff;
   text-align: center;
   text-transform: uppercase;
@@ -1657,11 +1655,23 @@
     1px -1px 0 #4583d0,
     -1px 1px 0 #4583d0,
     1px 1px 0 #4583d0;
+
+  @media screen and (max-height: 600px) {
+    top: 21vh;
+    padding: 4px 20px;
+    font-size: clamp(12px, 1.8vw, 16px);
+  }
+
+  @media screen and (max-height: 400px) {
+    top: 12vh;
+    padding: 3px 15px;
+    font-size: clamp(10px, 1.5vw, 14px);
+  }
 }
 
-/* Adjust the decorative lines to be shorter */
+/* Adjust the decorative lines to be responsive */
 .player_turn_banner::before,
 .player_turn_banner::after {
-  width: 16px;
+  width: clamp(12px, 2vw, 16px);
   height: 2px;
 }
