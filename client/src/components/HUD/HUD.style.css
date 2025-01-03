@@ -1690,3 +1690,17 @@
   height: 2px;
 }
 
+/* Add fade-in animation for PlayerTab */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.player_tab_container {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+

@@ -643,7 +643,7 @@ export class Arena extends Phaser.Scene
             } if (pendingItem?.target === Target.SINGLE) {
                 this.sendUseItem(this.selectedPlayer?.pendingItem, gridX, gridY, player);
             } else {
-                player.onClick();
+                // player.onClick();
             }
         } else {
             console.log(`Clicked on empty tile at (${gridX}, ${gridY})`);
@@ -1350,7 +1350,7 @@ export class Arena extends Phaser.Scene
         // Create a new Graphics object to highlight the cells
         if (!this.highlight) this.highlight = this.add.graphics().setDepth(1);
         this.clearHighlight();
-        this.highlight.fillStyle(0xffd700, 0.7); // Use golden color
+        this.highlight.fillStyle(0xffd700, 0.8); // Use golden color
     
         // Iterate over each cell in the grid
         for (let y = -radius; y <= radius; y++) {
