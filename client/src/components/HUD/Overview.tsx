@@ -3,6 +3,7 @@ import { PlayerProps, TeamMember, PlayerProfileData } from "@legion/shared/inter
 import PlayerInfo from './PlayerInfo';
 import { PlayMode, StatusEffect } from '@legion/shared/enums';
 import { getSpritePath, statusIcons } from '../utils';
+import './Overview.style.css';
 
 import charProfileReady from '@assets/HUD/char_profile_ready.png';
 import charProfileActive from '@assets/HUD/char_profile_active.png';

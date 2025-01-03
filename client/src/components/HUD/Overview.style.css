@@ -1,0 +1,237 @@
+.overview {
+  position: fixed;
+  top: 10px;
+  pointer-events: auto;
+  margin: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 6px;
+  transition: all .2s;
+}
+
+/* Position the left overview */
+.overview:not(.overview_right) {
+  left: 10px;
+}
+
+/* Position the right overview */
+.overview.overview_right {
+  right: 10px;
+  align-items: flex-end;
+}
+
+.overview_playerteam {
+  cursor: var(--game-pointer);
+  transition: all .2s;
+}
+
+/* Update the media queries for scaling */
+@media screen and (max-width: 1500px) and (orientation: landscape) {
+  .overview:not(.overview_right) {
+    transform: scale(0.9);
+    transform-origin: top left;
+  }
+  
+  .overview.overview_right {
+    transform: scale(0.9);
+    transform-origin: top right;
+  }
+  
+  .overview_playerteam {
+    transform: scale(0.9);
+    transform-origin: top right;
+  }
+}
+
+@media screen and (max-width: 1400px) and (orientation: landscape) {
+  .overview:not(.overview_right) {
+    transform: scale(0.75);
+  }
+  
+  .overview.overview_right {
+    transform: scale(0.75);
+  }
+  
+  .overview_playerteam {
+    transform: scale(0.75);
+  }
+}
+
+@media screen and (max-width: 1100px) and (orientation: landscape) {
+  .overview:not(.overview_right) {
+    transform: scale(0.65);
+  }
+  
+  .overview.overview_right {
+    transform: scale(0.65);
+  }
+  
+  .overview_playerteam {
+    transform: scale(0.65);
+  }
+}
+
+@media screen and (max-width: 980px) and (orientation: landscape) {
+  .overview:not(.overview_right) {
+    transform: scale(0.55);
+  }
+  
+  .overview.overview_right {
+    transform: scale(0.55);
+  }
+  
+  .overview_playerteam {
+    transform: scale(0.55);
+  }
+}
+
+.member {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Kim', sans-serif;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  color: white;
+}
+
+.member_container {
+  position: absolute;
+  top: 108px;
+}
+
+.char_stats_container {
+  display: flex;
+  flex-direction: row;
+}
+
+.char_profile {
+  background-size: 100% 100%;
+}
+
+.char_profile_container {
+  width: 70px;
+  height: 70px;
+  border-radius: 8px;
+  padding-bottom: 6px;
+  background-size: 100% 100%;
+  z-index: 20;
+}
+
+.char_portrait {
+  width: 100%;
+  height: 100%;
+  background-position: -40px -40px;
+  background-repeat: no-repeat;
+  transform: scale(0.6);
+}
+
+.char_portrait_right {
+  margin-left: 6px;
+}
+
+.char_alive_animation {
+  animation: animate-sprite 0.7s steps(1) infinite;
+}
+
+.char_stats {
+  background-size: 100% 100%;
+  height: 55px;
+  width: 130px;
+  margin-left: -16px;
+  margin-bottom: 4px;
+  padding: 8px;
+  padding-left: 22px;
+  padding-right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.char_stats_right {
+  margin-left: 0;
+  margin-right: -16px;
+  padding-left: 12px;
+  padding-right: 20px;
+}
+
+.char_stats_right .char_stats_player_name {
+  flex-direction: row-reverse;
+}
+
+.char_stats_player_name {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.char_stats_player_index {
+  min-width: 24px;
+  height: 24px;
+  background-image: url("@assets/HUD/no_bg.png");
+  background-size: 100% 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+}
+
+.char_stats_player_name p {
+  font-size: 14px;
+  font-weight: 400;
+  text-transform: capitalize;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.char_stats_bar {
+  background-color: #0e0e0e;
+  border-radius: 2px;
+  overflow: hidden;
+  width: 100%;
+  height: 4px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.char_stats_hp {
+  background-color: #ca304d;
+  border-radius: 3px;
+  height: 100%;
+  transition: width 0.3s ease-out;
+}
+
+.char_stats_mp {
+  background-color: #4583d0;
+  border-radius: 3px;
+  height: 100%;
+  transition: width 0.3s ease-out;
+}
+
+.char_statuses {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  position: absolute;
+  left: 80px;
+  top: 60px;
+}
+
+.char_statuses_right {
+  left: auto;
+  top: 66px;
+  right: 78px;
+}
+
+.char_statuses img {
+  width: 12px;
+  height: 14px;
+  background-color: #1c1f25;
+  padding: 2px;
+  border-radius: 2px;
+} 

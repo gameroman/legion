@@ -58,82 +58,6 @@
   pointer-events: none;
 }
 
-.overview {
-  position: fixed; /* Change from relative to fixed */
-  top: 10px;
-  pointer-events: auto; /* Re-enable pointer events for the overview components */
-  margin: 0; /* Remove margin since we're using fixed positioning */
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 6px;
-}
-
-/* Position the left overview */
-.overview:not(.overview_right) {
-  left: 10px;
-}
-
-/* Position the right overview */
-.overview.overview_right {
-  right: 10px;
-}
-
-/* Update the media queries for scaling */
-@media screen and (max-width: 1500px) and (orientation: landscape) {
-  .overview:not(.overview_right) {
-    transform: scale(0.9);
-    transform-origin: top left;
-  }
-  
-  .overview.overview_right {
-    transform: scale(0.9);
-    transform-origin: top right;
-  }
-}
-
-@media screen and (max-width: 1400px) and (orientation: landscape) {
-  .overview:not(.overview_right) {
-    transform: scale(0.75);
-  }
-  
-  .overview.overview_right {
-    transform: scale(0.75);
-  }
-}
-
-@media screen and (max-width: 1100px) and (orientation: landscape) {
-  .overview:not(.overview_right) {
-    transform: scale(0.65);
-  }
-  
-  .overview.overview_right {
-    transform: scale(0.65);
-  }
-}
-
-@media screen and (max-width: 980px) and (orientation: landscape) {
-  .overview:not(.overview_right) {
-    transform: scale(0.55);
-  }
-  
-  .overview.overview_right {
-    transform: scale(0.55);
-  }
-}
-
-.member {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: 'Kim', sans-serif;
-  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
-  color: white;
-}
-
 .justify_center {
   justify-content: center;
 }
@@ -224,33 +148,6 @@
   align-items: flex-end;
 }
 
-.overview_playerteam {
-  cursor: var(--game-pointer);
-  transition: all .2s;
-
-  @media screen and (max-width: 1500px) and (orientation: landscape) {
-    transform: scale(0.9);
-    transform-origin: top right;
-  }
-
-  @media screen and (max-width: 1400px) and (orientation: landscape) {
-    transform: scale(0.75);
-  }
-
-  @media screen and (max-width: 1100px) and (orientation: landscape) {
-    transform: scale(0.65);
-  }
-
-  @media screen and (max-width: 980px) and (orientation: landscape) {
-    transform: scale(0.55);
-  }
-}
-
-.member_container {
-  position: absolute;
-  top: 108px;
-}
-
 .item {
   width: 43px;
   height: 43px;
@@ -294,10 +191,6 @@
 
 .char_portrait_right {
   margin-left: 6px;
-}
-
-.char_alive_animation {
-  animation: animate-sprite 0.7s steps(1) infinite;
 }
 
 .char_stats {
@@ -1472,18 +1365,16 @@
   align-items: center;
   justify-content: center;
   padding: 10px;
-  gap: 12px;
   position: relative;
+  margin: 0 auto;
 }
 
 .timeline_character {
   display: flex;
   align-items: center;
-  gap: 16px;
-  position: relative;
+  position: absolute;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
-  position: absolute;
   left: 0;
 }
 

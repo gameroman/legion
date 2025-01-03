@@ -52,8 +52,10 @@ class SpectatorFooter extends Component<SpectatorFooterProps, SpectatorFooterSta
     // Sort queue by position
     const sortedQueue = [...(queue || [])].sort((a, b) => a.position - b.position);
 
-    // Inside the render method, calculate the required width
-    const timelineWidth = Math.max(100, sortedQueue.length * 72); // 72px per character
+    // Inside the render method, update the timeline calculations:
+    const portraitWidth = 72; // Width of each portrait
+    const timelineWidth = Math.max(100, sortedQueue.length * portraitWidth);
+    const startOffset = (timelineWidth - sortedQueue.length * portraitWidth) / 2;
 
     return (
       <div className="spectator_footer_wrapper">
@@ -62,7 +64,10 @@ class SpectatorFooter extends Component<SpectatorFooterProps, SpectatorFooterSta
             <div className="turn_order_label">Turn Order</div>
             <div 
               className="turn_timeline"
-              style={{ minWidth: `${timelineWidth}px` }}
+              style={{ 
+                width: `${timelineWidth}px`,
+                position: 'relative'
+              }}
             >
               {sortedQueue.map((queueItem, index) => {
                 const character = getCharacterFromQueue(queueItem);
@@ -76,13 +81,13 @@ class SpectatorFooter extends Component<SpectatorFooterProps, SpectatorFooterSta
                 const position = positions[characterKey] || index;
 
                 const style = {
-                  transform: `translateX(calc(${position} * 72px))`,
-                  zIndex: sortedQueue.length - position // Ensure proper stacking during animation
+                  transform: `translateX(${startOffset + (position * portraitWidth)}px)`,
+                  zIndex: sortedQueue.length - position
                 };
 
                 return (
                   <div 
-                    key={characterKey}  // Changed to stable key based on character
+                    key={characterKey}
                     className={`timeline_character ${queueItem.team === 1 ? 'timeline_ally' : 'timeline_enemy'}`}
                     style={style}
                   >
