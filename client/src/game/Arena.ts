@@ -537,8 +537,8 @@ export class Arena extends Phaser.Scene
                 return;
             }
 
-            const pointerX = pointer.x - startX;
-            const pointerY = pointer.y - startY;
+            const pointerX = pointer.x + this.cameras.main.scrollX - startX;
+            const pointerY = pointer.y + this.cameras.main.scrollY - startY;
 
             // Calculate the grid coordinates of the pointer
             const gridX = Math.floor(pointerX / this.tileSize);
@@ -1034,7 +1034,7 @@ export class Arena extends Phaser.Scene
         // console.log(`[Arena:processTurnee] Selecting player ${data.num} from team ${data.team}`);
         this.turnee = data;
         this.selectTurnee();
-        // this.emitEvent('overviewChange');
+        this.highlightTurnee();
     }
 
     updateMusicIntensity(ratio){
@@ -2031,5 +2031,33 @@ export class Arena extends Phaser.Scene
         } else {
             console.warn(`No handler found for replay event: ${message.event}`);
         }
+    }
+
+    highlightTurnee() {
+        if (!this.turnee) return;
+        
+        const player = this.getPlayer(this.turnee.team, this.turnee.num);
+        if (!player) return;
+
+        // Get screen dimensions and target position
+        const screenWidth = this.cameras.main.width;
+        const screenHeight = this.cameras.main.height;
+        const {x, y} = this.gridToPixelCoords(player.gridX, player.gridY);
+
+        // Calculate camera movement from center
+        const moveRatio = 0.4;
+        const screenCenterX = screenWidth/2;
+        const screenCenterY = screenHeight/2;
+        
+        const offsetX = (x - screenCenterX) * moveRatio;
+        const offsetY = (y - screenCenterY) * moveRatio;
+
+        // Pan camera smoothly from center
+        this.cameras.main.pan(
+            screenCenterX + offsetX,
+            screenCenterY + offsetY,
+            1000,
+            'Cubic.easeOut'
+        );
     }
 }
