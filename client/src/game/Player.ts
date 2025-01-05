@@ -62,6 +62,7 @@ export class Player extends Phaser.GameObjects.Container {
     normalColor: number;
     goldenColor: number = 0xDAA520;
     blinkTween: Phaser.Tweens.Tween | null = null;
+    selectionArrow: Phaser.GameObjects.Sprite;
 
     constructor(
         scene: Phaser.Scene, arenaScene: Arena, team: Team, name: string, gridX: number, gridY: number, x: number, y: number,
@@ -434,6 +435,25 @@ export class Player extends Phaser.GameObjects.Container {
         this.glowFx.color = GlowColors.Selected;
         this.glowFx.setActive(true);
 
+        // Add floating arrow
+        if (!this.selectionArrow) {
+            this.selectionArrow = this.scene.add.sprite(0, -60, 'arrow')
+                .setScale(0.2)
+                .setAngle(-90);  // Rotate 90 degrees counter-clockwise
+            this.add(this.selectionArrow);
+            
+            // Add floating animation
+            this.scene.tweens.add({
+                targets: this.selectionArrow,
+                y: '-=10',
+                duration: 1000,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+        }
+        this.selectionArrow.setVisible(true);
+
         if (this.isPlayer) {
             this.displayMovementRange();
             this.selected = true;
@@ -445,6 +465,9 @@ export class Player extends Phaser.GameObjects.Container {
 
     deselect() {
         this.selectionOval?.setVisible(false);
+        if (this.selectionArrow) {
+            this.selectionArrow.setVisible(false);
+        }
         this.hideMovementRange();
         this.selected = false;
         this.glowFx.setActive(false);
@@ -997,6 +1020,10 @@ export class Player extends Phaser.GameObjects.Container {
         this.sprite.anims?.stop();
         this.animationSprite.anims.stop();
     
+        if (this.selectionArrow) {
+            this.scene.tweens.killTweensOf(this.selectionArrow);
+        }
+
         // Call the parent class's destroy method
         super.destroy();
       }

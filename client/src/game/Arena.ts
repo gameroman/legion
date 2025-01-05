@@ -239,6 +239,9 @@ export class Arena extends Phaser.Scene
             this.load.off('complete');
         });
         this.connectToServer();
+
+        // In the preload() method, add:
+        this.load.image('arrow', require('@assets/HUD/arrow.png'));
     }
 
     extractGameIdFromUrl() {
