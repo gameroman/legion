@@ -94,7 +94,9 @@ class SpectatorFooter extends Component<SpectatorFooterProps, SpectatorFooterSta
                     className={`timeline_character ${queueItem.team === 1 ? 'timeline_ally' : 'timeline_enemy'}`}
                     style={style}
                   >
-                    <div className="timeline_portrait_container">
+                    <div 
+                      className={`timeline_portrait_container ${queueItem.team === 1 ? 'ally_portrait' : 'enemy_portrait'}`}
+                    >
                       <div 
                         className="timeline_portrait" 
                         style={portraitStyle}

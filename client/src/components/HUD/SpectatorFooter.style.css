@@ -84,13 +84,11 @@
   width: 60px;
   height: 60px;
   border-radius: 4px;
-  background-image: url('@assets/HUD/char_profile_idle.png');
   background-size: contain;
   background-repeat: no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* overflow: hidden; */
   position: relative;
   transition: transform 0.3s ease;
   margin: 3px;
@@ -217,4 +215,12 @@
 .timeline_portrait_container {
   position: relative;
   margin: 3px;
+}
+
+.ally_portrait {
+  background-image: url('@assets/HUD/blue_box.png');
+}
+
+.enemy_portrait {
+  background-image: url('@assets/HUD/red_box.png');
 } 
