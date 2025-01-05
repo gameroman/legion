@@ -531,10 +531,8 @@ export class Player extends Phaser.GameObjects.Container {
     }
     
     onClick() {
-        this.arena.playSound('click');
-        if (this.isPlayer && !this.isInIce()) { // If clicking on a player of your team
-            this.arena.selectPlayer(this);
-        } else if(this.isTarget()) {
+        if(this.isTarget()) {
+            this.arena.playSound('click');
             this.arena.sendAttack(this);
         }
     }
@@ -661,7 +659,7 @@ export class Player extends Phaser.GameObjects.Container {
     isTarget() {
         return (!this.isPlayer || this.isInIce())
             && this.isAlive()
-            && this.arena.selectedPlayer?.isNextTo(this.gridX, this.gridY)
+            // && this.arena.selectedPlayer?.isNextTo(this.gridX, this.gridY)
     }
 
     isNextTo(x: number, y: number) {

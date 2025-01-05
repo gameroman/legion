@@ -643,7 +643,7 @@ export class Arena extends Phaser.Scene
             } if (pendingItem?.target === Target.SINGLE) {
                 this.sendUseItem(this.selectedPlayer?.pendingItem, gridX, gridY, player);
             } else {
-                // player.onClick();
+                player.onClick();
             }
         } else {
             console.log(`Clicked on empty tile at (${gridX}, ${gridY})`);

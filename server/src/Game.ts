@@ -506,6 +506,7 @@ export abstract class Game
 
     processMove({tile}: {tile: Tile}) {
         const player = this.turnee;
+        console.log(`[Game:processMove] Player ${player.num} moving to ${tile.x},${tile.y}`);
         if (!player.canAct()) {
             return;
         }
@@ -570,20 +571,30 @@ export abstract class Game
     }
 
     processAttack({target, sameTeam}: {target: number, sameTeam: boolean}) {
-        // console.log(`[Game:processAttack] Player ${num} attacking target ${target}`);
+        console.log(`[Game:processAttack] Player ${this.turnee.num} attacking target ${target}`);
         const player = this.turnee;
         const opponentTeam = sameTeam ? player.team : this.getOtherTeam(player.team.id);
         const opponent = opponentTeam.getMembers()[target - 1];
         
         if (
             !player.canAct() || 
-            !player.isNextTo(opponent.x, opponent.y) || 
             !opponent.isAlive()
-        ) {
-            // console.log(`[Game:processAttack] Action refused: canAct = ${player.canAct()}, isNextTo = ${player.isNextTo(opponent.x, opponent.y)}, isAlive = ${opponent.isAlive()}!`);
-            // console.log(`[Game:processAttack] Player ${num} at ${player.x},${player.y}, target ${target} at ${opponent.x},${opponent.y}`);
-            return
+        ) {return
         };
+
+        if (!player.isNextTo(opponent.x, opponent.y)) {
+            // Find closest cell to opponent in movement range
+            const cellsInRange = this.listCellsInRange(player.x, player.y, player.distance);
+            if (!cellsInRange) {
+                return;
+            }
+            const closestCell = cellsInRange.reduce((closest, cell) => {
+                const distance = Math.abs(cell.x - opponent.x) + Math.abs(cell.y - opponent.y);
+                return distance < Math.abs(closest.x - opponent.x) + Math.abs(closest.y - opponent.y) ? cell : closest;
+            }, cellsInRange[0]);
+            this.processMove({tile: closestCell});
+            return;
+        }
         
         const damage = this.calculateDamage(player, opponent);
         opponent.takeDamage(damage);
