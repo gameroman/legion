@@ -224,13 +224,13 @@
 
 .char_statuses_right {
   left: auto;
-  top: 66px;
+  top: 60px;
   right: 78px;
 }
 
 .char_statuses img {
-  width: 12px;
-  height: 14px;
+  width: 18px;
+  height: 20px;
   background-color: #1c1f25;
   padding: 2px;
   border-radius: 2px;

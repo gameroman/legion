@@ -244,7 +244,7 @@ spells.push(new BaseSpell({
     shake: false,
 
     size: 1,
-    target: Target.AOE,
+    target: Target.SINGLE,
     effects: [],
     status: {effect: StatusEffect.POISON, chance: 1, duration: 10},
     effort: 5,
@@ -266,7 +266,7 @@ spells.push(new BaseSpell({
     yoffset: 30,
 
     size: 1,
-    target: Target.AOE,
+    target: Target.SINGLE,
     effects: [],
     status: {effect: StatusEffect.MUTE, chance: 1, duration: 5},
     effort: 4,

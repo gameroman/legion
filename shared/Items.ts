@@ -118,7 +118,7 @@ items[8] = new BaseItem({
     sfx: "healing",
     speedClass: SpeedClass.NORMAL,
     target: Target.SINGLE,
-    effects: [{stat: Stat.HP, value: 10, onKO: true}],
+    effects: [{stat: Stat.HP, value: 50, onKO: true}],
     effort: 1,
     targetHighlight: TargetHighlight.DEAD,
 });

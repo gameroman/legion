@@ -752,7 +752,7 @@ export class Player extends Phaser.GameObjects.Container {
         this.MPBar?.setVisible(false);
         this.hideAllStatusAnimations();
         this.playAnim('die');
-        this.hideBaseSquare(); // Hide baseSquare when dead
+        // this.hideBaseSquare(); 
         this.stopBlinkingBaseSquare(); // Stop blinking if any
         if (this.arena.selectedPlayer == this) this.arena.deselectPlayer();
 

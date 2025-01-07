@@ -61,6 +61,7 @@ import groundTilesAtlas from '@assets/tiles2.json';
 import { errorToast, recordLoadingStep, silentErrorToast } from '../components/utils';
 import { Tutorial } from './Tutorial';
 import { BaseSpell } from '@legion/shared/BaseSpell';
+import { BaseItem } from '@legion/shared/BaseItem';
 const LOCAL_ANIMATION_SCALE = 3;
 const DEPTH_OFFSET = 0.01;
 
@@ -632,6 +633,10 @@ export class Arena extends Phaser.Scene
             }
             this.sendSpell(gridX, gridY, player);
         } else if (this.selectedPlayer?.pendingItem != null) {
+            if (!this.validateTarget(gridX, gridY, pendingItem)) {
+                this.playSound('nope', 0.2);
+                return;
+            }
             this.sendUseItem(this.selectedPlayer?.pendingItem, gridX, gridY, player);
         } else if ((!player || !player.isAlive()) && this.hasObstacle(gridX, gridY)) {
             this.sendObstacleAttack(gridX, gridY);
@@ -645,18 +650,18 @@ export class Arena extends Phaser.Scene
         }
     }
 
-    validateTarget(gridX, gridY, spell: BaseSpell) {
-        if (spell.target == Target.AOE && spell.size > 1) {
+    validateTarget(gridX, gridY, action: BaseSpell | BaseItem) {
+        if (action.target == Target.AOE && action.size > 1) {
             return true;
         }
         const character = this.gridMap.get(serializeCoords(gridX, gridY));
+        if (!character && action.target === Target.SINGLE) return false;
         const isAlly = character?.team.id === this.playerTeamId;
-        console.log(`validateTarget: ${spell.name} ${spell.targetHighlight} ${isAlly}`);
-        if (spell.targetHighlight === TargetHighlight.ALLY && isAlly) {
+        if (action.targetHighlight === TargetHighlight.ALLY && isAlly) {
             return true;
-        } else if ((spell.targetHighlight == undefined || spell.targetHighlight === TargetHighlight.ENEMY) && !isAlly) {
+        } else if ((action.targetHighlight == undefined || action.targetHighlight === TargetHighlight.ENEMY) && !isAlly) {
             return true;
-        } else if (spell.targetHighlight === TargetHighlight.DEAD && !character?.isAlive()) {
+        } else if (action.targetHighlight === TargetHighlight.DEAD && !character?.isAlive()) {
             return true;
         }
         return false;
