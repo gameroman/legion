@@ -70,7 +70,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
 
   componentDidMount() {
     events.on('showPlayerBox', this.showPlayerBox);
-    events.on('updateOverview', this.updateOverview);
+    events.on('refreshOverview', this.updateOverview);
     events.on('gameEnd', this.endGame);
     events.on('hoverCharacter', () => {
       if (this.state.pendingSpell || this.state.pendingItem) return;

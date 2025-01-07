@@ -697,9 +697,10 @@ export class Arena extends Phaser.Scene
     }
     
     refreshOverview() {
+        this.overviewReady = true;
         const { team1, team2, general, initialized, queue, turnee } = this.getOverview();
         if (this.overviewReady) {
-            events.emit('updateOverview', team1, team2, general, initialized, queue, turnee);
+            events.emit('refreshOverview', team1, team2, general, initialized, queue, turnee);
         }
     }
 
@@ -740,9 +741,6 @@ export class Arena extends Phaser.Scene
             case 'cooldownEnded':
             case 'cooldownChange':
                 this.refreshBox();
-                this.refreshOverview();
-                break;
-            case 'overviewChange':
                 this.refreshOverview();
                 break;
             case 'letterKey':
@@ -1059,11 +1057,6 @@ export class Arena extends Phaser.Scene
         this.turnee = data;
         this.selectTurnee();
         this.highlightTurnee();
-
-        if (this.selectedPlayer) {
-            this.emitEvent('selectPlayer', {num: this.selectedPlayer.num})
-            events.emit('selectPlayer', {num: this.selectedPlayer.num}); // TODO: consolidate
-        }
     }
 
     updateMusicIntensity(ratio){
@@ -1532,7 +1525,7 @@ export class Arena extends Phaser.Scene
             this.selectTurnee();
         } else {
             const delay = 3000;
-            setTimeout(this.updateOverview.bind(this), delay + 1000);
+            setTimeout(this.refreshOverview.bind(this), delay + 1000);
             setTimeout(() => {
                 if (!this.gameSettings.tutorial) this.displayGEN(GEN.COMBAT_BEGINS);
                 this.setGameInitialized();
@@ -1578,7 +1571,7 @@ export class Arena extends Phaser.Scene
     
     setGameInitialized() {
         this.gameInitialized = true;
-        this.updateOverview();
+        this.refreshOverview();
     }
 
     startAnimation() {
@@ -1751,12 +1744,6 @@ export class Arena extends Phaser.Scene
                 }
             });
         });
-    }
-     
-
-    updateOverview() {
-        this.overviewReady = true;
-        this.emitEvent('overviewChange');
     }
 
     getOverview() {
