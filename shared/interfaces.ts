@@ -315,6 +315,7 @@ export interface GameData {
 export interface PlayerProps {
     name: string;
     number: number;
+    team: number;
     portrait: string;
     hp: number;
     maxHp: number;
@@ -327,6 +328,7 @@ export interface PlayerProps {
     pendingSpell: number;
     pendingItem: number;
     isParalyzed: boolean;
+    isPlayer: boolean;
 }
 
 export type StatusEffects = {

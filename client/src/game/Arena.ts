@@ -326,7 +326,7 @@ export class Arena extends Phaser.Scene
     }
 
     sendAttack(player: Player) {
-        if (!this.selectedPlayer.canAct()) return;
+        if (!this.selectedPlayer?.canAct()) return;
         const data = {
             target: player.num,
             sameTeam: player.team.id === this.selectedPlayer.team.id,
@@ -336,7 +336,7 @@ export class Arena extends Phaser.Scene
     }
 
     sendObstacleAttack(x, y) {
-        if (!this.selectedPlayer.canAct()) return;
+        if (!this.selectedPlayer?.canAct()) return;
         const data = {
             x,
             y,
@@ -719,7 +719,6 @@ export class Arena extends Phaser.Scene
             case 'characterKilled':
                 if (this.gameSettings.tutorial) events.emit('characterKilled');
                 break;
-            
             case 'hpChange':
                 if (this.selectedPlayer && data.num === this.selectedPlayer.num) {
                     this.refreshBox();
@@ -783,21 +782,20 @@ export class Arena extends Phaser.Scene
         }
     }
 
+    selectTurnee() {
+        this.deselectPlayer();
+        if (this.turnee) {
+            const player = this.getPlayer(this.turnee.team, this.turnee.num);
+            this.selectPlayer(player);
+        }
+    }
+
     selectPlayer(player: Player) {
         if (!this.gameInitialized) return;
-        if (this.selectedPlayer) {
-            const isSelf = player.num === this.selectedPlayer.num;
-            this.deselectPlayer();
-            if (isSelf) return;
-        }
+        console.log(`[Arena:selectPlayer] ${player.name}`);
         this.selectedPlayer = player;
         this.selectedPlayer.select();
-
-        console.log(`[selectPlayer] ${this.selectedPlayer.name} : ${this.selectedPlayer.isPlayer}`);
-        if (this.selectedPlayer.isPlayer) {
-            this.emitEvent('selectPlayer', {num: this.selectedPlayer.num})
-            events.emit('selectPlayer', {num: this.selectedPlayer.num}); // TODO: consolidate
-        }
+        this.refreshBox();
     }
 
     deselectPlayer() {
@@ -806,7 +804,6 @@ export class Arena extends Phaser.Scene
             this.selectedPlayer.cancelSkill();
             this.selectedPlayer = null;
             this.clearHighlight();
-            this.emitEvent('deselectPlayer')
         }
     }
 
@@ -1058,10 +1055,15 @@ export class Arena extends Phaser.Scene
     }
 
     processTurnee(data: {num: number, team: number}) {
-        // console.log(`[Arena:processTurnee] Selecting player ${data.num} from team ${data.team}`);
+        console.log(`[Arena:processTurnee] Selecting player ${data.num} from team ${data.team}`);
         this.turnee = data;
         this.selectTurnee();
         this.highlightTurnee();
+
+        if (this.selectedPlayer) {
+            this.emitEvent('selectPlayer', {num: this.selectedPlayer.num})
+            events.emit('selectPlayer', {num: this.selectedPlayer.num}); // TODO: consolidate
+        }
     }
 
     updateMusicIntensity(ratio){
@@ -1487,11 +1489,6 @@ export class Arena extends Phaser.Scene
                 spellAreaImage.destroy(); // Destroy the image at the end
             }
         });
-    }
-
-    selectTurnee() {
-        this.deselectPlayer();
-        if (this.turnee) this.selectPlayer(this.getPlayer(this.turnee.team, this.turnee.num));
     }
 
     initializeGame(data: GameData): void {

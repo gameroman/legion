@@ -195,6 +195,7 @@ export class Player extends Phaser.GameObjects.Container {
         return {
             name: this.name,
             number: this.num,
+            team: this.team.id,
             portrait: this.texture,
             hp: this.hp,
             maxHp: this.maxHP,
@@ -207,6 +208,7 @@ export class Player extends Phaser.GameObjects.Container {
             pendingSpell: this.pendingSpell,
             pendingItem: this.pendingItem,
             isParalyzed: this.isParalyzed(),
+            isPlayer: this.isPlayer,
           }
     }
 

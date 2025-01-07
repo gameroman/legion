@@ -37,7 +37,6 @@ interface GameHUDState {
   showTopMenu: boolean;
   showOverview: boolean;
   queue: any[];
-  turnee: any;
 }
 
 const events = new EventEmitter();
@@ -67,12 +66,10 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     showTopMenu: false,
     showOverview: false,
     queue: [],
-    turnee: null,
   } as GameHUDState;
 
   componentDidMount() {
     events.on('showPlayerBox', this.showPlayerBox);
-    events.on('hidePlayerBox', this.hidePlayerBox);
     events.on('updateOverview', this.updateOverview);
     events.on('gameEnd', this.endGame);
     events.on('hoverCharacter', () => {
@@ -122,11 +119,8 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   showPlayerBox = (playerData: PlayerProps) => {
-    this.setState({ playerVisible: true, player: playerData });
-  }
-
-  hidePlayerBox = () => {
-    this.setState({ playerVisible: false, player: null });
+    console.log(`[GameHUD:showPlayerBox] ${playerData.name}`);
+    this.setState({ player: playerData });
   }
 
   updateOverview = (
@@ -141,7 +135,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
         mode: general.mode,
         gameInitialized: initialized,
         queue,
-        turnee,
         showTopMenu: general.mode === PlayMode.TUTORIAL ? _showTopMenu : true,
         showOverview: general.mode === PlayMode.TUTORIAL ? _showOverview : true,
     })
@@ -187,8 +180,11 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   render() {
-    const { playerVisible, player, team1, team2, isSpectator, mode, gameInitialized, showTopMenu, showOverview } = this.state;
-    const members = team1?.members[0].isPlayer ? team1?.members : team2?.members;
+    const { 
+      player, team1, team2, isSpectator, mode, gameInitialized, showTopMenu,
+      showOverview
+    } = this.state;
+    const ownMembers = team1?.members[0].isPlayer ? team1?.members : team2?.members;
     const score = team1?.members[0].isPlayer ? team1?.score : team2?.score;
 
     if (!gameInitialized) {
@@ -197,7 +193,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
 
     const isTutorialMode = mode === PlayMode.TUTORIAL;
 
-    const showEnemyTurnBanner = !playerVisible && gameInitialized && !this.state.gameOver;
+    const showEnemyTurnBanner = !player?.isPlayer && gameInitialized && !this.state.gameOver;
 
     return (
       <div className="gamehud height_full flex flex_col justify_between padding_bottom_16">
@@ -213,7 +209,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
               Enemy Turn
             </div>
           )}
-           {showTopMenu && playerVisible && player ? (
+           {showTopMenu && player?.isPlayer ? (
             <>
               {player.pendingSpell == undefined && player.pendingItem == undefined && (
                 <div className="player_turn_banner">
@@ -229,17 +225,18 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
             </>
           ) : null}
         </>
-        <SpectatorFooter
-          isTutorial={isTutorialMode}
-          score={score}
-          mode={mode}
-          closeGame={this.closeGame}
-          queue={this.state.queue}
-          team1={team1}
-          team2={team2}
+          <SpectatorFooter
+            isTutorial={isTutorialMode}
+            score={score}
+            mode={mode}
+            closeGame={this.closeGame}
+            queue={this.state.queue}
+            isPlayer={player?.isPlayer}
+            team1={team1}
+            team2={team2}
         />
         {this.state.gameOver && <Endgame
-          members={members}
+          members={ownMembers}
           grade={this.state.grade}
           chests={this.state.chests}
           isWinner={this.state.isWinner}
