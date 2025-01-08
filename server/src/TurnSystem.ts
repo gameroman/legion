@@ -59,18 +59,32 @@ export class TurnSystem {
         // - Add small random factor to prevent perfect loops
         const speedMultiplier = 1 - (charSpeed * 0.0045); // Speed reduces cooldown by 0.4% per point
         const randomVariation = Math.random() * 10 - 5; // ±5 variation
-        const timeIncrement = (baseCooldown * speedMultiplier) + randomVariation;
+        let timeIncrement = (baseCooldown * speedMultiplier) + randomVariation;
+        
+        // For PASS actions, ensure the time increment is at least enough to prevent consecutive turns
+        if (actionType === SpeedClass.PASS) {
+            queueItem.passCount++;
+            // Find the next fastest actor's time
+            const otherActors = this.turnQueue.filter(item => 
+                item.character !== character && 
+                item.character.isAlive()
+            );
+            
+            if (otherActors.length > 0) {
+                const nextFastestTime = Math.min(...otherActors.map(item => item.nextActionTime));
+                // Ensure we go after the next fastest actor
+                const minimumNextTime = nextFastestTime + 1;
+                const requiredIncrement = minimumNextTime - this.currentTime;
+                timeIncrement = Math.max(timeIncrement, requiredIncrement);
+            }
+            
+            // Add increasing penalty for consecutive passes
+            // timeIncrement += (queueItem.passCount * 25); // Each consecutive pass adds 25 to cooldown
+        } else {
+            queueItem.passCount = 0;
+        }
         
         queueItem.nextActionTime = this.currentTime + timeIncrement;
-
-        // For PASS specifically, add an increasing penalty for consecutive passes
-        // if (actionType === SpeedClass.PASS) {
-        //     queueItem.passCount++;
-        //     queueItem.nextActionTime += (queueItem.passCount * 25); // Each consecutive pass adds 25 to cooldown
-        // } else {
-        //     queueItem.passCount = 0;
-        // }
-
         this.sortQueue();
     }
 

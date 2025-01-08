@@ -361,7 +361,7 @@ class QueuePage extends Component<QPageProps, QpageState> {
                                 </div>
                                 <div className="queue-number"></div>
                                 <div className="queue-text">
-                                    Waiting for players in {PlayModeLabels[this.props.matches.mode]} mode…
+                                    Looking for a worthy opponent in {PlayModeLabels[this.props.matches.mode]} mode…
                                 </div>
                             </div>
                         )

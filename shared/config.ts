@@ -47,7 +47,7 @@ export const goldRewardInterval = 15;
 export const goldReward = 1;
 export const casualModeThresholdTime = 5; // seconds after which redirection probability starts increasing
 export const maxWaitTimeForPractice = isDev ? 5 : 60; // maximum wait time after which a player is guaranteed to be redirected
-export let ALLOW_SWITCHEROO_RANKED = false;
+export let ALLOW_SWITCHEROO_RANKED = true;
 
 // Feature flags
 export const ENABLE_PLAYER_LEVEL = false;
