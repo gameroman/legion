@@ -569,6 +569,7 @@ export class Arena extends Phaser.Scene
             this.cellsHighlight.setTargetMode(size, true);
             this.clearHighlight();
             events.emit('pendingSpell');
+            this.brightenScene();
             this.darkenScene(spell?.targetHighlight);
         } else {
             this.cellsHighlight.setNormalMode(true);
