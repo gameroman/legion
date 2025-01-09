@@ -50,11 +50,7 @@ export class ServerPlayer {
     stats_modifiers: CharacterStats;
     hp;
     mp;
-    speed = 1; // TODO: incorporate into stats one day
     distance;
-    terrainDoTTimer: NodeJS.Timeout | null = null;
-    statusDoTTimer: NodeJS.Timeout | null = null;
-    statusesTimer: NodeJS.Timeout | null = null;
     inventoryCapacity: number = 3;
     inventory: Item[] = [];
     spells: Spell[] = [];
@@ -453,6 +449,10 @@ export class ServerPlayer {
         }
     }
 
+    removeCurrentTerrainEffect() {
+        this.removeTerrainEffect(this.activeTerrainDoT);
+    }
+
     removeTerrainEffect(terrain: Terrain) {
         this.activeTerrainDoT = null;
         if (terrain == Terrain.ICE) {
@@ -505,14 +505,6 @@ export class ServerPlayer {
         if (change) this.broadcastStatusEffectChange();
     }
 
-    clearDoTSatus(status: StatusEffect) {
-        if (DoTStatuses.includes(status)) {
-            if (this.statusDoTTimer) {
-                clearTimeout(this.statusDoTTimer);
-            }
-        }
-    }
-
     clearStatusEffects() {
         let change = false;
         for (const status in this.statuses) {
@@ -521,12 +513,6 @@ export class ServerPlayer {
             this.removeStatusEffect(status as keyof StatusEffects);
         }
         if (change) this.broadcastStatusEffectChange();
-    }
-
-    stopTerrainDoT() {
-        if (this.terrainDoTTimer) {
-            clearTimeout(this.terrainDoTTimer);
-        }
     }
 
     gainXP(amount: number) {
@@ -589,11 +575,6 @@ export class ServerPlayer {
         this.setMP(this.getStat(Stat.MP));
         // console.log(`[ServerPlayer:zombieLevelUp] Stats after lvlUp: ${Object.values(this.stats).join(", ")}`);
     }
-
-    halveSpeed() {
-        this.speed /= 2;
-    }
-
     isMage() {
         return this.class === Class.WHITE_MAGE || this.class === Class.BLACK_MAGE;
     }

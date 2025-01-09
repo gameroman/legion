@@ -50,7 +50,6 @@ export class TurnSystem {
         const baseCooldown = ACTION_COOLDOWNS[actionType];
         
         const charSpeed = character.getStat(Stat.SPEED);
-        console.log(`[TurnSystem:processAction] ${character.name} speed: ${charSpeed}`);
         
         // Compute new action time:
         // - Start from current time
