@@ -1017,8 +1017,17 @@ export class Arena extends Phaser.Scene
     }
 
     playSound(name, volume = 1, loop = false) {
+        if (!this.SFX || !this.SFX[name]) {
+            console.warn(`Sound effect "${name}" not found`);
+            return;
+        }
+        
         const adjustedVolume = volume * this.sfxVolume;
-        this.SFX[name].play({delay: 0, volume: adjustedVolume, loop});
+        try {
+            this.SFX[name].play({delay: 0, volume: adjustedVolume, loop});
+        } catch (error) {
+            console.warn(`Error playing sound "${name}":`, error);
+        }
     }
 
     stopSound(name) {
@@ -1442,10 +1451,6 @@ export class Arena extends Phaser.Scene
 
         this.processTerrain(data.terrain); // Put after floatTiles() to allow for tilesMap to be intialized
 
-        if (this.gameSettings.tutorial) {
-            this.tutorial = new Tutorial(this, this.gamehud);
-        }
-
         if (isReconnect) {
             this.setGameInitialized();
             this.selectTurnee();
@@ -1457,10 +1462,6 @@ export class Arena extends Phaser.Scene
                 this.setGameInitialized();
                 this.selectTurnee();
             }, delay);
-        }
-
-        if (this.gameSettings.tutorial) {
-            this.tutorial.start();
         }
 
         // Events from the HUD

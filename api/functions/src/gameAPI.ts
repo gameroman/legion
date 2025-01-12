@@ -2,10 +2,25 @@ import {onRequest} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import admin, {checkAPIKey, corsMiddleware, storage, isDevelopment} from "./APIsetup";
 import {EndGameData, GameReplayMessage} from "@legion/shared/interfaces";
-import {GameStatus} from "@legion/shared/enums";
+import {GameStatus, League, PlayMode} from "@legion/shared/enums";
 import {logPlayerAction, updateDailyVisits} from "./dashboardAPI";
 import Busboy from 'busboy';
 
+export async function createGameDocument(
+  gameId: string, players: string[], mode: PlayMode, league: League, stake: number
+) {
+  const db = admin.firestore();
+  const gameData = {
+    date: new Date(),
+    gameId,
+    players,
+    mode,
+    league,
+    status: GameStatus.ONGOING,
+    stake,
+  };
+  await db.collection("games").add(gameData);
+}
 
 export const createGame = onRequest({ 
   secrets: ["API_KEY"],
@@ -26,24 +41,14 @@ export const createGame = onRequest({
       const league = request.body.league;
       const stake = request.body.stake;
 
-      const gameData = {
-        date: new Date(),
-        gameId,
-        players,
-        mode,
-        league,
-        status: GameStatus.ONGOING,
-        stake,
-      };
-
-      await db.collection("games").add(gameData);
+      await createGameDocument(gameId, players, mode, league, stake);
 
       for (const player of players) {
         logPlayerAction(player, "gameStart", {
           gameId,
-          league: gameData.league,
-          mode: gameData.mode,
-          stake: gameData.stake,
+          league,
+          mode,
+          stake,
         });
       }
 

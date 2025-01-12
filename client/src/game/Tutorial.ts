@@ -47,7 +47,16 @@ export class Tutorial {
                     this.game.summonEnemy(15, 4);
                 },
                 transitions: {
-                    nextMessage: 'pointToCharacter',
+                    characterKilled: 'pointToCharacter',
+                },
+            },
+            _2v2: {
+                onEnter: () => {
+                    this.game.summonEnemy(18, 4);
+                    this.game.summonEnemy(13, 4);
+                },
+                transitions: {
+                    characterKilled: 'pointToCharacter',
                 },
             },
             pointToCharacter: {

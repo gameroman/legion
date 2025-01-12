@@ -129,7 +129,7 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
       </div>
       <div className="hero-content">
         <h2>Easy to learn, thrilling to master</h2>
-        <h3>Tactical PvP - Free to play</h3>
+        <h3>Turn-based PvP - Tactical - Free to play</h3>
         <p>Assemble a team of heroes and compete against other players to be the strongest of the arena!</p>
         <button className="cta-button" onClick={() => route('/game/tutorial')} aria-label="Start playing Legion">Play Now</button>
       </div>
