@@ -10,12 +10,11 @@ export const tips = [
     "The only way to free a frozen character is to attack them with a melee attack or use a fire spell on them!",
     "Thunder spells can paralyze your enemies, preventing them from moving or attacking for a limited time!",
     "The + and X versions of spells tend to have larger areas of effect and deal more damage!",
-    "Every action in the game has a cooldown time. While a character is in cooldown, they cannot do anything, but you can still use your other characters in the meantime!",
+    "The order of your characters' turns is determined by their speed stat. The faster they are, the sooner their turn will come!",
     "Targetting ice spells on an empty cell will still create ice blocks that can be used to block your enemies' path!",
     "The HP and MP of your whole team are fully replenished after each combat, so don't be afraid to use your spells!",
     "You can revive characters during combat by using a Clover!",
-    "The bar at the bottom of the game screen is the Audience bar. Impress the audience to earn extra rewards!",
-    "Haste Potions cut your cooldowns in half, very useful before casting a powerful spell!",
+    // "The bar at the bottom of the game screen is the Audience bar. Impress the audience to earn extra rewards!",
     "You can challenge any player to a game by visitting their profile page and clicking on the 'Challenge' button!",
 ];
 

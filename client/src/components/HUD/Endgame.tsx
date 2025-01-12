@@ -45,7 +45,7 @@ interface EndgameProps {
     grade: string;
     chests: GameOutcomeReward[];
     chestKey: ChestColor;
-    mode: PlayMode;
+    game0: boolean;
     eventEmitter: any;
     closeGame: () => void;
 }
@@ -127,13 +127,14 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
     render() {
         const [width, height] = useWindowSize()
         const { members, characters } = this.props;
-        const isTutorial = this.props.mode == PlayMode.TUTORIAL;
+        const isGame0 = this.props.game0;
+        const grade = isGame0 ? 'A' : this.props.grade;
 
         return (
             <div className="endgame">
                 <div className="defeat_title" style={this.endGameTitleBg()}>
                     <img className="defeat_title_bg" src={this.props.isWinner ? victoryTitle : defeatTitle} alt="End Title" />
-                    {this.props.isWinner && <img className="defeat_title_effect" src={this.getGradeImage(this.props.grade)} alt="" />}
+                    {this.props.isWinner && <img className="defeat_title_effect" src={this.getGradeImage(grade)} alt="" />}
                 </div>
                 <div className="endgame_score_bg">
                     <div className="flex items_center gap_4">
@@ -146,7 +147,7 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
                     </div>
                 </div>
 
-                {isTutorial && <div className="endgame_meet_team_msg">You earned your first 3 characters!</div>}
+                {isGame0 && <div className="endgame_meet_team_msg">You earned your first 3 characters!</div>}
 
                 <div className="flex flex_wrap gap_16 justify_center items_center max_w_lg" style={{ padding: '36px 48px', minHeight: '400px', alignItems: 'flex-start' }}>
                     {characters.map((character, idx) => (

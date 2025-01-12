@@ -1152,7 +1152,7 @@
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 100;
+  z-index: 10;
   
   /* Container styling */
   background: linear-gradient(
@@ -1240,7 +1240,7 @@
   top: 19vh;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 100;
+  z-index: 10;
   display: flex;
   align-items: center;
   gap: 12px;

@@ -1587,6 +1587,10 @@ export class Arena extends Phaser.Scene
                 return;
             }
 
+            if (gen != GEN.COMBAT_BEGINS && this.gameSettings.game0) {
+                return;
+            }
+
             let text1, text2;
 
             switch (gen) {

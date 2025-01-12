@@ -246,11 +246,11 @@ export class NewCharacter {
   getSpeed(): number {
     switch (this.characterClass) {
       case Class.WARRIOR:
-        return this.getRandom(25, 35);
+        return this.getRandom(26, 35);
       case Class.WHITE_MAGE:
-        return this.getRandom(20, 30);
-      case Class.BLACK_MAGE:
         return this.getRandom(15, 25);
+      case Class.BLACK_MAGE:
+        return this.getRandom(15, 20);
       case Class.THIEF:
         return this.getRandom(20, 30);
     }

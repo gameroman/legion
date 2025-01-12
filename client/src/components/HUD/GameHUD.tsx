@@ -30,6 +30,7 @@ interface GameHUDState {
   characters: CharacterUpdate[];
   isSpectator: boolean;
   mode: PlayMode;
+  game0: boolean;
   grade: string;
   chests: GameOutcomeReward[];
   key: ChestColor;
@@ -59,6 +60,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     gameOver: false,
     isSpectator: false,
     mode: null,
+    game0: false,
     xpReward: 0,
     goldReward: 0,
     characters: [],
@@ -73,6 +75,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     queue: [],
     timeLeft: 0,
     turnNumber: 0,
+    turnDuration: 0,
   } as GameHUDState;
 
   componentDidMount() {
@@ -134,15 +137,15 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     queue: any[], turnee: any
   ) => {
     const _showTopMenu = this.state.showTopMenu;
-    const _showOverview = this.state.showOverview;
     this.setState({ team1, team2 });
     this.setState({
         isSpectator: general.isSpectator,
         mode: general.mode,
+        game0: general.game0,
         gameInitialized: initialized,
         queue,
         showTopMenu: general.mode === PlayMode.TUTORIAL ? _showTopMenu : true,
-        showOverview: general.mode === PlayMode.TUTORIAL ? _showOverview : true,
+        showOverview: !general.game0,
         turnDuration: turnee.turnDuration,
         timeLeft: turnee.timeLeft,
         turnNumber: turnee.turnNumber,
@@ -261,7 +264,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
           goldReward={this.state.goldReward}
           characters={this.state.characters}
           chestKey={ChestColor.SILVER}
-          mode={mode}
+          game0={this.state.game0}
           closeGame={this.closeGame}
           eventEmitter={events}
         />}
