@@ -253,8 +253,10 @@ export abstract class Game
     resetTurnTimer(turnDuration: number) {
         clearTimeout(this.turnTimer!);
         this.turnStart = Date.now();
-        this.turnDuration = turnDuration;
+        // console.log(`[Game:resetTurnTimer] Resetting turn: ${turnDuration}`);
         this.turnTimer = setTimeout(this.processTurn.bind(this), turnDuration * 1000);
+        this.turnDuration = turnDuration;
+
     }
 
     processTurn(isKill: boolean = false) {
@@ -267,7 +269,7 @@ export abstract class Game
         this.turnee = this.turnSystem.getNextActor();
         this.turnee.setHasActed(false);
     
-        console.log(`[Game:processTurn] Turnee: ${this.turnee.num} from team ${this.turnee.team.id}`);
+        // console.log(`[Game:processTurn] Turnee: ${this.turnee.num} from team ${this.turnee.team.id}`);
     
         this.turnNumber++;
         let turnDuration = this.turnDuration + (isKill ? KILL_CAM_DURATION : 0);
@@ -521,7 +523,7 @@ export abstract class Game
 
     processMove({tile}: {tile: Tile}) {
         const player = this.turnee;
-        console.log(`[Game:processMove] Player ${player.num} moving to ${tile.x},${tile.y}`);
+        // console.log(`[Game:processMove] Player ${player.num} moving to ${tile.x},${tile.y}`);
         if (!player.canAct()) {
             return;
         }
@@ -586,7 +588,7 @@ export abstract class Game
     }
 
     processAttack({target, sameTeam}: {target: number, sameTeam: boolean}) {
-        console.log(`[Game:processAttack] Player ${this.turnee.num} attacking target ${target}`);
+        // console.log(`[Game:processAttack] Player ${this.turnee.num} attacking target ${target}`);
         const player = this.turnee;
         const opponentTeam = sameTeam ? player.team : this.getOtherTeam(player.team.id);
         const opponent = opponentTeam.getMembers()[target - 1];

@@ -418,7 +418,7 @@ export class AIServerPlayer extends ServerPlayer {
     }
 
     startTurn() {
-        console.log(`[AIServerPlayer:startTurn] ${this.name} is starting turn`);
+        // console.log(`[AIServerPlayer:startTurn] ${this.name} is starting turn`);
         super.startTurn();
         if (FREEZE_AI) return;
         // If is zombie, take between 1 and 4 seconds to act, otherwise between 1 and 2

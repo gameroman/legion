@@ -160,7 +160,7 @@ export class AIGame extends Game {
         const aiTeam = this.teams.get(2);
 
         this.turnDuration = Math.max(
-            GAME_0_TURN_DURATION - (playerTeam.getPlayerData().completedGames * 20),
+            GAME_0_TURN_DURATION - (playerTeam.getCompletedGames() * 20),
             TURN_DURATION
         );
 

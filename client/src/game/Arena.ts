@@ -651,10 +651,7 @@ export class Arena extends Phaser.Scene
         }
     }
 
-    
-
     validateTarget(gridX, gridY, action: BaseSpell | BaseItem) {
-        return true;
         if (action.target == Target.AOE && action.size > 1) {
             return true;
         }

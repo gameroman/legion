@@ -175,6 +175,10 @@ export class Team {
             completedGames: this.teamData.completedGames,
         }
     }
+
+    getCompletedGames() {
+        return this.teamData.completedGames || 0;
+    }
     
     getChestKey(): ChestColor | null {
         if (!this.teamData.dailyloot) {
