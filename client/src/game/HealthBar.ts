@@ -87,10 +87,10 @@ export class HealthBar extends Phaser.GameObjects.Container {
 
   darken(): void {
     // Darken the main health bar
-    this.hpBar.setFillStyle(this.multiplyColor(this.originalColor, DARKENING_INTENSITY));
+    this.hpBar.setFillStyle(this.multiplyColor(this.originalColor, DARKENING_INTENSITY * 2));
     
     // Darken the background
-    this.barBackground.setFillStyle(this.multiplyColor(this.originalBgColor, DARKENING_INTENSITY));
+    this.barBackground.setFillStyle(this.multiplyColor(this.originalBgColor, DARKENING_INTENSITY * 2));
   }
 
   brighten(): void {

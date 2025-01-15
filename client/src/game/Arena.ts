@@ -2078,7 +2078,6 @@ export class Arena extends Phaser.Scene
         }
     }
 
-    // Add this method to determine which sprites should stay bright
     private shouldStayBright(player: Player, targetHighlight: TargetHighlight = TargetHighlight.ENEMY): boolean {
         const isPlayerTeam = player.team.id === this.playerTeamId;
         
