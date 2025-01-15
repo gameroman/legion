@@ -12,7 +12,8 @@ import { OutcomeData, TerrainUpdate, PlayerContextData, GameOutcomeReward, GameD
 import { getChestContent } from '@legion/shared/chests';
 import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL, CAST_DELAY,
     PRACTICE_XP_COEF, PRACTICE_GOLD_COEF, RANKED_XP_COEF, RANKED_GOLD_COEF, remoteConfig,
-    LEGION_CUT, TURN_DURATION, KILL_CAM_DURATION } from '@legion/shared/config';
+    LEGION_CUT, TURN_DURATION, KILL_CAM_DURATION, MOVE_DELAY, ATTACK_DELAY, SPELL_DELAY,
+    ITEM_DELAY, KILL_CAM_DELAY } from '@legion/shared/config';
 import { TerrainManager } from './TerrainManager';
 import { TurnSystem } from './TurnSystem';
 
@@ -259,23 +260,24 @@ export abstract class Game
 
     }
 
-    processTurn(isKill: boolean = false) {
-        // Check if the previous turnee has acted
-        if (this.turnee && !this.turnee.hasActed) {
-            this.turnSystem.processAction(this.turnee, SpeedClass.NORMAL);
-        }
-    
-        this.broadcastQueueData();
-        this.turnee = this.turnSystem.getNextActor();
-        this.turnee.setHasActed(false);
-    
-        // console.log(`[Game:processTurn] Turnee: ${this.turnee.num} from team ${this.turnee.team.id}`);
-    
-        this.turnNumber++;
-        let turnDuration = this.turnDuration + (isKill ? KILL_CAM_DURATION : 0);
-        this.resetTurnTimer(turnDuration);
-        this.broadcast('turnee', this.getTurneeData());
-        this.turnee.startTurn();
+    processTurn(delay: number = 0) {
+        setTimeout(() => {
+            // Check if the previous turnee has acted
+            if (this.turnee && !this.turnee.hasActed) {
+                this.turnSystem.processAction(this.turnee, SpeedClass.NORMAL);
+            }
+
+            this.broadcastQueueData();
+            this.turnee = this.turnSystem.getNextActor();
+            this.turnee.setHasActed(false);
+
+            // console.log(`[Game:processTurn] Turnee: ${this.turnee.num} from team ${this.turnee.team.id}`);
+
+            this.turnNumber++;
+            this.resetTurnTimer(this.turnDuration);
+            this.broadcast('turnee', this.getTurneeData());
+            this.turnee.startTurn();
+        }, delay * 1000);
     }
 
     processPassTurn() {
@@ -421,6 +423,7 @@ export abstract class Game
 
     processAction(action: string, data: any, socket: Socket | null = null) {
         if (this.gameOver || !this.gameStarted) return;
+        if (this.turnee.hasActed) return;
 
         let team: Team;
         if (socket) {
@@ -549,7 +552,7 @@ export abstract class Game
         this.broadcastMove(player.team, player.num, tile);
 
         this.turnSystem.processAction(player, SpeedClass.FAST);
-        this.processTurn();
+        this.processTurn(MOVE_DELAY);
     }
 
     updatePlayerPosition(player: ServerPlayer, x: number, y: number) {
@@ -656,7 +659,7 @@ export abstract class Game
         }
 
         this.turnSystem.processAction(player, SpeedClass.NORMAL);
-        this.processTurn(isKill);
+        this.processTurn(isKill ? KILL_CAM_DURATION + KILL_CAM_DELAY : ATTACK_DELAY);
     }
 
     processObstacleAttack({x, y}: {x: number, y: number}) {
@@ -678,7 +681,7 @@ export abstract class Game
         });
 
         this.turnSystem.processAction(player, SpeedClass.NORMAL);
-        this.processTurn();
+        this.processTurn(ATTACK_DELAY);
     }
 
     processUseItem(
@@ -838,7 +841,7 @@ export abstract class Game
         team.sendScore();
 
         this.turnSystem.processAction(player, spell.speedClass);
-        this.processTurn(isKill);
+        this.processTurn(isKill ? KILL_CAM_DURATION + KILL_CAM_DELAY : SPELL_DELAY);
     }
 
     broadcastGEN(GENs: GEN[]) {
