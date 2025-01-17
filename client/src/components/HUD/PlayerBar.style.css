@@ -29,6 +29,37 @@
   align-items: center;
   justify-content: center;
   padding: 0 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.player_bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(45, 212, 191, 0.2),
+    transparent
+  );
+  transform: skewX(-25deg);
+  animation: shimmer 4s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -150%;
+  }
+  50% {
+    left: 150%;
+  }
+  100% {
+    left: 150%;
+  }
 }
 
 .player_bar_stats {
@@ -45,6 +76,7 @@
   align-items: center;
   gap: 1px;
   height: 24px;
+  position: relative;
 }
 
 .player_bar_stat:first-child {
@@ -107,5 +139,95 @@
   .player_bar_container {
     transform: translateX(-50%) scale(0.55);
     transform-origin: bottom center;
+  }
+}
+
+.player_bar_statuses {
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 90%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.player_bar_statuses div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  font-family: 'Kim';
+  color: #ffffff;
+  background: rgba(28, 31, 37, 0.6);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.player_bar_statuses img {
+  width: 20px;
+  height: 22px;
+  background-color: #1c1f25;
+  padding: 2px;
+  border-radius: 2px;
+  background: linear-gradient(135deg, #1c1f25 0%, #2a3746 100%);
+  border: 1px solid #3c616c;
+  transition: all 0.2s ease;
+}
+
+.player_bar_statuses img:hover {
+  transform: scale(1.1);
+  border-color: #51fdff;
+  box-shadow: 0 0 10px rgba(81, 253, 255, 0.3);
+}
+
+.enemy_turn_banner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 300px;
+  padding: 12px 40px;
+  
+  /* Container styling */
+  background: linear-gradient(
+    90deg,
+    rgba(28, 31, 37, 0) 0%,
+    rgba(202, 48, 77, 0.3) 20%,
+    rgba(202, 48, 77, 0.4) 50%,
+    rgba(202, 48, 77, 0.3) 80%,
+    rgba(28, 31, 37, 0) 100%
+  );
+  border-radius: 4px;
+  
+  /* Text styling */
+  font-family: 'Kim', sans-serif;
+  font-size: 24px;
+  color: #ffffff;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 
+    0 0 10px rgba(202, 48, 77, 0.8),
+    -1px -1px 0 #ca304d,
+    1px -1px 0 #ca304d,
+    -1px 1px 0 #ca304d,
+    1px 1px 0 #ca304d;
+  
+  /* Animation */
+  animation: enemyTurnPulse 2s infinite;
+}
+
+@keyframes enemyTurnPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(202, 48, 77, 0.3),
+      inset 0 0 20px rgba(202, 48, 77, 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(202, 48, 77, 0.5),
+      inset 0 0 30px rgba(202, 48, 77, 0.5);
   }
 } 

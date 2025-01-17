@@ -1149,7 +1149,6 @@
 
 .enemy_turn_banner {
   position: fixed;
-  top: 20px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
@@ -1165,7 +1164,6 @@
   );
   padding: 12px 40px;
   border-radius: 4px;
-  min-width: 300px;
   
   /* Text styling */
   font-family: 'Kim', sans-serif;

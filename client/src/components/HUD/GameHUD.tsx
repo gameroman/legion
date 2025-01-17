@@ -225,11 +225,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
               <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team2} />
             </div>
           )}
-          {showEnemyTurnBanner && (
-            <div className="enemy_turn_banner">
-              Enemy Turn
-            </div>
-          )}
            {showTopMenu && player?.isPlayer ? (
             <>
               {player.pendingSpell == undefined && player.pendingItem == undefined && (
@@ -254,13 +249,15 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
             </>
           ) : null}
         </>
-        {player?.isPlayer && <PlayerBar 
+        <PlayerBar 
           hp={player?.hp || 0}
           maxHp={player?.maxHp || 0}
           mp={player?.mp || 0}
           maxMp={player?.maxMp || 0}
           hasSpells={player?.spells?.length > 0}
-        />}
+          statuses={player?.statuses}
+          isPlayerTurn={player?.isPlayer}
+        />
         <Timeline
           isTutorial={isTutorialMode}
           score={score}
