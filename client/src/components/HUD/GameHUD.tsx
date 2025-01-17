@@ -257,6 +257,10 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
           hasSpells={player?.spells?.length > 0}
           statuses={player?.statuses}
           isPlayerTurn={player?.isPlayer}
+          turnDuration={this.state.turnDuration}
+          timeLeft={this.state.timeLeft}
+          turnNumber={this.state.turnNumber}
+          onPassTurn={() => events.emit('passTurn')}
         />
         <Timeline
           isTutorial={isTutorialMode}

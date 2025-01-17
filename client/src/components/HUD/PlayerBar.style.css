@@ -4,7 +4,7 @@
   left: 50%;
   transform: translateX(-50%);
   width: 50%;
-  min-width: 600px;
+  min-width: 800px;
   height: 80px;
   z-index: 9;
   transform-origin: bottom center;
@@ -116,6 +116,7 @@
 
 @media screen and (max-width: 1500px) and (orientation: landscape) {
   .player_bar_container {
+    width: 75%;
     transform: translateX(-50%) scale(0.9);
     transform-origin: bottom center;
   }
@@ -123,6 +124,7 @@
 
 @media screen and (max-width: 1400px) and (orientation: landscape) {
   .player_bar_container {
+    width: 85%;
     transform: translateX(-50%) scale(0.75);
     transform-origin: bottom center;
   }
@@ -130,6 +132,7 @@
 
 @media screen and (max-width: 1100px) and (orientation: landscape) {
   .player_bar_container {
+    width: 90%;
     transform: translateX(-50%) scale(0.65);
     transform-origin: bottom center;
   }
@@ -137,6 +140,7 @@
 
 @media screen and (max-width: 980px) and (orientation: landscape) {
   .player_bar_container {
+    width: 95%;
     transform: translateX(-50%) scale(0.55);
     transform-origin: bottom center;
   }
@@ -230,4 +234,82 @@
       0 0 30px rgba(202, 48, 77, 0.5),
       inset 0 0 30px rgba(202, 48, 77, 0.5);
   }
+}
+
+.player_bar_turn_info {
+  position: absolute;
+  left: 80px;
+  /* top: -20px; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.player_bar_turn_banner {
+  background: linear-gradient(
+    90deg,
+    rgba(28, 31, 37, 0) 0%,
+    rgba(69, 131, 208, 0.3) 20%,
+    rgba(69, 131, 208, 0.4) 50%,
+    rgba(69, 131, 208, 0.3) 80%,
+    rgba(28, 31, 37, 0) 100%
+  );
+  padding: 4px 16px;
+  border-radius: 4px;
+  font-family: 'Kim', sans-serif;
+  font-size: 18px;
+  color: #ffffff;
+  text-transform: uppercase;
+  text-shadow: 
+    0 0 8px rgba(69, 131, 208, 0.8),
+    -1px -1px 0 #4583d0,
+    1px -1px 0 #4583d0,
+    -1px 1px 0 #4583d0,
+    1px 1px 0 #4583d0;
+}
+
+.player_bar_controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.player_bar_pass_turn {
+  width: 64px;
+  height: 64px;
+  padding: 8px 0;
+  font-family: 'Kim';
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: linear-gradient(to bottom, #2a3746 0%, #1c1f25 100%);
+  border: 1px solid #3c616c;
+  border-radius: 4px;
+  cursor: var(--game-pointer);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.player_bar_pass_turn:hover {
+  border-color: #51fdff;
+  box-shadow: 0 0 10px rgba(81, 253, 255, 0.3);
+}
+
+.player_bar_pass_turn:active {
+  transform: scale(0.98);
+  background: linear-gradient(to bottom, #1c1f25 0%, #2a3746 100%);
+}
+
+.player_bar_pass_turn span {
+  width: 100%;
+  text-align: center;
+}
+
+.player_bar .circular_timer {
+  transform: scale(0.8);
 } 
