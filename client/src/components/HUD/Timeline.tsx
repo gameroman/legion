@@ -3,11 +3,11 @@ import { h, Fragment, Component } from 'preact';
 import { PlayMode, Class } from '@legion/shared/enums';
 import { TeamOverview } from "@legion/shared/interfaces";
 import { getSpritePath } from '../utils';
-import './SpectatorFooter.style.css';
+import './Timeline.style.css';
 import warriorIcon from '@assets/shop/warrior_icon.png';
 import mageIcon from '@assets/shop/mage_icon.png';
 
-interface SpectatorFooterProps {
+interface TimelineProps {
   isTutorial: boolean;
   score: number;
   mode: PlayMode;
@@ -22,16 +22,16 @@ interface SpectatorFooterProps {
   isPlayer: boolean;
 }
 
-interface SpectatorFooterState {
+interface TimelineState {
   positions: { [key: string]: number };
 }
 
-class SpectatorFooter extends Component<SpectatorFooterProps, SpectatorFooterState> {
+class Timeline extends Component<TimelineProps, TimelineState> {
   state = {
     positions: {},
   };
 
-  componentDidUpdate(prevProps: SpectatorFooterProps) {
+  componentDidUpdate(prevProps: TimelineProps) {
     if (prevProps.queue !== this.props.queue) {
       // Calculate new positions
       const newPositions = {};
@@ -132,4 +132,4 @@ class SpectatorFooter extends Component<SpectatorFooterProps, SpectatorFooterSta
   }
 }
 
-export default SpectatorFooter;
+export default Timeline;

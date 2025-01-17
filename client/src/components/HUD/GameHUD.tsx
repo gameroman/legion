@@ -6,11 +6,12 @@ import Overview from './Overview';
 import { Endgame } from './Endgame';
 import { EventEmitter } from 'eventemitter3';
 import { CharacterUpdate, GameOutcomeReward, OutcomeData, PlayerProps, TeamOverview } from "@legion/shared/interfaces";
-import SpectatorFooter from './SpectatorFooter';
+import Timeline from './Timeline';
 import { PlayMode, ChestColor } from '@legion/shared/enums';
 import { recordCompletedGame } from '../utils';
 import TutorialDialogue from './TutorialDialogue';
 import { CircularTimer } from './CircularTimer';
+import PlayerBar from './PlayerBar';
 
 
 interface GameHUDProps {
@@ -253,15 +254,22 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
             </>
           ) : null}
         </>
-          <SpectatorFooter
-            isTutorial={isTutorialMode}
-            score={score}
-            mode={mode}
-            closeGame={this.closeGame}
-            queue={this.state.queue}
-            isPlayer={player?.isPlayer}
-            team1={team1}
-            team2={team2}
+        {player?.isPlayer && <PlayerBar 
+          hp={player?.hp || 0}
+          maxHp={player?.maxHp || 0}
+          mp={player?.mp || 0}
+          maxMp={player?.maxMp || 0}
+          hasSpells={player?.spells?.length > 0}
+        />}
+        <Timeline
+          isTutorial={isTutorialMode}
+          score={score}
+          mode={mode}
+          closeGame={this.closeGame}
+          queue={this.state.queue}
+          isPlayer={player?.isPlayer}
+          team1={team1}
+          team2={team2}
         />
         {this.state.gameOver && <Endgame
           members={ownMembers}

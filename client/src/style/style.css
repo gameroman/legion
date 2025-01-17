@@ -981,15 +981,6 @@ canvas {
   border-radius: 50px;
 }
 
-.hp-bar {
-  background: linear-gradient(to right, darkgreen, lightgreen);
-  transition: width 0.3s ease-out;
-}
-
-.mp-bar {
-  background: linear-gradient(to right, darkblue, lightblue);
-  transition: width 0.3s ease-out;
-}
 
 .cooldown-bar {
   background: gold;
