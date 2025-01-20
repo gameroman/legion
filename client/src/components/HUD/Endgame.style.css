@@ -83,6 +83,9 @@
     width: auto;
     max-width: 100%;
     object-fit: contain;
+    animation: bounce 0.8s ease alternate;
+    -webkit-animation: bounce 0.8s ease alternate;
+    transform-origin: center;
 }
 
 .defeat_title .defeat_title_effect {
@@ -90,9 +93,30 @@
     top: clamp(-32px, -6vh, -72px);
     right: 1vw;
     width: 30vh;
-    animation: bounce 0.8s ease alternate;
-    -webkit-animation: bounce 0.8s ease alternate;
-    transform-origin: center;
+}
+
+@keyframes bounce {
+    0% {
+        transform: scale(0.7);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@-webkit-keyframes bounce {
+    0% {
+        transform: scale(0.7);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+    }
 }
 
 @media screen and (max-width: 480px) {
@@ -109,18 +133,6 @@
     .defeat_title .defeat_title_effect {
         width: 50vh;
         top: clamp(-24px, -4vh, -28px);
-    }
-
-    @keyframes bounce {
-        50% {
-            transform: scale(1.15);
-        }
-    }
-
-    @-webkit-keyframes bounce {
-        50% {
-            transform: scale(1.15);
-        }
     }
 }
 
@@ -272,18 +284,6 @@
 .endgame_rewards_items {
     position: absolute;
     bottom: 18px;
-}
-
-@keyframes bounce {
-    50% {
-        transform: scale(1.2);
-    }
-}
-
-@-webkit-keyframes bounce {
-    50% {
-        transform: scale(1.2);
-    }
 }
 
 .victory_title_effect {
