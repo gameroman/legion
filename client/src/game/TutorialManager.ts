@@ -13,6 +13,7 @@ export class TutorialManager {
     private isProcessingQueue = false;
     private lastMessageTime: number = 0;
     private readonly MESSAGE_COOLDOWN = 1000;
+    private gameEnded = false;
 
     // Map of events to their corresponding tutorial messages
     private readonly tutorialMessages: Record<string, TutorialMessage> = {
@@ -71,6 +72,10 @@ export class TutorialManager {
             events.emit('hideTutorialMessage');
         });
         events.on('turnStarted', () => {
+            events.emit('hideTutorialMessage');
+        });
+        events.on('gameEnd', () => {
+            this.gameEnded = true;
             events.emit('hideTutorialMessage');
         });
 
@@ -179,12 +184,13 @@ export class TutorialManager {
     }
 
     private queueMessage(messageKey: string) {
+        if (this.gameEnded) return false;
         // console.log(`[TutorialManager:queueMessage] Attempting to queue message: ${messageKey}`);
         const now = Date.now();
         
         // Check if enough time has passed since the last message
         if (now - this.lastMessageTime < this.MESSAGE_COOLDOWN) {
-            console.log(`[TutorialManager:queueMessage] Skipping message: too soon after last message`);
+            // console.log(`[TutorialManager:queueMessage] Skipping message: too soon after last message`);
             return false; // Return false to indicate message wasn't queued
         }
 
@@ -193,7 +199,7 @@ export class TutorialManager {
             this.messageQueue.push(message);
             this.lastMessageTime = now;
             this.processMessageQueue();
-            console.log(`[TutorialManager:queueMessage] Queued message: ${messageKey}`);
+            // console.log(`[TutorialManager:queueMessage] Queued message: ${messageKey}`);
             return true; // Return true to indicate message was queued
         }
         return false;

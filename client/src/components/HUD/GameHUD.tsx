@@ -217,8 +217,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
 
     const showEnemyTurnBanner = !player?.isPlayer && gameInitialized && !this.state.gameOver;
 
-
-    console.log(`MODE = ${mode}`);
     return (
       <div className="gamehud height_full flex flex_col justify_between padding_bottom_16">
         <>

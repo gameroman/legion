@@ -51,7 +51,6 @@ export abstract class Game
     turnStart: number = 0;
     turnDuration: number = 0;
     turnNumber: number = 0;
-
     gridWidth: number = 20;
     gridHeight: number = 10;
 
@@ -261,6 +260,7 @@ export abstract class Game
     }
 
     processTurn(delay: number = 0) {
+        if (this.gameOver) return;
         setTimeout(() => {
             // Check if the previous turnee has acted
             if (this.turnee && !this.turnee.hasActed) {

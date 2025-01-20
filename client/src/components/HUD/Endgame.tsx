@@ -107,7 +107,7 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
         }
         events.emit('exitGame');
         // If mode not in map, redirect to /play
-        if (modesToQueueMap[this.props.mode]) {
+        if (this.props.mode in modesToQueueMap) {
             route(`/queue/${modesToQueueMap[this.props.mode]}`);
         } else {
             route('/play');
@@ -204,7 +204,7 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
                     </div>
                 )}
 
-                {/* <div className="endgame_buttons">
+                <div className="endgame_buttons">
                     {showPlayAgain && (
                         <div 
                             className="endgame_button endgame_button_primary"
@@ -219,7 +219,7 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
                     >
                         <span>Main Menu</span>
                     </div>
-                </div> */}
+                </div>
 
                 {!!this.state.selectedChest && <OpenedChest 
                     width={width}

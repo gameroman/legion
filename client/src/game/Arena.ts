@@ -697,10 +697,6 @@ export class Arena extends Phaser.Scene
         }
     }
 
-    showEndgameScreen(data: OutcomeData) {
-        if (this.overviewReady) events.emit('gameEnd', data);
-    }
-
     relayEvent(event, data?) {
         // console.log(`[Arena:relayEvent] Emitting event: ${event}`);
         events.emit(event, data);
@@ -1028,6 +1024,7 @@ export class Arena extends Phaser.Scene
     }
 
     processGameEnd(data: OutcomeData) {
+        this.gameEnded = true;
         this.musicManager.playEnd();
         const winningTeam = data.isWinner ? this.teamsMap.get(this.playerTeamId) : this.teamsMap.get(this.getOtherTeam(this.playerTeamId));
         setTimeout(() => {
@@ -1035,7 +1032,9 @@ export class Arena extends Phaser.Scene
                 player.victoryDance();
             });
         }, 200);
-        this.showEndgameScreen(data);
+        if (this.overviewReady) {
+            events.emit('gameEnd', data);
+        }
     }
 
     processScoreUpdate({score}) {
@@ -1058,6 +1057,7 @@ export class Arena extends Phaser.Scene
     }
 
     processTurnee(data: {num: number, team: number, turnDuration: number, timeLeft: number}) {
+        if (this.gameEnded) return;
         // Determine if turnee is player
         if (data.team != this.playerTeamId) {
             events.emit('enemyTurn');
@@ -1643,7 +1643,7 @@ export class Arena extends Phaser.Scene
     }
 
     processGENQueue() {
-        if (this.isDisplayingGEN || this.killCamActive || this.genQueue.length === 0) {
+        if (this.gameEnded || this.isDisplayingGEN || this.killCamActive || this.genQueue.length === 0) {
             return;
         }
         this.isDisplayingGEN = true;
@@ -1854,7 +1854,6 @@ export class Arena extends Phaser.Scene
     }
 
     destroy() {
-        this.gameEnded = true;
         this.socket.disconnect();
 
         this.teamsMap.forEach((team) => {

@@ -1,24 +1,22 @@
 .endgame_buttons {
     position: absolute;
-    bottom: 36px;
+    bottom: clamp(24px, 5vh, 36px);
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     align-items: center;
-    width: 280px;
+    width: min(280px, 90vw);
 }
 
 .endgame_button {
     width: 100%;
-    height: 56px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     font-family: 'Kim';
-    font-size: 20px;
     text-transform: uppercase;
     transition: all 0.2s ease;
     position: relative;
@@ -26,6 +24,8 @@
 }
 
 .endgame_button_primary {
+    height: clamp(44px, 8vh, 56px);
+    font-size: clamp(16px, 3vw, 20px);
     background: linear-gradient(180deg, #ffd700 0%, #ffa600 100%);
     color: #1c1f25;
     border: 2px solid #ffd700;
@@ -44,27 +44,40 @@
 
 .endgame_button_primary:active {
     transform: translateY(1px);
+    background: linear-gradient(180deg, #ffa600 0%, #ffd700 100%);
 }
 
 .endgame_button_secondary {
-    background: linear-gradient(180deg, #4583d0 0%, #274c57 100%);
-    color: white;
-    border: 2px solid #4583d0;
-    box-shadow: 
-        0 0 15px rgba(69, 131, 208, 0.3),
-        inset 0 0 8px rgba(255, 255, 255, 0.2);
+    height: clamp(36px, 7vh, 48px);
+    width: 90%;
+    font-size: clamp(14px, 2.5vw, 16px);
+    background: linear-gradient(to bottom, #2a3746 0%, #1c1f25 100%);
+    color: #ffffff;
+    border: 1px solid #3c616c;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
+.endgame_button_secondary:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 3px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
 .endgame_button_secondary:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-        0 0 25px rgba(69, 131, 208, 0.5),
-        inset 0 0 12px rgba(255, 255, 255, 0.3);
+    border-color: #51fdff;
+    box-shadow: 0 0 10px rgba(81, 253, 255, 0.3);
 }
 
 .endgame_button_secondary:active {
-    transform: translateY(1px);
+    transform: scale(0.98);
+    background: linear-gradient(to bottom, #1c1f25 0%, #2a3746 100%);
 }
 
 .defeat_title {
@@ -83,8 +96,7 @@
     width: auto;
     max-width: 100%;
     object-fit: contain;
-    animation: bounce 0.8s ease alternate;
-    -webkit-animation: bounce 0.8s ease alternate;
+    animation: titleBounce 1s cubic-bezier(0.36, 0, 0.66, 1.5) forwards;
     transform-origin: center;
 }
 
@@ -93,30 +105,9 @@
     top: clamp(-32px, -6vh, -72px);
     right: 1vw;
     width: 30vh;
-}
-
-@keyframes bounce {
-    0% {
-        transform: scale(0.7);
-    }
-    50% {
-        transform: scale(1.15);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-@-webkit-keyframes bounce {
-    0% {
-        transform: scale(0.7);
-    }
-    50% {
-        transform: scale(1.15);
-    }
-    100% {
-        transform: scale(1);
-    }
+    animation: bounce 0.8s ease alternate;
+    -webkit-animation: bounce 0.8s ease alternate;
+    transform-origin: center;
 }
 
 @media screen and (max-width: 480px) {
@@ -133,6 +124,35 @@
     .defeat_title .defeat_title_effect {
         width: 50vh;
         top: clamp(-24px, -4vh, -28px);
+    }
+
+    @keyframes bounce {
+        50% {
+            transform: scale(1.15);
+        }
+    }
+
+    @-webkit-keyframes bounce {
+        50% {
+            transform: scale(1.15);
+        }
+    }
+}
+
+@keyframes titleBounce {
+    0% { 
+        transform: scale(0.5); 
+        opacity: 0;
+    }
+    50% { 
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    75% { 
+        transform: scale(0.9);
+    }
+    100% { 
+        transform: scale(1);
     }
 }
 
@@ -265,6 +285,14 @@
     z-index: 0;
 }
 
+/* Hide rewards on small screens; TODO; remove */
+@media screen and (max-width: 480px), 
+       screen and (max-height: 600px) {
+    .endgame_rewards_container {
+        display: none;
+    }
+}
+
 .endgame_rewards_heading_container {
     position: absolute;
     top: 32px;
@@ -284,6 +312,18 @@
 .endgame_rewards_items {
     position: absolute;
     bottom: 18px;
+}
+
+@keyframes bounce {
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+@-webkit-keyframes bounce {
+    50% {
+        transform: scale(1.2);
+    }
 }
 
 .victory_title_effect {
@@ -648,6 +688,40 @@
         top: -8px;
         padding: 3px 10px;
         border-radius: 8px;
+    }
+}
+
+/* For very small screens */
+@media screen and (max-width: 360px) {
+    .endgame_buttons {
+        bottom: 16px;
+        gap: 6px;
+    }
+
+    .endgame_button_primary {
+        height: 40px;
+    }
+
+    .endgame_button_secondary {
+        height: 32px;
+    }
+}
+
+/* For landscape orientation */
+@media screen and (max-height: 600px) and (orientation: landscape) {
+    .endgame_buttons {
+        bottom: 16px;
+        gap: 8px;
+    }
+
+    .endgame_button_primary {
+        height: 44px;
+        font-size: 16px;
+    }
+
+    .endgame_button_secondary {
+        height: 36px;
+        font-size: 14px;
     }
 }
   
