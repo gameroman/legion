@@ -157,7 +157,7 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
             <div className="endgame">
                 <div className="defeat_title" style={this.endGameTitleBg()}>
                     <img className="defeat_title_bg" src={this.props.isWinner ? victoryTitle : defeatTitle} alt="End Title" />
-                    {this.props.isWinner && <img className="defeat_title_effect" src={this.getGradeImage(grade)} alt="" />}
+                    {/* {this.props.isWinner && <img className="defeat_title_effect" src={this.getGradeImage(grade)} alt="" />} */}
                 </div>
                 <div className="endgame_score_bg">
                     <div className="flex items_center gap_4">

@@ -68,7 +68,7 @@ class XPCountUp extends Component<CountUpProps, CountUpState> {
         return (
             <div className={`endgame_character ${isLevelingUp ? 'leveling-up' : ''}`}>
                 {isLevelingUp && 
-                    <div className="endgame_character_lvlup">LEVEL UP!</div>
+                    <div className="endgame_character_lvlup">LVL UP!</div>
                 }
                 
                 <div className="endgame_character_level">
