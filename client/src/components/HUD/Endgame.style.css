@@ -251,6 +251,7 @@
     align-items: center;
     min-width: clamp(120px, 15vw, 180px);
     padding: clamp(8px, 1vh, 12px);
+    padding-top: clamp(16px, 2vh, 24px);
 }
 
 .endgame_character::before {
@@ -264,13 +265,32 @@
     background: linear-gradient(
         180deg,
         transparent 0%,
+        transparent 15%,
         rgba(69, 131, 208, 0.15) 30%,
         rgba(69, 131, 208, 0.3) 50%,
         rgba(69, 131, 208, 0.15) 70%,
+        transparent 85%,
         transparent 100%
     );
     z-index: -1;
     border-radius: 12px;
+}
+
+.endgame_character_level {
+    position: absolute;
+    top: clamp(4px, 0.8vh, 8px);
+    right: clamp(8px, 1vw, 12px);
+    font-size: clamp(12px, 1.5vh, 16px);
+    font-weight: 600;
+    color: #ffa600;
+    text-shadow: 0 0 8px rgba(255, 166, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.endgame_character_level span {
+    color: #ffffff;
 }
 
 .endgame_character_level_container {
@@ -278,15 +298,22 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    margin-bottom: 8px;
     width: 100%;
 }
 
-.endgame_character_level {
-    font-size: clamp(14px, 1.8vh, 18px);
-    font-weight: 600;
-    color: #ffa600;
-    text-shadow: 0 0 8px rgba(255, 166, 0, 0.5);
+.endgame_character_xp_container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.endgame_character_xp_label {
+    font-size: clamp(8px, 1vh, 10px);
+    color: #71deff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 1px;
 }
 
 .endgame_character_xp_bar {
@@ -302,6 +329,10 @@
     background: #71deff;
     box-shadow: 0 0 8px rgba(113, 222, 255, 0.5);
     transition: width 0.1s linear;
+}
+
+.endgame_character_xp_fill.reset {
+    transition: none;
 }
 
 .endgame_character_portrait {
@@ -405,6 +436,16 @@
     
     .endgame_character::before {
         height: 120%;
+        background: linear-gradient(
+            180deg,
+            transparent 0%,
+            transparent 10%,
+            rgba(69, 131, 208, 0.15) 30%,
+            rgba(69, 131, 208, 0.3) 50%,
+            rgba(69, 131, 208, 0.15) 70%,
+            transparent 90%,
+            transparent 100%
+        );
     }
 }
 

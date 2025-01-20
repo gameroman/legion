@@ -59,6 +59,8 @@ class XPCountUp extends Component<CountUpProps, CountUpState> {
     render() {
         const { character, member, memberIdx } = this.props;
         const maxXP = getXPThreshold(this.props.member.level); 
+        const isReceivingXP = character.earnedXP > 0;
+        const isResettingXP = this.state.xpCounter === 0;
 
         return (
             <div className="endgame_character">
@@ -66,16 +68,22 @@ class XPCountUp extends Component<CountUpProps, CountUpState> {
                     <div className="endgame_character_lvlup">LEVEL UP!</div>
                 }
                 
+                <div className="endgame_character_level">
+                    <span>Lvl</span> {member.level + this.state.isLevelUp}
+                </div>
+                
                 <div className="endgame_character_level_container">
-                    <div className="endgame_character_level">
-                        Level {member.level + this.state.isLevelUp}
-                    </div>
-                    <div className="endgame_character_xp_bar">
-                        <div 
-                            className="endgame_character_xp_fill"
-                            style={{ width: `${(this.state.xpCounter / maxXP) * 100}%` }}
-                        />
-                    </div>
+                    {isReceivingXP && (
+                        <div className="endgame_character_xp_container">
+                            <div className="endgame_character_xp_label">XP</div>
+                            <div className="endgame_character_xp_bar">
+                                <div 
+                                    className={`endgame_character_xp_fill ${isResettingXP ? 'reset' : ''}`}
+                                    style={{ width: `${(this.state.xpCounter / maxXP) * 100}%` }}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="endgame_character_portrait">
