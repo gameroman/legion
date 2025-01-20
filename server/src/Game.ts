@@ -51,7 +51,6 @@ export abstract class Game
     turnStart: number = 0;
     turnDuration: number = 0;
     turnNumber: number = 0;
-
     gridWidth: number = 20;
     gridHeight: number = 10;
 
@@ -261,6 +260,7 @@ export abstract class Game
     }
 
     processTurn(delay: number = 0) {
+        if (this.gameOver) return;
         setTimeout(() => {
             // Check if the previous turnee has acted
             if (this.turnee && !this.turnee.hasActed) {
@@ -482,17 +482,15 @@ export abstract class Game
             this.duration = Date.now() - this.startTime;
             this.gameOver = true;
 
-            this.saveReplayToDb();
-
             clearTimeout(this.audienceTimer!);
             clearTimeout(this.checkEndTimer!);
             clearInterval(this.turnTimer!);
 
             const results = {};
-            let winnerUID;
-            if (!this.sockets.length) return;
+            let winnerUID = '';
             this.teams.forEach(team => {
                 const uid = team.teamData.playerUID;
+                // Skip AI players
                 if (!uid || typeof uid !== 'string' || uid.trim() === '') {
                     return;
                 }
@@ -520,6 +518,8 @@ export abstract class Game
                 }
             });
             this.updateGameInDB(winnerUID, results);
+            this.saveReplayToDb();
+
         } catch (error) {
             console.error(error);
         }

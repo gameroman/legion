@@ -10,6 +10,7 @@ interface CountUpProps {
     member: any;
     character: CharacterUpdate;
     memberIdx: number;
+    isWinner: boolean;
 }
 
 interface CountUpState {
@@ -27,7 +28,7 @@ class XPCountUp extends Component<CountUpProps, CountUpState> {
     }
 
     componentDidMount(): void { 
-        const interval = Math.max(0.1, this.state.totalXP / 500);
+        const baseInterval = Math.max(0.1, this.state.totalXP / 500);
         this.timer = setInterval(() => {
             const maxXP = getXPThreshold(this.props.member.level); 
 
@@ -44,6 +45,8 @@ class XPCountUp extends Component<CountUpProps, CountUpState> {
                 clearInterval(this.timer);
                 this.timer = null;
             } else {
+                const remainingXP = this.state.totalXP - this.state.xpCounter;
+                const interval = Math.min(baseInterval, remainingXP);
                 this.setState({ xpCounter: this.state.xpCounter + interval });
             }
         }, 10);
@@ -58,37 +61,45 @@ class XPCountUp extends Component<CountUpProps, CountUpState> {
     render() {
         const { character, member, memberIdx } = this.props;
         const maxXP = getXPThreshold(this.props.member.level); 
+        const isReceivingXP = character.earnedXP > 0;
+        const isResettingXP = this.state.xpCounter === 0;
+        const isLevelingUp = this.state.isLevelUp > 0;
 
         return (
-            <div className="endgame_character">
-                <div className="endgame_character_lvl">
-                    <span className="lvl">Lvl</span>
-                    <span>{member.level + this.state.isLevelUp}</span>
+            <div className={`endgame_character ${isLevelingUp ? 'leveling-up' : ''}`}>
+                {isLevelingUp && 
+                    <div className="endgame_character_lvlup">LVL UP!</div>
+                }
+                
+                <div className="endgame_character_level">
+                    <span>Lvl</span> {member.level + this.state.isLevelUp}
                 </div>
-                {this.state.isLevelUp > 0 && <div className="endgame_character_lvlup">
-                    <span>LVL UP!</span>
-                </div>}
-                <div className="endgame_character_profile">
-                    <div className="char_portrait" style={{
-                        backgroundImage: `url(${getSpritePath(member.texture)})`,
-                        marginLeft: 0,
-                    }} />
-                </div>
-                <div className="endgame_character_info">
-                    <p className="endgame_character_name">{member.name}</p>
-                    <p className="endgame_character_class">{ClassLabels[member.class]}</p>
-                    <div className="flex flex_col gap_4 width_full padding_top_8">
-                        <div className="flex justify_between width_full">
-                            <span className="endgame_character_exp">EXP</span>
-                            <span className="endgame_character_expVal">
-                                {Math.floor(this.props.character.earnedXP) > 0 ? `+${Math.floor(this.props.character.earnedXP)}`: ''}
-                            </span>
+                
+                <div className="endgame_character_level_container">
+                    {isReceivingXP && (
+                        <div className="endgame_character_xp_container">
+                            <div className="endgame_character_xp_label">XP</div>
+                            <div className="endgame_character_xp_bar">
+                                <div 
+                                    className={`endgame_character_xp_fill ${isResettingXP ? 'reset' : ''}`}
+                                    style={{ width: `${(this.state.xpCounter / maxXP) * 100}%` }}
+                                />
+                            </div>
                         </div>
-                        <div className="endgame_character_exp_bg">
-                            <div style={{ width: `${(this.state.xpCounter / maxXP) * 100}%` }}></div>
-                        </div>
-                    </div>
+                    )}
                 </div>
+
+                <div className="endgame_character_portrait">
+                    <div 
+                        className={`char_portrait ${this.props.isWinner ? 'victory-animation' : ''}`} 
+                        style={{
+                            backgroundImage: `url(${getSpritePath(member.texture)})`,
+                        }} 
+                    />
+                </div>
+
+                <div className="endgame_character_name">{member.name}</div>
+                <div className="endgame_character_class">{ClassLabels[member.class]}</div>
             </div>
         );
     }
