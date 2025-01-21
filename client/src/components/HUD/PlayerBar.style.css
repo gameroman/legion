@@ -460,3 +460,41 @@
 .player_bar_item-icon-off {
   filter: grayscale(1);
 }
+
+.player_bar_silenced_message {
+  display: flex;
+  align-items: center;
+  padding: 16px 16px;
+  background: linear-gradient(
+    90deg,
+    rgba(28, 31, 37, 0) 0%,
+    rgba(202, 48, 77, 0.3) 20%,
+    rgba(202, 48, 77, 0.4) 50%,
+    rgba(202, 48, 77, 0.3) 80%,
+    rgba(28, 31, 37, 0) 100%
+  );
+  border-radius: 4px;
+  font-family: 'Kim', sans-serif;
+  font-size: 16px;
+  color: #ffffff;
+  text-shadow: 
+    0 0 8px rgba(202, 48, 77, 0.8),
+    -1px -1px 0 #ca304d,
+    1px -1px 0 #ca304d,
+    -1px 1px 0 #ca304d,
+    1px 1px 0 #ca304d;
+  animation: silencedPulse 2s infinite;
+}
+
+@keyframes silencedPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 15px rgba(202, 48, 77, 0.2),
+      inset 0 0 15px rgba(202, 48, 77, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 20px rgba(202, 48, 77, 0.4),
+      inset 0 0 20px rgba(202, 48, 77, 0.4);
+  }
+}

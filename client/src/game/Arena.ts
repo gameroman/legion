@@ -1707,10 +1707,11 @@ export class Arena extends Phaser.Scene
             const textDelay = 400;
             const yOffset = -180;
             const bgYPosition = (this.cameras.main.centerY / 2 + yOffset);
+            const xPosition = this.cameras.main.centerX + this.cameras.main.scrollX;
             const yPosition = this.cameras.main.centerY - 200 + yOffset;
             const scale = 0.5;
 
-            let genBg = this.add.image(this.cameras.main.centerX, bgYPosition, 'gen_bg');
+            let genBg = this.add.image(xPosition, bgYPosition, 'gen_bg');
             genBg.setAlpha(0).setDepth(10).setScale(scale);
             this.tweens.add({
                 targets: genBg,
@@ -1733,7 +1734,7 @@ export class Arena extends Phaser.Scene
             // Animate GEN Texts into View
             this.tweens.add({
                 targets,
-                x: this.cameras.main.centerX,
+                x: xPosition,
                 duration: textTweenDuration,
                 ease: 'Power2',
                 delay: textDelay,

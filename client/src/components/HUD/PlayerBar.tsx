@@ -104,15 +104,15 @@ class PlayerBar extends Component<PlayerBarProps> {
           turnDuration, timeLeft, turnNumber, onPassTurn, animate = true,
           items = [], spells = [], pendingSpell }: PlayerBarProps) {
      // Add mock values for each status effect (DO NOT REMOVE)
-    statuses = {
-      [StatusEffect.FREEZE]: 1,
-      [StatusEffect.BURN]: 2,
-      [StatusEffect.POISON]: 3,
-      [StatusEffect.SLEEP]: 4,
-      [StatusEffect.PARALYZE]: 5,
-      [StatusEffect.MUTE]: 0,
-      [StatusEffect.HASTE]: 7,
-    };
+    // statuses = {
+    //   [StatusEffect.FREEZE]: 1,
+    //   [StatusEffect.BURN]: 2,
+    //   [StatusEffect.POISON]: 3,
+    //   [StatusEffect.SLEEP]: 4,
+    //   [StatusEffect.PARALYZE]: 5,
+    //   [StatusEffect.MUTE]: 0,
+    //   [StatusEffect.HASTE]: 7,
+    // };
     const isMuted = statuses[StatusEffect.MUTE] > 0;
     const pendingSpellCost = pendingSpell !== null ? spells[pendingSpell]?.cost : 0;
 
@@ -199,7 +199,13 @@ class PlayerBar extends Component<PlayerBarProps> {
         {isPlayerTurn && (
           <div className="player_bar_actions_container">
             {this.renderActionRow(items, 0, InventoryType.CONSUMABLES)}
-            {hasSpells && (isMuted ? "Character is Silenced!" : this.renderActionRow(spells, spellsIndex, InventoryType.SPELLS))}
+            {hasSpells && (
+              isMuted ? (
+                <div className="player_bar_silenced_message">
+                  Character is Silenced!
+                </div>
+              ) : this.renderActionRow(spells, spellsIndex, InventoryType.SPELLS)
+            )}
           </div>
         )}
       </div>
