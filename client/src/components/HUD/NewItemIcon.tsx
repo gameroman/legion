@@ -17,6 +17,7 @@ interface ItemIconProps {
   index: number;
   canAct: boolean;
   actionType: InventoryType;
+  keyboardLayout: number;
 }
 
 interface ItemIconState {
@@ -28,7 +29,6 @@ interface ItemIconState {
     left: number;
   };
   croppedImageUrl: string | null;
-  keyboardLayout: number; // 0 for AZERTY, 1 for QWERTY
 }
 
 class ItemIcon extends Component<ItemIconProps, ItemIconState> {
@@ -41,36 +41,15 @@ class ItemIcon extends Component<ItemIconProps, ItemIconState> {
       left: 0
     },
     croppedImageUrl: null,
-    keyboardLayout: 0
   }
 
   componentDidMount() {
     this.cropSpritesheet();
-    this.loadKeyboardLayout();
-    events.on('settingsChanged', this.handleSettingsChanged);
   }
 
   componentDidUpdate(prevProps: ItemIconProps) {
     if (prevProps.action !== this.props.action) {
       this.cropSpritesheet();
-    }
-  }
-
-  componentWillUnmount() {
-    events.off('settingsChanged', this.handleSettingsChanged);
-  }
-
-  handleSettingsChanged = (settings) => {
-    this.setState({ keyboardLayout: settings.keyboardLayout });
-  }
-
-  loadKeyboardLayout = () => {
-    const settingsString = localStorage.getItem('gameSettings');
-    if (settingsString) {
-      const settings = JSON.parse(settingsString);
-      this.setState({ keyboardLayout: settings.keyboardLayout });
-    } else {
-      this.setState({ keyboardLayout: 1 });
     }
   }
 
@@ -94,8 +73,7 @@ class ItemIcon extends Component<ItemIconProps, ItemIconState> {
   }
 
   getKeyBinding = () => {
-    const { index, actionType } = this.props;
-    const { keyboardLayout } = this.state;
+    const { index, actionType, keyboardLayout } = this.props;
 
     const qwertyLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
     const azertyLayout = 'AZERTYUIOPQSDFGHJKLMWXCVBN';
@@ -104,9 +82,9 @@ class ItemIcon extends Component<ItemIconProps, ItemIconState> {
     
     let startPosition;
     if (actionType === InventoryType.CONSUMABLES) {
-      startPosition = keyboardLayout === 0 ? layout.indexOf('W') : layout.indexOf('Z');
-    } else { // For spells
       startPosition = keyboardLayout === 0 ? layout.indexOf('A') : layout.indexOf('Q');
+    } else { // For spells
+      startPosition = keyboardLayout === 0 ? layout.indexOf('W') : layout.indexOf('Z');
     }
 
     return layout.charAt(startPosition + index);

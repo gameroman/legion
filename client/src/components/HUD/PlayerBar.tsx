@@ -33,10 +33,34 @@ interface PlayerBarProps {
 
 class PlayerBar extends Component<PlayerBarProps> {
   events: EventEmitter;
+  state = {
+    keyboardLayout: 1 // Default to QWERTY
+  };
 
   constructor(props: PlayerBarProps) {
     super(props);
     this.events = props.eventEmitter;
+    this.loadKeyboardLayout();
+  }
+
+  componentDidMount() {
+    this.events.on('settingsChanged', this.handleSettingsChanged);
+  }
+
+  componentWillUnmount() {
+    this.events.off('settingsChanged', this.handleSettingsChanged);
+  }
+
+  handleSettingsChanged = (settings) => {
+    this.setState({ keyboardLayout: settings.keyboardLayout });
+  }
+
+  loadKeyboardLayout = () => {
+    const settingsString = localStorage.getItem('gameSettings');
+    if (settingsString) {
+      const settings = JSON.parse(settingsString);
+      this.setState({ keyboardLayout: settings.keyboardLayout });
+    }
   }
 
   handleActionClick = (event: Event, index: number) => {
@@ -47,7 +71,6 @@ class PlayerBar extends Component<PlayerBarProps> {
   renderActionRow(actions: any[], startIndex: number, type: InventoryType) {
     if (!actions?.length) return null;
     
-    const goldenGradient = 'linear-gradient(to bottom right, #bf9b30, #1c1f25)';
     const pending = type === InventoryType.CONSUMABLES ? this.props.pendingItem : this.props.pendingSpell;
 
     return (
@@ -67,6 +90,7 @@ class PlayerBar extends Component<PlayerBarProps> {
                 index={idx}
                 canAct={type === InventoryType.CONSUMABLES || (action?.cost <= this.props.mp)}
                 actionType={type}
+                keyboardLayout={this.state.keyboardLayout}
               />
               <span className="player_bar_action_name">{action.name}</span>
             </div>
@@ -92,6 +116,8 @@ class PlayerBar extends Component<PlayerBarProps> {
     const isMuted = statuses[StatusEffect.MUTE] > 0;
     const pendingSpellCost = pendingSpell !== null ? spells[pendingSpell]?.cost : 0;
 
+    const keyboardLayout = this.state.keyboardLayout === 0 ? 'AZERTYUIOPQSDFGHJKLMWXCVBN' : 'QWERTYUIOPASDFGHJKLZXCVBNM';
+    const spellsIndex = this.state.keyboardLayout === 0 ? keyboardLayout.indexOf('W') : keyboardLayout.indexOf('Z');
     return (
       <div className={`player_bar_container ${animate ? '' : 'no-progress-animation'}`}>
         <div className="player_bar">
@@ -172,8 +198,8 @@ class PlayerBar extends Component<PlayerBarProps> {
         
         {isPlayerTurn && (
           <div className="player_bar_actions_container">
-            {this.renderActionRow(items, 26, InventoryType.CONSUMABLES)}
-            {hasSpells && (isMuted ? "Character is Silenced!" : this.renderActionRow(spells, 0, InventoryType.SPELLS))}
+            {this.renderActionRow(items, 0, InventoryType.CONSUMABLES)}
+            {hasSpells && (isMuted ? "Character is Silenced!" : this.renderActionRow(spells, spellsIndex, InventoryType.SPELLS))}
           </div>
         )}
       </div>

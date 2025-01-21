@@ -592,7 +592,7 @@ export class Arena extends Phaser.Scene
                 // Get the letter corresponding to the keyCode
                 const letter = String.fromCharCode(event.keyCode);
                 this.selectedPlayer?.onLetterKey(letter);
-                this.sound.play('click');
+                // this.sound.play('click');
             }
         }
     }
@@ -1705,7 +1705,7 @@ export class Arena extends Phaser.Scene
             // Setup GEN Background
             const textTweenDuration = 600;
             const textDelay = 400;
-            const yOffset = 20;
+            const yOffset = -180;
             const bgYPosition = (this.cameras.main.centerY / 2 + yOffset);
             const yPosition = this.cameras.main.centerY - 200 + yOffset;
             const scale = 0.5;

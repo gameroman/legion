@@ -80,18 +80,6 @@ export class AIServerPlayer extends ServerPlayer {
     }
 
     takeAction(): number {
-        // console.log(`[AIServerPlayer:takeAction] ${this.name} is taking action`);
-        // if (this.team?.game.isTutorial()) {
-        //     if (this.attackMode === AIAttackMode.IDLE) {
-        //         // console.log(`[AIServerPlayer:takeAction] ${this.name} is idle`);
-        //         return 0;
-        //     }
-        //     if (this.actionCount > 0 && this.attackMode === AIAttackMode.ATTACK_ONCE) {
-        //         console.log(`[AIServerPlayer:takeAction] ${this.name} can act onlyonce`);
-        //         return 0;
-        //     }
-        // }
-
         if (!this.canAct()) {
             // console.log(`[AIServerPlayer:takeAction] ${this.name} cannot act`);
             return 0;
@@ -116,10 +104,9 @@ export class AIServerPlayer extends ServerPlayer {
         }
         
         // Try to use a spell
-        const spellDelay = this.checkForSpellUse();
-        if (spellDelay > -1) {
+        if (this.checkForSpellUse()) {
             this.handleActionTaken();
-            return spellDelay;
+            return 0;
         }
 
         // Try to attack or move
@@ -174,9 +161,8 @@ export class AIServerPlayer extends ServerPlayer {
         return false;
     }
 
-    checkForSpellUse(): number {
+    checkForSpellUse(): boolean {
         // console.log(`[AIServerPlayer:checkForSpellUse] Checking for spells among ${this.spells.map(spell => spell.id)}`);
-        let delay = -1;
         // Randomize the order of spells
         const spells = this.spells.sort(() => Math.random() - 0.5);
         for (let i = 0; i < spells.length; i++) {
@@ -201,36 +187,33 @@ export class AIServerPlayer extends ServerPlayer {
                 case 6:
                 case 7:
                 case 8:
-                    delay = this.checkForAoE(i);
-                    if (delay > -1) return delay;
+                    if (this.checkForAoE(i)) return true;
                     break;
                 case 9:
-                    delay = this.checkForHealUse(i);
-                    if (delay > -1) return delay;
+                    if (this.checkForHealUse(i)) return true;
                     break;
                 case 10:
                 case 11:
-                    delay = this.checkForStatusEffectUse(i);
-                    if (delay > -1) return delay;
+                    if (this.checkForStatusEffectUse(i)) return true;
                     break;
                 default:
                     console.log(`[AIServerPlayer:checkForSpellUse] Unknown spell ID: ${spell.id}`);
                     continue;
             }
         }
-        return delay;
+        return false;
     }
 
-    checkForHealUse(index: number): number {
+    checkForHealUse(index: number): boolean {
         const spell = this.spells[index];
-        if (spell.target != Target.SINGLE) return -1;
-        if (!spell.isHealingSpell()) return -1;
-        if (Math.random() > this.healRandomThreshold) return -1;
+        if (spell.target != Target.SINGLE) return false;
+        if (!spell.isHealingSpell()) return false;
+        if (Math.random() > this.healRandomThreshold) return false;
 
         const allies = this.team?.game.listAllAllies(this);
-        if (!allies || allies.length === 0) return -1;
+        if (!allies || allies.length === 0) return false;
         const ally = this.getOptimalTarget(allies!, lowestHpComparator);
-        if (!ally) return -1;
+        if (!ally) return false;
 
         const healAmount = spell.getHealAmount();
         if (ally.hp <= (ally.getMaxHP() - healAmount)) {
@@ -242,16 +225,16 @@ export class AIServerPlayer extends ServerPlayer {
                 target: ally.num,
             };
             this.team?.game.processMagic(data);
-            return spell.castTime * 1000;
+            return true;
         }
-        return -1;
+        return false;
     }
 
-    checkForAoE(index: number): number {
-        if (Math.random() < 0.4) return -1;
+    checkForAoE(index: number): boolean {
+        if (Math.random() < 0.4) return false;
 
         const spell = this.spells[index];
-        if (spell.target != Target.AOE) return -1;
+        if (spell.target != Target.AOE) return false;
 
         const tile = this.team?.game.scanGridForAoE(this, spell.size, spell.size - 1);
         if (tile) {
@@ -263,13 +246,13 @@ export class AIServerPlayer extends ServerPlayer {
                 target: null,
             };
             this.team?.game.processMagic(data);
-            return spell.castTime * 1000;
+            return true;
         }
-        return -1;
+        return false;
     }
 
-    checkForStatusEffectUse(index: number): number {
-        if (Math.random() < 0.4) return -1;
+    checkForStatusEffectUse(index: number): boolean {
+        if (Math.random() < 0.4) return false;
         const spell = this.spells[index];
         console.log(`[AIServerPlayer:checkForStatusEffectUse] Checking for status effect use: ${spell.status.effect}`);
 
@@ -278,7 +261,7 @@ export class AIServerPlayer extends ServerPlayer {
             // Filter to keep only mages
             targets = targets.filter(target => target.isMage());
         }
-        if (!targets || targets.length === 0) return -1;
+        if (!targets || targets.length === 0) return false;
         // Find the first target that is not afflicted by the status effect
         const target = targets.find(target => !target.hasStatusEffect(spell.status.effect)); 
         
@@ -291,9 +274,9 @@ export class AIServerPlayer extends ServerPlayer {
                 target: target.num,
             };
             this.team?.game.processMagic(data);
-            return spell.castTime * 1000;
+            return true;
         }
-        return -1;
+        return false;
     }
 
     determineTarget() {

@@ -337,6 +337,7 @@
   flex-direction: column;
   gap: 4px;
   min-width: 400px;
+  z-index: 11;
 }
 
 .player_bar_action_row {

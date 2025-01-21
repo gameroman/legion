@@ -577,27 +577,30 @@ export class Player extends Phaser.GameObjects.Container {
         }
     }
 
-    onLetterKey(keyCode) {
-        this.arena.playSound('click');
+    getLayoutAndSpellsIndex() {
         const qwertyLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
         const azertyLayout = 'AZERTYUIOPQSDFGHJKLMWXCVBN';
-        
-        // Get the current keyboard layout from settings
         const settingsString = localStorage.getItem('gameSettings');
         const settings = settingsString ? JSON.parse(settingsString) : { keyboardLayout: 1 }; // Default to QWERTY (1) if no settings
         const layout = settings.keyboardLayout === 0 ? azertyLayout : qwertyLayout;
+        const spellsIndex = settings.keyboardLayout === 0 ? layout.indexOf('W') : layout.indexOf('Z');
+        return { layout, spellsIndex };
+    }
+
+    onLetterKey(keyCode) {
+        const { layout } = this.getLayoutAndSpellsIndex();
         const index = layout.indexOf(keyCode);
         this.onKey(index);
     }
 
     onKey(keyIndex) {
         this.arena.playSound('click');
-        const keyboardLayout = 'QWERTYUIOPASDFGHJKLZXCVBNM';
-        const itemsIndex = keyboardLayout.indexOf('Z');
-        if (keyIndex >= itemsIndex) {
-            this.useItem(keyIndex - itemsIndex);
+        const { spellsIndex } = this.getLayoutAndSpellsIndex();
+        console.log(`[Player:onKey] keyIndex: ${keyIndex}, spellsIndex: ${spellsIndex}`);
+        if (keyIndex >= spellsIndex) {
+            this.useSkill(keyIndex - spellsIndex);
         } else {
-            this.useSkill(keyIndex);
+            this.useItem(keyIndex);
         }
     }
 
@@ -607,7 +610,7 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     useItem(index) {
-        // console.log(`Using item at slot ${index}`);
+        // console.log(`[Player:useItem] index: ${index}`);
         if (this.pendingItem == index) {
             this.cancelItem();
             return;
@@ -619,6 +622,7 @@ export class Player extends Phaser.GameObjects.Container {
         if (!item) {
             return;
         }
+        // console.log(`[Player:useItem] item: ${item.name}`);
         if (!this.canAct()) {
             this.arena.playSound('nope', 0.2);
             return;
@@ -668,11 +672,12 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     useSkill(index) {
+        // console.log(`[Player:useSkill] index: ${index}`);
         const spell = this.spells[index];
         if (!spell) {
-            // console.error(`No spell at slot ${index}`);
             return;
         }
+        // console.log(`[Player:useSkill] spell: ${spell.name}`);
         if (this.pendingSpell == index) {
             this.cancelSkill();
             return;
@@ -908,7 +913,6 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     showStatusAnimation(status: StatusEffect) {
-        console.log(`Showing status ${status}`);
         const keys = {
             [StatusEffect.PARALYZE]: 'paralyzed',
             [StatusEffect.POISON]: 'poisoned',
