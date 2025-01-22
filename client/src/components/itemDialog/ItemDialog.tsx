@@ -32,9 +32,7 @@ import cdIcon from '@assets/inventory/cd_icon.png';
 import targetIcon from '@assets/inventory/target_icon.png';
 import { APICharacterData } from '@legion/shared/interfaces';
 
-import { getConsumableById } from "@legion/shared/Items";
-import { getSpellById } from "@legion/shared/Spells";
-import { getEquipmentById } from "@legion/shared/Equipments";
+
 import { getSellPrice } from '@legion/shared/inventory';
 
 Modal.setAppElement('#root');

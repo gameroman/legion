@@ -94,36 +94,41 @@ class ItemIcon extends Component<ItemIconProps, ItemIconState> {
   handleOpenModal = (e: any, modalData: BaseItem | BaseSpell | BaseEquipment, inventoryType: InventoryType) => {
     const elementRect = e.currentTarget.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
-    
-    // Get the height of the modal (approximately)
-    const estimatedModalHeight = 200; // Adjust this value based on your modal's actual height
-    
-    let top = elementRect.top + elementRect.height / 2;
-    let left = elementRect.left + elementRect.width / 2;
-    
-    // Check if the modal would extend below the viewport
-    if (top + estimatedModalHeight > viewportHeight) {
-        // Position the modal above the item instead
-        top = elementRect.top - estimatedModalHeight;
-    }
-    
-    // Ensure the modal stays within the left/right bounds of the viewport
     const viewportWidth = window.innerWidth;
-    const estimatedModalWidth = 300; // Adjust based on your modal's width
     
+    // Estimate modal dimensions based on content type
+    let estimatedModalHeight = 200; // Default height
+    let estimatedModalWidth = 150;  // Default width
+    
+    // Adjust estimated height based on content type
+    if (modalData.description) {
+        estimatedModalHeight += 50; // Add more height for items with description
+    }
+    if ('effects' in modalData && modalData.effects?.length > 0) {
+        estimatedModalHeight += modalData.effects.length * 25; // Add height for each effect
+    }
+    
+    // Calculate initial position
+    let top = elementRect.top;
+    let left = elementRect.left + elementRect.width;
+    
+    // Check if modal would extend below viewport
+    if (top + estimatedModalHeight > viewportHeight) {
+        // Position modal above the click point
+        top = Math.max(10, viewportHeight - estimatedModalHeight - 10);
+    }
+    
+    // Check if modal would extend beyond right edge
     if (left + estimatedModalWidth > viewportWidth) {
-        left = viewportWidth - estimatedModalWidth - 10; // 10px padding from viewport edge
+        // Position modal to the left of the click point
+        left = Math.max(10, elementRect.left - estimatedModalWidth);
     }
     
-    if (left < 0) {
-        left = 10; // 10px padding from viewport edge
-    }
+    // Ensure minimum margins from viewport edges
+    top = Math.max(10, Math.min(top, viewportHeight - estimatedModalHeight - 10));
+    left = Math.max(10, Math.min(left, viewportWidth - estimatedModalWidth - 10));
 
-    const modalPosition = {
-        top: Math.max(10, top), // Ensure at least 10px from top of viewport
-        left,
-    };
-
+    const modalPosition = { top, left };
     const modalType = this.convertInventoryTypeToItemDialogType(inventoryType);
 
     this.setState({ openModal: true, modalType, modalPosition, modalData });
