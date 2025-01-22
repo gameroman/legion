@@ -37,7 +37,7 @@ export class QueueTips extends Component<{}, QueueTipsState> {
                 <div className="queue-tips-container">
                     <div style="font-family: Kim;">Tips</div>
                     <div>
-                        <span style={{ color: 'cyan' }}>
+                        <span className="queue-tips-text">
                             {this.state.tips[this.state.tipCount]}
                         </span>
                     </div>

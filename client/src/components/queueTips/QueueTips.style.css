@@ -37,3 +37,9 @@
   .next {
     right: 25vw;
   }
+  .queue-tips-text {
+    font-size: 1.2vw;
+    font-family: 'Kim';
+    text-align: center;
+    color: cyan;
+  }
