@@ -439,9 +439,12 @@ export const getEngagementMetrics = onRequest({ memory: '512MiB' }, async (reque
                 return;
             }
 
-            // Get all players who joined after the start date
+            // Get players who either joined or were active after the start date
             const playersSnapshot = await db.collection("players")
-                .where("joinDate", ">=", startDate)
+                .where(admin.firestore.Filter.or(
+                    admin.firestore.Filter.where("joinDate", ">=", startDate),
+                    admin.firestore.Filter.where("lastActiveDate", ">=", startDate)
+                ))
                 .get();
 
             const totalPlayers = playersSnapshot.size;
@@ -467,14 +470,13 @@ export const getEngagementMetrics = onRequest({ memory: '512MiB' }, async (reque
                 response.send({
                     landingPageCvRate,
                     totalPlayers: 0,
-                    tutorialCompletionRate: 0,
                     playedOneGameRate: 0,
                     playedOneGameRateNonMobile: 0,
                     playedOneGameRateMobile: 0,
-                    playedOneGameRate_tutorialCompleted: 0,
-                    playedOneGameRate_tutorialNotCompleted: 0,
                     playedMultipleGamesRate: 0,
-                    gameCompletionRate: 0
+                    gameCompletionRate: 0,
+                    abandonedFirstGameRateMobile: 0,
+                    abandonedFirstGameRateNonMobile: 0
                 });
                 return;
             }
@@ -486,11 +488,10 @@ export const getEngagementMetrics = onRequest({ memory: '512MiB' }, async (reque
             let totalNonMobilePlayers = 0;
             let totalMobilePlayers = 0;
             let playedMultipleGames = 0;
-            let completedTutorialCount = 0;
-            let playedOneGameAndCompletedTutorial = 0;
-            let playedOneGameAndNotCompletedTutorial = 0;
             let totalCompletedGames = 0;
             let totalGamesStarted = 0;
+            let abandonedFirstGameMobile = 0;
+            let abandonedFirstGameNonMobile = 0;
 
             // Process each player
             for (const playerDoc of playersSnapshot.docs) {
@@ -499,30 +500,30 @@ export const getEngagementMetrics = onRequest({ memory: '512MiB' }, async (reque
                 const playerTotalGames = stats.totalGames || 0;
                 const playerCompletedGames = stats.completedGames || 0;
                 const isMobile = playerData.isMobile || false;
-                const completedTutorial = stats.completedTutorial || false;
                 
-                if (playerTotalGames >= 1) {
+                const nbGamesThershold = 2; // Tutorial game + one more
+                if (playerTotalGames >= nbGamesThershold) {
                     playedOneGame++;
                     if (!isMobile) {
                         playedOneGameNonMobile++;
                     } else {
                         playedOneGameMobile++;
                     }
-                    if (completedTutorial) {
-                        playedOneGameAndCompletedTutorial++;
+                } else if (playerTotalGames === 1 && playerCompletedGames === 0) {
+                    // Player started exactly one game but didn't complete it
+                    if (isMobile) {
+                        abandonedFirstGameMobile++;
                     } else {
-                        playedOneGameAndNotCompletedTutorial++;
+                        abandonedFirstGameNonMobile++;
                     }
                 }
+
                 if (!isMobile) {
                     totalNonMobilePlayers++;
                 } else {
                     totalMobilePlayers++;
                 }
-                if (playerTotalGames > 1) playedMultipleGames++;
-                if (completedTutorial) {
-                    completedTutorialCount++;
-                }
+                if (playerTotalGames > nbGamesThershold) playedMultipleGames++;
 
                 totalCompletedGames += playerCompletedGames;
                 totalGamesStarted += playerTotalGames;
@@ -533,18 +534,17 @@ export const getEngagementMetrics = onRequest({ memory: '512MiB' }, async (reque
                 totalPlayers,
                 pctMobile: totalMobilePlayers > 0 ? (totalMobilePlayers / totalPlayers) * 100 : 0,
                 landingPageCvRate,
-                tutorialCompletionRate: (completedTutorialCount / totalPlayers) * 100,
                 playedOneGameRate: (playedOneGame / totalPlayers) * 100,
                 playedOneGameRateNonMobile: totalNonMobilePlayers > 0 ? 
                     (playedOneGameNonMobile / totalNonMobilePlayers) * 100 : 0,
                 playedOneGameRateMobile: totalMobilePlayers > 0 ?
                     (playedOneGameMobile / totalMobilePlayers) * 100 : 0,
-                playedOneGameRate_tutorialCompleted: completedTutorialCount > 0 ? 
-                    (playedOneGameAndCompletedTutorial / completedTutorialCount) * 100 : 0,
-                playedOneGameRate_tutorialNotCompleted: (totalPlayers - completedTutorialCount) > 0 ?
-                    (playedOneGameAndNotCompletedTutorial / (totalPlayers - completedTutorialCount)) * 100 : 0,
                 playedMultipleGamesRate: (playedMultipleGames / totalPlayers) * 100,
-                gameCompletionRate: totalGamesStarted > 0 ? (totalCompletedGames / totalGamesStarted) * 100 : 0
+                gameCompletionRate: totalGamesStarted > 0 ? (totalCompletedGames / totalGamesStarted) * 100 : 0,
+                abandonedFirstGameRateMobile: totalMobilePlayers > 0 ?
+                    (abandonedFirstGameMobile / totalMobilePlayers) * 100 : 0,
+                abandonedFirstGameRateNonMobile: totalNonMobilePlayers > 0 ?
+                    (abandonedFirstGameNonMobile / totalNonMobilePlayers) * 100 : 0
             };
 
             response.send(metrics);

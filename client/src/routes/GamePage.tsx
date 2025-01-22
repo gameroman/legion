@@ -120,15 +120,8 @@ class GamePage extends Component<GamePageProps, GamePageState> {
   handleServerDisconnect = () => {
     console.log(`[GamePage:serverDisconnect] Server disconnected`);
     
-    if (window.location.pathname.includes('tutorial')) {
-      this.setState(prevState => ({ key: prevState.key + 1 }), () => {
-        this.cleanup();
-        this.initializeGame();
-      });
-    } else {
-      if (process.env.NODE_ENV === 'development') return;
-      route('/');
-    }
+    if (process.env.NODE_ENV === 'development') return;
+    route('/');
   };
 
   startWaitingTimer = () => {

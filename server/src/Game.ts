@@ -1209,6 +1209,7 @@ export abstract class Game
         // console.log(`Base XP: ${xp}: ${otherTeam.getTotalLevel()} * ${XP_PER_LEVEL} * (${grade} + 0.3)`);
         if (mode == PlayMode.PRACTICE || mode == PlayMode.TUTORIAL) xp *= PRACTICE_XP_COEF;
         if (mode == PlayMode.RANKED || mode == PlayMode.RANKED_VS_AI) xp *= RANKED_XP_COEF;
+        if (team.isGame0) xp *= 2;
         // Add +- 5% random factor
         xp *= 0.95 + Math.random() * 0.1;
 
