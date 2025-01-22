@@ -1705,14 +1705,19 @@ export class Arena extends Phaser.Scene
             // Setup GEN Background
             const textTweenDuration = 600;
             const textDelay = 400;
-            const yOffset = -180;
-            const bgYPosition = (this.cameras.main.centerY / 2 + yOffset);
-            const xPosition = this.cameras.main.centerX + this.cameras.main.scrollX;
-            const yPosition = this.cameras.main.centerY - 200 + yOffset;
+            const yOffset = 80;
+            const bgYPosition = yOffset;
+            // Remove camera scroll from xPosition since we're using setScrollFactor(0)
+            const xPosition = this.cameras.main.centerX;
+            const yPosition = yOffset;
             const scale = 0.5;
 
-            let genBg = this.add.image(xPosition, bgYPosition, 'gen_bg');
-            genBg.setAlpha(0).setDepth(10).setScale(scale);
+            let genBg = this.add.image(xPosition, bgYPosition, 'gen_bg')
+                .setScrollFactor(0)
+                .setAlpha(0)
+                .setDepth(10)
+                .setScale(scale);
+
             this.tweens.add({
                 targets: genBg,
                 alpha: 0.7,
@@ -1722,12 +1727,22 @@ export class Arena extends Phaser.Scene
 
             // Setup GEN Texts
             const targets = [
-                this.add.image(-350, yPosition, text1).setDepth(10).setScale(scale),
-                this.add.image(this.cameras.main.width + 100, yPosition, 'blue_bang').setDepth(10).setScale(scale)
+                this.add.image(-350, yPosition, text1)
+                    .setScrollFactor(0) // Make it stick to camera
+                    .setDepth(10)
+                    .setScale(scale),
+                this.add.image(this.cameras.main.width + 100, yPosition, 'blue_bang')
+                    .setScrollFactor(0) // Make it stick to camera
+                    .setDepth(10)
+                    .setScale(scale)
             ];
+            
             if (text2) {
                 targets.push(
-                    this.add.image(this.cameras.main.width + 100, yPosition, text2).setDepth(10).setScale(scale)
+                    this.add.image(this.cameras.main.width + 100, yPosition, text2)
+                        .setScrollFactor(0) // Make it stick to camera
+                        .setDepth(10)
+                        .setScale(scale)
                 );
             }
 
