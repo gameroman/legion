@@ -5,8 +5,9 @@ import { Socket, Server } from 'socket.io';
 import { createServer } from 'http';
 import dotenv from 'dotenv';
 import * as admin from "firebase-admin";
-import { v4 as uuidv4 } from "uuid";
 import cors from 'cors';
+import { ServiceAccount } from "firebase-admin";
+import { getFirestore } from 'firebase-admin/firestore';
 
 import { apiFetch } from './API';
 import { Game } from './Game';
@@ -14,12 +15,29 @@ import { AIGame } from './AIGame';
 import { PvPGame } from './PvPGame';
 import firebaseConfig from '@legion/shared/firebaseConfig';
 import { League, PlayMode } from '@legion/shared/enums';
+import { transformDailyLoot } from '@legion/shared/utils';
+import { PlayerDataForGame } from '@legion/shared/interfaces';
 
 dotenv.config();
 
-admin.initializeApp(firebaseConfig);
 if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
+    // We're running locally with emulators
+    admin.initializeApp({
+        projectId: firebaseConfig.projectId,
+    });
+    
+    // Connect to local emulator
+    const db = getFirestore();
+    db.settings({
+        host: 'api:8090',
+        ssl: false
+    });
+
     process.env["FIREBASE_AUTH_EMULATOR_HOST"] = process.env.FIREBASE_AUTH_EMULATOR_HOST;
+    process.env["FIRESTORE_EMULATOR_HOST"] = "api:8090"; 
+} else {
+    // We're running in production
+    admin.initializeApp(firebaseConfig);
 }
 
 const PORT = process.env.PORT || 3123;
@@ -52,6 +70,56 @@ function shortToken(token: string) {
 
 const socketMap = new Map<Socket, Game>();
 const gamesMap = new Map<string, Game>();
+
+async function getPlayerData(uid: string): Promise<PlayerDataForGame> {
+  try {
+    const db = admin.firestore();
+    const playerDoc = await db.collection('players').doc(uid).get();
+    
+    if (!playerDoc.exists) {
+      throw new Error('Player not found');
+    }
+
+    const playerData = playerDoc.data();
+    if (!playerData) {
+      throw new Error('Player data is null');
+    }
+
+    // Update last active date if needed
+    const today = new Date().toISOString().replace('T', ' ').slice(0, 19);
+    if (playerData.lastActiveDate !== today) {
+      db.collection("players").doc(uid).update({
+        lastActiveDate: today,
+      });
+    }
+
+    // Transform dailyloot data
+    const transformedDailyLoot = transformDailyLoot(playerData.dailyloot || {});
+
+    const AIwinRatio = 
+      playerData.AIstats && playerData.AIstats.nbGames > 0 ?
+        (playerData.AIstats.wins - 1) / (playerData.AIstats.nbGames + 2) :
+        0;
+
+    return {
+      uid,
+      lvl: playerData.lvl || 1,
+      elo: playerData.elo || 100,
+      name: playerData.name || '',
+      teamName: "teamName",
+      avatar: playerData.avatar || '1',
+      league: playerData.league || 0,
+      rank: playerData.leagueStats?.rank || 0,
+      dailyloot: transformedDailyLoot,
+      AIwinRatio,
+      completedGames: playerData.engagementStats?.completedGames || 0,
+      engagementStats: playerData.engagementStats || {},
+    };
+  } catch (error) {
+    console.error('Error getting player data:', error);
+    throw error;
+  }
+}
 
 io.on('connection', async (socket: any) => {
     try {
@@ -136,14 +204,9 @@ io.on('connection', async (socket: any) => {
         console.log(`Reconnecting player ${shortToken(socket.uid)} to game ${gameId}`);
         game.reconnectPlayer(socket);
       } else {
-        const playerData = await apiFetch(
-          `getPlayerData`,
-          socket.firebaseToken,
-          {},
-          10,
-          500,
-        );
-  
+        console.log(`[server:connection] Fetching player data for ${socket.uid}`);
+        const playerData = await getPlayerData(socket.uid);
+        console.log(`[server:connection] !Player data fetched for ${socket.uid}:`, playerData);
         game.addPlayer(socket, playerData);
       }
 

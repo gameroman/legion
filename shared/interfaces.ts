@@ -389,7 +389,22 @@ export interface PlayerContextData {
     friends?: FriendData[];
     completedGames?: number;
     engagementStats?: any;
-  }
+}
+
+export interface PlayerDataForGame {
+    uid: string;
+    name: string;
+    teamName: string;
+    avatar: string;
+    lvl: number;
+    elo: number;
+    rank: number;
+    dailyloot: DailyLootAllAPIData;
+    league: League;
+    AIwinRatio?: number;
+    completedGames?: number;
+    engagementStats?: any;
+}
 
 export interface GameReplayMessage {
     timestamp: number;  // Milliseconds since game start

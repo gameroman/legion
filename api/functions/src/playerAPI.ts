@@ -26,6 +26,7 @@ import { numericalSort } from "@legion/shared/inventory";
 // import bs58 from 'bs58';
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { createGameDocument } from "./gameAPI";
+import { transformDailyLoot } from "@legion/shared/utils";
 
 const chestsDelays = {
   [ChestColor.BRONZE]: 6 * 60 * 60,
@@ -210,24 +211,6 @@ export const createPlayer = functions.runWith({ memory: '512MB' }).auth.user().o
     });
 });
 
-const transformDailyLoot = (dailyloot: DailyLootAllDBData): DailyLootAllAPIData => {
-  const now = Date.now() / 1000;
-  const transformedChests: DailyLootAllAPIData = {
-    [ChestColor.BRONZE]: { hasKey: false, countdown: 0 },
-    [ChestColor.SILVER]: { hasKey: false, countdown: 0 },
-    [ChestColor.GOLD]: { hasKey: false, countdown: 0 },
-  };
-  for (const color of Object.values(ChestColor)) {
-    const chest = dailyloot[color];
-    const timeLeft = chest.time - now;
-    transformedChests[color] = {
-      hasKey: chest.hasKey,
-      countdown: timeLeft > 0 ? timeLeft : 0,
-    };
-  }
-  return transformedChests;
-};
-
 
 export const getPlayerData = onRequest({
   memory: '512MiB'
@@ -258,7 +241,7 @@ export const getPlayerData = onRequest({
 
         const today = new Date().toISOString().replace('T', ' ').slice(0, 19);
         if (playerData.lastActiveDate !== today) {
-          await db.collection("players").doc(uid).update({
+          db.collection("players").doc(uid).update({
             lastActiveDate: today,
           });
           updateDAU(uid);
@@ -276,8 +259,6 @@ export const getPlayerData = onRequest({
         // Transform the chest field so that the `time` field becomes
         // a `countdown` field
         playerData.dailyloot = transformDailyLoot(playerData.dailyloot);
-
-        const tours = Object.keys(playerData.tours || {}).filter((tour) => !playerData.tours[tour]);
 
         // Ensure inventory fields exist and are arrays
         const inventory = playerData.inventory || {};

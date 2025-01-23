@@ -1,5 +1,5 @@
-import { PlayerInventory } from "./interfaces";
-import { StatusEffect } from "./enums";
+import { DailyLootAllAPIData, DailyLootAllDBData, PlayerInventory } from "./interfaces";
+import { ChestColor, StatusEffect } from "./enums";
 
 function specialRound(num: number): number {
     if (num >= 0) {
@@ -80,3 +80,20 @@ export async function sendMessageToAdmin(client: any, message: string) {
 
 export const paralyzingStatuses = [StatusEffect.FREEZE, StatusEffect.PARALYZE, StatusEffect.SLEEP];
 
+export const transformDailyLoot = (dailyloot: DailyLootAllDBData): DailyLootAllAPIData => {
+    const now = Date.now() / 1000;
+    const transformedChests: DailyLootAllAPIData = {
+      [ChestColor.BRONZE]: { hasKey: false, countdown: 0 },
+      [ChestColor.SILVER]: { hasKey: false, countdown: 0 },
+      [ChestColor.GOLD]: { hasKey: false, countdown: 0 },
+    };
+    for (const color of Object.values(ChestColor)) {
+      const chest = dailyloot[color];
+      const timeLeft = chest.time - now;
+      transformedChests[color] = {
+        hasKey: chest.hasKey,
+        countdown: timeLeft > 0 ? timeLeft : 0,
+      };
+    }
+    return transformedChests;
+  };

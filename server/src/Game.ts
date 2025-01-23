@@ -7,7 +7,7 @@ import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import { apiFetch, getRemoteConfig } from './API';
 import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League, GEN,
     Stat, SpeedClass } from '@legion/shared/enums';
-import { OutcomeData, TerrainUpdate, PlayerContextData, GameOutcomeReward, GameData,
+import { OutcomeData, TerrainUpdate, PlayerDataForGame, GameOutcomeReward, GameData,
     EndGameDataResults, GameReplayMessage } from '@legion/shared/interfaces';
 import { getChestContent } from '@legion/shared/chests';
 import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL, CAST_DELAY,
@@ -78,7 +78,7 @@ export abstract class Game
         socket.join(this.id);
     }
 
-    addPlayer(socket: Socket, playerData: PlayerContextData) {
+    addPlayer(socket: Socket, playerData: PlayerDataForGame) {
         try {
             if (this.sockets.length === 2) return;
             this.addSocket(socket);

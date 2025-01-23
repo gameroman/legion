@@ -11,3 +11,4 @@ serviceAccountKey.json
 /build
 /*.log
 dashboardv2/.env
+service-account.json

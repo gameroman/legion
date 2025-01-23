@@ -7,7 +7,7 @@ import {apiFetch} from './API';
 import { Class, PlayMode, League, AIAttackMode, Stat } from "@legion/shared/enums";
 import {NewCharacter} from "@legion/shared/NewCharacter";
 import {Team} from "./Team";
-import { DBCharacterData, PlayerContextData } from '@legion/shared/interfaces';
+import { DBCharacterData, PlayerContextData, PlayerDataForGame } from '@legion/shared/interfaces';
 import { Item } from './Item';
 import { getConsumableById } from '@legion/shared/Items';
 import { GAME_0_TURN_DURATION, MAX_AI_CHARACTERS, TURN_DURATION } from '@legion/shared/config';
@@ -230,7 +230,7 @@ export class AIGame extends Game {
         this.addAICharacter(team, character);
     }
 
-    async addPlayer(socket: Socket, playerData: PlayerContextData) {
+    async addPlayer(socket: Socket, playerData: PlayerDataForGame) {
         super.addPlayer(socket, playerData);
         if (this.sockets.length === this.nbExpectedPlayers) {
             this.start();
