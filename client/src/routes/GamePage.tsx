@@ -123,7 +123,6 @@ class GamePage extends Component<GamePageProps, GamePageState> {
   };
 
   handleRevealTeam = (team: PlayerNetworkData[]) => {
-    console.log(`[GamePage:handleRevealTeam] Team: ${team}`);
     this.setState({ revealedTeam: team });
   };
 
