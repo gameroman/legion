@@ -339,7 +339,6 @@ export class Arena extends Phaser.Scene
             tile: { x, y},
         };
         this.send('move', data);
-        events.emit('playerMoved');
         events.emit('performAction');
     }
 
@@ -350,7 +349,6 @@ export class Arena extends Phaser.Scene
             sameTeam: player.team.id === this.selectedPlayer.team.id,
         };
         this.send('attack', data);
-        events.emit('playerAttacked');
         events.emit('performAction');
     }
 
@@ -375,7 +373,6 @@ export class Arena extends Phaser.Scene
         this.send('spell', data);
         this.toggleTargetMode(false);
         this.selectedPlayer.pendingSpell = null;
-        events.emit(`playerCastSpell`);
         events.emit(`playerCastSpell_${this.selectedPlayer.pendingSpell}`);
         events.emit('performAction');
     }
@@ -393,7 +390,6 @@ export class Arena extends Phaser.Scene
         this.toggleItemMode(false);
         this.selectedPlayer.pendingItem = null;
         const item = this.selectedPlayer.inventory[index];
-        events.emit(`playerUseItem`);
         events.emit(`playerUseItem_${item.id}`);
         events.emit('performAction');
     }
@@ -777,6 +773,9 @@ export class Arena extends Phaser.Scene
 
         player.walkTo(tile.x, tile.y);
         this.playSoundMultipleTimes('steps', 2);
+        if (player.isPlayer) {
+            events.emit('playerMoved');
+        }
     }
 
     processAttack({team, target, num, damage, hp, isKill, sameTeam}) {
@@ -792,7 +791,10 @@ export class Arena extends Phaser.Scene
         player.attack(targetPlayer.gridX);
         targetPlayer.setHP(hp);
         targetPlayer.displaySlash(player);   
-        this.displayAttackImpact(targetPlayer.gridX, targetPlayer.gridY);    
+        this.displayAttackImpact(targetPlayer.gridX, targetPlayer.gridY);   
+        if (player.isPlayer) {
+            events.emit('playerAttacked');
+        }
     }
 
     processObstacleAttack({team, num, x, y}) {
@@ -836,6 +838,9 @@ export class Arena extends Phaser.Scene
         const player = this.getPlayer(team, num);
         player.useItemAnimation(animation, name);
         this.playSound(sfx);
+        if (player.isPlayer) {
+            events.emit(`playerUseItem`);
+        }
     }
 
     processCast(flag, {team, num, id, location,}) {
@@ -847,6 +852,9 @@ export class Arena extends Phaser.Scene
         const { x: pixelX, y: pixelY } = this.gridToPixelCoords(player.gridX, player.gridY);
         // this.spellCam(pixelX, pixelY, false);
         // if (flag) this.displaySpellArea(location, spell.size, spell.castTime);
+        if (player.isPlayer) {
+            events.emit(`playerCastSpell`);
+        }
     }
 
     processTerrain(updates: TerrainUpdate[]) {

@@ -208,12 +208,12 @@ export class TutorialManager {
     }
 
     destroy() {
-        events.removeAllListeners('updateEngagementStats');
         events.removeAllListeners('selectCharacter_hasItem');
         events.removeAllListeners('selectCharacter_2');
         events.removeAllListeners('selectCharacter');
         events.removeAllListeners('hasEnemy');
         events.removeAllListeners('playerMoved');
+        events.removeAllListeners('playerCastSpell');
         events.removeAllListeners('playerAttacked');
         events.removeAllListeners('selectedSpell');
         events.removeAllListeners('playerUseItem');
@@ -222,5 +222,6 @@ export class TutorialManager {
         events.removeAllListeners('hasStatus_POISON');
         events.removeAllListeners('hasStatus_MUTE');
         events.removeAllListeners('hasStatus_PARALYZE');
+
     }
 } 
