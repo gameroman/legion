@@ -268,5 +268,7 @@ export enum LockedFeatures {
     CONSUMABLES_BATCH_1,
     CONSUMABLES_BATCH_2,
     CONSUMABLES_BATCH_3,
+    DAILY_LOOT,
+    RANKED_MODE,
   }
   

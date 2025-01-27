@@ -212,9 +212,30 @@ class Navbar extends Component<Props, State> {
                             )}
                         </div>
                     </Link>
-                    <Link href="/rank" onMouseOver={() => this.setState({ hovered: MenuItems.RANK })} onMouseLeave={() => this.setState({ hovered: '' })}>
-                        <div className={`menuItemContainer ${currentPage(Routes.RANK) ? 'activeFlag' : ''}`}>
-                            <img className="menuItem" src={this.state.hovered === MenuItems.RANK ? rankActiveIcon : rankIcon} alt="Rank" />
+                    <Link 
+                        href={this.context.canAccessFeature(LockedFeatures.RANKED_MODE) ? "/rank" : "#"}
+                        onClick={(e) => {
+                            if (!this.context.canAccessFeature(LockedFeatures.RANKED_MODE)) {
+                                e.preventDefault();
+                                return;
+                            }
+                        }}
+                        onMouseOver={() => this.setState({ hovered: MenuItems.RANK })} 
+                        onMouseLeave={() => this.setState({ hovered: '' })}
+                    >
+                        <div className={`menuItemContainer ${currentPage(Routes.RANK) ? 'activeFlag' : ''} ${!this.context.canAccessFeature(LockedFeatures.RANKED_MODE) ? 'disabled' : ''}`}>
+                            <img 
+                                className="menuItem" 
+                                src={this.state.hovered === MenuItems.RANK ? rankActiveIcon : rankIcon} 
+                                alt="Rank" 
+                            />
+                            {!this.context.canAccessFeature(LockedFeatures.RANKED_MODE) && (
+                                <img 
+                                    className="lock-overlay"
+                                    src={lockIcon} 
+                                    alt="Locked" 
+                                />
+                            )}
                         </div>
                     </Link>
                 </div>

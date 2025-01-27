@@ -5,6 +5,20 @@
     display: flex;
     align-items: center;
     position: relative;
+    cursor: pointer;
+}
+
+.buttonContainer.disabled {
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
+
+.buttonContainer.disabled:hover {
+    transform: none;
+}
+
+.buttonContainer.disabled .lock-overlay {
+    filter: none; /* Keep the lock icon colorful */
 }
 
 .buttonContainer img {
@@ -31,4 +45,28 @@
 .labelContainer .player {
     font-size: 11px;
     color: #FFFFFF;
+}
+
+.playModeButton.disabled {
+    cursor: not-allowed;
+    pointer-events: all;
+}
+
+.playModeButton.disabled:hover {
+    transform: none;
+}
+
+.playModeButton img.grayscale {
+    filter: grayscale(100%);
+}
+
+.playModeButton .lock-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    pointer-events: none;
+    filter: brightness(1.2);
 }

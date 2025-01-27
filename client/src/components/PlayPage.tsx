@@ -11,7 +11,7 @@ import { PlayerContext } from '../contexts/PlayerContext';
 import { ENABLE_QUESTS, ENABLE_SPECTATOR_MODE } from "@legion/shared/config";
 import { firebaseAuth } from '../services/firebaseService'; 
 import PopupManager, { Popup } from './popups/PopupManager';
-
+import { LockedFeatures } from "@legion/shared/enums";
 /* eslint-disable react/prefer-stateless-function */
 class PlayPage extends Component {
   static contextType = PlayerContext; 
@@ -122,7 +122,7 @@ class PlayPage extends Component {
           highlightColor='#0000004d'
           baseColor='#0f1421'
           style={{ margin: '2px 146px', width: '1024px'}} />}
-        <DailyLoot data={this.context.player.dailyloot} />
+        {this.context.canAccessFeature(LockedFeatures.DAILY_LOOT) && <DailyLoot data={this.context.player.dailyloot} />}
         {ENABLE_QUESTS && <DailyQuest questData={data.dailyQuests} />}
         {ENABLE_SPECTATOR_MODE && <OnGoingArena ongoingGameData={data.ongoingGames} />}
       </div>

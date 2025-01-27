@@ -12,14 +12,16 @@ import middlePlayIdle from '@assets/middle_play_idle.png';
 import { PlayMode } from '@legion/shared/enums';
 import { apiFetch } from '../../services/apiService';
 
-interface ButtonProps {
-    players?: number;
+interface Props {
     label: string;
+    players?: number;
     mode: PlayMode;
     isLobbies?: boolean;
+    disabled?: boolean;
+    lockIcon?: string;
 }
 
-class PlayModeButton extends Component<ButtonProps> {
+class PlayModeButton extends Component<Props> {
     state = {
         active: false,
         lobbiesCount: null
@@ -50,16 +52,18 @@ class PlayModeButton extends Component<ButtonProps> {
     }
     
     render() {
+        const { label, players, mode, isLobbies, disabled, lockIcon } = this.props;
+        const { active, lobbiesCount } = this.state;
+
         const btnBg = {
-            backgroundImage: `url(${this.props.label === 'ranked'  || this.props.label === 'elysium'
-                ? (this.state.active ? specialBtnBgActive : specialBtnBgIdle)
-                : (this.state.active ? middlePlayActive : middlePlayIdle)
-                })`,
-            cursor: 'pointer'
+            backgroundImage: `url(${label === 'ranked'  || label === 'elysium'
+                ? (active ? specialBtnBgActive : specialBtnBgIdle)
+                : (active ? middlePlayActive : middlePlayIdle)
+                })`
         };
 
         const playerSpanStyle = {
-            color: `${this.state.active ? '#4ff4f6' : '#ffb653'}`
+            color: `${active ? '#4ff4f6' : '#ffb653'}`
         }
 
         const btnIcons = {
@@ -69,14 +73,32 @@ class PlayModeButton extends Component<ButtonProps> {
             elysium: SolanaIcon
         }
 
+        const handleClick = disabled ? undefined : this.handleCardClick;
+
         return (
-            <div id={`playmode_${this.props.mode}`} className="buttonContainer" style={btnBg} onMouseEnter={() => this.setState({active: true})} onMouseLeave={() => this.setState({active: false})} onClick={this.handleCardClick}>
-                <img src={btnIcons[this.props.label]} alt="" />
+            <div 
+                className={`buttonContainer ${disabled ? 'disabled' : ''}`} 
+                style={btnBg} 
+                onMouseEnter={() => !disabled && this.setState({active: true})} 
+                onMouseLeave={() => !disabled && this.setState({active: false})} 
+                onClick={handleClick}
+            >
+                <img 
+                    src={btnIcons[label]} 
+                    alt={label} 
+                />
+                {lockIcon && (
+                    <img 
+                        src={lockIcon} 
+                        alt="Locked" 
+                        className="lock-overlay"
+                    />
+                )}
                 <div className="labelContainer">
-                    <span className="label">{this.props.label}</span>
-                    {this.props.isLobbies 
-                        ? (this.state.lobbiesCount > 0 && <span className="player"><span style={playerSpanStyle}>{this.state.lobbiesCount}</span> {this.state.lobbiesCount === 1 ? 'Opponent' : 'Opponents'} Waiting</span>)
-                        : (this.props.players && <span className="player"><span style={playerSpanStyle}>{this.props.players}</span> {this.props.players === 1 ? 'Player' : 'Players'} Queuing</span>)
+                    <span className="label">{label}</span>
+                    {!disabled && isLobbies 
+                        ? (lobbiesCount > 0 && <span className="player"><span style={playerSpanStyle}>{lobbiesCount}</span> {lobbiesCount === 1 ? 'Opponent' : 'Opponents'} Waiting</span>)
+                        : (!disabled && players && <span className="player"><span style={playerSpanStyle}>{players}</span> {players === 1 ? 'Player' : 'Players'} Queuing</span>)
                     }
                 </div>
             </div>

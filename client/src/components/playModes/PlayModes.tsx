@@ -1,8 +1,10 @@
 import './PlayModes.style.css'
 import { h, Component } from 'preact';
 import PlayModeButton from '../playModeButton/playModeButton';
-import { PlayMode } from '@legion/shared/enums';
+import { PlayMode, LockedFeatures } from '@legion/shared/enums';
 import { ENABLE_ELYSIUM } from '@legion/shared/config';
+import { PlayerContext } from '../../contexts/PlayerContext';
+import { lockIcon } from '../utils';
 
 enum MiddleBtns {
   PRACTICE = 'practice',
@@ -12,6 +14,8 @@ enum MiddleBtns {
 }
 
 class PlayModes extends Component {
+  static contextType = PlayerContext;
+
   state = {
     isSolanaWalletPresent: false
   };
@@ -29,12 +33,19 @@ class PlayModes extends Component {
 
   render() {
     const { isSolanaWalletPresent } = this.state;
+    const isRankedUnlocked = this.context.canAccessFeature(LockedFeatures.RANKED_MODE);
     
     return (
       <div className="barContainer">
         <PlayModeButton label={MiddleBtns.PRACTICE} mode={PlayMode.PRACTICE}/>
         <PlayModeButton label={MiddleBtns.CASUAL} players={Math.floor(Math.random() * 4) + 1} mode={PlayMode.CASUAL}/>
-        <PlayModeButton label={MiddleBtns.RANKED} players={Math.floor(Math.random() * 2) + 1} mode={PlayMode.RANKED}/>
+        <PlayModeButton 
+          label={MiddleBtns.RANKED} 
+          players={Math.floor(Math.random() * 2) + 1} 
+          mode={PlayMode.RANKED}
+          disabled={!isRankedUnlocked}
+          lockIcon={!isRankedUnlocked ? lockIcon : undefined}
+        />
         {ENABLE_ELYSIUM && isSolanaWalletPresent && (
           <PlayModeButton label={MiddleBtns.ELYSIUM} players={1} mode={PlayMode.STAKED} isLobbies={true}/>
         )}
