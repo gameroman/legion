@@ -262,5 +262,8 @@ export enum LockedFeatures {
     SPELLS_BATCH_1,
     SPELLS_BATCH_2,
     SPELLS_BATCH_3,
+    EQUIPMENT_BATCH_1,
+    EQUIPMENT_BATCH_2,
+    EQUIPMENT_BATCH_3,
   }
   

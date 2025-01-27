@@ -2,11 +2,11 @@ import './ShopContent.style.css';
 import 'react-loading-skeleton/dist/skeleton.css'
 
 import Skeleton from 'react-loading-skeleton';
-import { h, Component } from 'preact';
+import { h, Component, render } from 'preact';
 import { PlayerContext } from '../../contexts/PlayerContext';
 import { apiFetch } from '../../services/apiService';
 import { InventoryType, ShopTab, EquipmentSlot, equipmentSlotLabelsPlural, LockedFeatures } from '@legion/shared/enums';
-import { LOCKED_FEATURES, MAX_CHARACTERS } from "@legion/shared/config";
+import { EQUIPMENT_BATCH_GOLD, LOCKED_FEATURES, MAX_CHARACTERS } from "@legion/shared/config";
 import { ShopItems, DBCharacterData } from '@legion/shared/interfaces';
 import { errorToast, successToast, playSoundEffect, silentErrorToast, lockIcon } from '../utils';
 import ShopSpellCard from '../shopSpellCard/ShopSpellCard';
@@ -172,6 +172,16 @@ class ShopContent extends Component<ShopContentProps> {
         if (purchasingCharacter) this.context.applyPurchase(id, price, quantity, this.state.curr_tab);
     }
 
+    getEquipmentBatch = (price: number): LockedFeatures | null => {
+        if (price <= EQUIPMENT_BATCH_GOLD[LockedFeatures.EQUIPMENT_BATCH_1]) {
+            return LockedFeatures.EQUIPMENT_BATCH_1;
+        } else if (price <= EQUIPMENT_BATCH_GOLD[LockedFeatures.EQUIPMENT_BATCH_2]) {
+            return LockedFeatures.EQUIPMENT_BATCH_2;
+        } else {
+            return LockedFeatures.EQUIPMENT_BATCH_3;
+        }
+    }
+
     render() {
         if (!this.state.inventoryData) return null;
 
@@ -230,7 +240,13 @@ class ShopContent extends Component<ShopContentProps> {
                         <ShopConsumableCard key={index} data={item} getItemAmount={getItemAmount} handleOpenModal={this.handleOpenModal} />
                     );
                 case ShopTab.EQUIPMENTS: {
-                    const groupedEquipment = groupEquipmentByType(this.state.inventoryData.equipment);
+                    const unlockedEquipment = this.state.inventoryData.equipment.filter(equipment => {
+                        const batch = this.getEquipmentBatch(equipment.price);
+                        return !batch || this.context.canAccessFeature(batch);
+                    });
+
+                    const groupedEquipment = groupEquipmentByType(unlockedEquipment);
+                    
                     return (
                         <div className="equipment-sections">
                             {Object.entries(groupedEquipment).map(([slot, items]) => (
@@ -250,6 +266,22 @@ class ShopContent extends Component<ShopContentProps> {
                                     </div>
                                 </div>
                             ))}
+                            {(!this.context.canAccessFeature(LockedFeatures.EQUIPMENT_BATCH_2) || 
+                              !this.context.canAccessFeature(LockedFeatures.EQUIPMENT_BATCH_3)) && (
+                                <div className="locked-spells-notice">
+                                    <img src={lockIcon} alt="Locked content" />
+                                    <h3>More Equipment Awaits!</h3>
+                                    <p>
+                                        {!this.context.canAccessFeature(LockedFeatures.EQUIPMENT_BATCH_2) && (
+                                            `Play ${this.context.getGamesUntilFeature(LockedFeatures.EQUIPMENT_BATCH_2)} more games to unlock better equipment!`
+                                        )}
+                                        {this.context.canAccessFeature(LockedFeatures.EQUIPMENT_BATCH_2) && 
+                                         !this.context.canAccessFeature(LockedFeatures.EQUIPMENT_BATCH_3) && (
+                                            `Play ${this.context.getGamesUntilFeature(LockedFeatures.EQUIPMENT_BATCH_3)} more games to unlock the final equipment tier!`
+                                        )}
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     );
                 }
@@ -298,8 +330,10 @@ class ShopContent extends Component<ShopContentProps> {
                     {this.state.inventoryData && shopTabIcons.map((icon, index) => {
                         const isCharacterTab = index === ShopTab.CHARACTERS;
                         const isSpellsTab = index === ShopTab.SPELLS;
+                        const isEquipmentTab = index === ShopTab.EQUIPMENTS;
                         const isDisabled = (isCharacterTab && !this.context.canAccessFeature(LockedFeatures.CHARACTER_PURCHASES)) ||
-                                         (isSpellsTab && !this.context.canAccessFeature(LockedFeatures.SPELLS_BATCH_1));
+                                         (isSpellsTab && !this.context.canAccessFeature(LockedFeatures.SPELLS_BATCH_1)) ||
+                                         (isEquipmentTab && !this.context.canAccessFeature(LockedFeatures.EQUIPMENT_BATCH_1));
 
                         return (
                             <Link
