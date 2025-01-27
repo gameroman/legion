@@ -1,5 +1,5 @@
 // PlayPage.tsx
-import { h, Component } from 'preact';
+import { h, Component, createRef } from 'preact';
 import Roster from './roster/Roster';
 import PlayModes from './playModes/PlayModes';
 import OnGoingArena from './onGoingArena/OnGoingArena';
@@ -10,7 +10,7 @@ import 'react-loading-skeleton/dist/skeleton.css'
 import { PlayerContext } from '../contexts/PlayerContext';
 import { ENABLE_QUESTS, ENABLE_SPECTATOR_MODE } from "@legion/shared/config";
 import { firebaseAuth } from '../services/firebaseService'; 
-import Welcome from './welcome/Welcome';
+import PopupManager, { Popup } from './popups/PopupManager';
 
 /* eslint-disable react/prefer-stateless-function */
 class PlayPage extends Component {
@@ -20,12 +20,14 @@ class PlayPage extends Component {
     showWelcome: false,
   };
 
+  popupManagerRef = createRef();
+
   componentDidMount() {
     const user = firebaseAuth.currentUser;
     
-    this.setState({
-      showWelcome: user?.isAnonymous && !this.context.welcomeShown,
-    });
+    if (user?.isAnonymous && !this.context.welcomeShown) {
+      this.popupManagerRef.current?.enqueuePopup(Popup.Guest);
+    }
   }
   
   componentDidUpdate() {
@@ -35,10 +37,11 @@ class PlayPage extends Component {
     }
   }
 
-  hideWelcome = () => {
-    this.setState({ showWelcome: false });
-    this.context.markWelcomeShown();
-    this.context.manageHelp('play');
+  handlePopupResolved = (popup: Popup) => {
+    if (popup === Popup.Guest) {
+      this.context.markWelcomeShown();
+      this.context.manageHelp('play');
+    }
   };
 
   render() {
@@ -108,7 +111,10 @@ class PlayPage extends Component {
 
     return (
       <div className="play-content">
-        {this.state.showWelcome && <Welcome onHide={this.hideWelcome} />}
+        <PopupManager 
+          ref={this.popupManagerRef}
+          onPopupResolved={this.handlePopupResolved}
+        />
         <Roster/>
         {data ? <PlayModes /> : <Skeleton
           height={50}

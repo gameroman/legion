@@ -5,7 +5,7 @@ export const tips = [
     "Level-ups grant your characters SP - spend them on their stats to make them stronger!",
     "If your mages often lack MP, equip them with Ethers!",
     "The Poison spell deals damage over time to an enemy!",
-    "Fire spells set the ground on fire, dealing damage to any character standing on or crossing it!",
+    "Fire spells set the ground on fire, dealing damage to characters standing on or crossing it!",
     "Ice spells freeze characters, preventing them from moving or attacking until freed!",
     "Free frozen character by attacking them with a melee attack or a fire spell!",
     "Thunder spells paralyze characters, preventing them from moving or attacking for several turns!",

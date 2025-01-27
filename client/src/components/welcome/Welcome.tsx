@@ -60,7 +60,7 @@ class Welcome extends Component<WelcomeProps, WelcomeState> {
             <h1 className="welcome-text">Welcome to Legion!</h1>
             {!showLoginOptions ? (
               <Fragment>
-                <div className="login-header">
+                <div className="welcome-header">
                   Play freely without an account, or create one at any time to save your progress!
                 </div>
                 <div className="login-buttons">
