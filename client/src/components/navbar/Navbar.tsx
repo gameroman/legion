@@ -241,14 +241,16 @@ class Navbar extends Component<Props, State> {
                 </div>
 
                 <div className="flexContainer" id="goldEloArea">
-                    {/* {this.state.isSolanaWalletPresent && this.state.isSolanaWalletConnected && (
-                        <UserInfoBar 
-                            icon='solana' 
-                            label={`${this.props.playerData.tokens !== null ? this.formatNumber(this.props.playerData.tokens[Token.SOL] || 0) : 'Loading...'} SOL`} 
-                        />
-                    )} */}
                     <UserInfoBar icon='gold' label={`${this.state.isLoading ? 'Loading...' : this.formatNumber(Math.round(this.props.playerData?.gold))}`}  />
-                    <UserInfoBar icon='league' label={this.state.isLoading ? 'Loading...' : `#${this.props.playerData?.rank}`} isLeague={true} bigLabel={!this.state.isLoading} league={this.props.playerData?.league} />
+                    {this.context.canAccessFeature(LockedFeatures.RANKED_MODE) && (
+                        <UserInfoBar 
+                            icon='league' 
+                            label={this.state.isLoading ? 'Loading...' : `#${this.props.playerData?.rank}`} 
+                            isLeague={true} 
+                            bigLabel={!this.state.isLoading} 
+                            league={this.props.playerData?.league} 
+                        />
+                    )}
                     <div className="expand_btn" style={{backgroundImage: `url(${expandBtn})`}} onClick={() => this.setState({ openDropdown: !this.state.openDropdown })} onMouseEnter={() => this.setState({ openDropdown: true })}>
                         <div className="dropdown-content" style={dropdownContentStyle} onMouseLeave={() => this.setState({ openDropdown: false })}>
                             <div onClick={() => window.open('https://guide.play-legion.io', '_blank')}>
@@ -263,17 +265,6 @@ class Navbar extends Component<Props, State> {
                             <div onClick={this.copyIDtoClipboard}>
                                 <img src={copyIcon} alt="Copy" /> Player ID
                             </div>
-                            {/* {this.state.isSolanaWalletPresent && (
-                                this.state.isSolanaWalletConnected ? (
-                                    <div onClick={this.disconnectSolanaWallet}>
-                                        <img src={logoutIcon} alt="Disconnect Wallet" /> Disconnect Wallet
-                                    </div>
-                                ) : (
-                                    <div onClick={this.connectSolanaWallet}>
-                                        <img src={walletIcon} alt="Connect Wallet" /> Connect Wallet
-                                    </div>
-                                )
-                            )} */}
                             <div onClick={this.toggleSettingsModal}>
                                 <img src={cogIcon} alt="Settings" /> Settings
                             </div>

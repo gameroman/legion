@@ -1,5 +1,5 @@
 // Inventory.tsx
-import { h, Component } from 'preact';
+import { h, Fragment, Component } from 'preact';
 import './Inventory.style.css';
 import { getConsumableById } from '@legion/shared/Items';
 import { getSpellById } from '@legion/shared/Spells';
@@ -16,7 +16,7 @@ import Modal from 'react-modal';
 import { Effect } from '@legion/shared/interfaces';
 
 import shopIcon from '@assets/inventory/shop_btn.png';
-import helpIcon from '@assets/inventory/info_btn.png';
+import { LockedFeatures } from '@legion/shared/enums';
 
 
 Modal.setAppElement('#root');
@@ -94,11 +94,15 @@ class Inventory extends Component<InventoryProps> {
           <div className="inventoryCategoryContainer">
             <p className="inventoryLabel">INVENTORY</p>
             <div className="inventoryCategories">
-              <Link href='/shop' className="categoryBtn" style={{ backgroundImage: `url(${shopIcon})` }}></Link>
-              <div className="categoryCount">
-                <span>{inventorySize(this.context.player.inventory)} </span>
-                &nbsp;/&nbsp;{this.context.player.carrying_capacity}
-              </div>
+              {this.context.canAccessFeature(LockedFeatures.CONSUMABLES_BATCH_1) && (
+                <>
+                  <Link href='/shop' className="categoryBtn" style={{ backgroundImage: `url(${shopIcon})` }}></Link>
+                  <div className="categoryCount">
+                    <span>{inventorySize(this.context.player.inventory)} </span>
+                    &nbsp;/&nbsp;{this.context.player.carrying_capacity}
+                  </div>
+                </>
+              )}
             </div>
           </div>
           <div className="inventoryWrapper">
@@ -125,8 +129,10 @@ class Inventory extends Component<InventoryProps> {
                   this.context.player.inventory[type]?.length > 0
                 ) && (
                   <div className='empty-slots-container'>
-                    <p>Your inventory is empty, take a look at the shop!</p>
-                    <Link href='/shop'>Go to shop <img src={shopIcon} alt="shop" /></Link>
+                    <p>Your inventory is empty{this.context.canAccessFeature(LockedFeatures.CONSUMABLES_BATCH_1) ? ', take a look at the shop!' : '!'}</p>
+                    {this.context.canAccessFeature(LockedFeatures.CONSUMABLES_BATCH_1) && (
+                      <Link href='/shop'>Go to shop <img src={shopIcon} alt="shop" /></Link>
+                    )}
                   </div>
                 )}
               </div>

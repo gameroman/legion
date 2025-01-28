@@ -22,9 +22,9 @@ equipments[1] = new BaseEquipment({
     name: "Basic staff",
     description: "",
     frame: 20,
-    effects: [{stat: Stat.SPATK, value: 10}, {stat: Stat.MP, value: 15}],
+    effects: [{stat: Stat.SPATK, value: 5}, {stat: Stat.MP, value: 10}],
     slot: EquipmentSlot.WEAPON,
-    effort: 9,
+    effort: 4,
     minLevel: 1,
     classes: [Class.BLACK_MAGE, Class.WHITE_MAGE],
 });

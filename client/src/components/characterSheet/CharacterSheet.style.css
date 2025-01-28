@@ -164,7 +164,7 @@
 }
 
 .team-exp-info span {
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 600;
     color: #ffffff;
 }
@@ -273,7 +273,7 @@
 }
 
 .character-info-bar .info-class span {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     color: #ffffff;
 }
@@ -290,7 +290,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     color: #ffffff;
 }
