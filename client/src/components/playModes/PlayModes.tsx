@@ -37,8 +37,17 @@ class PlayModes extends Component {
     
     return (
       <div className="barContainer">
-        <PlayModeButton label={MiddleBtns.PRACTICE} mode={PlayMode.PRACTICE}/>
-        <PlayModeButton label={MiddleBtns.CASUAL} players={Math.floor(Math.random() * 4) + 1} mode={PlayMode.CASUAL}/>
+        <PlayModeButton 
+          label={MiddleBtns.PRACTICE} 
+          mode={PlayMode.PRACTICE}
+          data-playmode="practice"
+        />
+        <PlayModeButton 
+          label={MiddleBtns.CASUAL} 
+          mode={PlayMode.CASUAL}
+          players={Math.floor(Math.random() * 4) + 1} 
+          data-playmode="casual"
+        />
         <PlayModeButton 
           label={MiddleBtns.RANKED} 
           players={Math.floor(Math.random() * 2) + 1} 
@@ -47,7 +56,12 @@ class PlayModes extends Component {
           lockIcon={!isRankedUnlocked ? lockIcon : undefined}
         />
         {ENABLE_ELYSIUM && isSolanaWalletPresent && (
-          <PlayModeButton label={MiddleBtns.ELYSIUM} players={1} mode={PlayMode.STAKED} isLobbies={true}/>
+          <PlayModeButton 
+            label={MiddleBtns.ELYSIUM} 
+            players={1} 
+            mode={PlayMode.STAKED} 
+            isLobbies={true}
+          />
         )}
       </div>
     );

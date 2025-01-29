@@ -19,6 +19,7 @@ interface Props {
     isLobbies?: boolean;
     disabled?: boolean;
     lockIcon?: string;
+    'data-playmode'?: string;
 }
 
 class PlayModeButton extends Component<Props> {
@@ -52,7 +53,7 @@ class PlayModeButton extends Component<Props> {
     }
     
     render() {
-        const { label, players, mode, isLobbies, disabled, lockIcon } = this.props;
+        const { label, players, mode, isLobbies, disabled, lockIcon, ...otherProps } = this.props;
         const { active, lobbiesCount } = this.state;
 
         const btnBg = {
@@ -82,6 +83,7 @@ class PlayModeButton extends Component<Props> {
                 onMouseEnter={() => !disabled && this.setState({active: true})} 
                 onMouseLeave={() => !disabled && this.setState({active: false})} 
                 onClick={handleClick}
+                {...otherProps}
             >
                 <img 
                     src={btnIcons[label]} 

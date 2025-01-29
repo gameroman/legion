@@ -25,15 +25,16 @@ class PlayPage extends Component {
   componentDidMount() {
     const user = firebaseAuth.currentUser;
     
-    if (user?.isAnonymous && !this.context.welcomeShown) {
+    if (user?.isAnonymous && !this.context.welcomeShown && this.context.player.isLoaded) {
       this.popupManagerRef.current?.enqueuePopup(Popup.Guest);
     }
   }
   
   componentDidUpdate() {
     if (!this.context.player.isLoaded) return;
-    if (!this.state.showWelcome) {
-      this.context.manageHelp('play');
+
+    if (this.context.getCompletedGames() < 1) {
+      this.popupManagerRef.current?.enqueuePopup(Popup.PlayOneGame);
     }
   }
 

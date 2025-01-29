@@ -606,8 +606,12 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       return this.state.player.engagementStats.completedGames >= LOCKED_FEATURES[feature];
     }
 
+    getCompletedGames = (): number => {
+      return this.state.player.engagementStats?.completedGames || 0;
+    }
+
     getGamesUntilFeature = (feature: LockedFeatures): number => {
-        const completedGames = this.state.player.engagementStats.completedGames || 0;
+        const completedGames = this.getCompletedGames();
         const requiredGames = LOCKED_FEATURES[feature];
         return Math.max(0, requiredGames - completedGames);
     }
@@ -622,6 +626,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           activeCharacterId: this.state.activeCharacterId,
           characterSheetIsDirty: this.state.characterSheetIsDirty,
           welcomeShown: this.state.welcomeShown,
+          loaded: this.state.player.isLoaded,
           setPlayerInfo: this.setPlayerInfo,
           refreshPlayerData: this.fetchPlayerData,
           refreshAllData: this.fetchAllData,
@@ -644,6 +649,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           handleChallengeDecline: this.handleChallengeDecline,
           canAccessFeature: this.canAccessFeature,
           getGamesUntilFeature: this.getGamesUntilFeature,
+          getCompletedGames: this.getCompletedGames,
         }}>
           {children}
           

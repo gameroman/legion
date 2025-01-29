@@ -1,5 +1,5 @@
 import { h, Component, Fragment } from 'preact';
-import AuthContext from '../../contexts/AuthContext';
+import AuthContext from '../../../contexts/AuthContext';
 import './Welcome.style.css';
 import logoBig from '@assets/logobig.png';
 

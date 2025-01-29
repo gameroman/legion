@@ -1,19 +1,30 @@
 import { h, Component } from 'preact';
-import Welcome from '../welcome/Welcome';
+import Welcome from './welcome/Welcome';
+import { PlayOneGameNotification } from './gameNotification/PlayOneGameNotification';
 
 export enum Popup {
-  Guest = 'GUEST'
+  Guest = 'GUEST',
+  PlayOneGame = 'PLAY_ONE_GAME'
 }
 
 interface PopupConfig {
   component: any;
   priority: number;
+  highlightSelectors?: string[];  // CSS selectors for elements to highlight
 }
 
 const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
   [Popup.Guest]: {
     component: Welcome,
-    priority: 2
+    priority: -1
+  },
+  [Popup.PlayOneGame]: {
+    component: PlayOneGameNotification,
+    priority: 1,
+    highlightSelectors: [
+      '[data-playmode="practice"]',
+      '[data-playmode="casual"]'
+    ]
   }
 };
 
@@ -31,6 +42,49 @@ export class PopupManager extends Component<Props, State> {
     activePopup: null,
     queuedPopups: new Set()
   };
+
+  componentDidUpdate(prevProps: Props, prevState: State) {
+    if (this.state.activePopup !== prevState.activePopup) {
+      // Remove previous highlights
+      if (prevState.activePopup) {
+        this.removeHighlights(prevState.activePopup);
+      }
+      // Add new highlights
+      if (this.state.activePopup) {
+        this.addHighlights(this.state.activePopup);
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.state.activePopup) {
+      this.removeHighlights(this.state.activePopup);
+    }
+  }
+
+  addHighlights(popup: Popup) {
+    const config = POPUP_CONFIGS[popup];
+    if (config.highlightSelectors) {
+      config.highlightSelectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(element => {
+          element.classList.add('popup-highlight');
+        });
+      });
+    }
+  }
+
+  removeHighlights(popup: Popup) {
+    const config = POPUP_CONFIGS[popup];
+    if (config.highlightSelectors) {
+      config.highlightSelectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(element => {
+          element.classList.remove('popup-highlight');
+        });
+      });
+    }
+  }
 
   enqueuePopup = (popup: Popup) => {
     this.setState(prevState => ({

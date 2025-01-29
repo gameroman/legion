@@ -23,6 +23,7 @@ export interface PlayerContextState {
 
 export const PlayerContext = createContext<{
   player: PlayerContextData;
+  loaded: boolean;
   characters: APICharacterData[];
   activeCharacterId: string;
   characterSheetIsDirty: boolean;
@@ -55,6 +56,7 @@ export const PlayerContext = createContext<{
   handleChallengeDecline: () => void;
   canAccessFeature: (feature: LockedFeatures) => boolean;
   getGamesUntilFeature: (feature: LockedFeatures) => number;
+  getCompletedGames: () => number;
 }>({
   player: {
     uid: '',
@@ -78,6 +80,7 @@ export const PlayerContext = createContext<{
     tokens: null,
     friends: [],
   },
+  loaded: false,
   characters: [],
   activeCharacterId: '',
   characterSheetIsDirty: false,
@@ -109,5 +112,6 @@ export const PlayerContext = createContext<{
   handleChallengeAccept: () => {},
   handleChallengeDecline: () => {},
   canAccessFeature: () => false,
+  getCompletedGames: () => 0,
   getGamesUntilFeature: () => 0,
 });
