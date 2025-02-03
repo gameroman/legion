@@ -54,6 +54,14 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       this.updateActiveCharacter = this.updateActiveCharacter.bind(this);
       this.fetchAllData = this.fetchAllData.bind(this);
       this.markShownWelcome = this.markShownWelcome.bind(this);
+      this.hasEquipableEquipment = this.hasEquipableEquipment.bind(this);
+      this.hasEquipableSpells = this.hasEquipableSpells.bind(this);
+      this.hasEquipableEquipmentByCurrentCharacter = this.hasEquipableEquipmentByCurrentCharacter.bind(this);
+      this.hasEquipableSpellsByCurrentCharacter = this.hasEquipableSpellsByCurrentCharacter.bind(this);
+      this.getEquipmentThatCurrentCharacterCanEquip = this.getEquipmentThatCurrentCharacterCanEquip.bind(this);
+      this.getCharacterThatCanEquipEquipment = this.getCharacterThatCanEquipEquipment.bind(this);
+      this.getSpellsThatCurrentCharacterCanEquip = this.getSpellsThatCurrentCharacterCanEquip.bind(this);
+      this.getCharacterThatCanEquipSpells = this.getCharacterThatCanEquipSpells.bind(this);
     }
 
     getInitialState(): PlayerContextState {
@@ -606,6 +614,54 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       return this.state.player.inventory.consumables.length > 0;
     }
 
+    hasEquipableEquipment = (): boolean => {
+      return this.state.characters.some(character => 
+        this.state.player.inventory.equipment.some(equipment => canEquipEquipment(character, equipment))
+      );
+    }
+
+    hasEquipableEquipmentByCurrentCharacter = (): boolean => {
+      return this.state.player.inventory.equipment.some(equipment => canEquipEquipment(this.getActiveCharacter(), equipment));
+    }
+
+    hasEquipableSpellsByCurrentCharacter = (): boolean => {
+      return this.state.player.inventory.spells.some(spell => canLearnSpell(this.getActiveCharacter(), spell));
+    }
+
+    hasEquipableSpells = (): boolean => {
+      return this.state.characters.some(character => 
+        this.state.player.inventory.spells.some(spell => canLearnSpell(character, spell))
+      );
+    }
+
+    hasEquipment = (): boolean => {
+      return this.state.player.inventory.equipment.length > 0;
+    }
+
+    hasSpells = (): boolean => {
+      return this.state.player.inventory.spells.length > 0;
+    }
+
+    getEquipmentThatCurrentCharacterCanEquip = (): number => {
+      return this.state.player.inventory.equipment.find(equipment => canEquipEquipment(this.getActiveCharacter(), equipment));
+    }
+
+    getCharacterThatCanEquipEquipment = (): APICharacterData => {
+      return this.state.characters.find(character => 
+        this.state.player.inventory.equipment.some(equipment => canEquipEquipment(character, equipment))
+      );
+    }
+
+    getSpellsThatCurrentCharacterCanEquip = (): number => {
+      return this.state.player.inventory.spells.find(spell => canLearnSpell(this.getActiveCharacter(), spell));
+    }
+
+    getCharacterThatCanEquipSpells = (): APICharacterData => {
+      return this.state.characters.find(character => 
+        this.state.player.inventory.spells.some(spell => canLearnSpell(character, spell))
+      );
+    }
+
     getGamesUntilFeature = (feature: LockedFeatures): number => {
         const completedGames = this.getCompletedGames();
         const requiredGames = LOCKED_FEATURES[feature];
@@ -647,6 +703,14 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           getCompletedGames: this.getCompletedGames,
           checkEngagementFlag: this.checkEngagementFlag,
           hasConsumable: this.hasConsumable,
+          hasEquipableEquipment: this.hasEquipableEquipment,
+          getEquipmentThatCurrentCharacterCanEquip: this.getEquipmentThatCurrentCharacterCanEquip,
+          getCharacterThatCanEquipEquipment: this.getCharacterThatCanEquipEquipment,
+          hasEquipableSpells: this.hasEquipableSpells,
+          hasEquipableEquipmentByCurrentCharacter: this.hasEquipableEquipmentByCurrentCharacter,
+          hasEquipableSpellsByCurrentCharacter: this.hasEquipableSpellsByCurrentCharacter,
+          getSpellsThatCurrentCharacterCanEquip: this.getSpellsThatCurrentCharacterCanEquip,
+          getCharacterThatCanEquipSpells: this.getCharacterThatCanEquipSpells,
         }}>
           {children}
           

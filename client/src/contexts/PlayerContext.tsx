@@ -1,5 +1,5 @@
 import { createContext } from 'preact';
-import { PlayerContextData, APICharacterData, FriendData } from '@legion/shared/interfaces';
+import { PlayerContextData, APICharacterData, FriendData, } from '@legion/shared/interfaces';
 import { League, Stat, InventoryActionType, ShopTab, LockedFeatures } from "@legion/shared/enums";
 import { Socket } from 'socket.io-client';
 
@@ -58,6 +58,14 @@ export const PlayerContext = createContext<{
   getCompletedGames: () => number;
   checkEngagementFlag: (flag: string) => boolean;
   hasConsumable: () => boolean;
+  hasEquipableEquipment: () => boolean;
+  hasEquipableSpells: () => boolean;
+  hasEquipableEquipmentByCurrentCharacter: () => boolean;
+  hasEquipableSpellsByCurrentCharacter: () => boolean;
+  getEquipmentThatCurrentCharacterCanEquip: () => number;
+  getCharacterThatCanEquipEquipment: () => APICharacterData;
+  getSpellsThatCurrentCharacterCanEquip: () => number;
+  getCharacterThatCanEquipSpells: () => APICharacterData;
 }>({
   player: {
     uid: '',
@@ -116,4 +124,12 @@ export const PlayerContext = createContext<{
   checkEngagementFlag: () => false,
   getGamesUntilFeature: () => 0,
   hasConsumable: () => false,
+  hasEquipableEquipment: () => false,
+  hasEquipableSpells: () => false,
+  hasEquipableEquipmentByCurrentCharacter: () => false,
+  hasEquipableSpellsByCurrentCharacter: () => false,
+  getEquipmentThatCurrentCharacterCanEquip: () => 0,
+  getCharacterThatCanEquipEquipment: () => undefined,
+  getSpellsThatCurrentCharacterCanEquip: () => 0,
+  getCharacterThatCanEquipSpells: () => undefined,
 });

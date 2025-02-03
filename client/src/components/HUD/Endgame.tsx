@@ -170,8 +170,6 @@ export class Endgame extends Component<EndgameProps, EndgameState> {
                     </div>
                 </div>
 
-                {isGame0 && <div className="endgame_meet_team_msg">You earned your first 3 characters!</div>}
-
                 <div className="endgame_characters_grid">
                     {characters.map((character, idx) => (
                         <CharacterCard

@@ -69,6 +69,32 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
     if (this.context.player.isLoaded) {
       if (!this.context.checkEngagementFlag('everEquippedConsumable') && this.context.hasConsumable()) {
         this.popupManagerRef.current?.enqueuePopup(Popup.EquipConsumable);
+      } else if (
+        !this.context.checkEngagementFlag('everEquippedEquipment') && 
+        this.context.hasEquipableEquipment()
+      ) {
+        const equipmentId = this.context.getEquipmentThatCurrentCharacterCanEquip();
+        if (equipmentId) {
+          this.popupManagerRef.current?.enqueuePopup(Popup.GoTeamPage); 
+        } else {
+          const character = this.context.getCharacterThatCanEquipEquipment();
+          if (character) {
+            this.popupManagerRef.current?.enqueuePopup(Popup.SwitchCharacterForEquipment); 
+          }
+        }
+      } else if (
+        !this.context.checkEngagementFlag('everEquippedSpells') && 
+        this.context.hasEquipableSpells()
+      ) {
+        const spellId = this.context.getSpellsThatCurrentCharacterCanEquip();
+        if (spellId) {
+          this.popupManagerRef.current?.enqueuePopup(Popup.GoTeamPage);
+        } else {
+          const character = this.context.getCharacterThatCanEquipSpells();
+          if (character) {
+            this.popupManagerRef.current?.enqueuePopup(Popup.SwitchCharacterForSpell); 
+          }
+        }
       } else {
         this.popupManagerRef.current?.hidePopup();
       }

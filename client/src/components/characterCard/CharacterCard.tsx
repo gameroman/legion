@@ -38,7 +38,14 @@ class CharacterCard extends Component<APICharacterData> {
     }
 
     return (
-      <div className="cardContainer" style={bgStyle} onClick={this.handleCardClick} onMouseEnter={() => this.setState({ active: true })} onMouseLeave={() => this.setState({ active: false })}>
+      <div 
+        className="cardContainer" 
+        style={bgStyle} 
+        onClick={this.handleCardClick} 
+        onMouseEnter={() => this.setState({ active: true })} 
+        onMouseLeave={() => this.setState({ active: false })}
+        data-character-id={this.props.id}
+      >
         <div className="characterLevel">
           <span className="level">Lvl</span>
           <span className="levelVal">{level}</span>

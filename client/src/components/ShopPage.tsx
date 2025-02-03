@@ -46,6 +46,16 @@ class ShopPage extends Component<ShopPageProps, State> {
         this.popupManagerRef.current?.enqueuePopup(Popup.BuySomething);
       } else if (!this.context.checkEngagementFlag('everEquippedConsumable') && this.context.hasConsumable()) {
         this.popupManagerRef.current?.enqueuePopup(Popup.GoTeamPage);
+      } else if (
+        !this.context.checkEngagementFlag('everEquippedEquipment') && 
+        this.context.hasEquipableEquipment()
+      ) {
+        this.popupManagerRef.current?.enqueuePopup(Popup.GoTeamPage);
+      } else if (
+        !this.context.checkEngagementFlag('everEquippedSpells') && 
+        this.context.hasEquipableSpells()
+      ) {
+        this.popupManagerRef.current?.enqueuePopup(Popup.GoTeamPage);
       }
     }
   }

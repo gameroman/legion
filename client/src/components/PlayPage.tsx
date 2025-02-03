@@ -33,12 +33,33 @@ class PlayPage extends Component {
   componentDidUpdate() {
     if (!this.context.player.isLoaded) return;
 
-    if (this.context.getCompletedGames() < 1) {
+    const completedGames = this.context.getCompletedGames();
+    if (completedGames < 1) {
       this.popupManagerRef.current?.enqueuePopup(Popup.PlayOneGame);
-    } else if (this.context.getCompletedGames() < 2) {
+    } else if (completedGames < 2) {
       this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedShop);
-    } else if (this.context.getCompletedGames() < 3) {
-      // this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedSpells);
+    } else if (completedGames < 3) {
+      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedSpells);
+    } else if (completedGames < 4) {
+      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedEquipment);
+    } else if (completedGames < 5) {
+      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedRanked);
+    } else if (completedGames < 6) {
+      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedConsumables2);
+    } else if (completedGames < 7) {
+      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedSpells2);
+    } else if (completedGames < 8) {
+      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedEquipment2);
+    } else if (completedGames < 9) {
+      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedDailyLoot);
+    } else if (completedGames < 10) {
+      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedEquipment3);
+    } else if (completedGames < 11) {
+      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedConsumables3);
+    } else if (completedGames < 12) {
+      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedSpells3);
+    } else if (completedGames < 13) {
+      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedCharacters);
     }
   }
 

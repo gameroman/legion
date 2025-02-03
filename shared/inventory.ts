@@ -147,7 +147,13 @@ export function learnSpell(playerData: PlayerContextData | DBPlayerData, charact
 
   playerInventory.spells = spells.sort(numericalSort);
   return {
-    playerUpdate: { inventory: playerInventory },
+    playerUpdate: { 
+      inventory: playerInventory,
+      engagementStats: {
+        ...playerData.engagementStats,
+        everEquippedSpells: true
+      }
+    },
     characterUpdate: { skills },
   };
 }
@@ -213,7 +219,13 @@ export function equipEquipment(playerData: PlayerContextData | DBPlayerData, cha
 
   playerInventory.equipment = equipment.sort(numericalSort);
   return {
-    playerUpdate: { inventory: playerInventory },
+    playerUpdate: { 
+      inventory: playerInventory,
+      engagementStats: {
+        ...playerData.engagementStats,
+        everEquippedEquipment: true
+      }
+    },
     characterUpdate: {
       equipment: equipped,
       inventory: characterData.inventory,
