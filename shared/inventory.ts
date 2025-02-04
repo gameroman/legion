@@ -151,7 +151,7 @@ export function learnSpell(playerData: PlayerContextData | DBPlayerData, charact
       inventory: playerInventory,
       engagementStats: {
         ...playerData.engagementStats,
-        everEquippedSpells: true
+        everEquippedSpell: true
       }
     },
     characterUpdate: { skills },

@@ -62,6 +62,9 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       this.getCharacterThatCanEquipEquipment = this.getCharacterThatCanEquipEquipment.bind(this);
       this.getSpellsThatCurrentCharacterCanEquip = this.getSpellsThatCurrentCharacterCanEquip.bind(this);
       this.getCharacterThatCanEquipSpells = this.getCharacterThatCanEquipSpells.bind(this);
+      this.hasCurrentCharacterSpendableSP = this.hasCurrentCharacterSpendableSP.bind(this);
+      this.getCharacterThatCanSpendSP = this.getCharacterThatCanSpendSP.bind(this);
+      this.hasAnyCharacterSpendableSP = this.hasAnyCharacterSpendableSP.bind(this);
     }
 
     getInitialState(): PlayerContextState {
@@ -223,7 +226,14 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
   
         return { 
             characterSheetIsDirty: true,
-            characters: updatedCharacters
+            characters: updatedCharacters,
+            player: {
+              ...prevState.player,
+              engagementStats: {
+                ...prevState.player.engagementStats,
+                everSpentSP: true
+              }
+            }
           };
       });
     }
@@ -611,6 +621,18 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       return this.state.player.engagementStats[flag] || false;
     }
 
+    getCharacterThatCanSpendSP = (): APICharacterData | undefined => {
+      return this.state.characters.find(character => character.sp > 0);
+    }
+
+    hasAnyCharacterSpendableSP = (): boolean => {
+      return this.state.characters.some(character => character.sp > 0);
+    }
+
+    hasCurrentCharacterSpendableSP = (): boolean => {
+      return this.getActiveCharacter()?.sp > 0;
+    }
+
     hasConsumable = (): boolean => {
       return this.state.player.inventory.consumables.length > 0;
     }
@@ -712,6 +734,9 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
           hasEquipableSpellsByCurrentCharacter: this.hasEquipableSpellsByCurrentCharacter,
           getSpellsThatCurrentCharacterCanEquip: this.getSpellsThatCurrentCharacterCanEquip,
           getCharacterThatCanEquipSpells: this.getCharacterThatCanEquipSpells,
+          hasAnyCharacterSpendableSP: this.hasAnyCharacterSpendableSP,
+          hasCurrentCharacterSpendableSP: this.hasCurrentCharacterSpendableSP,
+          getCharacterThatCanSpendSP: this.getCharacterThatCanSpendSP,
         }}>
           {children}
           

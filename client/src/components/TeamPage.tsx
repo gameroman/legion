@@ -85,7 +85,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
           }
         }
       } else if (
-        !this.context.checkEngagementFlag('everEquippedSpells') && 
+        !this.context.checkEngagementFlag('everEquippedSpell') && 
         this.context.hasEquipableSpells()
       ) {
         const spellId = this.context.getSpellsThatCurrentCharacterCanEquip();
@@ -97,9 +97,18 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
             this.popupManagerRef.current?.enqueuePopup(Popup.SwitchCharacterForSpell); 
           }
         }
+      } else if (
+        !this.context.checkEngagementFlag('everSpentSP') && 
+        this.context.hasAnyCharacterSpendableSP()
+      ) {
+        if (this.context.hasCurrentCharacterSpendableSP()) {
+          this.popupManagerRef.current?.enqueuePopup(Popup.SpendSP);
+        } else {
+          this.popupManagerRef.current?.enqueuePopup(Popup.SwitchCharacterForSP);
+        }
       } else {
         this.popupManagerRef.current?.hidePopup();
-      }
+      } 
     }
   }
 

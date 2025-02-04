@@ -10,7 +10,6 @@ import {DBCharacterData, DBPlayerData} from "@legion/shared/interfaces";
 import {inventorySize} from "@legion/shared/utils";
 import {getChestContent} from "@legion/shared/chests";
 import {logPlayerAction} from "./dashboardAPI";
-import { numericalSort } from "@legion/shared/inventory";
 import { getSellPrice } from '@legion/shared/inventory';
 
 import {
@@ -23,6 +22,9 @@ import {
   equipEquipment,
   unequipEquipment,
 } from '@legion/shared/inventory';
+
+import { addItemsToInventory } from "./inventoryUtils";
+import { RewardType } from "@legion/shared/enums";
 
 export const inventoryData = onRequest({
   memory: '512MiB'
@@ -51,6 +53,12 @@ export const inventoryData = onRequest({
     }
   });
 });
+
+const addConsumableToInventory = async (uid: string, itemId: number, nb: number) => {
+  const db = admin.firestore();
+  const playerDocRef = db.collection("players").doc(uid);
+  const docSnap = await playerDocRef.get();
+};
 
 export const purchaseItem = onRequest({
   memory: '512MiB'
@@ -100,29 +108,28 @@ export const purchaseItem = onRequest({
 
         gold -= totalPrice;
 
-        const inventoryUpdate = { ...inventory };
-        switch (inventoryType) {
-          case ShopTab.CONSUMABLES:
-            inventoryUpdate.consumables = [...inventory.consumables, ...Array(nb).fill(itemId)].sort(numericalSort);
-            break;
-          case ShopTab.SPELLS:
-            inventoryUpdate.spells = [...inventory.spells, ...Array(nb).fill(itemId)].sort(numericalSort);
-            break;
-          case ShopTab.EQUIPMENTS:
-            inventoryUpdate.equipment = [...inventory.equipment, ...Array(nb).fill(itemId)].sort(numericalSort);
-            break;
-        }
+        const inventoryUpdate = addItemsToInventory(
+          docSnap.data() as DBPlayerData,
+            inventoryType === ShopTab.CONSUMABLES ? RewardType.CONSUMABLES :
+            inventoryType === ShopTab.SPELLS ? RewardType.SPELL :
+            RewardType.EQUIPMENT,
+          itemId,
+          nb
+        );
 
         const result = await db.runTransaction(async (transaction) => {
-          transaction.update(playerDocRef, {
-            gold,
-            inventory: inventoryUpdate,
-          });
-          transaction.update(playerDocRef, {
-            'engagementStats.everPurchased': true,
-          });
+          const updates: any = {
+            gold: gold,
+            'engagementStats.everPurchased': true
+          };
+          
+          if (inventoryUpdate.inventory) {
+            updates.inventory = inventoryUpdate.inventory;
+          }
+          
+          transaction.update(playerDocRef, updates);
 
-          return { gold, inventory: inventoryUpdate };
+          return { gold, inventory: inventoryUpdate.inventory };
         });
 
         logPlayerAction(uid, "purchaseItem", {inventoryType, itemId, nb, totalPrice});

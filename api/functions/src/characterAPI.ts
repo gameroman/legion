@@ -157,8 +157,6 @@ export const postGameUpdate = onRequest({
         request.body.outcomes as OutcomeData;
       const {spellsUsed, itemsUsed, movements, attacks, flames, ice, poison, silenced, paralyzed, lowMP} =
         request.body.engagement as any;
-      console.log(
-        `[postGameUpdate] Spells used: ${spellsUsed}, Items used: ${itemsUsed}, Movements: ${movements}, Attacks: ${attacks}, Flames: ${flames}, Ice: ${ice}, Poison: ${poison}, Silenced: ${silenced}, Paralyzed: ${paralyzed}`);
       const mode = request.body.mode as PlayMode;
 
       if (!uid || typeof uid !== 'string' || uid.trim() === '') {

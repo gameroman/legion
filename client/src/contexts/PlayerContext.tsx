@@ -66,6 +66,9 @@ export const PlayerContext = createContext<{
   getCharacterThatCanEquipEquipment: () => APICharacterData;
   getSpellsThatCurrentCharacterCanEquip: () => number;
   getCharacterThatCanEquipSpells: () => APICharacterData;
+  hasAnyCharacterSpendableSP: () => boolean;
+  hasCurrentCharacterSpendableSP: () => boolean;
+  getCharacterThatCanSpendSP: () => APICharacterData;
 }>({
   player: {
     uid: '',
@@ -132,4 +135,7 @@ export const PlayerContext = createContext<{
   getCharacterThatCanEquipEquipment: () => undefined,
   getSpellsThatCurrentCharacterCanEquip: () => 0,
   getCharacterThatCanEquipSpells: () => undefined,
+  hasAnyCharacterSpendableSP: () => false,
+  hasCurrentCharacterSpendableSP: () => false,
+  getCharacterThatCanSpendSP: () => undefined,
 });

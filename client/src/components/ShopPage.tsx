@@ -52,7 +52,7 @@ class ShopPage extends Component<ShopPageProps, State> {
       ) {
         this.popupManagerRef.current?.enqueuePopup(Popup.GoTeamPage);
       } else if (
-        !this.context.checkEngagementFlag('everEquippedSpells') && 
+        !this.context.checkEngagementFlag('everEquippedSpell') && 
         this.context.hasEquipableSpells()
       ) {
         this.popupManagerRef.current?.enqueuePopup(Popup.GoTeamPage);

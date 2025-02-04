@@ -27,6 +27,7 @@ import { numericalSort } from "@legion/shared/inventory";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { createGameDocument } from "./gameAPI";
 import { transformDailyLoot } from "@legion/shared/utils";
+import { addItemsToInventory, checkFeatureUnlock, getUnlockRewards } from "./inventoryUtils";
 
 const chestsDelays = {
   [ChestColor.BRONZE]: 6 * 60 * 60,
@@ -1161,11 +1162,45 @@ export const incrementCompletedGames = onRequest({ memory: '512MiB' }, async (re
     corsMiddleware(request, response, async () => {
         try {
             const uid = request.body.uid;
-            await db.collection('players').doc(uid).set({
-                engagementStats: {
-                    completedGames: admin.firestore.FieldValue.increment(1)
+            const playerRef = db.collection('players').doc(uid);
+
+            await db.runTransaction(async (transaction) => {
+                const playerDoc = await transaction.get(playerRef);
+                if (!playerDoc.exists) {
+                    throw new Error('Player not found');
                 }
-            }, { merge: true });
+
+                const playerData = playerDoc.data() as DBPlayerData;
+                const newCompletedGames = (playerData.engagementStats?.completedGames || 0) + 1;
+
+                // Check for feature unlock at this completion count
+                const unlockedFeature = checkFeatureUnlock(newCompletedGames - 1);
+                const rewards = getUnlockRewards(unlockedFeature);
+
+                // Prepare base update
+                const updates: any = {
+                    'engagementStats.completedGames': newCompletedGames
+                };
+
+                // Apply all rewards
+                for (const reward of rewards) {
+                    const rewardUpdate = addItemsToInventory(
+                        playerData,
+                        reward.type,
+                        reward.id,
+                        reward.amount
+                    );
+
+                    if (rewardUpdate.inventory) {
+                        updates.inventory = rewardUpdate.inventory;
+                    }
+                    if (rewardUpdate.gold) {
+                        updates.gold = rewardUpdate.gold;
+                    }
+                }
+
+                transaction.update(playerRef, updates);
+            });
             
             response.send({ success: true });
         } catch (error) {

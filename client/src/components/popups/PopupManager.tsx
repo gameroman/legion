@@ -42,6 +42,8 @@ export enum Popup {
   PlayToUnlockConsumables3,
   PlayToUnlockSpells3,
   PlayToUnlockCharacters,
+  SpendSP,
+  SwitchCharacterForSP,
 }
 
 interface UnlockedFeatureConfig {
@@ -417,6 +419,23 @@ const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
       '[data-playmode="ranked"]'
     ],
   },
+  [Popup.SpendSP]: {
+    component: SimplePopup,
+    priority: 30,
+    highlightSelectors: ['[data-sp-plus="true"]'],
+    props: {
+      header: 'SP Available',
+      text: 'You have <span class="highlight-text">SP</span> to spend! Click on the <span class="highlight-text">+</span> button next to a stat to increase it and make your character stronger!',
+    }
+  },
+  [Popup.SwitchCharacterForSP]: {
+    component: SimplePopup,
+    priority: 31,
+    highlightSelectors: ['[[data-character-canspendsp]'],
+    props: {
+      text: 'One of your <span class="highlight-text">Characters</span> has SP to spend! Click on the character to switch to it!',
+    }
+  },
 };
 
 interface Props {
@@ -483,14 +502,20 @@ export class PopupManager extends Component<Props, State> {
         }
         if (selector === '[data-item-learnable]') {
           const spellId = this.context.getSpellsThatCurrentCharacterCanEquip();
-          if (spellId) {
+          if (spellId != undefined) {
             selector = `[data-item-icon="spells-${spellId}"]`;
           }
         }
         if (selector === '[data-item-equipable]') {
           const equipmentId = this.context.getEquipmentThatCurrentCharacterCanEquip();
-          if (equipmentId) {
+          if (equipmentId != undefined) {
             selector = `[data-item-icon="equipment-${equipmentId}"]`;
+          }
+        }
+        if (selector === '[data-character-canspendsp]') {
+          const character = this.context.getCharacterThatCanSpendSP();
+          if (character) {
+            selector = `[data-character-id="${character.id}"]`;
           }
         }
 

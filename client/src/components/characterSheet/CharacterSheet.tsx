@@ -103,7 +103,7 @@ class CharacterSheet extends Component<CharacterSheetProps> {
             }
 
             return rearrangedStats.map((item, index) => (
-                <div className="character-info-bar" key={index}>
+                <div data-sp-plus="true" className="character-info-bar" key={index}>
                     <div className="info-class" style={{ backgroundColor: STATS_BG_COLOR[StatLabels[getStatEnum(item.key)]] }}>
                         <span>{StatLabels[getStatEnum(item.key)]}</span>
                     </div>
@@ -115,8 +115,9 @@ class CharacterSheet extends Component<CharacterSheetProps> {
                         </p>
                     </div>
 
-                    {characterData?.sp > 0 && <button className="info-bar-plus" onClick={
-                        (e) => this.handleOpenModal(
+                    {characterData?.sp > 0 && <button 
+                        className="info-bar-plus" 
+                        onClick={(e) => this.handleOpenModal(
                             e, 
                             {
                                 stat: index,
@@ -124,8 +125,8 @@ class CharacterSheet extends Component<CharacterSheetProps> {
                             },
                             ItemDialogType.SP,
                             index
-                        )
-                    }></button>
+                        )}
+                    ></button>
                     }
                 </div>
             ));
