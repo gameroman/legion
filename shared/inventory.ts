@@ -64,7 +64,7 @@ export function canEquipEquipment(characterData: DBCharacterData | APICharacterD
     console.error("Invalid equipment ID");
     return false;
   }
-  if (dev) console.log(`[canEquipEquipment] equipmentId: ${equipmentId}, equipment: ${equipment.name}`);
+  // if (dev) console.log(`[canEquipEquipment] equipmentId: ${equipmentId}, equipment: ${equipment.name}`);
 
   return (
     hasMinLevel(characterData, equipment.minLevel) &&

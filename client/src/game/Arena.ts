@@ -297,7 +297,7 @@ export class Arena extends Phaser.Scene
         var onevent = this.socket.onevent;
         const scene = this;
         this.socket.onevent = function (packet) {
-            if (!scene.sceneCreated){
+            if (!scene.sceneCreated){ // Set at the end of create()
                 console.warn('queueing ',packet.data[0]);
                 scene.eventsQueue.push(packet);
             } else {

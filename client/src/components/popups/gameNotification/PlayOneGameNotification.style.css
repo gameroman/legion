@@ -107,14 +107,76 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 800px) {
   .game-notification {
     width: 90%;
     padding: 12px 16px;
+    bottom: 10px;
+    font-size: 0.9rem;
+    /* transform: scale(0.5); */
   }
   
+  .game-notification-content {
+    gap: 12px;
+  }
+
+  .game-notification-icon {
+    width: 32px;
+    height: 32px;
+    padding: 3px;
+    padding-left: 4px;
+  }
+  
+  .game-notification-header {
+    font-size: 0.9rem;
+  }
+
   .game-notification-text {
-    font-size: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .game-notification-text-container {
+    gap: 2px;
+  }
+
+  .expected-rewards-container {
+    padding: 8px 16px;
+    gap: 12px;
+    margin: 4px auto;
+  }
+
+  .unlocked-reward-item {
+    transform: scale(0.9);
+  }
+}
+
+@media (max-width: 480px) {
+  .game-notification {
+    width: 95%;
+    padding: 8px 12px;
+    bottom: 5px;
+  }
+
+  .game-notification-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .game-notification-header {
+    font-size: 0.85rem;
+  }
+
+  .game-notification-text {
+    font-size: 0.85rem;
+  }
+
+  .expected-rewards-container {
+    padding: 6px 12px;
+    gap: 8px;
+  }
+
+  .unlocked-reward-item {
+    transform: scale(0.8);
   }
 }
 
@@ -134,4 +196,58 @@
   height: 16px;
   margin-right: 0;
   margin-bottom: -2px;
+}
+
+.expected-rewards-container {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding: 12px 24px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  margin: 8px auto;
+  width: fit-content;
+  min-width: 120px;
+  contain: layout;
+  will-change: transform;
+}
+
+.unlocked-reward-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-notification-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  font-size: 1.2rem;
+  font-family: monospace;
+}
+
+.game-notification-close:hover {
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .game-notification-close {
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    font-size: 1rem;
+  }
 } 

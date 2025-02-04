@@ -9,19 +9,19 @@ interface Props {
 
 export class SimplePopup extends Component<Props> {
   render() {
+    const { header, text } = this.props;
     return (
-      <div className="game-notification">
-        <div className="game-notification-content">
+      <div className="simple-popup">
+        <div className="simple-popup-content">
           <img 
             src={goldChestImage} 
             alt="Gold chest" 
-            className="game-notification-icon"
+            className="simple-popup-icon"
           />
-          <div className="game-notification-text-container">
-            {this.props.header && <h3 className="game-notification-header">{this.props.header}</h3>}
-            <p 
-              className="game-notification-text"
-              dangerouslySetInnerHTML={{ __html: this.props.text }}
+          <div className="simple-popup-text-container">
+            {header && <h3 className="simple-popup-header">{header}</h3>}
+            <p className="simple-popup-text"
+               dangerouslySetInnerHTML={{ __html: text }}
             />
           </div>
         </div>

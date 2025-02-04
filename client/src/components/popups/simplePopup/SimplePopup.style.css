@@ -1,4 +1,4 @@
-.game-notification {
+.simple-popup {
   position: fixed;
   bottom: 20px;
   left: 50%;
@@ -15,13 +15,13 @@
   animation: slideUp 0.3s ease-out, dialogueGlow 2s ease-in-out infinite;
 }
 
-.game-notification-content {
+.simple-popup-content {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.game-notification-icon {
+.simple-popup-icon {
   width: 40px;
   height: 40px;
   object-fit: contain;
@@ -32,13 +32,13 @@
   animation: pulse 2s infinite;
 }
 
-.game-notification-text-container {
+.simple-popup-text-container {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.game-notification-header {
+.simple-popup-header {
   color: #00ffff;
   font-size: 1rem;
   margin: 0;
@@ -48,7 +48,7 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.game-notification-text {
+.simple-popup-text {
   color: #e0e0e0;
   font-size: 1.1rem;
   font-weight: 700;
@@ -108,18 +108,18 @@
 }
 
 @media (max-width: 768px) {
-  .game-notification {
+  .simple-popup {
     width: 90%;
     padding: 12px 16px;
   }
   
-  .game-notification-text {
+  .simple-popup-text {
     font-size: 1rem;
   }
 }
 
 /* Add a subtle hover effect */
-.game-notification:hover {
+.simple-popup:hover {
   transform: translate(-50%, -2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
   transition: all 0.2s ease;

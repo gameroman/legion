@@ -22,13 +22,13 @@ export class UnlockedFeature extends Component<Props> {
       const coordinates = rewardObject ? mapFrameToCoordinates(rewardObject.frame) : { x: 0, y: 0 };
       const backgroundImageUrl = getRewardBgImage(reward.type);
       return (
-        <div key={idx} className="unlocked-reward-item">
-          <div className="unlocked-reward-icon" style={{
+        <div key={idx} className="unlocked-feature-reward-item">
+          <div className="unlocked-feature-reward-icon" style={{
             backgroundImage: `url(${backgroundImageUrl})`,
             backgroundPosition: reward.type === RewardType.GOLD ? '' : `-${coordinates.x}px -${coordinates.y}px`,
             backgroundSize: reward.type === RewardType.GOLD ? '84% 100%' : 'initial',
           }}/>
-          <span className="unlocked-reward-amount">{reward.amount}</span>
+          <span className="unlocked-feature-reward-amount">{reward.amount}</span>
         </div>
       );
     });
@@ -50,12 +50,9 @@ export class UnlockedFeature extends Component<Props> {
           <h2 className="unlocked-feature-header">
             You unlocked <span className="highlight-text">{name}</span>!
           </h2>
-          <p className="unlocked-feature-description">{description}</p>
+          <p className="unlocked-feature-description" dangerouslySetInnerHTML={{ __html: description }} />
           
-          {/* <p className="unlocked-feature-rewards-header">
-            You also earned:
-          </p> */}
-          <div className="unlocked-rewards-container">
+          <div className="unlocked-feature-rewards">
             {this.renderRewards()}
           </div>
 

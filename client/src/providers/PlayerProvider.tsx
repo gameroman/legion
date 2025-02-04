@@ -455,7 +455,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       const user = firebaseAuth.currentUser;
       if (!user || this.state.socket) return;
 
-      console.log(`Connecting to ${process.env.MATCHMAKER_URL} ...`);
+      // console.log(`Connecting to ${process.env.MATCHMAKER_URL} ...`);
       
       const token = await getFirebaseIdToken();
       if (!token) {
@@ -480,7 +480,7 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
       });
 
       socket.on('connect', () => {
-        console.log('Connected to matchmaker');
+        // console.log('Connected to matchmaker');
         // Clear any pending reconnect timeout
         if (this.reconnectTimeout) {
           clearTimeout(this.reconnectTimeout);
@@ -596,11 +596,12 @@ class PlayerProvider extends Component<{}, PlayerContextState> {
     };
 
     canAccessFeature = (feature: LockedFeatures) => {
-      return this.state.player.engagementStats?.completedGames >= LOCKED_FEATURES[feature];
+      return this.getCompletedGames() >= LOCKED_FEATURES[feature];
     }
 
     getCompletedGames = (): number => {
-      return this.state.player.engagementStats?.completedGames || 0;
+      // -1 to account for game 0, and clamp at 0 so that players who skip it are on the same footing
+      return Math.max(0, (this.state.player.engagementStats?.completedGames || 0) - 1);
     }
 
     checkEngagementFlag = (flag: string): boolean => {

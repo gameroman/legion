@@ -29,37 +29,68 @@ class PlayPage extends Component {
       this.popupManagerRef.current?.enqueuePopup(Popup.Guest);
     }
   }
+
+  enqueuePopup = (popup: Popup) => {
+    this.popupManagerRef.current?.enqueuePopup(popup);
+  }
   
   componentDidUpdate() {
     if (!this.context.player.isLoaded) return;
 
     const completedGames = this.context.getCompletedGames();
-    if (completedGames < 1) {
-      this.popupManagerRef.current?.enqueuePopup(Popup.PlayOneGame);
-    } else if (completedGames < 2) {
-      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedShop);
-    } else if (completedGames < 3) {
-      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedSpells);
-    } else if (completedGames < 4) {
-      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedEquipment);
-    } else if (completedGames < 5) {
-      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedRanked);
-    } else if (completedGames < 6) {
-      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedConsumables2);
-    } else if (completedGames < 7) {
-      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedSpells2);
-    } else if (completedGames < 8) {
-      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedEquipment2);
-    } else if (completedGames < 9) {
-      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedDailyLoot);
-    } else if (completedGames < 10) {
-      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedEquipment3);
-    } else if (completedGames < 11) {
-      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedConsumables3);
-    } else if (completedGames < 12) {
-      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedSpells3);
-    } else if (completedGames < 13) {
-      this.popupManagerRef.current?.enqueuePopup(Popup.UnlockedCharacters);
+    console.log(`Completed games: ${completedGames}`);
+    
+    switch(completedGames) {
+      case 0:
+        this.enqueuePopup(Popup.PlayToUnlockShop);
+        break;
+      case 1:
+        this.enqueuePopup(Popup.UnlockedShop);
+        this.enqueuePopup(Popup.PlayToUnlockSpells);
+        break;
+      case 2:
+        this.enqueuePopup(Popup.UnlockedSpells);
+        this.enqueuePopup(Popup.PlayToUnlockEquipment);
+        break;
+      case 3:
+        this.enqueuePopup(Popup.UnlockedEquipment);
+        this.enqueuePopup(Popup.PlayToUnlockRanked);
+        break;
+      case 4:
+        this.enqueuePopup(Popup.UnlockedRanked);
+        this.enqueuePopup(Popup.PlayToUnlockConsumables2);
+        break;
+      case 5:
+        this.enqueuePopup(Popup.UnlockedConsumables2);
+        this.enqueuePopup(Popup.PlayToUnlockSpells2);
+        break;
+      case 6:
+        this.enqueuePopup(Popup.UnlockedSpells2);
+        this.enqueuePopup(Popup.PlayToUnlockEquipment2);
+        break;
+      case 7:
+        this.enqueuePopup(Popup.UnlockedEquipment2);
+        this.enqueuePopup(Popup.PlayToUnlockDailyLoot);
+        break;
+      case 8:
+        this.enqueuePopup(Popup.UnlockedDailyLoot);
+        this.enqueuePopup(Popup.PlayToUnlockEquipment3);
+        break;
+      case 9:
+        this.enqueuePopup(Popup.UnlockedEquipment3);
+        this.enqueuePopup(Popup.PlayToUnlockConsumables3);
+        break;
+      case 10:
+        this.enqueuePopup(Popup.UnlockedConsumables3);
+        this.enqueuePopup(Popup.PlayToUnlockSpells3);
+        break;
+      case 11:
+        this.enqueuePopup(Popup.UnlockedSpells3);
+        this.enqueuePopup(Popup.PlayToUnlockCharacters);
+        break;
+      case 12:
+        this.enqueuePopup(Popup.UnlockedCharacters);
+        break;
     }
   }
 

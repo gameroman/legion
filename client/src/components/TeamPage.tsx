@@ -67,6 +67,8 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
     }
 
     if (this.context.player.isLoaded) {
+      // console.log(`Character: ${this.context?.getActiveCharacter().name}`);
+
       if (!this.context.checkEngagementFlag('everEquippedConsumable') && this.context.hasConsumable()) {
         this.popupManagerRef.current?.enqueuePopup(Popup.EquipConsumable);
       } else if (
@@ -74,8 +76,8 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
         this.context.hasEquipableEquipment()
       ) {
         const equipmentId = this.context.getEquipmentThatCurrentCharacterCanEquip();
-        if (equipmentId) {
-          this.popupManagerRef.current?.enqueuePopup(Popup.GoTeamPage); 
+        if (equipmentId != undefined) {
+          this.popupManagerRef.current?.enqueuePopup(Popup.EquipEquipment); 
         } else {
           const character = this.context.getCharacterThatCanEquipEquipment();
           if (character) {
@@ -87,8 +89,8 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
         this.context.hasEquipableSpells()
       ) {
         const spellId = this.context.getSpellsThatCurrentCharacterCanEquip();
-        if (spellId) {
-          this.popupManagerRef.current?.enqueuePopup(Popup.GoTeamPage);
+        if (spellId != undefined) {
+          this.popupManagerRef.current?.enqueuePopup(Popup.EquipSpell);
         } else {
           const character = this.context.getCharacterThatCanEquipSpells();
           if (character) {
