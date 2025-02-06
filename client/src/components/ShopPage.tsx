@@ -43,7 +43,10 @@ class ShopPage extends Component<ShopPageProps, State> {
   componentDidUpdate() {
     if (this.context.player.isLoaded) {
       if (!this.context.checkEngagementFlag('everPurchased')) {
-        this.popupManagerRef.current?.enqueuePopup(Popup.BuySomething);
+        console.log(this.props.matches.id);
+        if (!this.props.matches.id || this.props.matches.id == 'consumables') {
+          this.popupManagerRef.current?.enqueuePopup(Popup.BuySomething);
+        }
       } else if (!this.context.checkEngagementFlag('everEquippedConsumable') && this.context.hasConsumable()) {
         this.popupManagerRef.current?.enqueuePopup(Popup.GoTeamPage);
       } else if (
