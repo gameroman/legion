@@ -101,6 +101,13 @@
     border-radius: 4px;
 }
 
+.buttonContainer.disabled .info-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+}
+
 .info-row {
     display: flex;
     justify-content: space-between;
@@ -181,4 +188,30 @@
 
 .buttonContainer.ranked:hover {
     box-shadow: 0 0 25px rgba(255, 176, 0, 0.2);
+}
+
+.lock-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 8px 0 0 0;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.lock-container .lock-icon {
+    width: 64px;
+    height: 64px;
+    pointer-events: none;
+}
+
+.lock-container .unlock-message {
+    color: #FFB653;
+    font-size: 14px;
+    text-align: center;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: -8px;
 }

@@ -264,11 +264,12 @@
     .endgame_characters_grid {
         gap: 0;
         margin-top: -10vh;
+        /* transform: scale(0.5); */
     }
     
-    .endgame_character {
+    /* .endgame_character {
         transform: scale(0.5);
-    }
+    } */
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

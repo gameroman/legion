@@ -38,7 +38,9 @@ class PlayModes extends Component {
     
     return (
       <div className="barContainer">
-        <BottomBorderDivider label="PLAY MODES" />
+        <div className="playModesContainer">
+          <BottomBorderDivider label="PLAY MODES" />
+        </div>
         <div className="playModesRow">
           <PlayModeButton 
             label={MiddleBtns.PRACTICE} 
@@ -57,6 +59,7 @@ class PlayModes extends Component {
             mode={PlayMode.RANKED}
             disabled={!isRankedUnlocked}
             lockIcon={!isRankedUnlocked ? lockIcon : undefined}
+            gamesUntilUnlock={!isRankedUnlocked ? this.context.getGamesUntilFeature(LockedFeatures.RANKED_MODE) : 0}
           />
           {ENABLE_ELYSIUM && isSolanaWalletPresent && (
             <PlayModeButton 

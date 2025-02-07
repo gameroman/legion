@@ -159,8 +159,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
+  position: absolute;
   gap: 4px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .menuItemContainer {

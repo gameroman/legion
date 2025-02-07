@@ -1,14 +1,10 @@
 import './playModeButton.style.css'
-import { h, Component } from 'preact';
+import { h, Fragment, Component } from 'preact';
 import { route } from 'preact-router';
 import PracticeIcon from '@assets/practice_icon.png';
 import CasualIcon from '@assets/casual_icon.png';
 import RankedIcon from '@assets/ranked_icon.png';
 import SolanaIcon from '@assets/solana.png';
-import specialBtnBgActive from '@assets/special_btn_bg_active.png';
-import specialBtnBgIdle from '@assets/special_btn_bg_idle.png';
-import middlePlayActive from '@assets/middle_play_active.png';
-import middlePlayIdle from '@assets/middle_play_idle.png';
 import { PlayMode } from '@legion/shared/enums';
 import { apiFetch } from '../../services/apiService';
 import xpIcon from '@assets/game_end/XP_icon.png';
@@ -23,6 +19,7 @@ interface Props {
     disabled?: boolean;
     lockIcon?: string;
     'data-playmode'?: string;
+    gamesUntilUnlock?: number;
 }
 
 interface ModeInfo {
@@ -90,7 +87,7 @@ class PlayModeButton extends Component<Props> {
     }
     
     render() {
-        const { label, players, mode, isLobbies, disabled, lockIcon, ...otherProps } = this.props;
+        const { label, players, mode, isLobbies, disabled, lockIcon, gamesUntilUnlock, ...otherProps } = this.props;
         const { active, lobbiesCount } = this.state;
         const modeInfo = modeInfoMap[mode];
 
@@ -118,13 +115,6 @@ class PlayModeButton extends Component<Props> {
                     alt={label}
                     className="mode-icon"
                 />
-                {lockIcon && (
-                    <img 
-                        src={lockIcon} 
-                        alt="Locked" 
-                        className="lock-overlay"
-                    />
-                )}
                 <div className="labelContainer">
                     <span className="label">{label}</span>
                     {!disabled && (
@@ -135,18 +125,35 @@ class PlayModeButton extends Component<Props> {
                                 : (players && <span className="player"><span className="count">{players}</span> {players === 1 ? 'Player' : 'Players'} Queuing</span>))
                     )}
                     <div className="info-container">
-                        <div className="info-row">
-                            <span className="info-label"><img src={xpIcon} alt="XP" className="reward-icon" />XP:</span>
-                            <span className={`info-value ${modeInfo?.xpRewards}`}>{modeInfo?.xpRewards?.charAt(0).toUpperCase() + modeInfo?.xpRewards?.slice(1)}</span>
-                        </div>
-                        <div className="info-row">
-                            <span className="info-label"><img src={goldIcon} alt="Gold" className="reward-icon" />Gold:</span>
-                            <span className={`info-value ${modeInfo?.goldRewards}`}>{modeInfo?.goldRewards?.charAt(0).toUpperCase() + modeInfo?.goldRewards?.slice(1)}</span>
-                        </div>
-                        <div className="info-row">
-                            <span className="info-label"><img src={goldChest} alt="Items" className="reward-icon" />Items:</span>
-                            <span className={`info-value ${modeInfo?.itemRewards ? 'high' : 'low'}`}>{modeInfo?.itemRewards ? 'Yes' : 'No'}</span>
-                        </div>
+                        {disabled ? (
+                            <div className="lock-container">
+                                <img 
+                                    src={lockIcon} 
+                                    alt="Locked" 
+                                    className="lock-icon"
+                                />
+                                {gamesUntilUnlock > 0 && (
+                                    <div className="unlock-message">
+                                        Play {gamesUntilUnlock} more {gamesUntilUnlock === 1 ? 'game' : 'games'} to unlock
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <>
+                            <div className="info-row">
+                                <span className="info-label"><img src={xpIcon} alt="XP" className="reward-icon" />XP:</span>
+                                <span className={`info-value ${modeInfo?.xpRewards}`}>{modeInfo?.xpRewards?.charAt(0).toUpperCase() + modeInfo?.xpRewards?.slice(1)}</span>
+                            </div>
+                            <div className="info-row">
+                                <span className="info-label"><img src={goldIcon} alt="Gold" className="reward-icon" />Gold:</span>
+                                <span className={`info-value ${modeInfo?.goldRewards}`}>{modeInfo?.goldRewards?.charAt(0).toUpperCase() + modeInfo?.goldRewards?.slice(1)}</span>
+                            </div>
+                            <div className="info-row">
+                                <span className="info-label"><img src={goldChest} alt="Items" className="reward-icon" />Items:</span>
+                                <span className={`info-value ${modeInfo?.itemRewards ? 'high' : 'low'}`}>{modeInfo?.itemRewards ? 'Yes' : 'No'}</span>
+                            </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

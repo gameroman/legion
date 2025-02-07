@@ -5,14 +5,15 @@
 
 .dailyLoots {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
+    gap: 50px;
     width: 100%;
 }
 
 .lootBoxContainer {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     background-image: url('@assets/shop/daily_bg_idle.png');
     background-size: 100% 100%;
