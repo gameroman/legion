@@ -159,40 +159,39 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
   }
 
   render() {
-
     return (
-        <div className="team-content">
-          <PopupManager 
-            ref={this.popupManagerRef}
-            onPopupResolved={() => {}}
-          />
-          <Roster/>
-          <div className="character-inventory-container">
-            {this.context.player.isLoaded ? <CharacterSheet 
-              itemEffects={this.state.statsModifiers}
-              handleItemEffect={this.handleItemEffect}
-              selectedEquipmentSlot={this.state.selectedEquipmentSlot} 
-              handleSelectedEquipmentSlot={this.handleSelectedEquipmentSlot} 
-              updateCharacterData={this.updateCharacterData}
-            /> : <Skeleton 
-            height={400} 
-            count={1} 
-            highlightColor='#0000004d' 
-            baseColor='#0f1421' 
-            style={{margin: '2px 0', width: '434px'}}/>}
+      <div className="team-page">
+        <PopupManager 
+          ref={this.popupManagerRef}
+          onPopupResolved={() => {}}
+        />
+        <Roster/>
+        <div className="character-inventory-container">
+          {this.context.player.isLoaded ? <CharacterSheet 
+            itemEffects={this.state.statsModifiers}
+            handleItemEffect={this.handleItemEffect}
+            selectedEquipmentSlot={this.state.selectedEquipmentSlot} 
+            handleSelectedEquipmentSlot={this.handleSelectedEquipmentSlot} 
+            updateCharacterData={this.updateCharacterData}
+          /> : <Skeleton 
+          height={400} 
+          count={1} 
+          highlightColor='#0000004d' 
+          baseColor='#0f1421' 
+          className="character-sheet-skeleton"/>}
 
-            {this.context.player.isLoaded ? <Inventory 
-              handleItemEffect={this.handleItemEffect}
-              handleSelectedEquipmentSlot={this.handleSelectedEquipmentSlot} 
-            /> : <Skeleton 
-            height={297} 
-            count={1} 
-            highlightColor='#0000004d' 
-            baseColor='#0f1421' 
-            style={{margin: '2px 0', width: '560px'}}/>}
-          </div>
+          {this.context.player.isLoaded ? <Inventory 
+            handleItemEffect={this.handleItemEffect}
+            handleSelectedEquipmentSlot={this.handleSelectedEquipmentSlot} 
+          /> : <Skeleton 
+          height={297} 
+          count={1} 
+          highlightColor='#0000004d' 
+          baseColor='#0f1421' 
+          className="inventory-skeleton"/>}
         </div>
-      );
+      </div>
+    );
   }
 }
 

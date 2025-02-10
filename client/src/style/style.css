@@ -1300,9 +1300,12 @@ canvas {
 .character-inventory-container {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 24px 0;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
 }
 
 .purchase-dialog {
@@ -1714,5 +1717,41 @@ a:-webkit-any-link {
   100% {
     transform: scale(1);
     filter: drop-shadow(0 0 6px rgba(0, 255, 255, 0.5));
+  }
+}
+
+.team-page {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.character-sheet-skeleton {
+  width: 100%;
+  max-width: 434px;
+  margin: 2px 0;
+}
+
+.inventory-skeleton {
+  width: 100%;
+  max-width: 560px;
+  margin: 2px 0;
+}
+
+@media (max-width: 1024px) {
+  .character-inventory-container {
+    padding: 16px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .team-page {
+    padding: 0 8px;
+  }
+  
+  .character-inventory-container {
+    gap: 16px;
   }
 }
