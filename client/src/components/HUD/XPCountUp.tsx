@@ -101,6 +101,7 @@ class XPCountUp extends Component<CountUpProps, CountUpState> {
         return (
             <div 
                 className={`endgame_character ${isLevelingUp ? 'leveling-up' : ''} ${isClickable ? 'clickable' : ''} ${this.isSelected() ? 'selected' : ''}`}
+                data-character-id={member.id}
                 onClick={this.handleClick}
             >
                 {isLevelingUp && 

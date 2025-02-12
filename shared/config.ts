@@ -137,7 +137,7 @@ export const UNLOCK_REWARDS = {
         { type: RewardType.GOLD, id: -1, amount: 200 },
     ],
     [LockedFeatures.SPELLS_BATCH_2]: [
-        { type: RewardType.SPELL, id: 1, amount: 3 },
+        { type: RewardType.CONSUMABLES, id: 1, amount: 3 },
         { type: RewardType.GOLD, id: -1, amount: 200 },
     ],
     [LockedFeatures.EQUIPMENT_BATCH_2]: [

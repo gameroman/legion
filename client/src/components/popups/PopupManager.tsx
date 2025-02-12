@@ -208,8 +208,8 @@ const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
     component: UnlockedFeature,
     priority: 100,
     props: {
-      name: 'More Equipment',
-      description: 'New <span class="highlight-text">Equipment</span> is available in the shop!',
+      name: 'All Equipment',
+      description: 'All <span class="highlight-text">Equipment</span> pieces are now available in the shop!',
       rewards: UNLOCK_REWARDS[LockedFeatures.EQUIPMENT_BATCH_3],
       route: `/shop/equipments`
     }
@@ -218,8 +218,8 @@ const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
     component: UnlockedFeature,
     priority: 100,
     props: {
-      name: 'More Consumables',
-      description: 'New <span class="highlight-text">Consumables</span> are available in the shop!',
+      name: 'All Consumables',
+      description: 'All <span class="highlight-text">Consumables</span> are now available in the shop!',
       rewards: UNLOCK_REWARDS[LockedFeatures.CONSUMABLES_BATCH_3],
       route: `/shop`
     }
@@ -228,8 +228,8 @@ const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
     component: UnlockedFeature,
     priority: 100,
     props: {
-      name: 'More Spells',
-      description: 'New <span class="highlight-text">Spells</span> are available in the shop!',
+      name: 'All Spells',
+      description: 'All <span class="highlight-text">Spells</span> are now available in the shop!',
       rewards: UNLOCK_REWARDS[LockedFeatures.SPELLS_BATCH_3],
       route: `/shop/spells`
     }
@@ -319,8 +319,8 @@ const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
     component: PlayOneGameNotification,
     priority: 22,
     props: {
-      header: 'Unlocking Consumables',
-      text: 'Play one <span class="highlight-text">Casual</span> or <span class="highlight-text">Ranked</span> game to unlock <span class="highlight-text">Consumables</span> in the shop and earn these rewards!',
+      header: 'Unlocking more Consumables',
+      text: 'Play one <span class="highlight-text">Casual</span> or <span class="highlight-text">Ranked</span> game to unlock <span class="highlight-text">more Consumables</span> in the shop and earn these rewards!',
       rewards: UNLOCK_REWARDS[LockedFeatures.CONSUMABLES_BATCH_2]
     },
     highlightSelectors: [
@@ -332,8 +332,8 @@ const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
     component: PlayOneGameNotification,
     priority: 23,
     props: {
-      header: 'Unlocking Spells',
-      text: 'Play one <span class="highlight-text">Casual</span> or <span class="highlight-text">Ranked</span> game to unlock <span class="highlight-text">Spells</span> in the shop and earn these rewards!',
+      header: 'Unlocking more Spells',
+      text: 'Play one <span class="highlight-text">Casual</span> or <span class="highlight-text">Ranked</span> game to unlock <span class="highlight-text">more Spells</span> in the shop and earn these rewards!',
       rewards: UNLOCK_REWARDS[LockedFeatures.SPELLS_BATCH_2]
     },
     highlightSelectors: [
@@ -345,8 +345,8 @@ const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
     component: PlayOneGameNotification,
     priority: 24,
     props: {
-      header: 'Unlocking Equipment',
-      text: 'Play one <span class="highlight-text">Casual</span> or <span class="highlight-text">Ranked</span> game to unlock <span class="highlight-text">Equipment</span> in the shop and earn these rewards!',
+      header: 'Unlocking more Equipment',
+      text: 'Play one <span class="highlight-text">Casual</span> or <span class="highlight-text">Ranked</span> game to unlock <span class="highlight-text">more Equipment</span> in the shop and earn these rewards!',
       rewards: UNLOCK_REWARDS[LockedFeatures.EQUIPMENT_BATCH_2]
     },
     highlightSelectors: [
@@ -384,8 +384,8 @@ const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
     component: PlayOneGameNotification,
     priority: 27,
     props: {
-      header: 'Unlocking Consumables',
-      text: 'Play one <span class="highlight-text">Casual</span> or <span class="highlight-text">Ranked</span> game to unlock <span class="highlight-text">Consumables</span> in the shop and earn these rewards!',
+      header: 'Unlocking all Consumables',
+      text: 'Play one <span class="highlight-text">Casual</span> or <span class="highlight-text">Ranked</span> game to unlock <span class="highlight-text">all Consumables</span> in the shop and earn these rewards!',
       rewards: UNLOCK_REWARDS[LockedFeatures.CONSUMABLES_BATCH_3]
     },
     highlightSelectors: [
@@ -397,8 +397,8 @@ const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
     component: PlayOneGameNotification,
     priority: 28,
     props: {
-      header: 'Unlocking Spells',
-      text: 'Play one <span class="highlight-text">Casual</span> or <span class="highlight-text">Ranked</span> game to unlock <span class="highlight-text">Spells</span> in the shop and earn these rewards!',
+      header: 'Unlocking all Spells',
+      text: 'Play one <span class="highlight-text">Casual</span> or <span class="highlight-text">Ranked</span> game to unlock <span class="highlight-text">all Spells</span> in the shop and earn these rewards!',
       rewards: UNLOCK_REWARDS[LockedFeatures.SPELLS_BATCH_3]
     },
     highlightSelectors: [
@@ -410,8 +410,8 @@ const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
     component: PlayOneGameNotification,
     priority: 29,
     props: {
-      header: 'Unlocking Equipment',
-      text: 'Play one <span class="highlight-text">Casual</span> or <span class="highlight-text">Ranked</span> game to unlock <span class="highlight-text">Equipment</span> in the shop and earn these rewards!',
+      header: 'Unlocking all Equipment',
+      text: 'Play one <span class="highlight-text">Casual</span> or <span class="highlight-text">Ranked</span> game to unlock <span class="highlight-text">all Equipment</span> in the shop and earn these rewards!',
       rewards: UNLOCK_REWARDS[LockedFeatures.EQUIPMENT_BATCH_3]
     },
     highlightSelectors: [
@@ -431,7 +431,7 @@ const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
   [Popup.SwitchCharacterForSP]: {
     component: SimplePopup,
     priority: 31,
-    highlightSelectors: ['[[data-character-canspendsp]'],
+    highlightSelectors: ['[data-character-canspendsp]'],
     props: {
       text: 'One of your <span class="highlight-text">Characters</span> has SP to spend! Click on the character to switch to it!',
     }

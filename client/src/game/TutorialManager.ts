@@ -103,7 +103,7 @@ export class TutorialManager {
             });
         }
 
-        if (!this.engagementStats.everUsedItem) {
+        if (!this.engagementStats.everUsedItem && this.engagementStats.completedGames < 4) {
             events.on('selectCharacter_hasItem', () => {
                 this.queueMessage('howToUseItem');
             });

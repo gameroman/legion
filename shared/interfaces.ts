@@ -288,6 +288,7 @@ export interface PlayerNetworkData {
     xp?: number;
     class: Class;
     level: number;
+    id?: string;
 }
 
 export interface PlayerProfileData {
@@ -359,6 +360,7 @@ export interface TeamMember {
     statuses: StatusEffects;
     xp?: number;
     level?: number;
+    id?: string;
 }
 
 export interface TeamOverview {
