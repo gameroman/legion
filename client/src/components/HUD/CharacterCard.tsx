@@ -17,6 +17,7 @@ interface CountUpProps {
     isQuestionMark?: boolean;
     // Roser prop
     isClickable?: boolean;
+    showSPBadge?: boolean;
 }
 
 interface CountUpState {
@@ -82,7 +83,7 @@ class CharacterCard extends Component<CountUpProps, CountUpState> {
     };
 
     render() {
-        const { update, member, hideXP, isQuestionMark, isClickable } = this.props;
+        const { update, member, hideXP, isQuestionMark, isClickable, showSPBadge } = this.props;
         const maxXP = getXPThreshold(this.props.member.level); 
         const isReceivingXP = update?.earnedXP > 0;
         const isResettingXP = this.state.xpCounter === 0;
@@ -104,6 +105,10 @@ class CharacterCard extends Component<CountUpProps, CountUpState> {
                 data-character-id={member.id}
                 onClick={this.handleClick}
             >
+                {showSPBadge && member.sp > 0 && (
+                    <div className="endgame_character_sp_badge">SP</div>
+                )}
+                
                 {isLevelingUp && 
                     <div className="endgame_character_lvlup">LVL UP!</div>
                 }

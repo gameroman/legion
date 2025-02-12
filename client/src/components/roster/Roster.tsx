@@ -33,6 +33,7 @@ class Roster extends Component {
                 member={character}
                 hideXP={true}
                 isClickable={true}
+                showSPBadge={true}
               />
             ))}
             {/* {

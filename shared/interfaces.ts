@@ -289,6 +289,7 @@ export interface PlayerNetworkData {
     class: Class;
     level: number;
     id?: string;
+    sp?: number;
 }
 
 export interface PlayerProfileData {
@@ -361,6 +362,7 @@ export interface TeamMember {
     xp?: number;
     level?: number;
     id?: string;
+    sp?: number;
 }
 
 export interface TeamOverview {
