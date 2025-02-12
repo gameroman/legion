@@ -2,7 +2,7 @@ import { h, Component } from 'preact';
 import { useWindowSize } from '@react-hook/window-size';
 import CountUp from 'react-countup';
 import { CharacterUpdate, GameOutcomeReward, TeamMember } from '@legion/shared/interfaces';
-import CharacterCard from './XPCountUp';
+import CharacterCard from './CharacterCard';
 import { ChestColor, PlayMode, RewardType } from '@legion/shared/enums';
 import OpenedChest from '../dailyLoot/OpenedChest';
 import { route } from 'preact-router';

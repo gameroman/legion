@@ -25,7 +25,7 @@ interface CountUpState {
     totalXP: number;
 }
 
-class XPCountUp extends Component<CountUpProps, CountUpState> {
+class CharacterCard extends Component<CountUpProps, CountUpState> {
     private timer: NodeJS.Timeout | null = null;
     state: CountUpState = {
         isLevelUp: 0,
@@ -144,4 +144,4 @@ class XPCountUp extends Component<CountUpProps, CountUpState> {
     }
 }
 
-export default XPCountUp;
+export default CharacterCard;

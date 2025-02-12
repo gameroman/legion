@@ -67,8 +67,7 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
     }
 
     if (this.context.player.isLoaded) {
-      // console.log(`Character: ${this.context?.getActiveCharacter().name}`);
-
+      this.popupManagerRef.current?.hidePopup();
       if (!this.context.checkEngagementFlag('everEquippedConsumable') && this.context.hasConsumable()) {
         this.popupManagerRef.current?.enqueuePopup(Popup.EquipConsumable);
       } else if (
@@ -102,13 +101,13 @@ class TeamPage extends Component<TeamPageProps, TeamPageState> {
         this.context.hasAnyCharacterSpendableSP()
       ) {
         if (this.context.hasCurrentCharacterSpendableSP()) {
+          console.log('Enqueuing SpendSP popup');
           this.popupManagerRef.current?.enqueuePopup(Popup.SpendSP);
         } else {
+          console.log('Enqueuing SwitchCharacterForSP popup');
           this.popupManagerRef.current?.enqueuePopup(Popup.SwitchCharacterForSP);
         }
-      } else {
-        this.popupManagerRef.current?.hidePopup();
-      } 
+      }
     }
   }
 

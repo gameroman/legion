@@ -1,6 +1,6 @@
 import { h, Component } from 'preact';
 import { PlayerNetworkData } from '@legion/shared/interfaces';
-import CharacterCard from '../HUD/XPCountUp';
+import CharacterCard from '../HUD/CharacterCard';
 import './TeamReveal.style.css';
 
 interface TeamRevealProps {

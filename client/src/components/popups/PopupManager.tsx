@@ -421,7 +421,7 @@ const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
   },
   [Popup.SpendSP]: {
     component: SimplePopup,
-    priority: 30,
+    priority: 31,
     highlightSelectors: ['[data-sp-plus="true"]'],
     props: {
       header: 'SP Available',
@@ -430,7 +430,7 @@ const POPUP_CONFIGS: Record<Popup, PopupConfig> = {
   },
   [Popup.SwitchCharacterForSP]: {
     component: SimplePopup,
-    priority: 31,
+    priority: 30,
     highlightSelectors: ['[data-character-canspendsp]'],
     props: {
       text: 'One of your <span class="highlight-text">Characters</span> has SP to spend! Click on the character to switch to it!',
@@ -457,18 +457,13 @@ export class PopupManager extends Component<Props, State> {
   };
 
   componentDidUpdate(prevProps: Props, prevState: State) {
-    if (this.state.activePopup !== prevState.activePopup) {
-      // Remove previous highlights
-      if (prevState.activePopup) {
-        this.removeHighlights(prevState.activePopup);
-      }
-      // Add new highlights
-      if (this.state.activePopup) {
-        this.addHighlights(this.state.activePopup);
-      }
-    } else if (this.state.activePopup) {
-      // If same popup is active but context might have changed (e.g. character switch)
-      this.removeHighlights(this.state.activePopup);
+    // Always remove all highlights first
+    document.querySelectorAll('.popup-highlight').forEach(element => {
+      element.classList.remove('popup-highlight');
+    });
+
+    // Then add new highlights if there's an active popup
+    if (this.state.activePopup) {
       this.addHighlights(this.state.activePopup);
     }
   }
@@ -596,8 +591,15 @@ export class PopupManager extends Component<Props, State> {
   };
 
   hidePopup = () => {
-    this.removeHighlights(this.state.activePopup);
-    this.setState({ activePopup: null });
+    // Remove all popup highlights from the DOM
+    document.querySelectorAll('.popup-highlight').forEach(element => {
+      element.classList.remove('popup-highlight');
+    });
+    // Clear both active popup and queue
+    this.setState({ 
+      activePopup: null,
+      queuedPopups: new Set()
+    });
   };
 
   render() {

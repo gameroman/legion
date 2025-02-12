@@ -3,7 +3,7 @@ import './Roster.style.css';
 import 'react-loading-skeleton/dist/skeleton.css'
 
 import { h, Component } from 'preact';
-import CharacterCard from '../HUD/XPCountUp';
+import CharacterCard from '../HUD/CharacterCard';
 import BottomBorderDivider from '../bottomBorderDivider/BottomBorderDivider';
 import { route } from 'preact-router';
 import { ShopTab } from '@legion/shared/enums';
