@@ -1,5 +1,6 @@
 .menu {
   height: 48px;
+  min-height: 48px;
   width: 100%;
   background-image: url("@assets/navbar_bg.png");
   background-size: 100% 100%;
