@@ -8,7 +8,8 @@ import {
     TargetHighlight,
     LockedFeatures,
     RewardType,
-    ConsumableShopCategory
+    ConsumableShopCategory,
+    SpellShopCategory
 } from "./enums";
 
 export class EffectModifier {
@@ -65,6 +66,7 @@ export interface SpellData {
     effort: number;
     targetHighlight?: TargetHighlight;
     unlock?: LockedFeatures;
+    category?: SpellShopCategory;
 }
 
 export interface ConsumableData {

@@ -1,6 +1,6 @@
 
 import { BaseSpell } from "./BaseSpell";
-import { Stat, Target, EffectDirection, Terrain, StatusEffect, Class, SpeedClass, TargetHighlight, LockedFeatures } from "./enums";
+import { Stat, Target, EffectDirection, Terrain, StatusEffect, Class, SpeedClass, TargetHighlight, LockedFeatures, SpellShopCategory } from "./enums";
 import { EffectModifier, EffectModifiers } from "./interfaces";
 
 export const spells:BaseSpell[] = [];
@@ -35,8 +35,9 @@ spells.push(new BaseSpell({
     classes: [Class.BLACK_MAGE],
     minLevel: 1,
     speedClass: SpeedClass.NORMAL,
-    
+    category: SpellShopCategory.ELEMENTAL,
     unlock: LockedFeatures.SPELLS_BATCH_1,
+
 }));
 
 spells.push(new BaseSpell({
@@ -60,6 +61,7 @@ spells.push(new BaseSpell({
     minLevel: 10,
     speedClass: SpeedClass.NORMAL,
     unlock: LockedFeatures.SPELLS_BATCH_3,
+    category: SpellShopCategory.ELEMENTAL,
 }));
 
 spells.push(new BaseSpell({
@@ -82,6 +84,7 @@ spells.push(new BaseSpell({
     minLevel: 20,
     speedClass: SpeedClass.SLOW,
     unlock: LockedFeatures.SPELLS_BATCH_3,
+    category: SpellShopCategory.ELEMENTAL,
 }));
 
 spells.push(new BaseSpell({
@@ -104,6 +107,7 @@ spells.push(new BaseSpell({
     minLevel: 1,
     speedClass: SpeedClass.NORMAL,
     unlock: LockedFeatures.SPELLS_BATCH_1,
+    category: SpellShopCategory.ELEMENTAL,
 }));
 
 spells.push(new BaseSpell({
@@ -127,6 +131,7 @@ spells.push(new BaseSpell({
     minLevel: 10,
     speedClass: SpeedClass.NORMAL,
     unlock: LockedFeatures.SPELLS_BATCH_3,
+    category: SpellShopCategory.ELEMENTAL,
 }));
 
 spells.push(new BaseSpell({
@@ -150,6 +155,7 @@ spells.push(new BaseSpell({
     minLevel: 20,
     speedClass: SpeedClass.SLOW,
     unlock: LockedFeatures.SPELLS_BATCH_3,
+    category: SpellShopCategory.ELEMENTAL,
 }));
 
 spells.push(new BaseSpell({
@@ -173,6 +179,7 @@ spells.push(new BaseSpell({
     minLevel: 1,
     speedClass: SpeedClass.NORMAL,
     unlock: LockedFeatures.SPELLS_BATCH_1,
+    category: SpellShopCategory.ELEMENTAL,
 }));
 
 spells.push(new BaseSpell({
@@ -196,6 +203,7 @@ spells.push(new BaseSpell({
     minLevel: 20,
     speedClass: SpeedClass.NORMAL,
     unlock: LockedFeatures.SPELLS_BATCH_3,
+    category: SpellShopCategory.ELEMENTAL,
 }));
 
 spells.push(new BaseSpell({
@@ -219,6 +227,7 @@ spells.push(new BaseSpell({
     minLevel: 20,
     speedClass: SpeedClass.SLOW,
     unlock: LockedFeatures.SPELLS_BATCH_3,
+    category: SpellShopCategory.ELEMENTAL,
 }));
 
 
@@ -243,6 +252,7 @@ spells.push(new BaseSpell({
     speedClass: SpeedClass.NORMAL,
     targetHighlight: TargetHighlight.ALLY,
     unlock: LockedFeatures.SPELLS_BATCH_2,
+    category: SpellShopCategory.HEALING,
 }));
 
 spells.push(new BaseSpell({
@@ -265,6 +275,7 @@ spells.push(new BaseSpell({
     minLevel: 2,
     speedClass: SpeedClass.NORMAL,
     unlock: LockedFeatures.SPELLS_BATCH_2,
+    category: SpellShopCategory.STATUS,
 }));
 
 spells.push(new BaseSpell({
@@ -288,6 +299,7 @@ spells.push(new BaseSpell({
     minLevel: 2,
     speedClass: SpeedClass.NORMAL,
     unlock: LockedFeatures.SPELLS_BATCH_2,
+    category: SpellShopCategory.STATUS,
 }));
 
 spells.push(new BaseSpell({
@@ -309,6 +321,7 @@ spells.push(new BaseSpell({
     classes: [Class.WHITE_MAGE],
     targetHighlight: TargetHighlight.DEAD,
     cost: 50,
+    category: SpellShopCategory.HEALING,
 }));
 
 export function getStarterSpells(characterClass: Class):number[] {

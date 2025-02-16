@@ -29,6 +29,7 @@ import charactersIcon from '@assets/shop/char_icon.png';
 import purchaseSfx from '@assets/sfx/purchase.wav';
 import { BaseEquipment } from '@legion/shared/BaseEquipment';
 import { BaseItem } from '@legion/shared/BaseItem';
+import { BaseSpell } from '@legion/shared/BaseSpell';
 
 interface ShopContentProps {
     characters: DBCharacterData[];
@@ -94,6 +95,17 @@ const groupConsumablesByCategory = (consumables: BaseItem[]) => {
             acc[category] = [];
         }
         acc[category].push(item);
+        return acc;
+    }, {});
+};
+
+const groupSpellsByCategory = (spells: BaseSpell[]) => {
+    return spells.reduce<Record<string, BaseSpell[]>>((acc, spell) => {
+        const category = spell.category;
+        if (!acc[category]) {
+            acc[category] = [];
+        }
+        acc[category].push(spell);
         return acc;
     }, {});
 };
@@ -239,18 +251,27 @@ class ShopContent extends Component<ShopContentProps> {
                         spell => this.context.canAccessFeature(spell.unlock)
                     );
                     
+                    const groupedSpells = groupSpellsByCategory(unlockedSpells);
+                    
                     return (
                         <div className="spells-container">
-                            <div className="spells-grid">
-                                {unlockedSpells.map((item, index) => 
-                                    <ShopSpellCard 
-                                        key={index} 
-                                        data={item} 
-                                        getItemAmount={getItemAmount} 
-                                        handleOpenModal={this.handleOpenModal} 
-                                    />
-                                )}
-                            </div>
+                            {Object.entries(groupedSpells).map(([category, spells]) => (
+                                <div key={category} className="spells-section">
+                                    <h3 className="spells-type-title">
+                                        {category.charAt(0) + category.slice(1).toLowerCase()}
+                                    </h3>
+                                    <div className="spells-grid">
+                                        {spells.map((spell, index) => 
+                                            <ShopSpellCard 
+                                                key={index} 
+                                                data={spell} 
+                                                getItemAmount={getItemAmount} 
+                                                handleOpenModal={this.handleOpenModal} 
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
                             {(!this.context.canAccessFeature(LockedFeatures.SPELLS_BATCH_2) || 
                               !this.context.canAccessFeature(LockedFeatures.SPELLS_BATCH_3)) && (
                                 <div className="locked-spells-notice">

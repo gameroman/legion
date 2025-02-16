@@ -284,3 +284,10 @@ export enum ConsumableShopCategory {
     STATUS = 'Status effect removal',
     BOOSTS = 'Boosts',
 }
+
+export enum SpellShopCategory {
+    HEALING = 'Healing',
+    ELEMENTAL = 'Elemental',
+    STATUS = 'Status effects',
+    BOOSTS = 'Boosts',
+}
