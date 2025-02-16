@@ -7,14 +7,14 @@ import { Spell } from './Spell';
 import { lineOfSight, listCellsOnTheWay } from '@legion/shared/utils';
 import { apiFetch } from './API';
 import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League, GEN,
-    Stat, SpeedClass } from '@legion/shared/enums';
+    Stat, SpeedClass, Class } from '@legion/shared/enums';
 import { OutcomeData, TerrainUpdate, PlayerDataForGame, GameOutcomeReward, GameData,
     EndGameDataResults, GameReplayMessage, CharacterData } from '@legion/shared/interfaces';
 import { getChestContent } from '@legion/shared/chests';
 import { AVERAGE_GOLD_REWARD_PER_GAME, XP_PER_LEVEL, CAST_DELAY,
     PRACTICE_XP_COEF, PRACTICE_GOLD_COEF, RANKED_XP_COEF, RANKED_GOLD_COEF, remoteConfig,
     LEGION_CUT, TURN_DURATION, KILL_CAM_DURATION, MOVE_DELAY, ATTACK_DELAY, SPELL_DELAY,
-    ITEM_DELAY, KILL_CAM_DELAY, FIRST_TURN_DELAY } from '@legion/shared/config';
+    ITEM_DELAY, KILL_CAM_DELAY, FIRST_TURN_DELAY, KILLALL_BM, KILLALL_WM, KILLALL_W } from '@legion/shared/config';
 import { TerrainManager } from './TerrainManager';
 import { TurnSystem } from './TurnSystem';
 import { withRetry } from './utils';
@@ -279,6 +279,34 @@ export abstract class Game
             setTimeout(() => {
                 this.endGame(2);
             }, 5000);
+        }
+
+        if (KILLALL_BM) {
+            this.teams.forEach(team => {
+                team.getMembers().forEach(player => {
+                    if (player.class === Class.BLACK_MAGE) {
+                        player.takeDamage(player.hp);
+                    }
+                });
+            });
+        }
+        if (KILLALL_WM) {
+            this.teams.forEach(team => {
+                team.getMembers().forEach(player => {
+                    if (player.class === Class.WHITE_MAGE) {
+                        player.takeDamage(player.hp);
+                    }
+                });
+            });
+        }
+        if (KILLALL_W) {
+            this.teams.forEach(team => {
+                team.getMembers().forEach(player => {
+                    if (player.class === Class.WARRIOR) {
+                        player.takeDamage(player.hp);
+                    }
+                });
+            });
         }
     }
 
@@ -812,7 +840,7 @@ export abstract class Game
                 const delta = target.getHPDelta();
                 // console.log(`[Game:applyMagic] delta: ${delta}, justDied: ${target.justDied}, targetHP: ${target.getHP()}, targetMaxHP: ${target.getMaxHP()}`);
                 player.increaseDamageDealt(delta);
-                if (target.justDied){
+                if (target.justDied && delta < 0){
                     nbKills++;
                 }
                 if (delta > 0) {
@@ -826,7 +854,10 @@ export abstract class Game
                 }
             }
             player.addInteractedTarget(target);
-        });            
+        });       
+        targets.forEach(target => {
+            target.justDied = false;
+        });
         // Add all targets to the list of interacted targets
         team.increaseScoreFromMultiHits(targets.length);
         team.increaseScoreFromSpell(spell.score);
@@ -882,7 +913,7 @@ export abstract class Game
         
         team.sendScore();
 
-        console.log(`[Game:processMagic] Processed spell, isKill: ${isKill}`);
+        // console.log(`[Game:processMagic] Processed spell, isKill: ${isKill}`);
         this.turnSystem.processAction(player, spell.speedClass);
         this.processTurn(isKill ? KILL_CAM_DURATION + KILL_CAM_DELAY : SPELL_DELAY);
     }
@@ -929,7 +960,7 @@ export abstract class Game
         let targetPlayer: ServerPlayer | null = null;
         if (spell.target === Target.SINGLE) {
             targetPlayer = this.teams.get(targetTeam)?.getMembers()[target - 1];
-            if (!targetPlayer || !targetPlayer.isAlive()) {
+            if (!targetPlayer || !spell.isApplicable(targetPlayer)) {
                 console.log(`[Game:processMagic] Invalid target for SINGLE target type!`);
                 return;
             }

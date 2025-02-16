@@ -9,9 +9,6 @@ export class Item extends BaseItem {
         // console.log(`Looking for targets at ${x}, ${y} for spell ${this.name}, target type ${Target[this.target]}`);
         if (this.target === Target.SELF) {
             return [user];
-        // } else if (this.target === Target.SINGLE) {
-        //     const target = game.getPlayerAt(x, y);
-        //     if (target) return [target];
         } else if (this.target === Target.AOE) {
             return game.getPlayersInArea(x, y, this.size);
         }

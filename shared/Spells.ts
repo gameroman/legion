@@ -290,6 +290,27 @@ spells.push(new BaseSpell({
     unlock: LockedFeatures.SPELLS_BATCH_2,
 }));
 
+spells.push(new BaseSpell({
+    id: 12,
+    name: "Revive",
+    description: "Revive a single target",
+    frame: 33,
+    vfx: "revive",
+    sfx: "revive",
+    shake: false,
+
+    size: 1,
+    target: Target.SINGLE,
+    effects: [{stat: Stat.HP, value: 10, modifiers: SPBasedBoost, onKO: true}],
+    effort: 30,
+    unlock: LockedFeatures.SPELLS_BATCH_3,
+    speedClass: SpeedClass.SLOW,
+    score: 20,
+    classes: [Class.WHITE_MAGE],
+    targetHighlight: TargetHighlight.DEAD,
+    cost: 50,
+}));
+
 export function getStarterSpells(characterClass: Class):number[] {
     // Return the id's of lvl1 spells for the provided class
     return spells.filter(spell => spell.minLevel === 1 && spell.classes.includes(characterClass)).map(spell => spell.id);

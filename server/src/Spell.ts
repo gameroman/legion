@@ -62,7 +62,7 @@ export class Spell extends BaseSpell {
 
     heal(caster: ServerPlayer, targets: ServerPlayer[], effect: Effect) {
         targets.forEach(target => {
-            if (!target.isAlive()) return;
+            if (!target.isAlive() && !effect.onKO) return;
             let heal = effect.value;
             // console.log(`Healing ${heal} damage`);
             if (effect.modifiers) heal = this.modulateEffectAll(effect.modifiers, caster, target, heal);
@@ -80,5 +80,11 @@ export class Spell extends BaseSpell {
 
     getHealAmount() {
         return this.effects.find(effect => effect.stat === Stat.HP && effect.value > 0)?.value ?? 0;
+    }
+
+    isApplicable(target: ServerPlayer) {
+        if (this.effects.some(effect => effect.onKO) && !target.isAlive()) return true;
+        if (this.effects.every(effect => !effect.onKO) && target.isAlive()) return true;
+        return false;
     }
 }

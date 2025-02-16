@@ -79,6 +79,9 @@ export let SKIP_LEVEL_RESTRICTIONS = false;
 export let IMMEDIATE_LOOT = true;
 export let LOTSA_MP = false;
 export let MAX_AI_CHARACTERS = 6;
+export let KILLALL_BM = true;
+export let KILLALL_WM = false;
+export let KILLALL_W = true;
 
 // Web3
 export let NETWORK = isDev ? 'devnet' : 'mainnet';
@@ -181,4 +184,7 @@ if (!isDev) {
     LOTSA_MP = false;
     ALLOW_SWITCHEROO_RANKED = true;
     MAX_AI_CHARACTERS = MAX_CHARACTERS;
+    KILLALL_BM = false;
+    KILLALL_WM = false;
+    KILLALL_W = false;
 }

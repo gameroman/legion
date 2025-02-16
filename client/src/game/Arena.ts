@@ -28,6 +28,7 @@ import impactImage from '@assets/vfx/sword_impact.png';
 import poisonImage from '@assets/vfx/poison.png';
 import muteImage from '@assets/vfx/mute.png';
 import handImage from '@assets/hand.png';
+import reviveImage from '@assets/vfx/revive.png';
 
 import statusesImage from '@assets/States.png';
 
@@ -46,6 +47,7 @@ import fireballSFX from '@assets/sfx/spells/fire_3.wav';
 import thunderSoundSFX from '@assets/sfx/spells/thunder.wav';
 import iceSoundSFX from '@assets/sfx/spells/ice.wav';
 import healingSFX from '@assets/sfx/spells/healing.wav';
+import reviveSFX from '@assets/sfx/spells/revive.wav';
 import poisonSoundSFX from '@assets/sfx/spells/poison.wav';
 import muteSoundSFX from '@assets/sfx/spells/mute.wav';
 import bgmStartSFX from '@assets/music/bgm_start.wav';
@@ -133,7 +135,7 @@ export class Arena extends Phaser.Scene
     private static readonly SOUND_NAMES = [
         'click', 'slash', 'steps', 'nope', 'heart', 'cooldown', 'fireball',
         'healing', 'cast', 'thunder', 'ice', 'shatter', 'flames', 'crowd',
-        'cheer', 'poison', 'mute', 'thud'
+        'cheer', 'poison', 'mute', 'thud', 'revive'
     ];
 
     constructor() {
@@ -221,6 +223,7 @@ export class Arena extends Phaser.Scene
         this.load.spritesheet('poison', poisonImage, { frameWidth: 64, frameHeight: 64});
         this.load.spritesheet('mute', muteImage, { frameWidth: 64, frameHeight: 64});
         this.load.spritesheet('statuses', statusesImage, { frameWidth: 96, frameHeight: 96});
+        this.load.spritesheet('revive', reviveImage, { frameWidth: 48, frameHeight: 64});
 
         this.load.audio('click', clickSFX);
         this.load.audio('slash', slashSFX);
@@ -243,6 +246,7 @@ export class Arena extends Phaser.Scene
         this.load.audio('healing', healingSFX);
         this.load.audio('poison', poisonSoundSFX);
         this.load.audio('mute', muteSoundSFX);
+        this.load.audio('revive', reviveSFX);
 
         // Load music
         this.load.audio('bgm_start', bgmStartSFX);
@@ -944,6 +948,7 @@ export class Arena extends Phaser.Scene
             this.spellCam(pixelX, pixelY);
         }
         const scale = spell.scale > 1 ? spell.scale : LOCAL_ANIMATION_SCALE;
+        console.log(`Playing ${spell.vfx}`)
         this.localAnimationSprite.setPosition(pixelX, pixelY)
             .setVisible(true)
             .setDepth(this.yToZ(y) + DEPTH_OFFSET)
@@ -1157,6 +1162,12 @@ export class Arena extends Phaser.Scene
             key: `potion_heal`, 
             frames: this.anims.generateFrameNumbers('potion_heal'), 
             frameRate: 10, 
+        });
+
+        this.anims.create({
+            key: `revive`, 
+            frames: this.anims.generateFrameNumbers('revive'), 
+            frameRate: 15, 
         });
 
         this.anims.create({

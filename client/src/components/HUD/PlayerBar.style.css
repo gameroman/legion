@@ -374,7 +374,7 @@
 .player_bar_actions_container {
   position: absolute;
   left: calc(100%);
-  top: -25px;
+  top: -10px;
   display: flex;
   flex-direction: column;
   gap: 4px;
