@@ -202,11 +202,10 @@
 .consumables-container {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 16px;
     width: 100%;
     max-width: 1024px;
     margin: 0 auto;
-    padding: 0 16px;
 }
 
 .consumables-grid {
@@ -214,4 +213,38 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     width: 100%;
+}
+
+.consumables-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0 16px;
+    width: 100%;
+    margin-bottom: 32px;
+}
+
+.consumables-type-title {
+    color: #e0f2ff;
+    font-size: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, rgba(173, 216, 230, 0.3), transparent);
+    border-left: 4px solid #add8e6;
+    text-shadow: 0 0 10px rgba(173, 216, 230, 0.5);
+    letter-spacing: 1px;
+    position: relative;
+    font-family: 'Kim', sans-serif;
+}
+
+.consumables-type-title::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    width: 60%;
+    background: linear-gradient(90deg, rgba(173, 216, 230, 0.5), transparent);
 }

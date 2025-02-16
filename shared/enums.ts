@@ -216,7 +216,7 @@ export const LeaguesNames = ['Bronze', 'Silver', 'Gold', 'Zenith', 'Apex', 'All 
 export enum GameStatus {
     ONGOING,
     COMPLETED,
-  }
+}
 
 export enum GEN {
     COMBAT_BEGINS,
@@ -270,11 +270,17 @@ export enum LockedFeatures {
     CONSUMABLES_BATCH_3,
     DAILY_LOOT,
     RANKED_MODE,
-  }
-  
-  export enum RewardType {
+}
+
+export enum RewardType {
     CONSUMABLES = 'consumable',
     SPELL = 'spell',
     EQUIPMENT = 'equipment',
     GOLD = 'gold',
+}
+
+export enum ConsumableShopCategory {
+    HEALING = 'Healing',
+    STATUS = 'Status effect removal',
+    BOOSTS = 'Boosts',
 }

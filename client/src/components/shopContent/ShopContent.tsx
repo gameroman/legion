@@ -28,6 +28,7 @@ import charactersIcon from '@assets/shop/char_icon.png';
 
 import purchaseSfx from '@assets/sfx/purchase.wav';
 import { BaseEquipment } from '@legion/shared/BaseEquipment';
+import { BaseItem } from '@legion/shared/BaseItem';
 
 interface ShopContentProps {
     characters: DBCharacterData[];
@@ -78,6 +79,17 @@ const groupEquipmentByType = (equipment: BaseEquipment[], useCategories: boolean
 
     return equipment.reduce<Record<string, BaseEquipment[]>>((acc, item) => {
         const category = EQUIP_CATEGORIES_GROUPPING[item.slot];
+        if (!acc[category]) {
+            acc[category] = [];
+        }
+        acc[category].push(item);
+        return acc;
+    }, {});
+};
+
+const groupConsumablesByCategory = (consumables: BaseItem[]) => {
+    return consumables.reduce<Record<string, BaseItem[]>>((acc, item) => {
+        const category = item.category;
         if (!acc[category]) {
             acc[category] = [];
         }
@@ -263,18 +275,27 @@ class ShopContent extends Component<ShopContentProps> {
                         consumable => this.context.canAccessFeature(consumable.unlock)
                     );
                     
+                    const groupedConsumables = groupConsumablesByCategory(unlockedConsumables);
+                    
                     return (
                         <div className="consumables-container">
-                            <div className="consumables-grid">
-                                {unlockedConsumables.map((item, index) => 
-                                    <ShopConsumableCard 
-                                        key={index} 
-                                        data={item} 
-                                        getItemAmount={getItemAmount} 
-                                        handleOpenModal={this.handleOpenModal} 
-                                    />
-                                )}
-                            </div>
+                            {Object.entries(groupedConsumables).map(([category, items]) => (
+                                <div key={category} className="consumables-section">
+                                    <h3 className="consumables-type-title">
+                                        {category.charAt(0) + category.slice(1).toLowerCase()}
+                                    </h3>
+                                    <div className="consumables-grid">
+                                        {items.map((item, index) => 
+                                            <ShopConsumableCard 
+                                                key={index} 
+                                                data={item} 
+                                                getItemAmount={getItemAmount} 
+                                                handleOpenModal={this.handleOpenModal} 
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
                             {(!this.context.canAccessFeature(LockedFeatures.CONSUMABLES_BATCH_2) || 
                               !this.context.canAccessFeature(LockedFeatures.CONSUMABLES_BATCH_3)) && (
                                 <div className="locked-spells-notice">

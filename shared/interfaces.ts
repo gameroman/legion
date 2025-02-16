@@ -7,7 +7,8 @@ import {
     SpeedClass,
     TargetHighlight,
     LockedFeatures,
-    RewardType
+    RewardType,
+    ConsumableShopCategory
 } from "./enums";
 
 export class EffectModifier {
@@ -82,6 +83,7 @@ export interface ConsumableData {
     effort: number;
     targetHighlight?: TargetHighlight;
     unlock?: LockedFeatures;
+    category?: ConsumableShopCategory;
 }
 
 export interface EquipmentData {

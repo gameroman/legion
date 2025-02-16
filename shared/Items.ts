@@ -1,5 +1,5 @@
 import { BaseItem } from "./BaseItem";
-import { Stat, StatusEffect, Target, SpeedClass, TargetHighlight, LockedFeatures } from ".";
+import { Stat, StatusEffect, Target, SpeedClass, TargetHighlight, LockedFeatures, ConsumableShopCategory } from ".";
 
 export const items: BaseItem[] = [];
 
@@ -15,6 +15,7 @@ items[0] = new BaseItem({
     effects: [{stat: Stat.HP, value: 50}],
     effort: 0.15,
     unlock: LockedFeatures.CONSUMABLES_BATCH_1,
+    category: ConsumableShopCategory.HEALING,
 });
 
 items[1] = new BaseItem({
@@ -29,6 +30,7 @@ items[1] = new BaseItem({
     effects: [{stat: Stat.MP, value: 20}],
     effort: 0.3,
     unlock: LockedFeatures.CONSUMABLES_BATCH_1,
+    category: ConsumableShopCategory.HEALING,
 });
 
 items[2] = new BaseItem({
@@ -43,6 +45,7 @@ items[2] = new BaseItem({
     effects: [{stat: Stat.HP, value: 250}],
     effort: 1,
     unlock: LockedFeatures.CONSUMABLES_BATCH_3,
+    category: ConsumableShopCategory.HEALING,
 });
 
 items[3] = new BaseItem({
@@ -57,6 +60,7 @@ items[3] = new BaseItem({
     effects: [{stat: Stat.MP, value: 100}],
     effort: 2,
     unlock: LockedFeatures.CONSUMABLES_BATCH_3,
+    category: ConsumableShopCategory.HEALING,
 });
 
 items[4] = new BaseItem({
@@ -71,6 +75,7 @@ items[4] = new BaseItem({
     effects: [{stat: Stat.HP, value: 1000}],
     effort: 5.5,
     unlock: LockedFeatures.CONSUMABLES_BATCH_3,
+    category: ConsumableShopCategory.HEALING,
 });
 
 items[5] = new BaseItem({
@@ -85,6 +90,7 @@ items[5] = new BaseItem({
     effects: [{stat: Stat.MP, value: 300}],
     effort: 8,
     unlock: LockedFeatures.CONSUMABLES_BATCH_3,
+    category: ConsumableShopCategory.HEALING,
 });
 
 items[6] = new BaseItem({
@@ -99,6 +105,7 @@ items[6] = new BaseItem({
     effects: [{stat: Stat.HP, value: 250}, {stat: Stat.MP, value: 100}],
     effort: 4,
     unlock: LockedFeatures.CONSUMABLES_BATCH_3,
+    category: ConsumableShopCategory.HEALING,
 });
 
 items[7] = new BaseItem({
@@ -113,6 +120,7 @@ items[7] = new BaseItem({
     effects: [{stat: Stat.HP, value: 1000}, {stat: Stat.MP, value: 300}],
     effort: 18,
     unlock: LockedFeatures.CONSUMABLES_BATCH_3,
+    category: ConsumableShopCategory.HEALING,
 });
 
 items[8] = new BaseItem({
@@ -129,6 +137,7 @@ items[8] = new BaseItem({
     effort: 1,
     unlock: LockedFeatures.CONSUMABLES_BATCH_1,
     targetHighlight: TargetHighlight.DEAD,
+    category: ConsumableShopCategory.HEALING,
 });
 
 items[9] = new BaseItem({
@@ -143,6 +152,7 @@ items[9] = new BaseItem({
     effects: [{stat: Stat.HP, value: -1}, {stat: Stat.MP, value: -1}],
     effort: 20,
     unlock: LockedFeatures.CONSUMABLES_BATCH_3,
+    category: ConsumableShopCategory.HEALING,
 });
 
 items[10] = new BaseItem({
@@ -158,6 +168,7 @@ items[10] = new BaseItem({
     statusRemovals: [StatusEffect.POISON],
     effort: 0.5,
     unlock: LockedFeatures.CONSUMABLES_BATCH_2,
+    category: ConsumableShopCategory.STATUS,
 });
 
 items[11] = new BaseItem({
@@ -173,6 +184,7 @@ items[11] = new BaseItem({
     statusRemovals: [StatusEffect.POISON, StatusEffect.PARALYZE, StatusEffect.SLEEP, StatusEffect.BURN],
     effort: 3.5,
     unlock: LockedFeatures.CONSUMABLES_BATCH_3,
+    category: ConsumableShopCategory.STATUS,
 });
 
 items[12] = new BaseItem({
@@ -188,6 +200,7 @@ items[12] = new BaseItem({
     statusRemovals: [StatusEffect.MUTE],
     effort: 0.5,
     unlock: LockedFeatures.CONSUMABLES_BATCH_2,
+    category: ConsumableShopCategory.STATUS,
 });
 
 items[13] = new BaseItem({
@@ -203,6 +216,7 @@ items[13] = new BaseItem({
     status: {effect: StatusEffect.HASTE, chance: 1, duration: 5},
     effort: 6,
     unlock: LockedFeatures.CONSUMABLES_BATCH_2,
+    category: ConsumableShopCategory.BOOSTS,
 });
 
 export function getConsumableById(id: number): BaseItem | undefined {
