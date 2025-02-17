@@ -165,8 +165,22 @@
   transform: translateY(-5px);
 }
 
+.news-media {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  overflow: hidden;
+}
+
+.news-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .news-image {
-  height: 200px;
+  width: 100%;
+  height: 100%;
   background-size: cover;
   background-position: center;
 }

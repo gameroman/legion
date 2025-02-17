@@ -183,42 +183,45 @@ export const getNews = onRequest({
   });
 });
 
-async function handleNewsImageUpload(
-  imageBuffer: Buffer | null, 
-  imageType: string | null, 
-  oldImageUrl?: string | null
+async function handleNewsMediaUpload(
+  buffer: Buffer | null, 
+  mimeType: string | null, 
+  oldUrl?: string | null
 ): Promise<string | null> {
-  if (!imageBuffer || isDevelopment) {
+  if (!buffer || isDevelopment) {
     return null;
   }
 
-  const ext = imageType?.split('/')[1] || 'jpg';
-  const filename = `news-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+  const isVideo = mimeType?.toLowerCase().startsWith('video/') || 
+                  mimeType?.toLowerCase() === 'application/quicktime';
+  const ext = mimeType?.split('/')[1]?.toLowerCase() || (isVideo ? 'mov' : 'jpg');
+  const folder = isVideo ? 'news-videos' : 'news-images';
+  const filename = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
   const bucket = storage.bucket('legion-32c6d.firebasestorage.app');
 
   try {
     const file = bucket.file(filename);
-    await file.save(imageBuffer, {
+    await file.save(buffer, {
       metadata: {
-        contentType: imageType,
+        contentType: mimeType,
       }
     });
     await file.makePublic();
-    const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filename)}?alt=media`;
+    const url = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filename)}?alt=media`;
 
-    // Delete old image if it exists
-    if (oldImageUrl) {
-      const oldFilename = decodeURIComponent(oldImageUrl.split('/o/')[1].split('?')[0]);
+    // Delete old media if it exists
+    if (oldUrl) {
+      const oldFilename = decodeURIComponent(oldUrl.split('/o/')[1].split('?')[0]);
       try {
         await bucket.file(oldFilename).delete();
       } catch (error) {
-        console.warn('[handleNewsImageUpload] Error deleting old image:', error);
+        console.warn('[handleNewsMediaUpload] Error deleting old media:', error);
       }
     }
 
-    return imageUrl;
+    return url;
   } catch (error) {
-    console.error('[handleNewsImageUpload] Storage error:', error);
+    console.error('[handleNewsMediaUpload] Storage error:', error);
     // @ts-ignore
     throw new Error(`Storage error: ${error.message}`);
   }
@@ -252,9 +255,9 @@ export const addNews = onRequest({
       // Handle file upload - skip in development
       if (!isDevelopment) {
         busboy.on('file', (_fieldname: string, file: any, { mimeType }: { mimeType: string }) => {
-          console.log(`[addNews] Processing file upload...`);
+          console.log(`[addNews] Processing file upload with mimeType:`, mimeType);
           const chunks: Buffer[] = [];
-          imageType = mimeType;
+          imageType = mimeType.toLowerCase();
 
           file.on('data', (data: Buffer) => {
             chunks.push(data);
@@ -280,7 +283,7 @@ export const addNews = onRequest({
               return;
             }
 
-            const imageUrl = await handleNewsImageUpload(imageBuffer, imageType);
+            const mediaUrl = await handleNewsMediaUpload(imageBuffer, imageType);
 
             const newsData = {
               title: fields.title,
@@ -289,7 +292,8 @@ export const addNews = onRequest({
               pinned: fields.pinned === 'true',
               link: fields.link || null,
               category: fields.category || 'general',
-              imageUrl: isDevelopment ? (fields.imageUrl || null) : imageUrl,
+              imageUrl: isDevelopment ? (fields.imageUrl || null) : mediaUrl,
+              isVideo: !isDevelopment && imageType?.startsWith('video/') || false,
               createdAt: new Date()
             };
 
@@ -357,9 +361,9 @@ export const updateNewsThumbnail = onRequest({
       // Handle file upload - skip in development
       if (!isDevelopment) {
         busboy.on('file', (_fieldname: string, file: any, { mimeType }: { mimeType: string }) => {
-          console.log(`[updateNewsThumbnail] Processing file upload...`);
+          console.log(`[updateNewsThumbnail] Processing file upload with mimeType:`, mimeType);
           const chunks: Buffer[] = [];
-          imageType = mimeType;
+          imageType = mimeType.toLowerCase();
 
           file.on('data', (data: Buffer) => {
             chunks.push(data);
@@ -384,19 +388,19 @@ export const updateNewsThumbnail = onRequest({
               return;
             }
 
-            const oldImageUrl = newsDoc.data()?.imageUrl;
-            const imageUrl = await handleNewsImageUpload(imageBuffer, imageType, oldImageUrl);
+            const oldMediaUrl = newsDoc.data()?.imageUrl;
+            const mediaUrl = await handleNewsMediaUpload(imageBuffer, imageType, oldMediaUrl);
 
             // Update the news document with the new image URL
             await newsDoc.ref.update({
-              imageUrl: isDevelopment ? null : imageUrl,
+              imageUrl: isDevelopment ? null : mediaUrl,
               updatedAt: new Date()
             });
 
             resolve({ 
               status: "success", 
               message: "Thumbnail updated successfully",
-              imageUrl 
+              imageUrl: mediaUrl 
             });
           } catch (error) {
             reject(error);

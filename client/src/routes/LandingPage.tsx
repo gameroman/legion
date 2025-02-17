@@ -19,6 +19,7 @@ interface NewsItem {
   title: string;
   text: string;
   imageUrl: string;
+  isVideo?: boolean;
   category: string;
   date: string;
   link: string | null;
@@ -170,9 +171,25 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
                 }
               }}
             >
-              <div className="news-image" style={{ 
-                backgroundImage: `url(${news.imageUrl || '/assets/news-placeholder.jpg'})` 
-              }}></div>
+              <div className="news-media">
+                {news.isVideo ? (
+                  <video 
+                    autoPlay 
+                    muted 
+                    loop 
+                    playsInline
+                    className="news-video"
+                  >
+                    <source src={news.imageUrl} type="video/quicktime" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <div 
+                    className="news-image" 
+                    style={{ backgroundImage: `url(${news.imageUrl || '/assets/news-placeholder.jpg'})` }}
+                  ></div>
+                )}
+              </div>
               <div className="news-content">
                 <span className="news-category">{news.category}</span>
                 <h3>{news.title}</h3>
