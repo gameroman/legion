@@ -439,14 +439,16 @@ export const getEngagementMetrics = onRequest({ memory: '512MiB' }, async (reque
                 return;
             }
 
-            // Get new players who joined after the start date
+            // Get new players who joined after the start date and are not excluded
             const [newPlayersSnapshot, activePlayersSnapshot] = await Promise.all([
                 db.collection("players")
                     .where("joinDate", ">=", startDate)
+                    .where("is_excluded", "!=", true)
                     .get(),
                 db.collection("players")
                     .where("lastActiveDate", ">=", startDate)
-                    .where("joinDate", "<", startDate) // Only get players who joined before startDate
+                    .where("joinDate", "<", startDate)
+                    .where("is_excluded", "!=", true)
                     .get()
             ]);
 
@@ -868,9 +870,10 @@ export const getActivePlayers = onRequest({ memory: '512MiB' }, async (request, 
 
     corsMiddleware(request, response, async () => {
         try {
-            // Get all players with engagementStats.totalGames > 1
+            // Get all players with engagementStats.totalGames > 1 and is_contacted != true
             const playersSnapshot = await db.collection("players")
                 .where("engagementStats.completedGames", ">", 1)
+                .where("is_contacted", "!=", true)
                 .get();
 
             // Map and sort players by total games
@@ -1075,6 +1078,52 @@ export const migrateCharacterSpeed = onRequest({ memory: '512MiB' }, async (requ
                 // @ts-ignore
                 error: error.toString()
             });
+        }
+    });
+});
+
+export const markPlayerContacted = onRequest({ memory: '512MiB' }, async (request, response) => {
+    const db = admin.firestore();
+
+    corsMiddleware(request, response, async () => {
+        try {
+            const playerId = request.query.playerId;
+            if (!playerId) {
+                response.status(400).send("Bad Request: Missing player ID");
+                return;
+            }
+
+            await db.collection("players").doc(playerId.toString()).update({
+                is_contacted: true
+            });
+
+            response.send({ status: "success" });
+        } catch (error) {
+            console.error("markPlayerContacted error:", error);
+            response.status(500).send("Error marking player as contacted");
+        }
+    });
+});
+
+export const markPlayerExcluded = onRequest({ memory: '512MiB' }, async (request, response) => {
+    const db = admin.firestore();
+
+    corsMiddleware(request, response, async () => {
+        try {
+            const playerId = request.query.playerId;
+            if (!playerId) {
+                response.status(400).send("Bad Request: Missing player ID");
+                return;
+            }
+
+            await db.collection("players").doc(playerId.toString()).update({
+                is_excluded: true
+            });
+
+            response.send({ status: "success" });
+        } catch (error) {
+            console.error("markPlayerExcluded error:", error);
+            response.status(500).send("Error marking player as excluded");
         }
     });
 });

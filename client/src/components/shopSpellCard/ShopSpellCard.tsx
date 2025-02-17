@@ -147,14 +147,6 @@ class ShopSpellCard extends Component<ShopCardProps> {
           <img src={goldIcon} alt="gold" />
           {data.price}
         </div>
-
-        <ReactTooltip
-          id={`spell-desc-tooltip-${data.id}`}
-          place="top-start"
-          variant="light"
-          content={data.description}
-          style={{maxWidth: '120px'}}
-        />
       </div>
     );
   }
