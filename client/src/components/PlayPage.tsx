@@ -28,8 +28,6 @@ class PlayPage extends Component {
     if (user?.isAnonymous && !this.context.welcomeShown && this.context.player.isLoaded) {
       this.popupManagerRef.current?.enqueuePopup(Popup.Guest);
     }
-
-    this.popupManagerRef.current?.enqueuePopup(Popup.FeatureReveal);
   }
 
   enqueuePopup = (popup: Popup) => {
@@ -40,6 +38,10 @@ class PlayPage extends Component {
     if (!this.context.player.isLoaded) return;
 
     const completedGames = this.context.getCompletedGames();
+
+    if (completedGames > 12) { 
+      this.enqueuePopup(Popup.FeatureReveal);
+    }
     
     switch(completedGames) {
       case 0:

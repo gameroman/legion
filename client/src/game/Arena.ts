@@ -828,7 +828,7 @@ export class Arena extends Phaser.Scene
     processStatusChange({team, num, statuses}) {
         if (this.gameEnded) return;
         const player = this.getPlayer(team, num);
-        player.setStatuses(statuses);
+        player?.setStatuses(statuses);
     }
 
     processMPChange({num, mp}) {

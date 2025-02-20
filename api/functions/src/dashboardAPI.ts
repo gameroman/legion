@@ -443,17 +443,22 @@ export const getEngagementMetrics = onRequest({ memory: '512MiB' }, async (reque
             const [newPlayersSnapshot, activePlayersSnapshot] = await Promise.all([
                 db.collection("players")
                     .where("joinDate", ">=", startDate)
-                    .where("is_excluded", "!=", true)
                     .get(),
                 db.collection("players")
                     .where("lastActiveDate", ">=", startDate)
                     .where("joinDate", "<", startDate)
-                    .where("is_excluded", "!=", true)
                     .get()
             ]);
 
-            const newPlayers = newPlayersSnapshot.docs;
-            const activePlayers = activePlayersSnapshot.docs;
+            // Filter out excluded players and map to docs
+            const newPlayers = newPlayersSnapshot.docs
+                .filter(doc => !doc.data().is_excluded);
+            const activePlayers = activePlayersSnapshot.docs
+                .filter(doc => !doc.data().is_excluded);
+
+            // Extract player IDs
+            const newPlayerIds = newPlayers.map(doc => doc.id);
+            const activePlayerIds = activePlayers.map(doc => doc.id);
             
             // Use only new players for conversion rate
             const newPlayersCount = newPlayers.length;
@@ -544,6 +549,8 @@ export const getEngagementMetrics = onRequest({ memory: '512MiB' }, async (reque
             }
 
             const metrics = {
+                newPlayerIds,
+                activePlayerIds,
                 totalVisits: totalVisitors,
                 totalPlayers,
                 pctMobile: totalMobilePlayers > 0 ? (totalMobilePlayers / totalPlayers) * 100 : 0,
@@ -870,19 +877,27 @@ export const getActivePlayers = onRequest({ memory: '512MiB' }, async (request, 
 
     corsMiddleware(request, response, async () => {
         try {
-            // Get all players with engagementStats.totalGames > 1 and is_contacted != true
+            // Calculate date 1 month ago
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+            const oneMonthAgoStr = oneMonthAgo.toISOString();
+
+            // Get players with more than 1 completed game and not active in last month
             const playersSnapshot = await db.collection("players")
-                .where("engagementStats.completedGames", ">", 1)
-                .where("is_contacted", "!=", true)
+                .where("engagementStats.completedGames", ">", 5)
+                .where("lastActiveDate", "<", oneMonthAgoStr)
                 .get();
 
-            // Map and sort players by total games
-            const players = playersSnapshot.docs.map(doc => ({
-                id: doc.id,
-                totalGames: doc.data().engagementStats?.completedGames || 0,
-                joinDate: doc.data().joinDate,
-                lastActiveDate: doc.data().lastActiveDate
-            })).sort((a, b) => b.totalGames - a.totalGames);
+            // Filter out contacted players in memory
+            const players = playersSnapshot.docs
+                .filter(doc => !doc.data().is_contacted) // This will filter out docs where is_contacted is true
+                .map(doc => ({
+                    id: doc.id,
+                    totalGames: doc.data().engagementStats?.completedGames || 0,
+                    joinDate: doc.data().joinDate,
+                    lastActiveDate: doc.data().lastActiveDate
+                }))
+                .sort((a, b) => b.totalGames - a.totalGames);
 
             response.send(players);
         } catch (error) {
