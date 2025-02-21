@@ -15,7 +15,12 @@ import * as Sentry from "@sentry/react";
 import { recordPageView } from './components/utils';
 import { firebaseAuth } from './services/firebaseService';
 import LogRocket from './logrocketSetup';
+import Hotjar from '@hotjar/browser';
 
+const siteId = 5312432;
+const hotjarVersion = 6;
+
+Hotjar.init(siteId, hotjarVersion);
 // Only initialize Sentry if not in development mode
 if (process.env.NODE_ENV !== 'development') {
   Sentry.init({

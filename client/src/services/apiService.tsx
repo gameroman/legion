@@ -143,18 +143,39 @@ async function apiFetch(endpoint: string, options: ApiFetchOptions = {}, maxRetr
 export { apiFetch };
 
 export function generateVisitorId(): string | undefined {
-  // Check for common bot/crawler signatures
   const userAgent = navigator.userAgent.toLowerCase();
+  
+  // First check for generic "bot" pattern
+  if (/bot/i.test(userAgent)) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Bot detected via regex with user agent: ${userAgent}`);
+    }
+    return undefined;
+  }
+
   const botPatterns = [
-    'bot', 'crawler', 'spider', 'slurp', 'baiduspider',
-    'yandexbot', 'facebookexternalhit', 'linkedinbot',
-    'twitterbot', 'slackbot', 'telegrambot', 'whatsapp',
-    'semrushbot', 'ahrefsbot', 'mj12bot', 'bingbot',
-    'googlebot', 'headless','facebook'
+    // Common bot identifiers
+    'crawler', 'spider', 'slurp',
+    // Search engine bots
+    'googlebot', 'bingbot', 'yandexbot', 'baiduspider',
+    // Social media bots
+    'facebookexternalhit', 'linkedinbot', 'twitterbot', 
+    'slackbot', 'telegrambot', 'whatsapp',
+    // SEO/Analytics bots
+    'semrushbot', 'ahrefsbot', 'mj12bot',
+    // Headless browsers (often used by bots)
+    'headless', 'phantomjs', 'puppeteer',
+    // Additional patterns
+    'crawl', 'index', 'archive', 'facebook',
+    // Known libraries/frameworks that might be used for automation
+    'selenium', 'webdriver', 'cypress'
   ];
 
   // Return undefined if it's a bot
   if (botPatterns.some(pattern => userAgent.includes(pattern))) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Bot detected via pattern with user agent: ${userAgent}`);
+    }
     return undefined;
   }
 

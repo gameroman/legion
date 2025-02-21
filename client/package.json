@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@hotjar/browser": "^1.0.9",
     "@react-hook/window-size": "^3.1.1",
     "@sentry/integrations": "^7.114.0",
     "@sentry/react": "^8.32.0",
