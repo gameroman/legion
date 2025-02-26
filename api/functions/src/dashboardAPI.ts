@@ -69,7 +69,7 @@ export async function updateDAU(userId: string) {
 }
 
 
-export async function updateDailyVisits(visitorId?: string) {
+export async function updateDailyVisits(visitorId?: string, referrer?: string, isMobile?: boolean) {
     if (!visitorId) return;
     
     const db = admin.firestore();
@@ -79,13 +79,30 @@ export async function updateDailyVisits(visitorId?: string) {
     await db.runTransaction(async (transaction) => {
         const doc = await transaction.get(docRef);
         if (!doc.exists) {
-            transaction.set(docRef, {visitors: [visitorId]});
+            transaction.set(docRef, {
+                visitors: [{
+                    id: visitorId,
+                    referrer: referrer || null,
+                    isMobile: !!isMobile,
+                    isDeveloper: referrer?.includes('phaser.io') || false
+                }]
+            });
         } else {
             const docData = doc.data();
             const visitors = docData && docData.visitors ? docData.visitors : [];
-            if (!visitors.includes(visitorId)) {
-                visitors.push(visitorId);
-                transaction.update(docRef, {visitors: visitors});
+            
+            // Check if visitor already exists by ID
+            const visitorIndex = visitors.findIndex((v: any) => v.id === visitorId);
+            
+            if (visitorIndex === -1) {
+                // Add new visitor
+                visitors.push({
+                    id: visitorId,
+                    referrer: referrer || null,
+                    isMobile: !!isMobile,
+                    isDeveloper: referrer?.includes('phaser.io') || false
+                });
+                transaction.update(docRef, { visitors: visitors });
             }
         }
     });
@@ -439,138 +456,188 @@ export const getEngagementMetrics = onRequest({ memory: '512MiB' }, async (reque
                 return;
             }
 
-            // Get new players who joined after the start date and are not excluded
-            const [newPlayersSnapshot, activePlayersSnapshot] = await Promise.all([
-                db.collection("players")
-                    .where("joinDate", ">=", startDate)
-                    .get(),
-                db.collection("players")
-                    .where("lastActiveDate", ">=", startDate)
-                    .where("joinDate", "<", startDate)
-                    .get()
-            ]);
+            // Get players who joined after the start date, grouped by developer/mobile status
+            const playersSnapshot = await db.collection("players")
+                .where("joinDate", ">=", startDate)
+                .get();
 
-            // Filter out excluded players and map to docs
-            const newPlayers = newPlayersSnapshot.docs
-                .filter(doc => !doc.data().is_excluded);
-            const activePlayers = activePlayersSnapshot.docs
-                .filter(doc => !doc.data().is_excluded);
-
-            // Extract player IDs
-            const newPlayerIds = newPlayers.map(doc => doc.id);
-            const activePlayerIds = activePlayers.map(doc => doc.id);
+            // Filter players by different properties
+            const allPlayers = playersSnapshot.docs.filter(doc => !doc.data().is_excluded);
+            const newPlayers = allPlayers.filter(doc => doc.data().joinDate >= startDate);
+            const developerPlayers = allPlayers.filter(doc => doc.data().is_developer);
+            const nonDeveloperPlayers = allPlayers.filter(doc => !doc.data().is_developer);
+            const mobilePlayers = allPlayers.filter(doc => doc.data().isMobile);
+            const nonMobilePlayers = allPlayers.filter(doc => !doc.data().isMobile);
             
-            // Use only new players for conversion rate
-            const newPlayersCount = newPlayers.length;
+            const activePlayers = await db.collection("players")
+                .where("lastActiveDate", ">=", startDate)
+                .where("joinDate", "<", startDate)
+                .get();
             
-            // Combine players for other metrics, removing duplicates
-            const allPlayerDocs = [...newPlayers, ...activePlayers];
-            const totalPlayers = allPlayerDocs.length;
+            const activePlayersData = activePlayers.docs.filter(doc => !doc.data().is_excluded);
 
-            // Get unique visitors since start date
+            // For each segment, calculate players who've played games
+            const nbGamesThershold = 2; // Tutorial game + one more
+
+            // Get unique visitors since start date with their attributes
             const visitsSnapshot = await db.collection("dailyVisits")
                 .where(admin.firestore.FieldPath.documentId(), ">=", startDate)
                 .get();
 
-            // Count total unique visitors across all days
-            const uniqueVisitors = new Set();
+            // Parse visitor data
+            const allVisitors = new Set();
+            const developerVisitors = new Set();
+            const mobileVisitors = new Set();
+            
             visitsSnapshot.forEach(doc => {
                 const visitors = doc.data().visitors || [];
-                // @ts-ignore
-                visitors.forEach(visitor => uniqueVisitors.add(visitor));
-            });
-            const totalVisitors = uniqueVisitors.size;
-
-            // Calculate conversion rate using only new players
-            const landingPageCvRate = totalVisitors > 0 ? (newPlayersCount / totalVisitors) * 100 : 0;
-
-            if (totalPlayers === 0) {
-                response.send({
-                    landingPageCvRate,
-                    totalPlayers: 0,
-                    playedOneGameRate: 0,
-                    playedOneGameRateNonMobile: 0,
-                    playedOneGameRateMobile: 0,
-                    playedMultipleGamesRate: 0,
-                    gameCompletionRate: 0,
-                    abandonedFirstGameRateMobile: 0,
-                    abandonedFirstGameRateNonMobile: 0,
-                    totalFirstGameAbandonmentRate: 0
+                visitors.forEach((visitor: any) => {
+                    allVisitors.add(visitor.id);
+                    if (visitor.isDeveloper) developerVisitors.add(visitor.id);
+                    if (visitor.isMobile) mobileVisitors.add(visitor.id);
                 });
-                return;
-            }
+            });
 
-            // Count players based on their metrics
-            let playedOneGame = 0;
-            let playedOneGameNonMobile = 0;
-            let playedOneGameMobile = 0;
-            let totalNonMobilePlayers = 0;
-            let totalMobilePlayers = 0;
-            let playedMultipleGames = 0;
-            let totalCompletedGames = 0;
-            let totalGamesStarted = 0;
-            let abandonedFirstGameMobile = 0;
-            let abandonedFirstGameNonMobile = 0;
+            // Extract the non-developer and non-mobile visitors
+            const nonDeveloperVisitors = new Set([...allVisitors].filter(id => !developerVisitors.has(id)));
+            const nonMobileVisitors = new Set([...allVisitors].filter(id => !mobileVisitors.has(id)));
 
-            // Process each player
-            for (const playerDoc of allPlayerDocs) {
-                const playerData = playerDoc.data();
-                const stats = playerData.engagementStats || {};
-                const playerTotalGames = stats.totalGames || 0;
-                const playerCompletedGames = stats.completedGames || 0;
-                const isMobile = playerData.isMobile || false;
-                
-                const nbGamesThershold = 2; // Tutorial game + one more
-                if (playerCompletedGames >= nbGamesThershold) {
-                    playedOneGame++;
-                    if (!isMobile) {
-                        playedOneGameNonMobile++;
-                    } else {
-                        playedOneGameMobile++;
-                    }
-                } else if (playerTotalGames === 1 && playerCompletedGames === 0) {
-                    // Player started exactly one game but didn't complete it
-                    if (isMobile) {
-                        abandonedFirstGameMobile++;
-                    } else {
-                        abandonedFirstGameNonMobile++;
-                    }
+            // Calculate engagement metrics for each segment
+            const calculateSegmentMetrics = (players: any[]) => {
+                if (players.length === 0) {
+                    return {
+                        totalPlayers: 0,
+                        playedOneGameCount: 0,
+                        playedOneGameRate: 0,
+                        playedMultipleGamesCount: 0,
+                        playedMultipleGamesRate: 0,
+                        gameCompletionRate: 0,
+                        abandonedFirstGameCount: 0,
+                        abandonedFirstGameRate: 0
+                    };
                 }
 
-                if (!isMobile) {
-                    totalNonMobilePlayers++;
-                } else {
-                    totalMobilePlayers++;
+                let playedOneGame = 0;
+                let playedMultipleGames = 0;
+                let totalCompletedGames = 0;
+                let totalGamesStarted = 0;
+                let abandonedFirstGame = 0;
+
+                for (const playerDoc of players) {
+                    const stats = playerDoc.data().engagementStats || {};
+                    const completedGames = stats.completedGames || 0;
+                    const totalGames = stats.totalGames || 0;
+                    
+                    if (completedGames >= nbGamesThershold) {
+                        playedOneGame++;
+                    }
+                    if (completedGames > nbGamesThershold) {
+                        playedMultipleGames++;
+                    }
+                    if (totalGames === 1 && completedGames === 0) {
+                        abandonedFirstGame++;
+                    }
+                    
+                    totalCompletedGames += completedGames;
+                    totalGamesStarted += totalGames;
                 }
-                if (playerCompletedGames > nbGamesThershold) playedMultipleGames++;
 
-                totalCompletedGames += playerCompletedGames;
-                totalGamesStarted += playerTotalGames;
-            }
-
-            const metrics = {
-                newPlayerIds,
-                activePlayerIds,
-                totalVisits: totalVisitors,
-                totalPlayers,
-                pctMobile: totalMobilePlayers > 0 ? (totalMobilePlayers / totalPlayers) * 100 : 0,
-                landingPageCvRate,
-                playedOneGameRate: (playedOneGame / totalPlayers) * 100,
-                playedOneGameRateNonMobile: totalNonMobilePlayers > 0 ? 
-                    (playedOneGameNonMobile / totalNonMobilePlayers) * 100 : 0,
-                playedOneGameRateMobile: totalMobilePlayers > 0 ?
-                    (playedOneGameMobile / totalMobilePlayers) * 100 : 0,
-                playedMultipleGamesRate: (playedMultipleGames / totalPlayers) * 100,
-                gameCompletionRate: totalGamesStarted > 0 ? (totalCompletedGames / totalGamesStarted) * 100 : 0,
-                abandonedFirstGameRateMobile: totalMobilePlayers > 0 ?
-                    (abandonedFirstGameMobile / totalMobilePlayers) * 100 : 0,
-                abandonedFirstGameRateNonMobile: totalNonMobilePlayers > 0 ?
-                    (abandonedFirstGameNonMobile / totalNonMobilePlayers) * 100 : 0,
-                totalFirstGameAbandonmentRate: totalPlayers > 0 ?
-                    ((abandonedFirstGameMobile + abandonedFirstGameNonMobile) / totalPlayers) * 100 : 0
+                return {
+                    totalPlayers: players.length,
+                    playedOneGameCount: playedOneGame,
+                    playedOneGameRate: (playedOneGame / players.length) * 100,
+                    playedMultipleGamesCount: playedMultipleGames,
+                    playedMultipleGamesRate: (playedMultipleGames / players.length) * 100,
+                    gameCompletionRate: totalGamesStarted > 0 ? (totalCompletedGames / totalGamesStarted) * 100 : 0,
+                    abandonedFirstGameCount: abandonedFirstGame,
+                    abandonedFirstGameRate: (abandonedFirstGame / players.length) * 100
+                };
             };
 
-            response.send(metrics);
+            // Calculate metrics for each segment
+            const overallMetrics = calculateSegmentMetrics(allPlayers);
+            const developerMetrics = calculateSegmentMetrics(developerPlayers);
+            const nonDeveloperMetrics = calculateSegmentMetrics(nonDeveloperPlayers);
+            const mobileMetrics = calculateSegmentMetrics(mobilePlayers);
+            const nonMobileMetrics = calculateSegmentMetrics(nonMobilePlayers);
+
+            // Calculate conversion rates
+            const overallConversionRate = allVisitors.size > 0 ? (newPlayers.length / allVisitors.size) * 100 : 0;
+            const developerConversionRate = developerVisitors.size > 0 ? 
+                (developerPlayers.length / developerVisitors.size) * 100 : 0;
+            const nonDeveloperConversionRate = nonDeveloperVisitors.size > 0 ?
+                (nonDeveloperPlayers.length / nonDeveloperVisitors.size) * 100 : 0;
+            const mobileConversionRate = mobileVisitors.size > 0 ?
+                (mobilePlayers.length / mobileVisitors.size) * 100 : 0;
+            const nonMobileConversionRate = nonMobileVisitors.size > 0 ?
+                (nonMobilePlayers.length / nonMobileVisitors.size) * 100 : 0;
+
+            // Generate insights
+            const insights = [];
+            
+            if (developerMetrics.playedOneGameRate > nonDeveloperMetrics.playedOneGameRate + 5) {
+                insights.push("Developers have a significantly higher rate of playing at least the threshold number of games.");
+            }
+            
+            if (nonDeveloperMetrics.playedOneGameRate > developerMetrics.playedOneGameRate + 5) {
+                insights.push("Non-developers have a significantly higher rate of playing at least the threshold number of games.");
+            }
+            
+            if (mobileMetrics.playedOneGameRate > nonMobileMetrics.playedOneGameRate + 5) {
+                insights.push("Mobile users have a significantly higher rate of playing at least the threshold number of games.");
+            }
+            
+            if (nonMobileMetrics.playedOneGameRate > mobileMetrics.playedOneGameRate + 5) {
+                insights.push("Desktop users have a significantly higher rate of playing at least the threshold number of games.");
+            }
+            
+            if (mobileMetrics.abandonedFirstGameRate > nonMobileMetrics.abandonedFirstGameRate + 5) {
+                insights.push("Mobile users abandon their first game at a significantly higher rate.");
+            }
+
+            if (nonMobileConversionRate > mobileConversionRate + 5) {
+                insights.push("Desktop users convert from visit to player at a higher rate than mobile users.");
+            }
+
+            if (mobileConversionRate > nonMobileConversionRate + 5) {
+                insights.push("Mobile users convert from visit to player at a higher rate than desktop users.");
+            }
+
+            response.send({
+                // Visitor metrics
+                totalVisitors: allVisitors.size,
+                developerVisitors: developerVisitors.size,
+                mobileVisitors: mobileVisitors.size,
+                
+                // Conversion rates
+                overallConversionRate,
+                developerConversionRate,
+                nonDeveloperConversionRate,
+                mobileConversionRate,
+                nonMobileConversionRate,
+                
+                // Player counts
+                totalNewPlayers: newPlayers.length,
+                developerPlayers: developerPlayers.length,
+                nonDeveloperPlayers: nonDeveloperPlayers.length,
+                mobilePlayers: mobilePlayers.length,
+                nonMobilePlayers: nonMobilePlayers.length,
+                activePlayers: activePlayersData.length,
+                
+                // Engagement metrics by segment
+                overall: overallMetrics,
+                developers: developerMetrics,
+                nonDevelopers: nonDeveloperMetrics,
+                mobile: mobileMetrics,
+                desktop: nonMobileMetrics,
+                
+                // Insights
+                insights,
+                
+                // IDs for further analysis if needed
+                newPlayerIds: newPlayers.map(doc => doc.id),
+                activePlayerIds: activePlayersData.map(doc => doc.id)
+            });
         } catch (error) {
             console.error("getEngagementMetrics error:", error);
             response.status(500).send("Error calculating engagement metrics");

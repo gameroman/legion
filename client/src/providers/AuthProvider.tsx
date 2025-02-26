@@ -46,13 +46,26 @@ class AuthProvider extends Component {
             }
             const credentials = await firebaseAuth.signInAnonymously();
             
-            if (this.state.utmSource && credentials.user) {
-                apiFetch('setUtmSource', {
-                    method: 'POST',
-                    body: {
-                        utmSource: this.state.utmSource
-                    }
-                });
+            // Check for UTM source and/or mobile device
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (credentials.user) {
+                const params: any = {};
+                
+                if (this.state.utmSource) {
+                    params.utmSource = this.state.utmSource;
+                }
+                
+                if (isMobile !== undefined) {
+                    params.isMobile = isMobile;
+                }
+                
+                if (Object.keys(params).length > 0) {
+                    apiFetch('setUserAttributes', {
+                        method: 'POST',
+                        body: params
+                    });
+                }
             }
             return credentials.user;
         } catch (error) {

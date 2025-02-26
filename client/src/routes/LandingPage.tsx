@@ -69,13 +69,21 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
     }
     
     const visitorId = generateVisitorId();
-    // console.log(`[LandingPage:componentDidMount] visitorId: ${visitorId}`);
-    this.fetchNews(undefined, visitorId);
+    // Get referrer information
+    const referrer = document.referrer || null;
+    // Check if user is on mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    // Pass all information to the API
+    this.fetchNews(undefined, visitorId, referrer, isMobile);
   }
 
-  fetchNews = async (retries = 3, visitorId?: string): Promise<void> => {
+  fetchNews = async (retries = 3, visitorId?: string, referrer?: string, isMobile?: boolean): Promise<void> => {
     try {
-      const response = await fetch(`${process.env.API_URL}/getNews?isFrontPage=true&limit=3${visitorId ? `&visitorId=${visitorId}` : ''}`);
+      const response = await fetch(`${process.env.API_URL}/getNews?isFrontPage=true&limit=3${
+        visitorId ? `&visitorId=${visitorId}` : ''}${
+        referrer ? `&referrer=${encodeURIComponent(referrer)}` : ''}${
+        isMobile !== undefined ? `&isMobile=${isMobile}` : ''}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -89,7 +97,7 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
       if (retries > 0) {
         // Wait 500ms before retrying
         await new Promise(resolve => setTimeout(resolve, 500));
-        return this.fetchNews(retries - 1, visitorId);
+        return this.fetchNews(retries - 1, visitorId, referrer, isMobile);
       }
       this.setState({ isLoadingNews: false });
     }

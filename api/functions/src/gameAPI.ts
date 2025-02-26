@@ -124,20 +124,23 @@ export const completeGame = onRequest({
   });
 });
 
-export const getNews = onRequest({ 
-  memory: '512MiB' 
-},(request, response) => {
+export const getNews = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
   const db = admin.firestore();
-
   corsMiddleware(request, response, async () => {
     try {
       const limit = parseInt(request.query.limit as string) || 3;
       const isFrontPage = request.query.isFrontPage === 'true';
-      const visitorId = request.query.visitorId;
       
-      // If this is a front page visit, update the daily visits counter
-      if (isFrontPage) {
-        await updateDailyVisits(visitorId as string);
+      // Get visitor tracking parameters
+      const visitorId = request.query.visitorId as string;
+      const referrer = request.query.referrer as string;
+      const isMobile = request.query.isMobile === 'true';
+      
+      // Track visitor if this is a front page visit
+      if (isFrontPage && visitorId) {
+        await updateDailyVisits(visitorId, referrer, isMobile);
       }
       
       // Get all news

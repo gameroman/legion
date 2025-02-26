@@ -1624,3 +1624,39 @@ export const updatePlayerAvatar = onRequest({
     }
   });
 });
+
+export const setUserAttributes = onRequest({
+    memory: '512MiB'
+}, (request, response) => {
+    const db = admin.firestore();
+
+    corsMiddleware(request, response, async () => {
+        try {
+            const uid = await getUID(request);
+            const attributes = request.body;
+            logger.info("Setting user attributes for player:", uid, "attributes:", attributes);
+
+            const updateData: any = {};
+            
+            if (attributes.utmSource) {
+                updateData['acquisition.utmSource'] = attributes.utmSource;
+            }
+            
+            if ('isMobile' in attributes) {
+                updateData.isMobile = !!attributes.isMobile;
+            }
+            
+            if ('referrer' in attributes && attributes.referrer) {
+                updateData.is_developer = attributes.referrer.includes('phaser.io');
+                updateData.referrer = attributes.referrer;
+            }
+
+            await db.collection("players").doc(uid).set(updateData, { merge: true });
+
+            response.send({ success: true });
+        } catch (error) {
+            console.error("setUserAttributes error:", error);
+            response.status(500).send("Error");
+        }
+    });
+});
