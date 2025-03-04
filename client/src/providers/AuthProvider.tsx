@@ -59,7 +59,11 @@ class AuthProvider extends Component {
                 if (isMobile !== undefined) {
                     params.isMobile = isMobile;
                 }
-                
+
+                if (document.referrer) {
+                    params.referrer = document.referrer;
+                }
+                                
                 if (Object.keys(params).length > 0) {
                     apiFetch('setUserAttributes', {
                         method: 'POST',

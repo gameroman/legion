@@ -1633,8 +1633,18 @@ export const setUserAttributes = onRequest({
     corsMiddleware(request, response, async () => {
         try {
             const uid = await getUID(request);
-            const attributes = request.body;
-            logger.info("Setting user attributes for player:", uid, "attributes:", attributes);
+            
+            // Parse the request body if it's a string or use it directly if it's already an object
+            let attributes = request.body || {};
+            if (typeof attributes === 'string') {
+                try {
+                    attributes = JSON.parse(attributes);
+                } catch (e) {
+                    logger.error("Error parsing request body:", e);
+                }
+            }
+            
+            logger.info(`Setting user attributes for player: ${uid} attributes: ${JSON.stringify(attributes)}`);
 
             const updateData: any = {};
             
