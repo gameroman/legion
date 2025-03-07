@@ -70,7 +70,7 @@ export const ENABLE_SETTINGS = true;
 export const ENABLE_ELYSIUM = false;
 
 // Admin
-export let FREEZE_AI = true;
+export let FREEZE_AI = false;
 export const STARTING_GOLD_ADMIN = 100000;
 export const STARTING_SPELLS_ADMIN = [2];
 export const STARTING_EQUIPMENT_ADMIN = [2];
@@ -168,7 +168,7 @@ export const UNLOCK_REWARDS = {
 
 export const remoteConfig = {
     AUTO_DEFEAT: false,
-    AUTO_WIN: true,
+    AUTO_WIN: false,
     HIGH_DAMAGE: false,
     FAST_MODE: true,
     COOLDOWN_OVERRIDE: 500,

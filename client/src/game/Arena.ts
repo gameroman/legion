@@ -57,6 +57,8 @@ import thudSFX from '@assets/sfx/thud.wav';
 import speechBubble from '@assets/speech_bubble.png';
 import speechTail from '@assets/speech_tail.png';
 
+import arenaBg from '@assets/arenabg.png';
+
 // Static imports for tile atlas
 import groundTilesImage from '@assets/tiles2.png';
 import groundTilesAtlas from '@assets/tiles2.json';
@@ -271,6 +273,8 @@ export class Arena extends Phaser.Scene
             this.load.off('complete');
         });
         this.connectToServer();
+
+        this.load.image('arenaBg', arenaBg);
     }
 
     extractGameIdFromUrl() {
@@ -1359,6 +1363,108 @@ export class Arena extends Phaser.Scene
     // PhaserCreate
     create()
     {
+        // Add the background image first so it's behind everything else
+        const bg = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'arenaBg')
+            .setDepth(0)
+            .setOrigin(0.5, 0.5);
+        
+        // Apply a basic scale to cover the screen initially
+        const baseScaleX = this.cameras.main.width / bg.width;
+        const baseScaleY = this.cameras.main.height / bg.height;
+        const baseScale = Math.max(baseScaleX, baseScaleY);
+        bg.setScale(baseScale);
+        
+        // Handle window resizing
+        this.scale.on('resize', (gameSize) => {
+            const newScaleX = gameSize.width / bg.width;
+            const newScaleY = gameSize.height / bg.height;
+            const newScale = Math.max(newScaleX, newScaleY);
+            
+            bg.setScale(newScale);
+            bg.setPosition(gameSize.width / 2, gameSize.height / 2);
+        });
+        
+        // Follow camera movement - keep background centered on screen
+        this.cameras.main.on('camerascroll', () => {
+            if (!bg) return;
+            
+            // Keep background centered on the camera's view
+            const centerX = this.cameras.main.scrollX + this.cameras.main.width / 2;
+            const centerY = this.cameras.main.scrollY + this.cameras.main.height / 2;
+            
+            bg.setPosition(centerX, centerY);
+        });
+        
+        // Create sunbeam effects
+        const createSunbeams = () => {
+            // Create container at fixed screen position
+            const beamsContainer = this.add.container(
+                this.cameras.main.width / 2, 
+                this.cameras.main.height / 2
+            )
+            .setDepth(0.5)
+            .setScrollFactor(0); // Fix the beams in place relative to the camera
+            
+            // Choose a consistent angle for all beams (45 degrees diagonal)
+            const beamAngle = -45; // Negative for top-right to bottom-left direction
+            
+            // Create multiple beams with different scales and opacities
+            for (let i = 0; i < 8; i++) {
+                // Create a light beam - using a rectangle with gradient
+                const beam = this.add.graphics();
+                
+                // Only vary the size and position, not the angle
+                const width = Phaser.Math.Between(800, 1500);
+                const height = Phaser.Math.Between(100, 200);
+                
+                // Adjust the position to create an evenly distributed pattern
+                // This spreads the beams across the screen in the same direction
+                const offsetX = Phaser.Math.Between(-500, 500);
+                const offsetY = Phaser.Math.Between(-400, 400);
+                
+                // Create a gradient fill with warm colors
+                // Use golden/amber/orange colors instead of white
+                const color1 = 0xFFD700; // Golden yellow
+                const color2 = 0xFFA500; // Light orange
+                
+                beam.fillGradientStyle(
+                    color1, color1, color2, color2,
+                    0.07 + Math.random() * 0.15, 0.07 + Math.random() * 0.15, 0, 0
+                );
+                
+                // Draw the beam
+                beam.fillRect(-width/2, -height/2, width, height);
+                
+                // Position and rotate the beam
+                beam.setPosition(offsetX, offsetY);
+                beam.setRotation(Phaser.Math.DegToRad(beamAngle));
+                
+                // Add to container
+                beamsContainer.add(beam);
+                
+                // Animate the beam - slow pulsing
+                this.tweens.add({
+                    targets: beam,
+                    alpha: { from: beam.alpha, to: beam.alpha * 0.6 },
+                    duration: Phaser.Math.Between(8000, 15000),
+                    ease: 'Sine.easeInOut',
+                    yoyo: true,
+                    repeat: -1
+                });
+            }
+            
+            return beamsContainer;
+        };
+        
+        // Create the sunbeams
+        // const sunbeams = createSunbeams();
+        
+        // // Update sunbeams position on window resize
+        // this.scale.on('resize', (gameSize) => {
+        //     // Reposition the sunbeams container to center of screen
+        //     sunbeams.setPosition(gameSize.width / 2, gameSize.height / 2);
+        // });
+        
         this.loadBackgroundMusic();
         this.setUpArena();
         this.createAnims();
@@ -1497,7 +1603,7 @@ export class Arena extends Phaser.Scene
         this.placeCharacters(data.opponent.team, this.teamsMap.get(data.opponent.teamId), isReconnect);
 
         const tilesDelay = isReconnect ? 0 : 1000;
-        this.floatTiles(tilesDelay);
+        // this.floatTiles(tilesDelay);
 
         this.processTerrain(data.terrain); // Put after floatTiles() to allow for tilesMap to be intialized
 

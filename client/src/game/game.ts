@@ -5,13 +5,13 @@ import RoundRectanglePlugin from 'phaser3-rex-plugins/plugins/roundrectangle-plu
 let gameWidth;
 let gameHeight;
 
-gameWidth = 1800;
-gameHeight = 900;
+gameWidth = 1920;
+gameHeight = 1080;
 
 const config = {
     type: Phaser.WEBGL,
     scale: {
-        mode: Phaser.Scale.FIT,
+        mode: Phaser.Scale.ENVELOP,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: Math.ceil(gameWidth),
         height: Math.ceil(gameHeight),
