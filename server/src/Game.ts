@@ -169,7 +169,8 @@ export abstract class Game
 
     getPosition(index, flip) {
         const positions = [
-            {x: 4, y: 3},
+            {x: 2, y: 0},
+            // {x: 4, y: 3},
             {x: 4, y: 5},
             {x: 2, y: 4},
             {x: 2, y: 2},

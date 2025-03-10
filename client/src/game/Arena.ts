@@ -73,6 +73,16 @@ export const DARKENING_INTENSITY = 0.9; // 0 = completely dark, 1 = no darkening
 // Add to imports at the top
 import { TutorialManager } from './TutorialManager';
 
+// Add these constants at the class level
+const HEX_WIDTH = 87; // Width of hexagon
+const HEX_HEIGHT = 100; // Height of hexagon
+// Use formulas to automatically calculate spacing based on hexagon dimensions
+const HEX_HORIZ_SPACING = HEX_WIDTH; 
+const HEX_VERT_SPACING = HEX_HEIGHT * 0.75; 
+
+// Add in the existing imports section if not already present
+import hexTileImage from '@assets/tile.png';
+
 export class Arena extends Phaser.Scene
 {
     gamehud;
@@ -90,7 +100,7 @@ export class Arena extends Phaser.Scene
     obstaclesMap: Map<string, boolean> = new Map<string, boolean>();
     terrainSpritesMap: Map<string, Phaser.GameObjects.Sprite> = new Map<string, Phaser.GameObjects.Sprite>();
     terrainMap: Map<string, Terrain> = new Map<string, Terrain>();
-    gridWidth = 20;
+    gridWidth = 18;
     gridHeight = 9;
     server;
     animationScales;
@@ -275,6 +285,7 @@ export class Arena extends Phaser.Scene
         this.connectToServer();
 
         this.load.image('arenaBg', arenaBg);
+        this.load.image('hexTile', hexTileImage);
     }
 
     extractGameIdFromUrl() {
@@ -544,7 +555,7 @@ export class Arena extends Phaser.Scene
         const totalHeight = this.tileSize * this.gridHeight;
         const gameWidth = this.scale.gameSize.width;
         const gameHeight = this.scale.gameSize.height;
-        const verticalOffset = -50;
+        const verticalOffset = 150;
         const startX = (gameWidth - totalWidth) / 2;
         const startY = (gameHeight - totalHeight) / 2 + verticalOffset;
         return {startX, startY};
@@ -561,17 +572,21 @@ export class Arena extends Phaser.Scene
         this.cellsHighlight = new CellsHighlight(this, this.gridWidth, this.gridHeight, this.tileSize, this.gridCorners).setDepth(1);
         this.cellsHighlight.setDepth(2);
 
-         this.input.on('pointermove', function (pointer) {
-             const {gridX, gridY} = this.pointerToGrid(pointer);
-             if (this.gameInitialized) this.cellsHighlight.move(gridX, gridY);
-         }, this);
+        //  this.input.on('pointermove', function (pointer) {
+        //      const {gridX, gridY} = this.pointerToHexGrid(pointer);
+        //      const tile = this.tilesMap.get(serializeCoords(gridX, gridY));
+        //      console.log(gridX, gridY, tile);
+        //      if (tile) {
+        //         tile.setTint(0x00ff00);
+        //      }
+        //  }, this);
 
         this.input.on('pointerdown', function (pointer) {
             if (pointer.rightButtonDown()) {
                 this.selectedPlayer?.cancelSkill();
                 return;
             }
-            const {gridX, gridY} = this.pointerToGrid(pointer);
+            const {gridX, gridY} = this.pointerToHexGrid(pointer);
             if (this.isSkip(gridX, gridY)) return;
             this.handleTileClick(gridX, gridY);
         }, this);
@@ -668,6 +683,15 @@ export class Arena extends Phaser.Scene
     }
 
     handleTileHover(gridX, gridY, hover = true) {
+        console.log(`(${gridX}, ${gridY})`);
+        const tile = this.tilesMap.get(serializeCoords(gridX, gridY));
+        if (tile) {
+            if (hover) {
+                tile.setTint(0x00ff00);
+            } else {
+                tile.setTint(0xffffff);
+            }
+        }
         const player = this.gridMap.get(serializeCoords(gridX, gridY));
         if (player) {
             if (hover) {
@@ -1290,10 +1314,11 @@ export class Arena extends Phaser.Scene
     placeCharacter(character: PlayerNetworkData, team: Team, isReconnect = false) {
         // console.log(`[Arena:placeCharacter] Placing character ${character.name} with data ${JSON.stringify(character)}`);
         const isPlayer = team.id === this.playerTeamId;
-        const {x, y} = this.gridToPixelCoords(character.x, character.y);
+        const {x, y} = this.hexGridToPixelCoords(character.x, character.y);
+        const centerTileYOffset = 50;
 
         const player = new Player(
-            this, this, team, character.name, character.x, character.y, x, y,
+            this, this, team, character.name, character.x, character.y, x, y - centerTileYOffset,
             team.getMembers().length + 1, character.portrait, isPlayer, character.class,
             character.hp, character.maxHP, character.mp, character.maxMP,
             character.level, character.xp,
@@ -1325,22 +1350,35 @@ export class Arena extends Phaser.Scene
   
 
     highlightCells(gridX, gridY, radius) {
+        console.log(gridX, gridY, radius);
         // Clear any existing highlights
         this.clearHighlight();
         
-        // Iterate over each cell in the grid
-        for (let y = -radius; y <= radius; y++) {
-            for (let x = -radius; x <= radius; x++) {
-                // Check if the cell is within the circle
-                if (x * x + y * y <= radius * radius) {
-                    if(!this.isValidCell(gridX, gridY, gridX + x, gridY + y)) continue;
-                    
-                    // Get the tile sprite at this position
-                    const tileSprite = this.tilesMap.get(serializeCoords(gridX + x, gridY + y));
-                    if (tileSprite) {
-                        // Apply cyan tint to the tile
-                        tileSprite.setTint(0x00ffff); // Bright cyan color
-                    }
+        // For hexagonal grids, we need to use hex coordinates to calculate distances properly
+        for (let q = -radius; q <= radius; q++) {
+            // In a hex grid, the range of the second coordinate depends on the first
+            // This ensures we scan a proper hexagonal area
+            const r1 = Math.max(-radius, -q - radius);
+            const r2 = Math.min(radius, -q + radius);
+            
+            for (let r = r1; r <= r2; r++) {
+                // Convert cube coordinates to offset coordinates
+                // For odd-r layout (assuming that's what we're using based on the code)
+                const col = q + Math.floor((r + (r&1)) / 2);
+                const row = r;
+                
+                const targetX = gridX + col;
+                const targetY = gridY + row;
+                
+                // Skip invalid cells
+                if (!this.isValidGridPosition(targetX, targetY)) continue;
+                if (!this.isValidCell(gridX, gridY, targetX, targetY)) continue;
+                
+                // Get the tile sprite at this position
+                const tileSprite = this.tilesMap.get(serializeCoords(targetX, targetY));
+                if (tileSprite) {
+                    // Apply cyan tint to the tile
+                    tileSprite.setTint(0x00ffff); // Bright cyan color
                 }
             }
         }
@@ -1604,6 +1642,8 @@ export class Arena extends Phaser.Scene
 
         const tilesDelay = isReconnect ? 0 : 1000;
         // this.floatTiles(tilesDelay);
+
+        this.floatHexTiles(tilesDelay);
 
         this.processTerrain(data.terrain); // Put after floatTiles() to allow for tilesMap to be intialized
 
@@ -2218,5 +2258,139 @@ export class Arena extends Phaser.Scene
 
     isAlly(player: Player): boolean {
         return this.isPlayerTeam(player.team.id);
+    }
+
+    floatHexTiles(duration) {
+        const {startX, startY} = this.getStartXY();
+        const offsetX = startX + HEX_WIDTH / 2;
+        const offsetY = startY + HEX_HEIGHT / 2;
+        
+        // Loop over each row
+        for (let y = 0; y < this.gridHeight; y++) {
+            // Calculate row offset (even rows are shifted right)
+            const rowOffset = (y % 2 === 0) ? (HEX_WIDTH / 2) : 0;
+            
+            // In each row, loop over each column
+            for (let x = 0; x < this.gridWidth; x++) {
+                if (this.isSkip(x, y)) continue;
+                
+                // Calculate hex position
+                const hexX = offsetX + x * HEX_HORIZ_SPACING + rowOffset;
+                const hexY = offsetY + y * HEX_VERT_SPACING;
+                
+                this.floatOneHexTile(x, y, hexX, hexY, duration);
+            }
+        }
+    }
+
+    floatOneHexTile(x, y, hexX, hexY, duration, yoyo = false) {
+        // Randomly select different hexagon tiles for variety
+        const tiles = ['hexTile']; // You can add more hex tile variations here
+        const tileKey = tiles[Math.floor(Math.random() * tiles.length)];
+        
+        // Create tile with initial position below the screen
+        const tileSprite = this.add.image(
+            hexX, 
+            hexY,
+            tileKey
+        )
+        .setDepth(1)
+        .setOrigin(0.5, 0.5)
+        .setAlpha(0.5);
+
+        // Make tile interactive for mouse events
+        tileSprite.setInteractive();
+        
+        tileSprite.on('pointerover', function() {
+            if (this.isSkip(x, y)) return;
+            this.handleTileHover(x, y);
+        }, this);
+
+        tileSprite.on('pointerout', function() {
+            if (this.isSkip(x, y)) return;
+            this.handleTileHover(x, y, false);
+        }, this);
+
+        // Store tile reference in the map
+        this.tilesMap.set(serializeCoords(x, y), tileSprite);
+        
+        return tileSprite;
+    }
+
+    hexGridToPixelCoords(gridX, gridY) {
+        const {startX, startY} = this.getStartXY();
+        const offsetX = startX + HEX_WIDTH / 2;
+        const offsetY = startY + HEX_HEIGHT / 2;
+        
+        // Calculate row offset (even rows are shifted right)
+        const rowOffset = (gridY % 2 === 0) ? HEX_WIDTH / 2 : 0;
+        
+        return {
+            x: offsetX + gridX * HEX_HORIZ_SPACING + rowOffset,
+            y: offsetY + gridY * HEX_VERT_SPACING
+        };
+    }
+
+    pointerToHexGrid(pointer) {
+        const {startX, startY} = this.getStartXY();
+        const offsetX = startX + HEX_WIDTH / 2;
+        const offsetY = 0; 
+        
+        const pointerX = pointer.x + this.cameras.main.scrollX - startX;
+        const pointerY = pointer.y + this.cameras.main.scrollY - startY;
+        
+        // Estimate the row first based on Y position
+        const estimatedRow = Math.floor((pointerY - offsetY) / HEX_VERT_SPACING);
+        
+        // Determine the column offset for this row
+        const rowOffset = (estimatedRow % 2 === 0) ? HEX_WIDTH / 2 : 0;
+        
+        // Estimate the column based on X position and row offset
+        const estimatedCol = Math.floor((pointerX - rowOffset) / HEX_HORIZ_SPACING);
+        
+        // Find the center of the estimated hex
+        const hexCenterX = offsetX + estimatedCol * HEX_HORIZ_SPACING + rowOffset;
+        const hexCenterY = offsetY + estimatedRow * HEX_VERT_SPACING;
+        
+        // Final check - is the pointer within the hexagon?
+        // This uses a simplified distance check - for a proper hex check, 
+        // you would need to check if the point is inside the hexagon boundaries
+        const dx = pointerX - hexCenterX;
+        const dy = pointerY - hexCenterY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // If the distance is too large, adjust to the nearest valid hex
+        if (distance > HEX_WIDTH / 2) {
+            // Find closest hex (simplified)
+            // For a more accurate approach, you'd need to check surrounding hexes
+            return { gridX: estimatedCol, gridY: estimatedRow };
+        }
+        
+        return { gridX: estimatedCol, gridY: estimatedRow };
+    }
+
+    // Helper method to convert offset coordinates to cube coordinates
+    offsetToCube(col, row) {
+        // For odd-r offset system
+        const x = col - Math.floor(row / 2);
+        const z = row;
+        const y = -x - z;
+        return { x, y, z };
+    }
+
+    // Calculate hex distance between two hex points in cube coordinates
+    hexDistance(a, b) {
+        return Math.max(
+            Math.abs(a.x - b.x),
+            Math.abs(a.y - b.y),
+            Math.abs(a.z - b.z)
+        );
+    }
+
+    // Check if a hex grid position is within radius of another hex position
+    isWithinHexRange(fromX, fromY, toX, toY, radius) {
+        const fromHex = this.offsetToCube(fromX, fromY);
+        const toHex = this.offsetToCube(toX, toY);
+        return this.hexDistance(fromHex, toHex) <= radius;
     }
 }

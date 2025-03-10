@@ -33,7 +33,7 @@ export const PROMOTION_RATIO = 0.4;
 export const DEMOTION_RATIO = 0.3;
 export const SEASON_END_CRON = '0 19 * * 5' // UTC
 export const BASE_ANIM_FRAME_RATE = 5;
-
+export const MOVEMENT_RANGE = 2;
 
 export const PRACTICE_XP_COEF = 0.6;
 export const PRACTICE_GOLD_COEF = 0.1; // TODO: make 0?
@@ -70,7 +70,7 @@ export const ENABLE_SETTINGS = true;
 export const ENABLE_ELYSIUM = false;
 
 // Admin
-export let FREEZE_AI = false;
+export let FREEZE_AI = true;
 export const STARTING_GOLD_ADMIN = 100000;
 export const STARTING_SPELLS_ADMIN = [2];
 export const STARTING_EQUIPMENT_ADMIN = [2];

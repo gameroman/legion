@@ -10,7 +10,7 @@ import { Arena } from "./Arena";
 import { PlayerProps, StatusEffects } from "@legion/shared/interfaces";
 import { paralyzingStatuses } from '@legion/shared/utils';
 import { SpeechBubble } from "./SpeechBubble";
-import { BASE_ANIM_FRAME_RATE } from '@legion/shared/config';
+import { BASE_ANIM_FRAME_RATE, MOVEMENT_RANGE } from '@legion/shared/config';
 
 enum GlowColors {
     Enemy = 0xff0000,
@@ -78,7 +78,7 @@ export class Player extends Phaser.GameObjects.Container {
         this.texture = texture;
         this.name = name;
         this.isPlayer = isPlayer;
-        this.distance = 2;
+        this.distance = MOVEMENT_RANGE;
         this.maxHP = maxHP;
         this.maxMP = maxMP;
         this.hp = this.maxHP;
@@ -89,9 +89,9 @@ export class Player extends Phaser.GameObjects.Container {
         this.level = level;
 
         this.normalColor = isPlayer ? 0x0000ff : 0xff0000;
-        this.baseSquare = scene.add.graphics().setAlpha(BASE_SQUARE_ALPHA);
-        this.setBaseSquareColor(this.normalColor); // Use method to set color
-        this.add(this.baseSquare);
+        // this.baseSquare = scene.add.graphics().setAlpha(BASE_SQUARE_ALPHA);
+        // this.setBaseSquareColor(this.normalColor); // Use method to set color
+        // this.add(this.baseSquare);
 
         // Create the sprite using the given key and add it to the container
         this.sprite = scene.add.sprite(0, 0, texture);
@@ -120,8 +120,8 @@ export class Player extends Phaser.GameObjects.Container {
             this.add(this.numKey);
         } 
 
-        this.baseSquare.fillStyle(isPlayer ? 0x0000ff : 0xff0000); // Must be called before strokeRect
-        this.baseSquare.fillRoundedRect(-30, 10, 60, 60, BASE_SQUARE_RADIUS);  
+        // this.baseSquare.fillStyle(isPlayer ? 0x0000ff : 0xff0000); // Must be called before strokeRect
+        // this.baseSquare.fillRoundedRect(-30, 10, 60, 60, BASE_SQUARE_RADIUS);  
 
         if (gridX < this.arena.gridWidth/2) this.sprite.flipX = true;
 
@@ -220,43 +220,43 @@ export class Player extends Phaser.GameObjects.Container {
           }
     }
 
-    setBaseSquareColor(color: number) {
-        this.baseSquare.clear();
-        this.baseSquare.fillStyle(color, 0.6);
-        this.baseSquare.fillRoundedRect(-30, 10, 60, 60, BASE_SQUARE_RADIUS);
-    }
+    // setBaseSquareColor(color: number) {
+    //     this.baseSquare.clear();
+    //     this.baseSquare.fillStyle(color, 0.6);
+    //     this.baseSquare.fillRoundedRect(-30, 10, 60, 60, BASE_SQUARE_RADIUS);
+    // }
 
-    hideBaseSquare() {
-        this.baseSquare.setVisible(false);
-    }
+    // hideBaseSquare() {
+    //     this.baseSquare.setVisible(false);
+    // }
 
-    showBaseSquare() {
-        this.baseSquare.setVisible(true);
-        this.baseSquare.setAlpha(BASE_SQUARE_ALPHA);
-    }
+    // showBaseSquare() {
+    //     this.baseSquare.setVisible(true);
+    //     this.baseSquare.setAlpha(BASE_SQUARE_ALPHA);
+    // }
 
-    startBlinkingBaseSquare() {
-        this.setBaseSquareColor(this.goldenColor);
-        this.blinkTween = this.scene.tweens.add({
-            targets: this.baseSquare,
-            alpha: { from: 1, to: 0 },
-            duration: 150,
-            yoyo: true,
-            repeat: -1
-        });
-    }
+    // startBlinkingBaseSquare() {
+    //     this.setBaseSquareColor(this.goldenColor);
+    //     this.blinkTween = this.scene.tweens.add({
+    //         targets: this.baseSquare,
+    //         alpha: { from: 1, to: 0 },
+    //         duration: 150,
+    //         yoyo: true,
+    //         repeat: -1
+    //     });
+    // }
 
-    stopBlinkingBaseSquare() {
-        if (this.blinkTween) {
-            this.blinkTween.stop();
-            this.blinkTween = null;
-        }
-        this.setBaseSquareColor(this.normalColor);
-        this.baseSquare.setAlpha(1);
-    }
+    // stopBlinkingBaseSquare() {
+    //     if (this.blinkTween) {
+    //         this.blinkTween.stop();
+    //         this.blinkTween = null;
+    //     }
+    //     this.setBaseSquareColor(this.normalColor);
+    //     this.baseSquare.setAlpha(1);
+    // }
 
     makeAirEntrance() {
-        this.baseSquare.setVisible(false);
+        // this.baseSquare.setVisible(false);
         const {x: targetX, y: targetY} = this.arena.gridToPixelCoords(this.gridX, this.gridY);
 
         // Create a trail effect
@@ -315,7 +315,7 @@ export class Player extends Phaser.GameObjects.Container {
 
                 // Camera shake effect
                 this.scene.cameras.main.shake(200, 0.005);
-                this.baseSquare.setVisible(true);
+                // this.baseSquare.setVisible(true);
 
                 // Revert to idle animation after a short delay
                 this.scene.time.delayedCall(300, () => {
@@ -762,7 +762,7 @@ export class Player extends Phaser.GameObjects.Container {
         if (this.hp <= 0) {
             this.die();
         } else {
-            this.showBaseSquare(); // Show baseSquare when alive
+            // this.showBaseSquare(); // Show baseSquare when alive
 
             if (!this.casting) this.playAnim('hurt', true);
             
@@ -795,7 +795,7 @@ export class Player extends Phaser.GameObjects.Container {
         this.hideAllStatusAnimations();
         this.playAnim('die');
         // this.hideBaseSquare(); 
-        this.stopBlinkingBaseSquare(); // Stop blinking if any
+        // this.stopBlinkingBaseSquare(); // Stop blinking if any
         if (this.arena.selectedPlayer == this) this.arena.deselectPlayer();
 
         const deathPhrases: string[] = [
@@ -1028,7 +1028,7 @@ export class Player extends Phaser.GameObjects.Container {
         // Stop all tweens related to this player
         if (this.scene?.tweens) {
             this.scene.tweens.killTweensOf(this);
-            this.scene.tweens.killTweensOf(this.baseSquare);
+            // this.scene.tweens.killTweensOf(this.baseSquare);
         }
     
         if (this.blinkTween) {

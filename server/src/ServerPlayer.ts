@@ -6,7 +6,7 @@ import { getConsumableById } from '@legion/shared/Items';
 import { getSpellById } from '@legion/shared/Spells';
 import { getMaxStatValue, getXPThreshold } from '@legion/shared/levelling';
 import { CharacterStats, Equipment, PlayerNetworkData, StatusEffects } from '@legion/shared/interfaces';
-import { INJURED_MODE, PARALYZED_DELAY } from "@legion/shared/config";
+import { INJURED_MODE, MOVEMENT_RANGE, PARALYZED_DELAY } from "@legion/shared/config";
 import { getEquipmentById } from '@legion/shared/Equipments';
 import { getSpells, lvlUp, setUpInventory } from '@legion/shared/NewCharacter';
 
@@ -72,7 +72,7 @@ export class ServerPlayer {
         this.frame = frame;
         this.x = x;
         this.y = y;
-        this.distance = 3;
+        this.distance = MOVEMENT_RANGE;
 
         this.statuses = {
             [StatusEffect.FREEZE]: 0,
