@@ -5,7 +5,7 @@ import { Team } from './Team';
 import { MusicManager } from './MusicManager';
 import { CellsHighlight } from './CellsHighlight';
 import { getSpellById } from '@legion/shared/Spells';
-import { lineOfSight, serializeCoords } from '@legion/shared/utils';
+import { lineOfSight, serializeCoords, cubeToOffset, hexDistance, offsetToCube } from '@legion/shared/utils';
 import { getFirebaseIdToken } from '../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain, GEN, AIAttackMode, TargetHighlight } from "@legion/shared/enums";
@@ -664,7 +664,7 @@ export class Arena extends Phaser.Scene
             this.sendUseItem(this.selectedPlayer?.pendingItem, gridX, gridY, player);
         } else if ((!player || !player.isAlive()) && this.hasObstacle(gridX, gridY)) {
             this.sendObstacleAttack(gridX, gridY);
-        } else if (this.selectedPlayer && !player) {
+        } else if (this.selectedPlayer && !player && this.selectedPlayer.canMoveTo(gridX, gridY)) {
             console.log(`Moving to (${gridX}, ${gridY})`);
             this.handleMove(gridX, gridY);
         } else if (player){ 
@@ -1047,7 +1047,7 @@ export class Arena extends Phaser.Scene
         }
 
         const {x, y} = this.gridToPixelCoords(player.gridX, player.gridY);
-        this.panCameraWithOffset(x, y);
+        // this.panCameraWithOffset(x, y);
     }
 
     processGameEnd(data: OutcomeData) {
@@ -1356,10 +1356,7 @@ export class Arena extends Phaser.Scene
             const r2 = Math.min(radius, -q + radius);
             
             for (let r = r1; r <= r2; r++) {
-                // Convert cube coordinates to offset coordinates
-                // For odd-r layout (assuming that's what we're using based on the code)
-                const col = q + Math.floor((r + (r&1)) / 2);
-                const row = r;
+                const {col, row} = cubeToOffset(q, r, -q-r, gridY);
                 
                 const targetX = gridX + col;
                 const targetY = gridY + row;
@@ -2368,29 +2365,5 @@ export class Arena extends Phaser.Scene
         
         return { gridX: estimatedCol, gridY: estimatedRow };
     }
-
-    // Helper method to convert offset coordinates to cube coordinates
-    offsetToCube(col, row) {
-        // For odd-r offset system
-        const x = col - Math.floor(row / 2);
-        const z = row;
-        const y = -x - z;
-        return { x, y, z };
-    }
-
-    // Calculate hex distance between two hex points in cube coordinates
-    hexDistance(a, b) {
-        return Math.max(
-            Math.abs(a.x - b.x),
-            Math.abs(a.y - b.y),
-            Math.abs(a.z - b.z)
-        );
-    }
-
-    // Check if a hex grid position is within radius of another hex position
-    isWithinHexRange(fromX, fromY, toX, toY, radius) {
-        const fromHex = this.offsetToCube(fromX, fromY);
-        const toHex = this.offsetToCube(toX, toY);
-        return this.hexDistance(fromHex, toHex) <= radius;
-    }
+    
 }

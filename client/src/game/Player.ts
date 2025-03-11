@@ -525,7 +525,7 @@ export class Player extends Phaser.GameObjects.Container {
         
         const distance = hexDistance(this.gridX, this.gridY, x, y);
         console.log(`[Player:canMoveTo] distance: ${distance}, distance: ${this.distance}`);
-        return distance <= this.distance + 1;
+        return distance <= this.distance;
     }
 
     updatePos(x, y) {

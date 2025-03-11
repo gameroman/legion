@@ -13,55 +13,127 @@ export function serializeCoords(x: number, y: number): string {
     return `${x},${y}`;
 }  
 
+// Convert offset coordinates to cube coordinates
+export function offsetToCube(col: number, row: number): { x: number, y: number, z: number } {
+    // For odd-r offset system
+    const x = col - Math.floor(row / 2);
+    const z = row;
+    const y = -x - z;
+    return { x, y, z };
+}
+
+// Convert cube coordinates back to offset coordinates
+export function cubeToOffset(x, y, z, centerRow) {
+    const row = z;
+    const col = centerRow % 2 === 0 
+        ? x + Math.floor((z + 1) / 2)
+        : x + Math.floor(z / 2);
+    return { col, row };
+}
+
+
+// Interpolate between two cube coordinates
+function cubeLinearInterpolation(a: { x: number, y: number, z: number }, 
+                                b: { x: number, y: number, z: number }, 
+                                t: number) {
+    return {
+        x: a.x * (1 - t) + b.x * t,
+        y: a.y * (1 - t) + b.y * t,
+        z: a.z * (1 - t) + b.z * t
+    };
+}
+
+// Round cube coordinates to the nearest valid hex
+function roundCube(cube: { x: number, y: number, z: number }) {
+    let rx = Math.round(cube.x);
+    let ry = Math.round(cube.y);
+    let rz = Math.round(cube.z);
+
+    const xDiff = Math.abs(rx - cube.x);
+    const yDiff = Math.abs(ry - cube.y);
+    const zDiff = Math.abs(rz - cube.z);
+
+    // Adjust the coordinate with the largest rounding error
+    if (xDiff > yDiff && xDiff > zDiff) {
+        rx = -ry - rz;
+    } else if (yDiff > zDiff) {
+        ry = -rx - rz;
+    } else {
+        rz = -rx - ry;
+    }
+
+    return { x: rx, y: ry, z: rz };
+}
+
 export function lineOfSight(startX: number, startY: number, endX: number, endY: number, isFree: Function): boolean {
-    // Get the distance between the start and end points
-    let distance = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
+    // Convert to cube coordinates
+    const startCube = offsetToCube(startX, startY);
+    const endCube = offsetToCube(endX, endY);
+    
+    // Calculate the cube distance
+    const distance = Math.max(
+        Math.abs(endCube.x - startCube.x),
+        Math.abs(endCube.y - startCube.y),
+        Math.abs(endCube.z - startCube.z)
+    );
 
-    // Calculate the number of steps to check, based on the distance
-    let steps = Math.ceil(distance);
+    // Calculate the number of steps to check
+    const steps = Math.max(1, distance);
 
-    // console.log(`Line of sight from (${startX}, ${startY}) to (${endX}, ${endY})`);
+    // Check each point along the line
     for (let i = 1; i < steps; i++) {
-        // Calculate the current position along the line
-        const xInc = specialRound(i / steps * (endX - startX));
-        const yInc = specialRound(i / steps * (endY - startY));
-        let currentX = Math.round(startX + xInc);
-        let currentY = Math.round(startY + yInc);
-        if (currentX == startX && currentY == startY) continue;
-
-        // Check if this position is occupied
-        if (!isFree(currentX, currentY)) {
-            // console.log(`Line of sight blocked at (${currentX}, ${currentY})`);
-            // If the position is occupied, return false
+        // Interpolate in cube coordinates
+        const t = i / steps;
+        const interpolated = cubeLinearInterpolation(startCube, endCube, t);
+        const rounded = roundCube(interpolated);
+        
+        // Convert back to offset coordinates
+        const { col, row } = cubeToOffset(rounded.x, rounded.y, rounded.z, startY);
+        
+        // Skip the starting point
+        if (col === startX && row === startY) continue;
+        
+        // Check if this position is free
+        if (!isFree(col, row)) {
             return false;
         }
     }
 
-    // If no occupied positions were found, return true
+    // If all positions are free, return true
     return true;
 }
 
 export function listCellsOnTheWay(startX: number, startY: number, endX: number, endY: number): Set<string> {
-    // Get the distance between the start and end points
-    let distance = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
+    // Convert to cube coordinates
+    const startCube = offsetToCube(startX, startY);
+    const endCube = offsetToCube(endX, endY);
+    
+    // Calculate the cube distance
+    const distance = Math.max(
+        Math.abs(endCube.x - startCube.x),
+        Math.abs(endCube.y - startCube.y),
+        Math.abs(endCube.z - startCube.z)
+    );
 
-    // Calculate the number of steps to check, based on the distance
-    let steps = Math.ceil(distance);
-
+    // Calculate the number of steps
+    const steps = Math.max(1, distance);
+    
     const cells = new Set<string>();
     cells.add(serializeCoords(startX, startY));
-    for (let i = 1; i < steps; i++) {
-        // Calculate the current position along the line
-        const xInc = specialRound(i / steps * (endX - startX));
-        const yInc = specialRound(i / steps * (endY - startY));
-        let currentX = Math.round(startX + xInc);
-        let currentY = Math.round(startY + yInc);
-        if (currentX == startX && currentY == startY) continue;
-
+    
+    // Track each point along the line
+    for (let i = 1; i <= steps; i++) {
+        // Interpolate in cube coordinates
+        const t = i / steps;
+        const interpolated = cubeLinearInterpolation(startCube, endCube, t);
+        const rounded = roundCube(interpolated);
+        
+        // Convert back to offset coordinates
+        const { col, row } = cubeToOffset(rounded.x, rounded.y, rounded.z, startY);
+        
         // Add this position to the list
-        cells.add(serializeCoords(currentX, currentY));
+        cells.add(serializeCoords(col, row));
     }
-    cells.add(serializeCoords(endX, endY));
 
     return cells;
 }

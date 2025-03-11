@@ -167,7 +167,7 @@ export class ServerPlayer {
         if (!this.canAct()) return false;
         
         const distance = hexDistance(this.x, this.y, x, y);
-        return distance <= this.distance + 1;
+        return distance <= this.distance;
     }
 
     isNextTo(x: number, y: number) {
