@@ -15,15 +15,23 @@ export function serializeCoords(x: number, y: number): string {
 
 // Convert offset coordinates to cube coordinates
 export function offsetToCube(col: number, row: number): { x: number, y: number, z: number } {
-    // For odd-r offset system
+    // For even-r offset system
     const x = col - Math.floor(row / 2);
     const z = row;
     const y = -x - z;
     return { x, y, z };
 }
 
+function oddOffsetToCube(col: number, row: number): { x: number, y: number, z: number } {
+    // For odd-r offset system
+    const x = col - Math.floor((row+1) / 2);
+    const z = row;
+    const y = -x - z;
+    return { x, y, z };
+}
+
 // Convert cube coordinates back to offset coordinates
-export function cubeToOffset(x, y, z, centerRow) {
+export function cubeToOffset(x: number, y: number, z: number, centerRow: number) {
     const row = z;
     const col = centerRow % 2 === 0 
         ? x + Math.floor((z + 1) / 2)
@@ -71,11 +79,11 @@ export function lineOfSight(startX: number, startY: number, endX: number, endY: 
         return true;
     }
     const cells = listCellsOnTheWay(startX, startY, endX, endY);
-    console.log(`[lineOfSight] cells on the way: ${JSON.stringify(Array.from(cells))}`);
+    // console.log(`[lineOfSight] cells on the way: ${JSON.stringify(Array.from(cells))}`);
     for (const cell of cells) {
         // Split the cell string into x and y coordinates
         const [x, y] = cell.split(',').map(Number);
-        console.log(`[lineOfSight] cell ${cell} is free: ${isFree(x, y)}`);
+        // console.log(`[lineOfSight] cell ${cell} is free: ${isFree(x, y)}`);
         if (!isFree(x, y)) {
             return false;
         }
@@ -84,16 +92,8 @@ export function lineOfSight(startX: number, startY: number, endX: number, endY: 
 }
 
 export function listCellsOnTheWay(startX: number, startY: number, endX: number, endY: number): Set<string> {
-    function offsetToCube(col: number, row: number): { x: number, y: number, z: number } {
-        // For even-r offset system (pointy-top hexes)
-        const x = col - Math.floor(row / 2);
-        const z = row;
-        const y = -x - z;
-        return { x, y, z };
-    }
-    
     // Convert cube coordinates back to offset coordinates
-    function cubeToOffset(x, y, z, centerRow) {
+    function cubeToOffset(x: number, y: number, z: number, centerRow: number) {
         const row = z;
         const col = centerRow % 2 === 0 
             ? x + Math.floor(z / 2)
@@ -102,8 +102,8 @@ export function listCellsOnTheWay(startX: number, startY: number, endX: number, 
     }
     
     // Convert to cube coordinates
-    const startCube = offsetToCube(startX, startY);
-    const endCube = offsetToCube(endX, endY);
+    const startCube = oddOffsetToCube(startX, startY);
+    const endCube = oddOffsetToCube(endX, endY);
     
     // Calculate the cube distance
     const distance = Math.max(
@@ -111,12 +111,19 @@ export function listCellsOnTheWay(startX: number, startY: number, endX: number, 
         Math.abs(endCube.y - startCube.y),
         Math.abs(endCube.z - startCube.z)
     );
+    // console.log(`[listCellsOnTheWay] Distance: ${distance}`);
+
+    const cells = new Set<string>();
+    // cells.add(serializeCoords(startX, startY));
+
+    if (distance === 1) {
+        cells.add(serializeCoords(endX, endY));
+        return cells;
+    }
 
     // Calculate the number of steps
     const steps = Math.max(1, distance);
     
-    const cells = new Set<string>();
-    // cells.add(serializeCoords(startX, startY));
     
     // Track each point along the line
     for (let i = 1; i <= steps; i++) {
@@ -178,19 +185,13 @@ export const transformDailyLoot = (dailyloot: DailyLootAllDBData): DailyLootAllA
  * @returns The hex distance between the two points
  */
 export function hexDistance(x1: number, y1: number, x2: number, y2: number): number {
-    // Convert to cube coordinates (x,y,z)
-    const q1 = x1;
-    const r1 = y1;
-    const s1 = -q1 - r1;
-    
-    const q2 = x2;
-    const r2 = y2;
-    const s2 = -q2 - r2;
+    const startCube = oddOffsetToCube(x1, y1);
+    const endCube = oddOffsetToCube(x2, y2);
     
     // Calculate hex distance using maximum of the absolute differences
     return Math.max(
-        Math.abs(q1 - q2),
-        Math.abs(r1 - r2),
-        Math.abs(s1 - s2)
+        Math.abs(startCube.x - endCube.x),
+        Math.abs(startCube.y - endCube.y),
+        Math.abs(startCube.z - endCube.z)
     );
 }

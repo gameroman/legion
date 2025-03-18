@@ -68,8 +68,6 @@ import { BaseItem } from '@legion/shared/BaseItem';
 const LOCAL_ANIMATION_SCALE = 3;
 const DEPTH_OFFSET = 0.01;
 
-const DEBUG_OFFSET = [0, 50];
-
 export const DARKENING_INTENSITY = 0.9; // 0 = completely dark, 1 = no darkening
 
 // Add to imports at the top
@@ -1374,17 +1372,6 @@ export class Arena extends Phaser.Scene
   
 
     highlightCells(gridX, gridY, radius) {
-        const startX = 2;
-        const startY = 4;
-        const endX = 3;
-        const endY = 5;
-        const cellsOnTheWay = listCellsOnTheWay(startX, startY, endX, endY);
-        console.log(`[Arena:highlightCells] Path between ${startX},${startY} and ${endX},${endY}: ${JSON.stringify(Array.from(cellsOnTheWay))}`);
-        cellsOnTheWay.forEach(cell => {
-            const coords = cell.split(',');
-            console.log(`[Arena:highlightCells] IsFree ${coords[0]},${coords[1]}: ${this.isFree(coords[0], coords[1])}`);
-        });
-        console.log(`[Arena:highlightCells] Line of sight between ${startX},${startY} and ${endX},${endY}: ${lineOfSight(startX, startY, endX, endY, this.isFree.bind(this))}`);
         // Clear any existing highlights
         this.clearHighlight();
         
@@ -1563,8 +1550,7 @@ export class Arena extends Phaser.Scene
         this.sceneCreated = true;
         this.emptyQueue();
 
-        // Add keyboard shortcut for coordinate toggle (using 'C' key)
-        this.input.keyboard.on('keydown-C', () => {
+        this.input.keyboard.on('keydown-D', () => {
             this.toggleCoordinateDisplay();
         });
     }
@@ -2383,7 +2369,7 @@ export class Arena extends Phaser.Scene
 
     hexGridToPixelCoords(gridX, gridY) {
         // Specifically called to compute PLAYER positions
-        const centerTileYOffset = 50;
+        const centerTileYOffset = 40;
         const {startX, startY} = this.getStartXY();
         const offsetX = startX + HEX_WIDTH / 2;
         const offsetY = startY + HEX_HEIGHT / 2;

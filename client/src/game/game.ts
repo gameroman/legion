@@ -21,7 +21,7 @@ const config = {
     dom: {
         createContainer: true
     },
-    pixelArt: true,
+    pixelArt: false,
     plugins: {
         global:[
             {
