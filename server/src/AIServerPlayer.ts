@@ -1,6 +1,7 @@
 import { ServerPlayer } from './ServerPlayer';
 import { AIAttackMode, SpeedClass, StatusEffect, Target } from "@legion/shared/enums";
 import { FREEZE_AI } from "@legion/shared/config";
+import { hexDistance } from '@legion/shared/utils';
 
 
 type Comparator<T> = (a: T, b: T) => number;
@@ -374,7 +375,7 @@ export class AIServerPlayer extends ServerPlayer {
         if (!closestTile) return;
         let closestDistance = Math.pow(closestTile.x - x, 2) + Math.pow(closestTile.y - y, 2);
         for(let i = 1; i < tiles!.length; i++) {
-            const nextTo = (Math.abs(x - tiles![i].x) <= 1 && Math.abs(y - tiles![i].y) <= 1);
+            const nextTo = hexDistance(tiles![i].x, tiles![i].y, x, y) <= 1;
             if (nextTo) {
                 closestTile = tiles![i];
                 break;

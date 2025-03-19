@@ -4,7 +4,7 @@ import * as admin from 'firebase-admin';
 import { ServerPlayer } from './ServerPlayer';
 import { Team } from './Team';
 import { Spell } from './Spell';
-import { lineOfSight, listCellsOnTheWay, getTilesInHexRadius, isSkip } from '@legion/shared/utils';
+import { lineOfSight, listCellsOnTheWay, getTilesInHexRadius, isSkip, hexDistance } from '@legion/shared/utils';
 import { apiFetch } from './API';
 import { Terrain, PlayMode, Target, StatusEffect, ChestColor, League, GEN,
     Stat, SpeedClass, Class } from '@legion/shared/enums';
@@ -688,8 +688,8 @@ export abstract class Game
                 return;
             }
             const closestCell = cellsInRange.reduce((closest, cell) => {
-                const distance = Math.abs(cell.x - opponent.x) + Math.abs(cell.y - opponent.y);
-                return distance < Math.abs(closest.x - opponent.x) + Math.abs(closest.y - opponent.y) ? cell : closest;
+                const distance = hexDistance(cell.x, cell.y, opponent.x, opponent.y);
+                return distance < hexDistance(closest.x, closest.y, opponent.x, opponent.y) ? cell : closest;
             }, cellsInRange[0]);
             this.processMove({tile: closestCell});
             return;

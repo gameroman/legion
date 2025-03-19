@@ -4,7 +4,7 @@ import { GameHUD, events } from '../components/HUD/GameHUD';
 import { Team } from './Team';
 import { MusicManager } from './MusicManager';
 import { getSpellById } from '@legion/shared/Spells';
-import { lineOfSight, serializeCoords, cubeToOffset, getTilesInHexRadius, isSkip } from '@legion/shared/utils';
+import { lineOfSight, serializeCoords, cubeToOffset, getTilesInHexRadius, isSkip, hexDistance } from '@legion/shared/utils';
 import { getFirebaseIdToken } from '../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain, GEN, AIAttackMode, TargetHighlight } from "@legion/shared/enums";
@@ -1281,7 +1281,7 @@ export class Arena extends Phaser.Scene
     hasEnemyNextTo(gridX, gridY) {
         const enemyTeam = this.teamsMap.get(this.getOtherTeam(this.playerTeamId))
         return enemyTeam.getMembers().some(member => {
-            return Math.abs(member.gridX - gridX) <= 1 && Math.abs(member.gridY - gridY) <= 1;
+            return hexDistance(member.gridX, member.gridY, gridX, gridY) <= 1;
         });
     }
     

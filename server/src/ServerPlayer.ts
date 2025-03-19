@@ -171,7 +171,7 @@ export class ServerPlayer {
     }
 
     isNextTo(x: number, y: number) {
-        return (Math.abs(x - this.x) <= 1 && Math.abs(y - this.y) <= 1);
+        return hexDistance(this.x, this.y, x, y) <= 1;
     }
 
     isInArea(x: number, y: number, radius: number) {
