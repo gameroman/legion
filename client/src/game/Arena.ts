@@ -448,16 +448,6 @@ export class Arena extends Phaser.Scene
             startY,
         };
 
-        this.input.on('pointerdown', function (pointer) {
-            if (pointer.rightButtonDown()) {
-                this.selectedPlayer?.cancelSkill();
-                return;
-            }
-            const {gridX, gridY} = this.pointerToHexGrid(pointer);
-            if (isSkip(gridX, gridY)) return;
-            this.handleTileClick(gridX, gridY);
-        }, this);
-
         this.input.keyboard.on('keydown', this.handleKeyDown, this);
     }
 
@@ -2187,6 +2177,14 @@ export class Arena extends Phaser.Scene
         tileSprite.on('pointerout', function() {
             if (isSkip(x, y)) return;
             this.handleTileHover(x, y, false);
+        }, this);
+
+        tileSprite.on('pointerdown', function(pointer) {
+            if (pointer.rightButtonDown()) {
+                this.selectedPlayer?.cancelSkill();
+                return;
+            }
+            this.handleTileClick(x, y);
         }, this);
 
         // Store tile reference in the map
