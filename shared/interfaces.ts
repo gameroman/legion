@@ -327,6 +327,7 @@ export interface GameData {
     player: GamePlayerData,
     opponent: GamePlayerData,
     terrain: TerrainUpdate[],
+    holes: {x: number, y: number}[];
 }
 
 export interface PlayerProps {

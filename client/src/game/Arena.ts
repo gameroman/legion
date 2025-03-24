@@ -523,7 +523,9 @@ export class Arena extends Phaser.Scene
     }
 
     isFree(gridX, gridY) {
-        return !this.gridMap.get(serializeCoords(gridX, gridY)) && !this.obstaclesMap.get(serializeCoords(gridX, gridY));
+        return !this.gridMap.get(serializeCoords(gridX, gridY)) && 
+               !this.obstaclesMap.get(serializeCoords(gridX, gridY)) &&
+               !this.hexGridManager.isHole(gridX, gridY);
     }
 
     hasPlayer(gridX, gridY) {
@@ -1354,6 +1356,11 @@ export class Arena extends Phaser.Scene
 
         this.teamsMap.set(data.player.teamId, new Team(this, data.player.teamId, true, data.player.player, data.player.score));
         this.teamsMap.set(data.opponent.teamId, new Team(this, data.opponent.teamId, false, data.opponent.player));
+
+        // Set up holes in the grid
+        if (data.holes && this.hexGridManager) {
+            this.hexGridManager.setHoles(data.holes);
+        }
 
         // Events from the HUD
         events.on('itemClick', (keyIndex) => {

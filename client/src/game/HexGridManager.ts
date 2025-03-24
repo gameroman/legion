@@ -48,6 +48,8 @@ export class HexGridManager {
     // Grid dimensions and position
     private gridCorners: { startX: number, startY: number };
 
+    private holePositions: Set<string> = new Set<string>();
+
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
         this.calculateGridCorners();
@@ -115,7 +117,7 @@ export class HexGridManager {
             
             // In each row, loop over each column
             for (let x = 0; x < GRID_WIDTH; x++) {
-                if (isSkip(x, y)) continue;
+                if (isSkip(x, y) || this.isHole(x, y)) continue;
                 
                 // Calculate hex position
                 const hexX = offsetX + x * HexGridManager.HEX_HORIZ_SPACING + rowOffset;
@@ -337,7 +339,8 @@ export class HexGridManager {
     isValidGridPosition(x: number, y: number): boolean {
         return x >= 0 && x < GRID_WIDTH && 
                y >= 0 && y < GRID_HEIGHT && 
-               !isSkip(x, y);
+               !isSkip(x, y) &&
+               !this.isHole(x, y);
     }
 
     isValidCell(fromX: number, fromY: number, toX: number, toY: number, isFree: (x: number, y: number) => boolean) {
@@ -556,5 +559,15 @@ export class HexGridManager {
         if (tile) {
             this.applyTileColor(tile, color);
         }
+    }
+
+    setHoles(holes: {x: number, y: number}[]) {
+        holes.forEach(hole => {
+            this.holePositions.add(serializeCoords(hole.x, hole.y));
+        });
+    }
+    
+    isHole(x: number, y: number): boolean {
+        return this.holePositions.has(serializeCoords(x, y));
     }
 } 

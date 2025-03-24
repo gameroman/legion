@@ -58,6 +58,7 @@ export abstract class Game
     replayMessages: GameReplayMessage[] = [];
     gameOutcomes: Map<number, OutcomeData> = new Map();
     processedUIDs: Set<string> | null = null;
+    holePositions: Set<string> = new Set<string>(); // Store coordinates of holes
 
     constructor(id: string, mode: PlayMode, league: League, io: Server) {
         this.id = id;
@@ -167,12 +168,12 @@ export abstract class Game
 
     getPosition(index, flip) {
         const positions = [
-            {x: 4, y: 5},
-            {x: 2, y: 2},
-            {x: 2, y: 8},
-            {x: 2, y: 5},
-            {x: 0, y: 2},
-            {x: 0, y: 8},
+            {x: 5, y: 6},
+            {x: 5, y: 3},
+            {x: 4, y: 9},
+            {x: 3, y: 6},
+            {x: 3, y: 3},
+            {x: 2, y: 9},
         ]
         const position = positions[index];
         if (flip) {
@@ -182,11 +183,14 @@ export abstract class Game
     }
 
     isFree(gridX: number, gridY: number) {
-        return !this.gridMap.get(`${gridX},${gridY}`) && !this.hasObstacle(gridX, gridY);
+        return !this.gridMap.get(`${gridX},${gridY}`) && 
+               !this.hasObstacle(gridX, gridY) && 
+               !this.isHole(gridX, gridY);
     }
 
     hasObstacle(gridX: number, gridY: number) {
-        return this.terrainManager.terrainMap.get(`${gridX},${gridY}`) === Terrain.ICE;
+        return this.terrainManager.terrainMap.get(`${gridX},${gridY}`) === Terrain.ICE || 
+               this.isHole(gridX, gridY);
     }
 
     freeCell(gridX: number, gridY: number) {
@@ -252,6 +256,9 @@ export abstract class Game
         console.log(`[Game:startGame]`)
         this.startTime = Date.now();
         this.gameStarted = true;
+
+        // Generate holes before initializing turn order
+        this.generateHoles();
 
         this.turnSystem = new TurnSystem();
         const allCharacters = this.getTeam(1).concat(this.getTeam(2));
@@ -440,6 +447,10 @@ export abstract class Game
             terrain: Array.from(this.terrainManager.terrainMap).map(([key, value]) => {
                 const [x, y] = key.split(',').map(Number);
                 return {x, y, terrain: value};
+            }),
+            holes: Array.from(this.holePositions).map(coords => {
+                const [x, y] = coords.split(',').map(Number);
+                return {x, y};
             }),
         }
         return data;
@@ -1503,6 +1514,71 @@ export abstract class Game
 
             return { characters: rosterData };
         }, retries, delay, 'getRosterData');
+    }
+
+    generateHoles() {
+        const fixedHoles = [
+            {x: 0, y: 0},
+            {x: 0, y: 2},
+            {x: 1, y: 0},
+            {x: 2, y: 0},
+            {x: 2, y: 2},
+            {x: 3, y: 0},
+            {x: 4, y: 0},
+            {x: 0, y: 1},
+            {x: 1, y: 1},
+            {x: 2, y: 1},
+            {x: 3, y: 1},
+            {x: 4, y: 1},
+            {x: 0, y: 3},
+            {x: 5, y: 0},
+            {x: 5, y: 1},
+            {x: 3, y: 2},
+            {x: 4, y: 2},
+            {x: 6, y: 0},
+            {x: 0, y: 7},
+            {x: 0, y: 9},
+            {x: 0, y: 10},
+            {x: 9, y: 0},
+            {x: 10, y: 0},
+            {x: 10, y: 10},
+            {x: 11, y: 0},
+            {x: 11, y: 10},
+            {x: 12, y: 0},
+            {x: 13, y: 0},
+            {x: 14, y: 0},
+            {x: 10, y: 1},
+            {x: 11, y: 1},
+            {x: 12, y: 1},
+            {x: 13, y: 1},
+            {x: 14, y: 1},
+            {x: 15, y: 1},
+            {x: 9, y: 2},
+            {x: 10, y: 2},
+            {x: 11, y: 2},
+            {x: 12, y: 2},
+            {x: 13, y: 2},
+            {x: 14, y: 2},
+            {x: 13, y: 3},
+            {x: 14, y: 3},
+            {x: 15, y: 3},
+            {x: 13, y: 4},
+            {x: 14, y: 4},
+            {x: 15, y: 5},
+            {x: 14, y: 6},
+            {x: 15, y: 7},
+            {x: 14, y: 8},
+            {x: 14, y: 9},
+            {x: 15, y: 9},
+            {x: 14, y: 10},
+            {x: 15, y: 10},
+        ];
+        
+        this.holePositions = new Set(fixedHoles.map(hole => `${hole.x},${hole.y}`));
+    }
+
+    isHole(gridX: number, gridY: number): boolean {
+        return this.holePositions.has(`${gridX},${gridY}`);
     }
 }
 
