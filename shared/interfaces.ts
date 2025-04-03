@@ -49,16 +49,14 @@ export interface SpellData {
     frame: number;
     sfx: string;
     vfx: string;
+    projectile?: string;
     speedClass: SpeedClass;
     castTime?: number;
     cost?: number;
     target: Target;
-    size: number;
+    radius: number;
     effects: Effect[];
-    shake: boolean;
     score: number;
-    yoffset?: number;
-    scale?: number;
     terrain?: Terrain;
     minLevel?: number;
     classes?: Class[];
@@ -78,7 +76,7 @@ export interface ConsumableData {
     animation: string;
     speedClass: SpeedClass;
     target: Target;
-    size?: number;
+    radius?: number;
     effects: Effect[];
     statusRemovals?: StatusEffect[];
     status?: StatusEffectData;

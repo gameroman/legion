@@ -242,7 +242,6 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
       return;
     }
     
-    console.log('Clicked pass turn');
     events.emit('passTurn');
   }
 

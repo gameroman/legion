@@ -13,7 +13,7 @@ export class BaseItem {
     animation: string = '';
     sfx: string = '';
     speedClass: SpeedClass = SpeedClass.NORMAL;
-    size?: number = 1;
+    radius?: number = 1;
     price: number = 0;
     rarity: Rarity = Rarity.COMMON;
     effort: number = 0;

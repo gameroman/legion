@@ -9,13 +9,12 @@ import { getFirebaseIdToken } from '../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain, GEN, AIAttackMode, TargetHighlight } from "@legion/shared/enums";
 import { TerrainUpdate, GameData, OutcomeData, PlayerNetworkData } from '@legion/shared/interfaces';
-import { KILL_CAM_DURATION, BASE_ANIM_FRAME_RATE, FREEZE_CAMERA, GRID_WIDTH, GRID_HEIGHT, SPELL_RANGE, MOVEMENT_RANGE } from '@legion/shared/config';
+import { KILL_CAM_DURATION, BASE_ANIM_FRAME_RATE, FREEZE_CAMERA, GRID_WIDTH, GRID_HEIGHT, SPELL_RANGE, MOVEMENT_RANGE, PROJECTILE_DURATION } from '@legion/shared/config';
 
 import killzoneImage from '@assets/killzone.png';
 import iceblockImage from '@assets/iceblock.png';
 
 import potionHealImage from '@assets/vfx/potion_heal.png';
-import explosionsImage from '@assets/vfx/explosions.png';
 import smokeImage from '@assets/vfx/smoke.png';
 import thunderImage from '@assets/vfx/thunder.png';
 import castImage from '@assets/vfx/cast.png';
@@ -66,14 +65,15 @@ import { BaseItem } from '@legion/shared/BaseItem';
 import { HexGridManager, HighlightType } from './HexGridManager';
 import { TutorialManager } from './TutorialManager';
 
-const LOCAL_ANIMATION_SCALE = 3;
+import hexTileImage from '@assets/tile.png';
+import { VFXconfig, fireLevels, terrainFireLevels } from './VFXconfig';
+
+const LOCAL_ANIMATION_SCALE = 1;
 const DEPTH_OFFSET = 0.01;
 export const DARKENING_INTENSITY = 0.9;
 const TINT_COLOR = Math.round(0x66 * DARKENING_INTENSITY) * 0x010101;
 const AIR_ENTRANCE_DELAY = 750;
 const AIR_ENTRANCE_DELAY_VARIANCE = 200;
-
-import hexTileImage from '@assets/tile.png';
 
 export class Arena extends Phaser.Scene
 {
@@ -119,6 +119,9 @@ export class Arena extends Phaser.Scene
     isDarkened: boolean = false;
     tutorialManager: TutorialManager;
     hexGridManager: HexGridManager;
+
+    // Add to the class properties at the top of the file
+    private lastKeyTime: number = 0;
 
     private static readonly GEN_CONFIGS = {
         [GEN.COMBAT_BEGINS]: { text1: 'combat', text2: 'begins' },
@@ -213,7 +216,15 @@ export class Arena extends Phaser.Scene
             this.load.spritesheet(sprite, require(`@assets/sprites/${sprite}.png`), frameConfig);
         });
         this.load.spritesheet('potion_heal', potionHealImage, { frameWidth: 48, frameHeight: 64});
-        this.load.spritesheet('explosions', explosionsImage, { frameWidth: 96, frameHeight: 96});
+
+        fireLevels.forEach(level => {
+            this.load.spritesheet(`fire_${level}_explosion`, require(`@assets/vfx/fire_${level}_explosion.png`), { frameWidth: 512, frameHeight: 512});
+            this.load.spritesheet(`fireball_${level}`, require(`@assets/vfx/fireball_${level}.png`), { frameWidth: 512, frameHeight: 512});
+        });
+        terrainFireLevels.forEach(level => {
+            this.load.spritesheet(`terrain_fire_${level}`, require(`@assets/vfx/terrain_fire_${level}.png`), { frameWidth: 512, frameHeight: 512});
+        });
+
         this.load.spritesheet('thunder2', thunderImage, { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('smoke', smokeImage, { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('cast', castImage, { frameWidth: 48, frameHeight: 64});
@@ -451,7 +462,7 @@ export class Arena extends Phaser.Scene
             const isAllyTargetingSpell = spell?.targetHighlight === TargetHighlight.ALLY;
             
             this.isInTargetMode = true;
-            this.targetModeSize = spell?.size - 1|| 0;
+            this.targetModeSize = spell?.radius - 1|| 0;
             this.hexGridManager.toggleTargetMode(true);
             
             // Add pointer move listener to highlight tiles in radius as cursor moves
@@ -493,6 +504,7 @@ export class Arena extends Phaser.Scene
             
             events.emit('clearPendingSpell');
             this.brightenScene();
+            this.selectedPlayer?.displayMovementRange();
         }
     }
 
@@ -519,6 +531,15 @@ export class Arena extends Phaser.Scene
     }
 
     handleKeyDown(event) {
+        // Prevent key event handling if input is locked
+        if (this.inputLocked) return;
+        
+        // Simple debouncing - prevent multiple rapid triggers of the same key
+        if (this.lastKeyTime && (Date.now() - this.lastKeyTime < 100)) {
+            return;
+        }
+        this.lastKeyTime = Date.now();
+        
         // Check if the pressed key is a number
         const isNumberKey = (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NINE) || (event.keyCode >= Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO && event.keyCode <= Phaser.Input.Keyboard.KeyCodes.NUMPAD_NINE);
         if (!isNumberKey) {
@@ -527,7 +548,6 @@ export class Arena extends Phaser.Scene
                 // Get the letter corresponding to the keyCode
                 const letter = String.fromCharCode(event.keyCode);
                 this.selectedPlayer?.onLetterKey(letter);
-                // this.sound.play('click');
             }
         }
     }
@@ -586,7 +606,7 @@ export class Arena extends Phaser.Scene
     validateTarget(gridX, gridY, action: BaseSpell | BaseItem) {
         const distance = hexDistance(this.selectedPlayer.gridX, this.selectedPlayer.gridY, gridX, gridY);
         if (distance > MOVEMENT_RANGE + SPELL_RANGE) return false;
-        if (action.target == Target.AOE && action.size > 1) {
+        if (action.target == Target.AOE && action.radius > 1) {
             return true;
         }
         const character = this.gridMap.get(serializeCoords(gridX, gridY));
@@ -755,18 +775,6 @@ export class Arena extends Phaser.Scene
         }
     }
 
-    processCast(flag, {team, num, id, location,}) {
-        if (this.gameEnded) return;
-        // console.log(`Processing cast: ${flag} ${team} ${num} ${id} ${location}`);
-        const player = this.getPlayer(team, num);
-        const spell = getSpellById(id);
-        player?.castAnimation(flag, spell?.name);
-        // const { x: pixelX, y: pixelY } = this.hexGridToPixelCoords(player.gridX, player.gridY);
-        // this.spellCam(pixelX, pixelY, false);
-        if (player.isPlayer) {
-            events.emit(`playerCastSpell`);
-        }
-    }
 
     processTerrain(updates: TerrainUpdate[]) {
         if (this.gameEnded) return;
@@ -839,35 +847,127 @@ export class Arena extends Phaser.Scene
         return Number((3.5 + y/10).toFixed(2));
     }
 
-    processLocalAnimation({x, y, id, isKill}) {
+    processCast(flag, {team, num, id, target,}) {
+        if (this.gameEnded) return;
+        // console.log(`Processing cast: ${flag} ${team} ${num} ${id} ${target}`);
+        const player = this.getPlayer(team, num);
         const spell = getSpellById(id);
-        if (spell.size % 2 === 0) {
-            x += 0.5;
-            y += 0.5;
+        player?.castAnimation(flag, spell?.name);
+
+        // const { x: pixelX, y: pixelY } = this.hexGridToPixelCoords(player.gridX, player.gridY);
+        // this.spellCam(pixelX, pixelY, false);
+        if (player.isPlayer) {
+            events.emit(`playerCastSpell`);
         }
-        const {x: pixelX, y: pixelYInitial} = this.hexGridToPixelCoords(x, y);
+    }
+
+    processLocalAnimation({fromX, fromY, toX, toY, id, isKill}) {
+        const spell = getSpellById(id);
+        const {x: pixelXInitial, y: pixelYInitial} = this.hexGridToPixelCoords(toX, toY);
         let pixelY = pixelYInitial;
-        if (spell.yoffset) pixelY += spell.yoffset;
+        let pixelX = pixelXInitial;
 
-        if (isKill) {
-            this.killCam(pixelX, pixelY);
-        } else {
-            // this.spellCam(pixelX, pixelY);
+        const config = VFXconfig[spell.vfx];
+        if (config.yoffset) pixelY += config.yoffset;
+        if (config.xoffset) pixelX += config.xoffset;
+
+        if (spell.projectile) {
+            this.animateProjectile(fromX, fromY, toX, toY, spell.projectile);
         }
-        const scale = spell.scale > 1 ? spell.scale : LOCAL_ANIMATION_SCALE;
-        console.log(`Playing ${spell.vfx}`)
-        this.localAnimationSprite.setPosition(pixelX, pixelY)
-            .setVisible(true)
-            .setDepth(this.yToZ(y) + DEPTH_OFFSET)
-            .setScale(scale)
-            .play(spell.vfx);
-        this.playSound(spell.sfx);
 
-        if (spell.shake) {
-            const duration = isKill ? 2000 : 250;
-            const intensity = 0.002;
-            this.cameras.main.shake(duration, intensity);
-        } 
+        setTimeout(() => {
+            if (isKill) {
+                this.killCam(pixelX, pixelY);
+            } else {
+                // this.spellCam(pixelX, pixelY);
+            }
+
+            const scale = 'scale' in config ? config.scale : LOCAL_ANIMATION_SCALE;
+
+            this.localAnimationSprite.setPosition(pixelX, pixelY)
+                .setVisible(true)
+                .setDepth(this.yToZ(toY) + DEPTH_OFFSET)
+                .setScale(scale)
+                .play(spell.vfx);
+            this.playSound(spell.sfx);
+
+            if (config.shake) {
+                const duration = isKill ? 2000 : 1000;
+                const intensity = isKill ? 0.002 : 0.02;
+                this.cameras.main.shake(duration, intensity);
+            } 
+        }, PROJECTILE_DURATION * 1000);
+    }
+
+    // New method to animate projectile from caster to target
+        animateProjectile(fromX: number, fromY: number, toX: number, toY: number, projectileKey: string) {
+        // Convert grid coordinates to pixel coordinates
+        const {x: startX, y: startY} = this.hexGridToPixelCoords(fromX, fromY);
+        const {x: endX, y: endY} = this.hexGridToPixelCoords(toX, toY);
+        
+        // Create projectile sprite at caster position
+        const projectile = this.add.sprite(startX, startY, '')
+            .setScale(VFXconfig[projectileKey].scale)
+            .setOrigin(0.5, 0.5)
+            .setDepth(this.yToZ(fromY) + DEPTH_OFFSET + 0.1);
+
+        // Set initial rotation - point upward 
+        // Since sprite faces right by default, we need -90 degrees to point up
+        projectile.setRotation(-Math.PI/2);
+        
+        // Play projectile animation
+        projectile.play(projectileKey);
+        
+        // Calculate screen top with some padding
+        const screenTop = -50;
+        
+        // Calculate total distance based on the actual path (up then down)
+        const distanceUp = Math.abs(startY - screenTop);
+        const distanceDown = Math.abs(endY - screenTop);
+        const totalDistance = distanceUp + distanceDown;
+        
+        const totalDuration = PROJECTILE_DURATION * 1000;
+        
+        // Phase 1: Ascent - Move projectile straight up
+        this.tweens.add({
+            targets: projectile,
+            y: screenTop,
+            duration: (distanceUp / totalDistance) * totalDuration,
+            ease: 'Cubic.easeOut',
+            onComplete: () => {
+                // Phase 2: Hide the projectile
+                projectile.setVisible(false);
+                
+                // Phase 3: Reappear above target and crash down
+                setTimeout(() => {
+                    // Reposition projectile above the target
+                    projectile.setPosition(endX, screenTop)
+                        .setVisible(true)
+                        // Set rotation to point downward (90 degrees)
+                        .setRotation(Math.PI/2);
+                    
+                    // Create the descent tween
+                    this.tweens.add({
+                        targets: projectile,
+                        y: endY,
+                        duration: (distanceDown / totalDistance) * totalDuration,
+                        ease: 'Cubic.easeIn',
+                        onComplete: () => {
+                            // Fade out and destroy on impact
+                            this.tweens.add({
+                                targets: projectile,
+                                alpha: 0,
+                                scale: projectile.scale * 1.5,
+                                duration: 200,
+                                onComplete: () => {
+                                    projectile.destroy();
+                                }
+                            });
+                        }
+                    });
+                }, totalDuration / 10); // Brief pause before reappearing
+            }
+        });
     }
 
     // Add this new method to handle camera movement
@@ -1078,22 +1178,21 @@ export class Arena extends Phaser.Scene
             frameRate: 15, 
         });
 
-        this.anims.create({
-            key: `explosion_1`, 
-            frames: this.anims.generateFrameNumbers('explosions', { start: 48, end: 59 }), 
-            frameRate: 15, 
-        });
+        fireLevels.forEach(level => {
+            const key = `fire_${level}_explosion`;
+            const fireballKey = `fireball_${level}`;
+            this.anims.create({
+                key,
+                frames: this.anims.generateFrameNumbers(key),
+                frameRate: VFXconfig[key]?.frameRate || 15, // Fallback to 15 if not specified
+            });
 
-        this.anims.create({
-            key: `explosion_2`, 
-            frames: this.anims.generateFrameNumbers('explosions', { start: 12, end: 23 }), 
-            frameRate: 15, 
-        });
-
-        this.anims.create({
-            key: `explosion_3`, 
-            frames: this.anims.generateFrameNumbers('explosions', { start: 0, end: 11 }), 
-            frameRate: 15, 
+            this.anims.create({
+                key: fireballKey, 
+                frames: this.anims.generateFrameNumbers(fireballKey), 
+                frameRate: VFXconfig[fireballKey]?.frameRate || 15, 
+                repeat: -1,
+            });
         });
 
         this.anims.create({
@@ -1139,13 +1238,14 @@ export class Arena extends Phaser.Scene
         });
 
         // Terrain VFX
-
-        this.anims.create({
-            key: `ground_flame`, 
-            frames: this.anims.generateFrameNumbers('thunder', { start: 48, end: 59 }), 
-            frameRate: 15, 
-            repeat: -1,
-            // yoyo: true,
+        terrainFireLevels.forEach(level => {
+            const key = `terrain_fire_${level}`;
+            this.anims.create({
+                key,
+                frames: this.anims.generateFrameNumbers(key),
+                frameRate: 30,
+                repeat: -1,
+            });
         });
 
         this.anims.create({
@@ -1689,7 +1789,7 @@ export class Arena extends Phaser.Scene
     }
 
     updateEnvironmentAudio() {
-        if (this.gameEnded) return;
+        if (this.gameEnded || !this.gameInitialized) return;
         const flames = this.environmentalAudioSources.flames;
         if (flames > 0) {
             this.playSound('flames', 0.5, true);
@@ -1963,20 +2063,28 @@ export class Arena extends Phaser.Scene
         }
     }
 
-    // Add these new methods:
     private handleFireTerrain(x: number, y: number) {
         const {x: pixelX, y: pixelY} = this.hexGridToPixelCoords(x, y);
-        const sprite = this.add.sprite(pixelX, pixelY, '')
-            .setDepth(this.yToZ(y)).setScale(2).setAlpha(0.9);
-        this.addFlames();
-        sprite.on('destroy', () => {
-            this.removeFlames();
-        });
-        sprite.anims.play('ground_flame');
-        this.sprites.push(sprite);
-        this.terrainSpritesMap.set(serializeCoords(x, y), sprite);
-        this.terrainMap.set(serializeCoords(x, y), Terrain.FIRE);
-        events.emit('flamesAppeared');
+        // Do nothing if the tile already has fire
+        if (this.terrainMap.get(serializeCoords(x, y)) === Terrain.FIRE) return;
+        setTimeout(() => {
+            const sprite = this.add.sprite(pixelX, pixelY, '')
+                .setDepth(this.yToZ(y)).setScale(0.5).setAlpha(0.9);
+            this.addFlames();
+            sprite.on('destroy', () => {
+                this.removeFlames();
+            });
+            const randomLevel = terrainFireLevels[Math.floor(Math.random() * terrainFireLevels.length)];
+            sprite.anims.play(`terrain_fire_${randomLevel}`);
+            // Apply a random flip X
+            if (Math.random() < 0.5) {
+                sprite.setFlipX(true);
+            }
+            this.sprites.push(sprite);
+            this.terrainSpritesMap.set(serializeCoords(x, y), sprite);
+            this.terrainMap.set(serializeCoords(x, y), Terrain.FIRE);
+            events.emit('flamesAppeared');
+        }, 500);
     }
 
     private handleIceTerrain(x: number, y: number) {
@@ -2044,7 +2152,7 @@ export class Arena extends Phaser.Scene
         // Get the current spell
         const spell = this.selectedPlayer?.spells[this.selectedPlayer?.pendingSpell];
         const isAllyTargetingSpell = spell?.targetHighlight === TargetHighlight.ALLY;
-        console.log('isAllyTargetingSpell', isAllyTargetingSpell);
+
         // Check if the target is within range (player's distance + SPELL_RANGE)
         if (this.hexGridManager.isValidGridPosition(gridX, gridY) && distance <= this.selectedPlayer.distance + SPELL_RANGE) {
             // Clear previous spell highlights but keep target range

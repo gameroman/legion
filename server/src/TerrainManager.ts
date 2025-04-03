@@ -48,7 +48,7 @@ export class TerrainManager {
     updateTerrainFromSpell(spell: Spell, x: number, y: number) {
         this.updates = [];
         
-        const tilesInRadius = getTilesInHexRadius(x, y, spell.size - 1);
+        const tilesInRadius = getTilesInHexRadius(x, y, spell.radius - 1);
         
         for (const tile of tilesInRadius) {
             if (isSkip(tile.x, tile.y)) continue;

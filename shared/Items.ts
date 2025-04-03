@@ -129,7 +129,7 @@ items[8] = new BaseItem({
     description: "Revives a character with 10 HP",
     frame: 9,
     animation: "potion_heal",
-    size: 1,
+    radius: 1,
     sfx: "healing",
     speedClass: SpeedClass.NORMAL,
     target: Target.SINGLE,

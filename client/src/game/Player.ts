@@ -651,19 +651,23 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     useSkill(index) {
-        // console.log(`[Player:useSkill] index: ${index}`);
         const spell = this.spells[index];
         if (!spell) {
             return;
         }
-        // console.log(`[Player:useSkill] spell: ${spell.name}`);
+        
+        // If the same spell is selected again, cancel it
         if (this.pendingSpell == index) {
             this.cancelSkill();
             return;
         }
+        
+        // Cancel any pending item
         if (this.pendingItem != null) {
             this.cancelItem();
         }
+        
+        // Check conditions for using a spell
         if (!this.canAct() || spell.cost > this.mp || this.isMuted()) {
             this.arena.playSound('nope', 0.2);
             if (this.isMuted()) {
@@ -675,6 +679,7 @@ export class Player extends Phaser.GameObjects.Container {
             return;
         }
         
+        // Set the pending spell and enable target mode
         this.pendingSpell = index;
         this.arena.toggleTargetMode(true);
         this.arena.refreshBox();
@@ -957,7 +962,7 @@ export class Player extends Phaser.GameObjects.Container {
         }
         
         // @ts-ignore
-        await this.scene?.sleep(10);
+        // await this.scene?.sleep(10);
         this.speechBubble.setText(text);
         this.speechBubble.setVisible(true);
         const duration = this.speechBubble.setDuration(sticky);

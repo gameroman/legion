@@ -237,7 +237,7 @@ export class AIServerPlayer extends ServerPlayer {
         const spell = this.spells[index];
         if (spell.target != Target.AOE) return false;
 
-        const tile = this.team?.game.scanGridForAoE(this, spell.size - 1, spell.size - 1);
+        const tile = this.team?.game.scanGridForAoE(this, spell.radius - 1, spell.radius - 1);
         if (tile) {
             const data = {
                 x: tile!.x,

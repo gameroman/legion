@@ -10,7 +10,7 @@ export class Item extends BaseItem {
         if (this.target === Target.SELF) {
             return [user];
         } else if (this.target === Target.AOE) {
-            return game.getPlayersInArea(x, y, this.size);
+            return game.getPlayersInArea(x, y, this.radius);
         }
         return [];
     }

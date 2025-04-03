@@ -1,7 +1,7 @@
 import { Target, Terrain, Rarity, Class, SpeedClass, TargetHighlight, LockedFeatures, SpellShopCategory } from "./enums";
 import { Effect, SpellData, StatusEffectData } from "./interfaces";
 import { getPrice, getRarity } from "./economy";
-import { TIME_COEFFICIENT } from "@legion/shared/config";
+
 export class BaseSpell {
     id: number = -1;
     name: string = '';
@@ -11,14 +11,12 @@ export class BaseSpell {
     effects: Effect[] = [];
     frame: number = 0;
     vfx: string = '';
-    size: number = 0;
+    radius: number = 0;
+    projectile?: string;
     speedClass: SpeedClass = SpeedClass.NORMAL;
     castTime: number = 0;
-    shake: boolean = false;
     sfx: string = '';
     score: number= 0;
-    yoffset: number = 0;
-    scale: number = 1;
     terrain: Terrain = Terrain.NONE;
     rarity: Rarity = Rarity.COMMON;
     price: number = 0;
@@ -38,8 +36,8 @@ export class BaseSpell {
         this.cost = 2;
         this.castTime = 1;
         if (props.target == Target.AOE) {
-            this.cost *= Math.round(props.size * 5);
-            this.castTime *= Math.round(props.size);
+            this.cost *= Math.round(props.radius * 5);
+            this.castTime *= Math.round(props.radius);
         }
         if (props.terrain == Terrain.FIRE) {
             this.cost = Math.round(this.cost * 1);

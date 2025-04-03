@@ -125,7 +125,6 @@ export class TutorialManager {
 
         if (!this.engagementStats.everSawIce) {
             events.on('hasIce', () => {
-                console.log('Catching hasIce');
                 if (this.queueMessage('howToDealWithIce')) {
                     this.engagementStats.everSawIce = true;
                     events.removeAllListeners('hasIce');
@@ -135,7 +134,6 @@ export class TutorialManager {
 
         if (!this.engagementStats.everPoisoned) {
             events.on('hasStatus_Poison', () => {
-                console.log('Catching hasStatus_Poison');
                 if (this.queueMessage('howToDealWithPoison')) {
                     this.engagementStats.everPoisoned = true;
                     events.removeAllListeners('hasStatus_Poison');
@@ -145,7 +143,6 @@ export class TutorialManager {
 
         if (!this.engagementStats.everSilenced) {
             events.on('hasStatus_Mute', () => {
-                console.log('Catching hasStatus_Mute');
                 if (this.queueMessage('howToDealWithSilence')) {
                     this.engagementStats.everSilenced = true;
                     events.removeAllListeners('hasStatus_Mute');
@@ -155,7 +152,6 @@ export class TutorialManager {
 
         if (!this.engagementStats.everParalyzed) {
             events.on('hasStatus_Paralyze', () => {
-                console.log('Catching hasStatus_Paralyze');
                 if (this.queueMessage('howToDealWithParalysis')) {
                     this.engagementStats.everParalyzed = true;
                     events.removeAllListeners('hasStatus_Paralyze');
@@ -165,7 +161,6 @@ export class TutorialManager {
 
         if (!this.engagementStats.everLowMP) {
             events.on('hasLowMP', () => {
-                console.log('Catching hasLowMP');
                 if (this.queueMessage('howToDealWithLowMP')) {
                     this.engagementStats.everLowMP = true;
                     events.removeAllListeners('hasLowMP');
