@@ -50,8 +50,8 @@ export interface SpellData {
     sfx: string;
     vfx: string;
     projectile?: string;
+    charge?: string;
     speedClass: SpeedClass;
-    castTime?: number;
     cost?: number;
     target: Target;
     radius: number;

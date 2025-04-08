@@ -32,8 +32,12 @@ export const VFXconfig: Record<string, VFXConfig>    = {
     fireball_3: {
         scale: 0.2,
         frameRate: 30,
+    },
+    potion_heal: {
+        scale: 2,
     }
 }
 
 export const fireLevels = [1,2,3];
 export const terrainFireLevels = [1];
+export const chargedFireLevels = [1,2];

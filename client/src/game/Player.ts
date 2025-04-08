@@ -18,9 +18,6 @@ enum GlowColors {
     Selected = 0xffffff,
 }
 
-const BASE_SQUARE_ALPHA = 0.5;
-const BASE_SQUARE_RADIUS = 8;
-
 export class Player extends Phaser.GameObjects.Container {
     sprite: Phaser.GameObjects.Sprite;
     numKey: Phaser.GameObjects.Text;
@@ -64,6 +61,7 @@ export class Player extends Phaser.GameObjects.Container {
     blinkTween: Phaser.Tweens.Tween | null = null;
     selectionArrow: Phaser.GameObjects.Sprite;
     deathCheckTimer: Phaser.Time.TimerEvent;
+    chargeSprite: Phaser.GameObjects.Sprite | null = null;
 
     constructor(
         scene: Phaser.Scene, arenaScene: Arena, team: Team, name: string, gridX: number, gridY: number, x: number, y: number,
@@ -624,13 +622,38 @@ export class Player extends Phaser.GameObjects.Container {
         this.displayOverheadText(name, 4000, '#fff');
     }
 
-    castAnimation(flag: boolean, name: string) {
+    castAnimation(flag: boolean, name: string, charge?: string) {
         if (flag) {
             this.playAnim('cast', false);
             this.animationSprite.setVisible(true).play('cast');
             this.displayOverheadText(name, 4000, '#fff');
             this.arena.playSound('cast', 1);
+            
+            if (charge) {
+                // Create charge sprite above the player
+                this.chargeSprite = this.scene.add.sprite(
+                    0, // Center on player
+                    -50, // Position above the player
+                    ''
+                )
+                .setDepth(1) // Set slightly higher depth than player
+                .setScale(0.5);
+                
+                // Add the chargeSprite to the player container
+                this.add(this.chargeSprite);
+                
+                // Play the fire charge animation
+                this.chargeSprite.play(charge);
+            }
         } else {
+            // Stop and clean up charge animation when ending cast
+            if (this.chargeSprite) {
+                this.chargeSprite.stop();
+                this.chargeSprite.setVisible(false);
+                this.chargeSprite.destroy();
+                this.chargeSprite = null;
+            }
+            
             this.playAnim('idle');
             this.animationSprite.setVisible(false);
             this.arena.stopSound('cast');
@@ -1014,6 +1037,12 @@ export class Player extends Phaser.GameObjects.Container {
     }
 
     destroy() {
+        // Cleanup charge sprite if it exists
+        if (this.chargeSprite) {
+            this.chargeSprite.destroy();
+            this.chargeSprite = null;
+        }
+        
         // Stop all tweens related to this player
         if (this.scene?.tweens) {
             this.scene.tweens.killTweensOf(this);

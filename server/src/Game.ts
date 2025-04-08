@@ -1010,7 +1010,10 @@ export abstract class Game
         this.emitMPchange(player.team, player.num, mp);
         player.setCasting(true);
 
-        const delay = CAST_DELAY * 1000;
+        let delay = CAST_DELAY * 1000;
+        if (spell.charge) {
+            delay += 1000;
+        }
         setTimeout(this.applyMagic.bind(this, spell, player, x, y, player.team, targetPlayer), delay);
         return delay;
     }

@@ -24,7 +24,8 @@ spells.push(new BaseSpell({
     sfx: "fireball",
 
     radius: 1,
-    projectile: 'fireball_1',
+    charge: 'charged_fire_1',
+    // projectile: 'fireball_1',
     target: Target.AOE,
     effects: [{stat: Stat.HP, value: -15, modifiers: SPBasedBoostDeboost}],
     terrain: Terrain.FIRE,
@@ -48,7 +49,8 @@ spells.push(new BaseSpell({
     sfx: "fireball",
 
     radius: 2,
-    projectile: 'fireball_2',
+    charge: 'charged_fire_1',
+    // projectile: 'fireball_2',
     target: Target.AOE,
     effects: [{stat: Stat.HP, value: -25, modifiers: SPBasedBoostDeboost}],
     terrain: Terrain.FIRE,
@@ -72,7 +74,8 @@ spells.push(new BaseSpell({
 
     radius: 3,
     target: Target.AOE,
-    projectile: 'fireball_3',
+    // projectile: 'fireball_3',
+    charge: 'charged_fire_2',
     effects: [{stat: Stat.HP, value: -60, modifiers: SPBasedBoostDeboost}],
     terrain: Terrain.FIRE,
     effort: 25,

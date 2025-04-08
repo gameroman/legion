@@ -66,7 +66,7 @@ import { HexGridManager, HighlightType } from './HexGridManager';
 import { TutorialManager } from './TutorialManager';
 
 import hexTileImage from '@assets/tile.png';
-import { VFXconfig, fireLevels, terrainFireLevels } from './VFXconfig';
+import { VFXconfig, fireLevels, terrainFireLevels, chargedFireLevels } from './VFXconfig';
 
 const LOCAL_ANIMATION_SCALE = 1;
 const DEPTH_OFFSET = 0.01;
@@ -219,10 +219,13 @@ export class Arena extends Phaser.Scene
 
         fireLevels.forEach(level => {
             this.load.spritesheet(`fire_${level}_explosion`, require(`@assets/vfx/fire_${level}_explosion.png`), { frameWidth: 512, frameHeight: 512});
-            this.load.spritesheet(`fireball_${level}`, require(`@assets/vfx/fireball_${level}.png`), { frameWidth: 512, frameHeight: 512});
+            // this.load.spritesheet(`fireball_${level}`, require(`@assets/vfx/fireball_${level}.png`), { frameWidth: 512, frameHeight: 512});
         });
         terrainFireLevels.forEach(level => {
             this.load.spritesheet(`terrain_fire_${level}`, require(`@assets/vfx/terrain_fire_${level}.png`), { frameWidth: 512, frameHeight: 512});
+        });
+        chargedFireLevels.forEach(level => {
+            this.load.spritesheet(`charged_fire_${level}`, require(`@assets/vfx/charged_fire_${level}.png`), { frameWidth: 512, frameHeight: 512});
         });
 
         this.load.spritesheet('thunder2', thunderImage, { frameWidth: 96, frameHeight: 96});
@@ -852,11 +855,11 @@ export class Arena extends Phaser.Scene
         // console.log(`Processing cast: ${flag} ${team} ${num} ${id} ${target}`);
         const player = this.getPlayer(team, num);
         const spell = getSpellById(id);
-        player?.castAnimation(flag, spell?.name);
+        player?.castAnimation(flag, spell?.name, spell?.charge);
 
         // const { x: pixelX, y: pixelY } = this.hexGridToPixelCoords(player.gridX, player.gridY);
         // this.spellCam(pixelX, pixelY, false);
-        if (player.isPlayer) {
+        if (player?.isPlayer) {
             events.emit(`playerCastSpell`);
         }
     }
@@ -868,8 +871,10 @@ export class Arena extends Phaser.Scene
         let pixelX = pixelXInitial;
 
         const config = VFXconfig[spell.vfx];
-        if (config.yoffset) pixelY += config.yoffset;
-        if (config.xoffset) pixelX += config.xoffset;
+        if (config) {
+            if (config.yoffset) pixelY += config.yoffset;
+            if (config.xoffset) pixelX += config.xoffset;
+        }
 
         if (spell.projectile) {
             this.animateProjectile(fromX, fromY, toX, toY, spell.projectile);
@@ -882,7 +887,7 @@ export class Arena extends Phaser.Scene
                 // this.spellCam(pixelX, pixelY);
             }
 
-            const scale = 'scale' in config ? config.scale : LOCAL_ANIMATION_SCALE;
+            const scale = config && 'scale' in config ? config.scale : LOCAL_ANIMATION_SCALE;
 
             this.localAnimationSprite.setPosition(pixelX, pixelY)
                 .setVisible(true)
@@ -891,12 +896,12 @@ export class Arena extends Phaser.Scene
                 .play(spell.vfx);
             this.playSound(spell.sfx);
 
-            if (config.shake) {
+            if (config && config.shake) {
                 const duration = isKill ? 2000 : 1000;
                 const intensity = isKill ? 0.002 : 0.02;
                 this.cameras.main.shake(duration, intensity);
             } 
-        }, PROJECTILE_DURATION * 1000);
+        }, spell.projectile ? PROJECTILE_DURATION * 1000 : 0);
     }
 
     // New method to animate projectile from caster to target
@@ -1180,17 +1185,27 @@ export class Arena extends Phaser.Scene
 
         fireLevels.forEach(level => {
             const key = `fire_${level}_explosion`;
-            const fireballKey = `fireball_${level}`;
+            // const fireballKey = `fireball_${level}`;
             this.anims.create({
                 key,
                 frames: this.anims.generateFrameNumbers(key),
                 frameRate: VFXconfig[key]?.frameRate || 15, // Fallback to 15 if not specified
             });
 
+            // this.anims.create({
+            //     key: fireballKey, 
+            //     frames: this.anims.generateFrameNumbers(fireballKey), 
+            //     frameRate: VFXconfig[fireballKey]?.frameRate || 15, 
+            //     repeat: -1,
+            // });
+        });
+
+        chargedFireLevels.forEach(level => {
+            const key = `charged_fire_${level}`;
             this.anims.create({
-                key: fireballKey, 
-                frames: this.anims.generateFrameNumbers(fireballKey), 
-                frameRate: VFXconfig[fireballKey]?.frameRate || 15, 
+                key,
+                frames: this.anims.generateFrameNumbers(key),
+                frameRate: 50,
                 repeat: -1,
             });
         });
@@ -2064,6 +2079,7 @@ export class Arena extends Phaser.Scene
     }
 
     private handleFireTerrain(x: number, y: number) {
+        const TERRAIN_SPRITE_DELAY = 200;
         const {x: pixelX, y: pixelY} = this.hexGridToPixelCoords(x, y);
         // Do nothing if the tile already has fire
         if (this.terrainMap.get(serializeCoords(x, y)) === Terrain.FIRE) return;
@@ -2084,7 +2100,7 @@ export class Arena extends Phaser.Scene
             this.terrainSpritesMap.set(serializeCoords(x, y), sprite);
             this.terrainMap.set(serializeCoords(x, y), Terrain.FIRE);
             events.emit('flamesAppeared');
-        }, 500);
+        }, TERRAIN_SPRITE_DELAY);
     }
 
     private handleIceTerrain(x: number, y: number) {
