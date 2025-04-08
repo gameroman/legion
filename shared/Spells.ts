@@ -95,6 +95,7 @@ spells.push(new BaseSpell({
     frame: 20,
     vfx: "thunder",
     sfx: "thunder",
+    charge: 'charged_thunder_1',
 
     radius: 1,
     target: Target.AOE,
@@ -117,7 +118,7 @@ spells.push(new BaseSpell({
     frame: 21,
     vfx: "thunder+",
     sfx: "thunder",
-
+    charge: 'charged_thunder_1',
     radius: 2,
     target: Target.AOE,
     effects: [{stat: Stat.HP, value: -60, modifiers: SPBasedBoostDeboost}],
@@ -139,6 +140,7 @@ spells.push(new BaseSpell({
     frame: 22,
     vfx: "thunder",
     sfx: "thunder",
+    charge: 'charged_thunder_2',
 
     radius: 3,
     target: Target.AOE,
@@ -161,6 +163,7 @@ spells.push(new BaseSpell({
     frame: 10,
     vfx: "ice",
     sfx: "ice",
+    charge: 'charged_ice_1',
 
     radius: 1,
     target: Target.AOE,
@@ -183,7 +186,7 @@ spells.push(new BaseSpell({
     frame: 11,
     vfx: "ice+",
     sfx: "ice",
-
+    charge: 'charged_ice_1',
     radius: 2,
     target: Target.AOE,
     effects: [{stat: Stat.HP, value: -60, modifiers: SPBasedBoostDeboost}],
@@ -205,7 +208,7 @@ spells.push(new BaseSpell({
     frame: 12,
     vfx: "iceX",
     sfx: "ice",
-
+    charge: 'charged_ice_2',
     radius: 3,
     target: Target.AOE,
     effects: [{stat: Stat.HP, value: -100, modifiers: SPBasedBoostDeboost}],

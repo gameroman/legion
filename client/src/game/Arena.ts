@@ -66,7 +66,7 @@ import { HexGridManager, HighlightType } from './HexGridManager';
 import { TutorialManager } from './TutorialManager';
 
 import hexTileImage from '@assets/tile.png';
-import { VFXconfig, fireLevels, terrainFireLevels, chargedFireLevels } from './VFXconfig';
+import { VFXconfig, fireLevels, terrainFireLevels, chargedFireLevels, chargedIceLevels, chargedThunderLevels } from './VFXconfig';
 
 const LOCAL_ANIMATION_SCALE = 1;
 const DEPTH_OFFSET = 0.01;
@@ -226,6 +226,12 @@ export class Arena extends Phaser.Scene
         });
         chargedFireLevels.forEach(level => {
             this.load.spritesheet(`charged_fire_${level}`, require(`@assets/vfx/charged_fire_${level}.png`), { frameWidth: 512, frameHeight: 512});
+        });
+        chargedIceLevels.forEach(level => {
+            this.load.spritesheet(`charged_ice_${level}`, require(`@assets/vfx/charged_ice_${level}.png`), { frameWidth: 512, frameHeight: 512});
+        });
+        chargedThunderLevels.forEach(level => {
+            this.load.spritesheet(`charged_thunder_${level}`, require(`@assets/vfx/charged_thunder_${level}.png`), { frameWidth: 512, frameHeight: 512});
         });
 
         this.load.spritesheet('thunder2', thunderImage, { frameWidth: 96, frameHeight: 96});
@@ -1220,6 +1226,26 @@ export class Arena extends Phaser.Scene
             });
         });
 
+        chargedIceLevels.forEach(level => {
+            const key = `charged_ice_${level}`;
+            this.anims.create({
+                key,
+                frames: this.anims.generateFrameNumbers(key),
+                frameRate: 50,
+                repeat: -1,
+            });
+        });
+
+        chargedThunderLevels.forEach(level => {
+            const key = `charged_thunder_${level}`;
+            this.anims.create({
+                key,
+                frames: this.anims.generateFrameNumbers(key),
+                frameRate: 50,
+                repeat: -1,
+            });
+        });
+
         this.anims.create({
             key: `thunder`, 
             frames: this.anims.generateFrameNumbers('thunder', { start: 36, end: 47 }), 
@@ -2117,37 +2143,43 @@ export class Arena extends Phaser.Scene
         const {x: pixelX, y: pixelY} = this.hexGridToPixelCoords(x, y);
         const depth = this.yToZ(y) + DEPTH_OFFSET;
         
-        // Create meltdown sprite for reverse animation
-        const meltdownSprite = this.add.sprite(pixelX, pixelY, 'meltdown')
-            .setDepth(depth)
-            .setOrigin(0.5, 0.35);
+        // Generate a random delay between 0-150ms for more natural look when multiple blocks appear
+        const randomDelay = Math.floor(Math.random() * 150);
         
-        // Get all frames from the meltdown animation
-        const frames = this.anims.generateFrameNumbers('meltdown');
-        
-        // Create a reverse animation key if it doesn't exist
-        const reverseAnimKey = 'meltdown_reverse';
-        if (!this.anims.exists(reverseAnimKey)) {
-            this.anims.create({
-                key: reverseAnimKey,
-                frames: this.anims.generateFrameNumbers('meltdown', { frames: frames.map((_, i) => frames.length - 1 - i) }),
-                frameRate: 10
-            });
-        }
-        
-        // Play the reverse animation
-        meltdownSprite.play(reverseAnimKey);
-        
-        // When animation completes, create the ice block
-        meltdownSprite.once('animationcomplete', () => {
-            meltdownSprite.destroy();
+        // Use Phaser's time delayed call to execute with random delay
+        this.time.delayedCall(randomDelay, () => {
+            // Create meltdown sprite for reverse animation
+            const meltdownSprite = this.add.sprite(pixelX, pixelY, 'meltdown')
+                .setDepth(depth)
+                .setOrigin(0.5, 0.35);
             
-            // Create the actual ice block
-            const icesprite = this.createIceBlock(x, y);
-            this.terrainSpritesMap.set(serializeCoords(x, y), icesprite);
-            this.terrainMap.set(serializeCoords(x, y), Terrain.ICE);
-            this.obstaclesMap.set(serializeCoords(x, y), true);
-            events.emit('iceAppeared');
+            // Get all frames from the meltdown animation
+            const frames = this.anims.generateFrameNumbers('meltdown');
+            
+            // Create a reverse animation key if it doesn't exist
+            const reverseAnimKey = 'meltdown_reverse';
+            if (!this.anims.exists(reverseAnimKey)) {
+                this.anims.create({
+                    key: reverseAnimKey,
+                    frames: this.anims.generateFrameNumbers('meltdown', { frames: frames.map((_, i) => frames.length - 1 - i) }),
+                    frameRate: 10
+                });
+            }
+            
+            // Play the reverse animation
+            meltdownSprite.play(reverseAnimKey);
+            
+            // When animation completes, create the ice block
+            meltdownSprite.once('animationcomplete', () => {
+                meltdownSprite.destroy();
+                
+                // Create the actual ice block
+                const icesprite = this.createIceBlock(x, y);
+                this.terrainSpritesMap.set(serializeCoords(x, y), icesprite);
+                this.terrainMap.set(serializeCoords(x, y), Terrain.ICE);
+                this.obstaclesMap.set(serializeCoords(x, y), true);
+                events.emit('iceAppeared');
+            });
         });
     }
 

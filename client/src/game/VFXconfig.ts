@@ -41,3 +41,5 @@ export const VFXconfig: Record<string, VFXConfig>    = {
 export const fireLevels = [1,2,3];
 export const terrainFireLevels = [1];
 export const chargedFireLevels = [1,2];
+export const chargedIceLevels = [1,2];
+export const chargedThunderLevels = [1,2];
