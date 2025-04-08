@@ -18,7 +18,7 @@ const SPBasedBoost = new EffectModifiers(
 spells.push(new BaseSpell({
     id: 0,
     name: "Fire",
-    description: "1x1 fire attack that sets the ground on fire",
+    description: "Fire attack that sets 1 tile on fire",
     frame: 0,
     vfx: "fire_1_explosion",
     sfx: "fireball",
@@ -43,7 +43,7 @@ spells.push(new BaseSpell({
 spells.push(new BaseSpell({
     id: 1,
     name: "Fire+",
-    description: "2x2 fire attack that sets the ground on fire",
+    description: "Fire attack that sets 2 tiles on fire",
     frame: 1,
     vfx: "fire_2_explosion",
     sfx: "fireball",
@@ -67,7 +67,7 @@ spells.push(new BaseSpell({
 spells.push(new BaseSpell({
     id: 2,
     name: "Fire X",
-    description: "3x3 fireball attack that sets the ground on fire",
+    description: "Fire attack that sets 3 tiles on fire",
     frame: 2,
     vfx: "fire_3_explosion",
     sfx: "fireball",
@@ -91,7 +91,7 @@ spells.push(new BaseSpell({
 spells.push(new BaseSpell({
     id: 3,
     name: "Thunder",
-    description: "Unleash a 1x1 thunder bolt and may paralyze the target for 5 turns, preventing them from acting",
+    description: "Unleash a thunder bolt on 1 tile and may paralyze the target for 5 turns",
     frame: 20,
     vfx: "thunder",
     sfx: "thunder",
@@ -113,7 +113,7 @@ spells.push(new BaseSpell({
 spells.push(new BaseSpell({
     id: 4,
     name: "Thunder+",
-    description: "Unleash a 2x2 thunder bolt and may paralyze the target for 7 turns, preventing them from acting",
+    description: "Unleash a thunder bolt on 2 tiles and may paralyze the target for 7 turns",
     frame: 21,
     vfx: "thunder+",
     sfx: "thunder",
@@ -135,7 +135,7 @@ spells.push(new BaseSpell({
 spells.push(new BaseSpell({
     id: 5,
     name: "Thunder X",
-    description: "Unleash a 3x3 thunder bolt and may paralyze the target for 10 turns, preventing them from acting",
+    description: "Unleash a thunder bolt on 3 tiles and may paralyze the target for 10 turns",
     frame: 22,
     vfx: "thunder",
     sfx: "thunder",
@@ -157,7 +157,7 @@ spells.push(new BaseSpell({
 spells.push(new BaseSpell({
     id: 6,
     name: "Ice",
-    description: "Generate a 1x1 pillar of ice and trap the target in ice",
+    description: "Generate a pillar of ice one 1 tile and trap the target in ice",
     frame: 10,
     vfx: "ice",
     sfx: "ice",
@@ -179,7 +179,7 @@ spells.push(new BaseSpell({
 spells.push(new BaseSpell({
     id: 7,
     name: "Ice+",
-    description: "Generate a 2x2 pillar of ice and trap the targets in ice",
+    description: "Generate a pillar of ice on 2 tiles and trap the targets in ice",
     frame: 11,
     vfx: "ice+",
     sfx: "ice",
@@ -201,7 +201,7 @@ spells.push(new BaseSpell({
 spells.push(new BaseSpell({
     id: 8,
     name: "Ice X",
-    description: "Generate a 3x3 pillar of ice and trap the targets in ice",
+    description: "Generate a pillar of ice on 3 tiles and trap the targets in ice",
     frame: 12,
     vfx: "iceX",
     sfx: "ice",

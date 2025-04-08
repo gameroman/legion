@@ -11,8 +11,8 @@ import { Target, Terrain, GEN, AIAttackMode, TargetHighlight } from "@legion/sha
 import { TerrainUpdate, GameData, OutcomeData, PlayerNetworkData } from '@legion/shared/interfaces';
 import { KILL_CAM_DURATION, BASE_ANIM_FRAME_RATE, FREEZE_CAMERA, GRID_WIDTH, GRID_HEIGHT, SPELL_RANGE, MOVEMENT_RANGE, PROJECTILE_DURATION } from '@legion/shared/config';
 
-import killzoneImage from '@assets/killzone.png';
 import iceblockImage from '@assets/iceblock.png';
+import meltdownImage from '@assets/meltdown.png';
 
 import potionHealImage from '@assets/vfx/potion_heal.png';
 import smokeImage from '@assets/vfx/smoke.png';
@@ -205,8 +205,8 @@ export class Arena extends Phaser.Scene
         // console.log('Preloading assets ...');
         this.gamehud = new GameHUD();
         
-        this.load.image('killzone',  killzoneImage);
         this.load.image('iceblock',  iceblockImage);
+        this.load.spritesheet('meltdown',  meltdownImage, { frameWidth: 150, frameHeight: 150});
         this.load.image('speech_bubble', speechBubble);
         this.load.image('speech_tail', speechTail);
         this.load.image('hand', handImage);
@@ -566,6 +566,7 @@ export class Arena extends Phaser.Scene
     }
 
     handleTileClick(gridX, gridY) {
+        console.log(`[Arena:handleTileClick] Clicked on tile: ${gridX}, ${gridY}`);
         if (this.inputLocked) {
             this.unlockInput();
             return;
@@ -803,7 +804,7 @@ export class Arena extends Phaser.Scene
         const {x: pixelX, y: pixelY} = this.hexGridToPixelCoords(x, y);
         const depth = this.yToZ(y) + DEPTH_OFFSET;
         const icesprite = this.add.sprite(pixelX, pixelY, 'iceblock')
-            .setDepth(depth).setAlpha(0.9).setOrigin(0.5, 0.35).setInteractive();
+            .setDepth(depth).setAlpha(0.9).setInteractive().setOrigin(0.5, 0.35);
         // Add pointerover event to sprite
         icesprite.on('pointerover', () => {
             if (this.selectedPlayer?.isNextTo(x, y) 
@@ -812,6 +813,9 @@ export class Arena extends Phaser.Scene
                 && this.selectedPlayer.pendingItem == null) {
                 events.emit('hoverEnemyCharacter');
             } 
+        });
+        icesprite.on('pointerdown', () => {
+            this.handleTileClick(x, y);
         });
         // Add pointerout event to sprite
         icesprite.on('pointerout', () => {
@@ -1170,6 +1174,12 @@ export class Arena extends Phaser.Scene
         });
 
         // Spells VFX
+
+        this.anims.create({
+            key: `meltdown`, 
+            frames: this.anims.generateFrameNumbers('meltdown'), 
+            frameRate: 10, 
+        });
 
         this.anims.create({
             key: `potion_heal`, 
@@ -2103,15 +2113,71 @@ export class Arena extends Phaser.Scene
         }, TERRAIN_SPRITE_DELAY);
     }
 
+    private iceFormation(x: number, y: number) {
+        const {x: pixelX, y: pixelY} = this.hexGridToPixelCoords(x, y);
+        const depth = this.yToZ(y) + DEPTH_OFFSET;
+        
+        // Create meltdown sprite for reverse animation
+        const meltdownSprite = this.add.sprite(pixelX, pixelY, 'meltdown')
+            .setDepth(depth)
+            .setOrigin(0.5, 0.35);
+        
+        // Get all frames from the meltdown animation
+        const frames = this.anims.generateFrameNumbers('meltdown');
+        
+        // Create a reverse animation key if it doesn't exist
+        const reverseAnimKey = 'meltdown_reverse';
+        if (!this.anims.exists(reverseAnimKey)) {
+            this.anims.create({
+                key: reverseAnimKey,
+                frames: this.anims.generateFrameNumbers('meltdown', { frames: frames.map((_, i) => frames.length - 1 - i) }),
+                frameRate: 10
+            });
+        }
+        
+        // Play the reverse animation
+        meltdownSprite.play(reverseAnimKey);
+        
+        // When animation completes, create the ice block
+        meltdownSprite.once('animationcomplete', () => {
+            meltdownSprite.destroy();
+            
+            // Create the actual ice block
+            const icesprite = this.createIceBlock(x, y);
+            this.terrainSpritesMap.set(serializeCoords(x, y), icesprite);
+            this.terrainMap.set(serializeCoords(x, y), Terrain.ICE);
+            this.obstaclesMap.set(serializeCoords(x, y), true);
+            events.emit('iceAppeared');
+        });
+    }
+
     private handleIceTerrain(x: number, y: number) {
-        const icesprite = this.createIceBlock(x, y);
-        this.terrainSpritesMap.set(serializeCoords(x, y), icesprite);
-        this.terrainMap.set(serializeCoords(x, y), Terrain.ICE);
-        const tile = this.hexGridManager.getTile(x, y);
-        // @ts-ignore
-        if (tile.tween) tile.tween.stop();
-        this.obstaclesMap.set(serializeCoords(x, y), true);
-        events.emit('iceAppeared');
+        if (this.terrainMap.get(serializeCoords(x, y)) === Terrain.ICE) return;
+        this.iceFormation(x, y);
+    }
+
+    private meltdown(sprite: Phaser.GameObjects.Sprite) {
+        // Create a meltdown sprite at the same position as the terrain sprite
+        const meltdownSprite = this.add.sprite(
+            sprite.x, 
+            sprite.y, 
+            'meltdown'
+        )
+            .setDepth(sprite.depth + 0.01)
+            .setScale(sprite.scaleX)
+            .setOrigin(0.5, 0.5);
+        
+        // Hide the original terrain sprite
+        sprite.setVisible(false);
+        
+        // Play meltdown animation
+        meltdownSprite.play('meltdown');
+        
+        // When animation completes, destroy both sprites
+        meltdownSprite.once('animationcomplete', () => {
+            meltdownSprite.destroy();
+            sprite.destroy();
+        });
     }
 
     private handleClearTerrain(x: number, y: number) {
@@ -2119,7 +2185,7 @@ export class Arena extends Phaser.Scene
         this.terrainMap.delete(serializeCoords(x, y));
         const terrainsprite = this.terrainSpritesMap.get(serializeCoords(x, y));
         if (terrainsprite) {
-            this.flickerAndDestroy(terrainsprite, 5, 1000);
+            this.meltdown(terrainsprite);
             this.terrainSpritesMap.delete(serializeCoords(x, y));
         }
     }
