@@ -9,7 +9,8 @@ import { getFirebaseIdToken } from '../services/apiService';
 import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain, GEN, AIAttackMode, TargetHighlight } from "@legion/shared/enums";
 import { TerrainUpdate, GameData, OutcomeData, PlayerNetworkData } from '@legion/shared/interfaces';
-import { KILL_CAM_DURATION, BASE_ANIM_FRAME_RATE, FREEZE_CAMERA, GRID_WIDTH, GRID_HEIGHT, SPELL_RANGE, MOVEMENT_RANGE, PROJECTILE_DURATION } from '@legion/shared/config';
+import { KILL_CAM_DURATION, BASE_ANIM_FRAME_RATE, FREEZE_CAMERA, GRID_WIDTH, GRID_HEIGHT,
+     SPELL_RANGE, MOVEMENT_RANGE, PROJECTILE_DURATION } from '@legion/shared/config';
 
 import iceblockImage from '@assets/iceblock.png';
 import meltdownImage from '@assets/meltdown.png';
@@ -66,7 +67,8 @@ import { HexGridManager, HighlightType } from './HexGridManager';
 import { TutorialManager } from './TutorialManager';
 
 import hexTileImage from '@assets/tile.png';
-import { VFXconfig, fireLevels, terrainFireLevels, chargedFireLevels, chargedIceLevels, chargedThunderLevels } from './VFXconfig';
+import { VFXconfig, fireLevels, terrainFireLevels, chargedFireLevels, 
+    chargedIceLevels, chargedThunderLevels, iceLevels, thunderLevels } from './VFXconfig';
 
 const LOCAL_ANIMATION_SCALE = 1;
 const DEPTH_OFFSET = 0.01;
@@ -227,8 +229,14 @@ export class Arena extends Phaser.Scene
         chargedFireLevels.forEach(level => {
             this.load.spritesheet(`charged_fire_${level}`, require(`@assets/vfx/charged_fire_${level}.png`), { frameWidth: 512, frameHeight: 512});
         });
+        iceLevels.forEach(level => {
+            this.load.spritesheet(`ice_${level}`, require(`@assets/vfx/ice_${level}.png`), { frameWidth: 512, frameHeight: 512});
+        });
         chargedIceLevels.forEach(level => {
             this.load.spritesheet(`charged_ice_${level}`, require(`@assets/vfx/charged_ice_${level}.png`), { frameWidth: 512, frameHeight: 512});
+        });
+        thunderLevels.forEach(level => {
+            this.load.spritesheet(`thunder_${level}`, require(`@assets/vfx/thunder_${level}.png`), { frameWidth: 512, frameHeight: 512});
         });
         chargedThunderLevels.forEach(level => {
             this.load.spritesheet(`charged_thunder_${level}`, require(`@assets/vfx/charged_thunder_${level}.png`), { frameWidth: 512, frameHeight: 512});
@@ -391,6 +399,7 @@ export class Arena extends Phaser.Scene
     }
 
     sendSpell(x: number, y: number, player: Player | null) {
+        console.log(`[Arena:sendSpell] Sending spell at ${x}, ${y}`);
         if (!this.selectedPlayer || !this.selectedPlayer.canAct()) return;
         const data = {
             x,
@@ -810,7 +819,9 @@ export class Arena extends Phaser.Scene
         const {x: pixelX, y: pixelY} = this.hexGridToPixelCoords(x, y);
         const depth = this.yToZ(y) + DEPTH_OFFSET;
         const icesprite = this.add.sprite(pixelX, pixelY, 'iceblock')
-            .setDepth(depth).setAlpha(0.9).setInteractive().setOrigin(0.5, 0.35);
+            .setDepth(depth).setAlpha(0.9)
+            .setOrigin(0.5, 0.35)
+            // .setInteractive();
         // Add pointerover event to sprite
         icesprite.on('pointerover', () => {
             if (this.selectedPlayer?.isNextTo(x, y) 
@@ -898,12 +909,36 @@ export class Arena extends Phaser.Scene
             }
 
             const scale = config && 'scale' in config ? config.scale : LOCAL_ANIMATION_SCALE;
+            let yScale = scale;
+            let yOrigin = 1;
 
+            if (config && config.stretch) {
+                let distanceToTop = pixelY;
+                // if (config && config.extraStretch) {
+                //     distanceToTop += 100;
+                // }
+                const baseHeight = 512; // Base height of the thunder sprite
+                
+                // Set the scale: normal width, stretched height to reach top
+                let heightScale = distanceToTop / baseHeight;
+                if (config && config.extraStretch) {
+                    heightScale *= 1.2;
+                }
+                yScale = heightScale;
+                yOrigin = 1;
+            }
+            // Normal handling for other animations
             this.localAnimationSprite.setPosition(pixelX, pixelY)
                 .setVisible(true)
                 .setDepth(this.yToZ(toY) + DEPTH_OFFSET)
-                .setScale(scale)
-                .play(spell.vfx);
+                .setScale(scale, yScale);
+
+            if (config && config.stretch) {
+                this.localAnimationSprite.setOrigin(0.5, yOrigin);
+            }
+            
+            this.localAnimationSprite.play(spell.vfx);
+            
             this.playSound(spell.sfx);
 
             if (config && config.shake) {
@@ -1223,6 +1258,24 @@ export class Arena extends Phaser.Scene
                 frames: this.anims.generateFrameNumbers(key),
                 frameRate: 50,
                 repeat: -1,
+            });
+        });
+
+        iceLevels.forEach(level => {
+            const key = `ice_${level}`;
+            this.anims.create({
+                key,
+                frames: this.anims.generateFrameNumbers(key),
+                frameRate: VFXconfig[key]?.frameRate || 15, // Fallback to 15 if not specified
+            });
+        });
+
+        thunderLevels.forEach(level => {
+            const key = `thunder_${level}`;
+            this.anims.create({
+                key,
+                frames: this.anims.generateFrameNumbers(key),
+                frameRate: VFXconfig[key]?.frameRate || 15, // Fallback to 15 if not specified
             });
         });
 
@@ -2142,12 +2195,13 @@ export class Arena extends Phaser.Scene
     private iceFormation(x: number, y: number) {
         const {x: pixelX, y: pixelY} = this.hexGridToPixelCoords(x, y);
         const depth = this.yToZ(y) + DEPTH_OFFSET;
-        
+        const TERRAIN_SPRITE_DELAY = 200;
+
         // Generate a random delay between 0-150ms for more natural look when multiple blocks appear
         const randomDelay = Math.floor(Math.random() * 150);
         
         // Use Phaser's time delayed call to execute with random delay
-        this.time.delayedCall(randomDelay, () => {
+        this.time.delayedCall(TERRAIN_SPRITE_DELAY + randomDelay, () => {
             // Create meltdown sprite for reverse animation
             const meltdownSprite = this.add.sprite(pixelX, pixelY, 'meltdown')
                 .setDepth(depth)
