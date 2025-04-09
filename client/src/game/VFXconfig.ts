@@ -67,6 +67,19 @@ export const VFXconfig: Record<string, VFXConfig>    = {
         extraStretch: true,
         yoffset: 400,
     },
+    heal_1: {
+        frameRate: 15,
+    },
+    heal_2: {
+        frameRate: 40,
+        scale: 0.5,
+        yoffset: 50,
+    },
+    heal_3: {
+        frameRate: 40,
+        scale: 0.5,
+        yoffset: 100,
+    },
     potion_heal: {
         scale: 2,
     }
@@ -75,6 +88,7 @@ export const VFXconfig: Record<string, VFXConfig>    = {
 export const fireLevels = [1,2,3];
 export const iceLevels = [1,2,3];
 export const thunderLevels = [1,2,3];
+export const healLevels = [1,2,3];
 export const terrainFireLevels = [1];
 export const chargedFireLevels = [1,2];
 export const chargedIceLevels = [1,2];

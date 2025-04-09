@@ -68,7 +68,8 @@ import { TutorialManager } from './TutorialManager';
 
 import hexTileImage from '@assets/tile.png';
 import { VFXconfig, fireLevels, terrainFireLevels, chargedFireLevels, 
-    chargedIceLevels, chargedThunderLevels, iceLevels, thunderLevels } from './VFXconfig';
+    chargedIceLevels, chargedThunderLevels, iceLevels, thunderLevels,
+    healLevels } from './VFXconfig';
 
 const LOCAL_ANIMATION_SCALE = 1;
 const DEPTH_OFFSET = 0.01;
@@ -240,6 +241,9 @@ export class Arena extends Phaser.Scene
         });
         chargedThunderLevels.forEach(level => {
             this.load.spritesheet(`charged_thunder_${level}`, require(`@assets/vfx/charged_thunder_${level}.png`), { frameWidth: 512, frameHeight: 512});
+        });
+        healLevels.forEach(level => {
+            this.load.spritesheet(`heal_${level}`, require(`@assets/vfx/heal_${level}.png`), { frameWidth: 512, frameHeight: 512});
         });
 
         this.load.spritesheet('thunder2', thunderImage, { frameWidth: 96, frameHeight: 96});
@@ -1296,6 +1300,15 @@ export class Arena extends Phaser.Scene
                 frames: this.anims.generateFrameNumbers(key),
                 frameRate: 50,
                 repeat: -1,
+            });
+        });
+
+        healLevels.forEach(level => {
+            const key = `heal_${level}`;
+            this.anims.create({
+                key,
+                frames: this.anims.generateFrameNumbers(key),
+                frameRate: VFXconfig[key]?.frameRate || 15,
             });
         });
 

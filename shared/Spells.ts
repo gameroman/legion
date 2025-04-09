@@ -229,7 +229,7 @@ spells.push(new BaseSpell({
     name: "Heal",
     description: "Heal a single target",
     frame: 30,
-    vfx: "potion_heal",
+    vfx: "heal_2",
     sfx: "healing",
     
 
@@ -298,7 +298,7 @@ spells.push(new BaseSpell({
     name: "Revive",
     description: "Revive a single target",
     frame: 33,
-    vfx: "revive",
+    vfx: "heal_3",
     sfx: "revive",
     
 
