@@ -2,7 +2,7 @@ interface VFXConfig {
     frameRate?: number;
     yoffset?: number;
     xoffset?: number;
-    scale?: number;
+    scale: number;
     shake?: boolean;
     stretch?: boolean;
     extraStretch?: boolean;
@@ -12,16 +12,19 @@ export const VFXconfig: Record<string, VFXConfig>    = {
     fire_1_explosion: {
         frameRate: 30,
         yoffset: 100,
+        scale: 1
     },
     fire_2_explosion: {
         yoffset: 100,
         frameRate: 30,
         xoffset: -25,
+        scale: 1
     },
     fire_3_explosion: {
         frameRate: 30,
         shake: true,
         yoffset: 100,
+        scale: 1
     },
     fireball_1: {
         scale: 0.2,
@@ -38,10 +41,12 @@ export const VFXconfig: Record<string, VFXConfig>    = {
     ice_1: {
         frameRate: 40,
         yoffset: 50,
+        scale: 1
     },
     ice_2: {
         frameRate: 30,
         yoffset: 50,
+        scale: 1
     },
     ice_3: {
         frameRate: 60,
@@ -59,6 +64,7 @@ export const VFXconfig: Record<string, VFXConfig>    = {
         yoffset: 400,
         stretch: true,
         extraStretch: true, 
+        scale: 1,
     },
     thunder_3: {
         frameRate: 40,
@@ -69,6 +75,7 @@ export const VFXconfig: Record<string, VFXConfig>    = {
     },
     heal_1: {
         frameRate: 15,
+        scale: 1,
     },
     heal_2: {
         frameRate: 40,

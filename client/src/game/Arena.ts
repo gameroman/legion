@@ -71,7 +71,7 @@ import { VFXconfig, fireLevels, terrainFireLevels, chargedFireLevels,
     chargedIceLevels, chargedThunderLevels, iceLevels, thunderLevels,
     healLevels } from './VFXconfig';
 
-const LOCAL_ANIMATION_SCALE = 1;
+const LOCAL_ANIMATION_SCALE = 2;
 const DEPTH_OFFSET = 0.01;
 export const DARKENING_INTENSITY = 0.9;
 const TINT_COLOR = Math.round(0x66 * DARKENING_INTENSITY) * 0x010101;
@@ -799,12 +799,12 @@ export class Arena extends Phaser.Scene
     }
 
 
-    processTerrain(updates: TerrainUpdate[]) {
+    processTerrain(updates: TerrainUpdate[], isReconnect = false) {
         if (this.gameEnded) return;
         updates.forEach(({x, y, terrain}) => {
             const handlers = {
                 [Terrain.FIRE]: () => this.handleFireTerrain(x, y),
-                [Terrain.ICE]: () => this.handleIceTerrain(x, y),
+                [Terrain.ICE]: () => this.handleIceTerrain(x, y, isReconnect),
                 [Terrain.NONE]: () => this.handleClearTerrain(x, y)
             };
             handlers[terrain]?.();
@@ -907,7 +907,7 @@ export class Arena extends Phaser.Scene
 
         setTimeout(() => {
             if (isKill) {
-                this.killCam(pixelX, pixelY);
+                this.killCam(pixelXInitial, pixelYInitial);
             } else {
                 // this.spellCam(pixelX, pixelY);
             }
@@ -1640,7 +1640,7 @@ export class Arena extends Phaser.Scene
             this.hexGridManager.setCharacterTiles(this.gridMap);
         }, isReconnect ? 0 : AIR_ENTRANCE_DELAY + AIR_ENTRANCE_DELAY_VARIANCE * 2);
 
-        this.processTerrain(data.terrain); // Put after floatTiles() to allow for tilesMap to be intialized
+        this.processTerrain(data.terrain, isReconnect); // Put after floatTiles() to allow for tilesMap to be intialized
 
         if (isReconnect) {
             this.setGameInitialized();
@@ -2205,54 +2205,64 @@ export class Arena extends Phaser.Scene
         }, TERRAIN_SPRITE_DELAY);
     }
 
-    private iceFormation(x: number, y: number) {
+    private iceFormation(x: number, y: number, isReconnect = false) {
         const {x: pixelX, y: pixelY} = this.hexGridToPixelCoords(x, y);
         const depth = this.yToZ(y) + DEPTH_OFFSET;
         const TERRAIN_SPRITE_DELAY = 200;
 
-        // Generate a random delay between 0-150ms for more natural look when multiple blocks appear
-        const randomDelay = Math.floor(Math.random() * 150);
-        
-        // Use Phaser's time delayed call to execute with random delay
-        this.time.delayedCall(TERRAIN_SPRITE_DELAY + randomDelay, () => {
-            // Create meltdown sprite for reverse animation
-            const meltdownSprite = this.add.sprite(pixelX, pixelY, 'meltdown')
-                .setDepth(depth)
-                .setOrigin(0.5, 0.35);
+        // Helper function to create ice block and update maps
+        const createIceAndUpdateMaps = () => {
+            const icesprite = this.createIceBlock(x, y);
+            this.terrainSpritesMap.set(serializeCoords(x, y), icesprite);
+            this.terrainMap.set(serializeCoords(x, y), Terrain.ICE);
+            this.obstaclesMap.set(serializeCoords(x, y), true);
+            events.emit('iceAppeared');
+        };
+
+        if (isReconnect) {
+            // Skip animation and create ice block immediately when reconnecting
+            createIceAndUpdateMaps();
+        } else {
+            // Generate a random delay between 0-150ms for more natural look when multiple blocks appear
+            const randomDelay = Math.floor(Math.random() * 150);
             
-            // Get all frames from the meltdown animation
-            const frames = this.anims.generateFrameNumbers('meltdown');
-            
-            // Create a reverse animation key if it doesn't exist
-            const reverseAnimKey = 'meltdown_reverse';
-            if (!this.anims.exists(reverseAnimKey)) {
-                this.anims.create({
-                    key: reverseAnimKey,
-                    frames: this.anims.generateFrameNumbers('meltdown', { frames: frames.map((_, i) => frames.length - 1 - i) }),
-                    frameRate: 10
-                });
-            }
-            
-            // Play the reverse animation
-            meltdownSprite.play(reverseAnimKey);
-            
-            // When animation completes, create the ice block
-            meltdownSprite.once('animationcomplete', () => {
-                meltdownSprite.destroy();
+            // Use Phaser's time delayed call to execute with random delay
+            this.time.delayedCall(TERRAIN_SPRITE_DELAY + randomDelay, () => {
+                // Create meltdown sprite for reverse animation
+                const meltdownSprite = this.add.sprite(pixelX, pixelY, 'meltdown')
+                    .setDepth(depth)
+                    .setOrigin(0.5, 0.35);
                 
-                // Create the actual ice block
-                const icesprite = this.createIceBlock(x, y);
-                this.terrainSpritesMap.set(serializeCoords(x, y), icesprite);
-                this.terrainMap.set(serializeCoords(x, y), Terrain.ICE);
-                this.obstaclesMap.set(serializeCoords(x, y), true);
-                events.emit('iceAppeared');
+                // Get all frames from the meltdown animation
+                const frames = this.anims.generateFrameNumbers('meltdown');
+                
+                // Create a reverse animation key if it doesn't exist
+                const reverseAnimKey = 'meltdown_reverse';
+                if (!this.anims.exists(reverseAnimKey)) {
+                    this.anims.create({
+                        key: reverseAnimKey,
+                        frames: this.anims.generateFrameNumbers('meltdown', { frames: frames.map((_, i) => frames.length - 1 - i) }),
+                        frameRate: 10
+                    });
+                }
+                
+                // Play the reverse animation
+                meltdownSprite.play(reverseAnimKey);
+                
+                // When animation completes, create the ice block
+                meltdownSprite.once('animationcomplete', () => {
+                    meltdownSprite.destroy();
+                    
+                    // Create the ice block and update maps
+                    createIceAndUpdateMaps();
+                });
             });
-        });
+        }
     }
 
-    private handleIceTerrain(x: number, y: number) {
+    private handleIceTerrain(x: number, y: number, isReconnect = false) {
         if (this.terrainMap.get(serializeCoords(x, y)) === Terrain.ICE) return;
-        this.iceFormation(x, y);
+        this.iceFormation(x, y, isReconnect);
     }
 
     private meltdown(sprite: Phaser.GameObjects.Sprite) {
