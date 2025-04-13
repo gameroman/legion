@@ -10,7 +10,7 @@ import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain, GEN, AIAttackMode, TargetHighlight } from "@legion/shared/enums";
 import { TerrainUpdate, GameData, OutcomeData, PlayerNetworkData } from '@legion/shared/interfaces';
 import { KILL_CAM_DURATION, BASE_ANIM_FRAME_RATE, FREEZE_CAMERA, GRID_WIDTH, GRID_HEIGHT,
-     SPELL_RANGE, MOVEMENT_RANGE, PROJECTILE_DURATION } from '@legion/shared/config';
+     SPELL_RANGE, MOVEMENT_RANGE, PROJECTILE_DURATION, VALIDATE_TARGETS } from '@legion/shared/config';
 
 import iceblockImage from '@assets/iceblock.png';
 import meltdownImage from '@assets/meltdown.png';
@@ -83,7 +83,6 @@ export class Arena extends Phaser.Scene
     teamsMap: Map<number, Team> = new Map<number, Team>();
     selectedPlayer: Player | null = null;
     localAnimationSprite: Phaser.GameObjects.Sprite;
-    obstaclesMap: Map<string, boolean> = new Map<string, boolean>();
     terrainSpritesMap: Map<string, Phaser.GameObjects.Sprite> = new Map<string, Phaser.GameObjects.Sprite>();
     terrainMap: Map<string, Terrain> = new Map<string, Terrain>();
     server;
@@ -564,7 +563,7 @@ export class Arena extends Phaser.Scene
 
     isFree(gridX, gridY) {
         return !this.gridMap.get(serializeCoords(gridX, gridY)) && 
-               !this.obstaclesMap.get(serializeCoords(gridX, gridY)) &&
+               !this.hexGridManager.hasObstacle(gridX, gridY) &&
                !this.hexGridManager.isHole(gridX, gridY);
     }
 
@@ -588,7 +587,7 @@ export class Arena extends Phaser.Scene
                 return;
             }
             this.sendSpell(gridX, gridY, player);
-        } else if (this.selectedPlayer?.pendingItem != null) {
+        } else if (pendingItem != null) {
             if (!this.validateTarget(gridX, gridY, pendingItem)) {
                 this.playSound('nope', 0.2);
                 return;
@@ -615,6 +614,7 @@ export class Arena extends Phaser.Scene
     }
 
     validateTarget(gridX, gridY, action: BaseSpell | BaseItem) {
+        if (!VALIDATE_TARGETS) return true;
         if (!isInSpellRange(this.selectedPlayer.gridX, this.selectedPlayer.gridY, gridX, gridY)) return false;
         if (action.target == Target.AOE && action.radius > 1) {
             return true;
@@ -2107,7 +2107,7 @@ export class Arena extends Phaser.Scene
             const icesprite = this.createIceBlock(x, y);
             this.terrainSpritesMap.set(serializeCoords(x, y), icesprite);
             this.terrainMap.set(serializeCoords(x, y), Terrain.ICE);
-            this.obstaclesMap.set(serializeCoords(x, y), true);
+            this.hexGridManager.setObstacle(x, y, true);
             events.emit('iceAppeared');
         };
 
@@ -2182,7 +2182,7 @@ export class Arena extends Phaser.Scene
     }
 
     private handleClearTerrain(x: number, y: number) {
-        this.obstaclesMap.delete(serializeCoords(x, y));
+        this.hexGridManager.setObstacle(x, y, false);
         this.terrainMap.delete(serializeCoords(x, y));
         const terrainsprite = this.terrainSpritesMap.get(serializeCoords(x, y));
         if (terrainsprite) {
