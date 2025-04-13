@@ -10,11 +10,12 @@ import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain, GEN, AIAttackMode, TargetHighlight } from "@legion/shared/enums";
 import { TerrainUpdate, GameData, OutcomeData, PlayerNetworkData } from '@legion/shared/interfaces';
 import { KILL_CAM_DURATION, BASE_ANIM_FRAME_RATE, FREEZE_CAMERA, GRID_WIDTH, GRID_HEIGHT,
-     SPELL_RANGE, MOVEMENT_RANGE, PROJECTILE_DURATION, VALIDATE_TARGETS } from '@legion/shared/config';
+     SPELL_RANGE, PROJECTILE_DURATION, VALIDATE_TARGETS } from '@legion/shared/config';
 
 import iceblockImage from '@assets/iceblock.png';
 import meltdownImage from '@assets/meltdown.png';
 
+import smokeImage from '@assets/vfx/smoke.png';
 import potionHealImage from '@assets/vfx/potion_heal.png';
 import castImage from '@assets/vfx/cast.png';
 import slashImage from '@assets/vfx/slash.png';
@@ -238,6 +239,7 @@ export class Arena extends Phaser.Scene
             this.load.spritesheet(`heal_${level}`, require(`@assets/vfx/heal_${level}.png`), { frameWidth: 512, frameHeight: 512});
         });
 
+        this.load.spritesheet('smoke', smokeImage, { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('cast', castImage, { frameWidth: 48, frameHeight: 64});
         this.load.spritesheet('slash', slashImage, { frameWidth: 96, frameHeight: 96});
         this.load.spritesheet('impact', impactImage, { frameWidth: 291, frameHeight: 291});
@@ -928,6 +930,7 @@ export class Arena extends Phaser.Scene
                 this.localAnimationSprite.setOrigin(0.5, yOrigin);
             }
             
+            console.log(`[Arena:processLocalAnimation] spell.vfx: ${spell.vfx}`);
             this.localAnimationSprite.play(spell.vfx);
             
             this.playSound(spell.sfx);
