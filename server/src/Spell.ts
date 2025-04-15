@@ -47,7 +47,20 @@ export class Spell extends BaseSpell {
         const statValue = player.getStat(modifier.stat);
         const sign = modifier.direction === EffectDirection.PLUS ? 1 : -1;
         const random = (Math.random() - 0.5)/10;
-        return value * (1 + (statValue * modifier.value * sign)) * (1 + random);
+        
+        // Store the original sign of the value
+        const originalSign = Math.sign(value);
+        
+        // Calculate the modified value
+        let modifiedValue = value * (1 + (statValue * modifier.value * sign)) * (1 + random);
+        
+        // Ensure the sign of the value doesn't change (damage stays damage, healing stays healing)
+        // If sign flipped, set to a minimum effect value (e.g., 1)
+        if (Math.sign(modifiedValue) !== originalSign) {
+            modifiedValue = originalSign * 1; // Minimum effect of 1 in the original direction
+        }
+        
+        return modifiedValue;
     }
 
     dealDamage(caster: ServerPlayer, targets: ServerPlayer[], effect: Effect) {

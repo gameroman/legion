@@ -96,9 +96,7 @@ export class NewCharacter {
     };
 
     for (let i = 1; i < this.level; i++) {
-      // console.log(`[NewCharacter:constructor] Stats before lvlUp: ${Object.values(this.stats).join(", ")}`);
       lvlUp(this.characterClass, this.stats);
-      // console.log(`[NewCharacter:constructor] Stats after lvlUp: ${Object.values(this.stats).join(", ")}`);
     }
 
     if (isAI) {

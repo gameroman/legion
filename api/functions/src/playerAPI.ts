@@ -782,6 +782,7 @@ export const setPlayerOnSteroids = onRequest({
         const newCharacters = [
           new NewCharacter(Class.WARRIOR, Math.floor(Math.random() * 20) + levelBase),
           new NewCharacter(Class.WHITE_MAGE, Math.floor(Math.random() * 20) + levelBase),
+          new NewCharacter(Class.WHITE_MAGE, Math.floor(Math.random() * 20) + levelBase),
           new NewCharacter(Class.BLACK_MAGE, Math.floor(Math.random() * 20) + levelBase),
           new NewCharacter(Class.BLACK_MAGE, Math.floor(Math.random() * 20) + levelBase),
         ];
@@ -797,7 +798,8 @@ export const setPlayerOnSteroids = onRequest({
 
           // Adjust spells for white mage and black mages
           if (character.characterClass === Class.WHITE_MAGE) {
-            characterData.skills = [9, 10, 11];
+            characterData.skill_slots = 4;
+            characterData.skills = []; // Start with empty skills array for white mages
           } else if (character.characterClass === Class.BLACK_MAGE) {
             characterData.skill_slots = 5;
             characterData.skills = [];
@@ -807,8 +809,18 @@ export const setPlayerOnSteroids = onRequest({
           newCharacterRefs.push(characterRef);
         }
 
+        // Distribute spells 9 to 12 among white mages
+        const whiteMageRefs = newCharacterRefs.filter((_, index) => index === 1 || index === 2);
+        const whiteSpells = [9, 10, 11, 12];
+        for (const spell of whiteSpells) {
+          const randomWhiteMage = whiteMageRefs[Math.floor(Math.random() * whiteMageRefs.length)];
+          transaction.update(randomWhiteMage, {
+            skills: admin.firestore.FieldValue.arrayUnion(spell),
+          });
+        }
+
         // Distribute spells 1-8 among black mages
-        const blackMageRefs = newCharacterRefs.filter((_, index) => index > 1);
+        const blackMageRefs = newCharacterRefs.filter((_, index) => index === 3 || index === 4);
         const spells = [0, 1, 2, 3, 4, 5, 6, 7, 8];
         for (const spell of spells) {
           const randomBlackMage = blackMageRefs[Math.floor(Math.random() * blackMageRefs.length)];
@@ -842,10 +854,40 @@ export const setPlayerOnSteroids = onRequest({
           }
         }
 
+        // Set all engagement stats to true to simulate a player who has done everything
+        const completeEngagementStats = {
+          completedGames: 15,
+          totalGames: 25,
+          everPurchased: true,
+          everSpentSP: true,
+          everOpenedDailyLoot: true,
+          everEquippedConsumable: true,
+          everEquippedEquipment: true,
+          everEquippedSpell: true,
+          everUsedSpell: true,
+          everUsedItem: true,
+          everPlayedPractice: true,
+          everPlayedCasual: true,
+          everPlayedRanked: true,
+          everMoved: true,
+          everAttacked: true,
+          everSawFlames: true,
+          everSawIce: true,
+          everPoisoned: true,
+          everSilenced: true,
+          everParalyzed: true,
+          everLowMP: true,
+        };
+
         transaction.update(playerRef, {
           characters: newCharacterRefs,
           gold: 35000,
           inventory: newInventory,
+          engagementStats: completeEngagementStats,
+          AIstats: {
+            nbGames: 10,
+            wins: 20
+          }
         });
       });
 

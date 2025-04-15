@@ -82,13 +82,14 @@ export let INJURED_MODE = false;
 export let SKIP_LEVEL_RESTRICTIONS = false;
 export let IMMEDIATE_LOOT = true;
 export let LOTSA_MP = false;
+export let LOTSA_HP = false;
 export let MAX_AI_CHARACTERS = 6;
 export let KILLALL_BM = false;
 export let KILLALL_WM = false;
 export let KILLALL_W = false;
 export let FREEZE_CAMERA = false;
 export let VALIDATE_TARGETS = false;
-export const CAST_ZOOM = true;
+export const CAST_ZOOM = false;
 
 // Web3
 export let NETWORK = isDev ? 'devnet' : 'mainnet';
@@ -190,6 +191,7 @@ if (!isDev) {
     SKIP_LEVEL_RESTRICTIONS = false;
     IMMEDIATE_LOOT = false;
     LOTSA_MP = false;
+    LOTSA_HP = false;
     ALLOW_SWITCHEROO_RANKED = true;
     MAX_AI_CHARACTERS = MAX_CHARACTERS;
     KILLALL_BM = false;

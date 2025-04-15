@@ -6,7 +6,7 @@ import { getConsumableById } from '@legion/shared/Items';
 import { getSpellById } from '@legion/shared/Spells';
 import { getMaxStatValue, getXPThreshold } from '@legion/shared/levelling';
 import { CharacterStats, Equipment, PlayerNetworkData, StatusEffects } from '@legion/shared/interfaces';
-import { INJURED_MODE, MOVEMENT_RANGE, PARALYZED_DELAY } from "@legion/shared/config";
+import { INJURED_MODE, LOTSA_HP, MOVEMENT_RANGE, PARALYZED_DELAY } from "@legion/shared/config";
 import { getEquipmentById } from '@legion/shared/Equipments';
 import { getSpells, lvlUp, setUpInventory } from '@legion/shared/NewCharacter';
 import { hexDistance } from '@legion/shared/utils';
@@ -242,7 +242,7 @@ export class ServerPlayer {
     }
 
     getMaxHP() {
-        return this.getStat(Stat.HP);
+        return LOTSA_HP ? 1000 : this.getStat(Stat.HP);
     }
 
     getMaxMP() {

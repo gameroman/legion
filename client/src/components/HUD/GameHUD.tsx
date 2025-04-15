@@ -253,8 +253,8 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
   }
 
   handleKeyDown = (event: KeyboardEvent) => {
-    // Toggle HUD visibility when 'h' key is pressed
-    if (event.key.toLowerCase() === 'h') {
+    // Toggle HUD visibility when 'a' key is pressed
+    if (event.key.toLowerCase() === 'a') {
       this.setState(prevState => ({ isHUDVisible: !prevState.isHUDVisible }));
     }
   }
