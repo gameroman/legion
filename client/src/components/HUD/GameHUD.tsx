@@ -45,6 +45,7 @@ interface GameHUDState {
   turnNumber: number;
   tutorialPosition: 'bottom' | 'spells' | 'items';
   animate: boolean;
+  isHUDVisible: boolean;
 }
 
 const events = new EventEmitter();
@@ -81,6 +82,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     turnDuration: 0,
     animate: false,
     tutorialPosition: 'bottom' as const,
+    isHUDVisible: true,
   });
 
   state = this.getInitialState();
@@ -147,10 +149,15 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     // Add new event listener for revealing top menu
     events.on('revealTopMenu', this.revealTopMenu);
     events.on('revealOverview', this.revealOverview);
+
+    // Add keyboard event listener for HUD toggle
+    window.addEventListener('keydown', this.handleKeyDown);
   }
 
   componentWillUnmount() {
     events.removeAllListeners();
+    // Remove keyboard event listener
+    window.removeEventListener('keydown', this.handleKeyDown);
   }
 
   showPlayerBox = (playerData: PlayerProps) => {
@@ -245,10 +252,17 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
     events.emit('passTurn');
   }
 
+  handleKeyDown = (event: KeyboardEvent) => {
+    // Toggle HUD visibility when 'h' key is pressed
+    if (event.key.toLowerCase() === 'h') {
+      this.setState(prevState => ({ isHUDVisible: !prevState.isHUDVisible }));
+    }
+  }
+
   render() {
     const { 
       player, team1, team2, isSpectator, mode, gameInitialized,
-      showOverview,
+      showOverview, isHUDVisible
     } = this.state;
     const ownMembers: TeamMember[] = team1?.members[0]?.isPlayer ? team1?.members : team2?.members;
     const score = team1?.members[0]?.isPlayer ? team1?.score : team2?.score;
@@ -261,72 +275,55 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
 
     return (
       <div className="gamehud height_full flex flex_col justify_between padding_bottom_16">
-        {this.state.showTargetBanner && (
+        {isHUDVisible && this.state.showTargetBanner && (
           <div className="target_selection_banner">
             Select a target
           </div>
         )}
-        <>
-          {showOverview && (
-            <div className="hud-container">
-              <Overview position="left" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team1} />
-              <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team2} />
-            </div>
-          )}
-           {/* {showTopMenu && player?.isPlayer ? (
-            <>
-              {player.pendingSpell == undefined && player.pendingItem == undefined && (
-                <div class="player_turn_banner_container">
-                  <div class="player_turn_banner">
-                    <div class="player_turn_banner_particles" />
-                    Your Turn!
-                  </div>
-                  <CircularTimer 
-                    turnDuration={this.state.turnDuration}
-                    timeLeft={this.state.timeLeft}
-                    turnNumber={this.state.turnNumber}
-                    key={`${player.team}-${player.number}`}
-                  />
-                </div>
-              )}
-              <PlayerTab 
-                player={player} 
-                eventEmitter={events} 
-                isTutorial={isTutorialMode} 
-              />
-            </>
-          ) : null} */}
-        </>
-        <PlayerBar 
-          hp={player?.hp || 0}
-          maxHp={player?.maxHp || 0}
-          mp={player?.mp || 0}
-          maxMp={player?.maxMp || 0}
-          hasSpells={player?.spells?.length > 0}
-          statuses={player?.statuses}
-          isPlayerTurn={player?.isPlayer}
-          turnDuration={this.state.turnDuration}
-          timeLeft={this.state.timeLeft}
-          turnNumber={this.state.turnNumber}
-          onPassTurn={this.handlePassTurn}
-          animate={this.state.animate}
-          pendingItem={player?.pendingItem}
-          pendingSpell={player?.pendingSpell}
-          items={player?.items}
-          spells={player?.spells}
-          eventEmitter={events}
-        />
-        <Timeline
-          isTutorial={isTutorialMode}
-          score={score}
-          mode={mode}
-          closeGame={this.closeGame}
-          queue={this.state.queue}
-          isPlayer={player?.isPlayer}
-          team1={team1}
-          team2={team2}
-        />
-        {this.state.gameOver && <Endgame
+        {isHUDVisible && (
+          <>
+            {showOverview && (
+              <div className="hud-container">
+                <Overview position="left" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team1} />
+                <Overview position="right" isSpectator={isSpectator} selectedPlayer={player} eventEmitter={events} mode={mode} {...team2} />
+              </div>
+            )}
+          </>
+        )}
+        {isHUDVisible && (
+          <PlayerBar 
+            hp={player?.hp || 0}
+            maxHp={player?.maxHp || 0}
+            mp={player?.mp || 0}
+            maxMp={player?.maxMp || 0}
+            hasSpells={player?.spells?.length > 0}
+            statuses={player?.statuses}
+            isPlayerTurn={player?.isPlayer}
+            turnDuration={this.state.turnDuration}
+            timeLeft={this.state.timeLeft}
+            turnNumber={this.state.turnNumber}
+            onPassTurn={this.handlePassTurn}
+            animate={this.state.animate}
+            pendingItem={player?.pendingItem}
+            pendingSpell={player?.pendingSpell}
+            items={player?.items}
+            spells={player?.spells}
+            eventEmitter={events}
+          />
+        )}
+        {isHUDVisible && (
+          <Timeline
+            isTutorial={isTutorialMode}
+            score={score}
+            mode={mode}
+            closeGame={this.closeGame}
+            queue={this.state.queue}
+            isPlayer={player?.isPlayer}
+            team1={team1}
+            team2={team2}
+          />
+        )}
+        {isHUDVisible && this.state.gameOver && <Endgame
           members={ownMembers}
           grade={this.state.grade}
           chests={this.state.chests}
@@ -340,7 +337,7 @@ class GameHUD extends Component<GameHUDProps, GameHUDState> {
           closeGame={this.closeGame}
           eventEmitter={events}
         />}
-        {this.state.isTutorialVisible && this.state.tutorialMessages.length > 0 && (
+        {isHUDVisible && this.state.isTutorialVisible && this.state.tutorialMessages.length > 0 && (
           <TutorialDialogue
             messages={this.state.tutorialMessages}
             position={this.state.tutorialPosition}
