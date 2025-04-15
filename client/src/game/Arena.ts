@@ -10,7 +10,7 @@ import { allSprites } from '@legion/shared/sprites';
 import { Target, Terrain, GEN, AIAttackMode, TargetHighlight } from "@legion/shared/enums";
 import { TerrainUpdate, GameData, OutcomeData, PlayerNetworkData } from '@legion/shared/interfaces';
 import { KILL_CAM_DURATION, BASE_ANIM_FRAME_RATE, FREEZE_CAMERA, GRID_WIDTH, GRID_HEIGHT,
-     SPELL_RANGE, PROJECTILE_DURATION, VALIDATE_TARGETS } from '@legion/shared/config';
+     SPELL_RANGE, PROJECTILE_DURATION, VALIDATE_TARGETS, CAST_ZOOM } from '@legion/shared/config';
 
 import iceblockImage from '@assets/iceblock.png';
 import meltdownImage from '@assets/meltdown.png';
@@ -119,6 +119,8 @@ export class Arena extends Phaser.Scene
 
     // Add to the class properties at the top of the file
     private lastKeyTime: number = 0;
+    // Add this class property at the top of the Arena class
+    private isZoomedForSpellCast: boolean = false;
 
     private static readonly GEN_CONFIGS = {
         [GEN.COMBAT_BEGINS]: { text1: 'combat', text2: 'begins' },
@@ -866,16 +868,60 @@ export class Arena extends Phaser.Scene
 
     processCast(flag, {team, num, id, target,}) {
         if (this.gameEnded) return;
-        // console.log(`Processing cast: ${flag} ${team} ${num} ${id} ${target}`);
+        
         const player = this.getPlayer(team, num);
         const spell = getSpellById(id);
         player?.castAnimation(flag, spell?.name, spell?.charge);
 
-        // const { x: pixelX, y: pixelY } = this.hexGridToPixelCoords(player.gridX, player.gridY);
-        // this.spellCam(pixelX, pixelY, false);
+        if (CAST_ZOOM) {
+            // Check for cast start with charged spell
+            if (flag && spell?.charge) {
+                console.log(`Starting charged spell cast`);
+                const { x: pixelX, y: pixelY } = this.hexGridToPixelCoords(player.gridX, player.gridY);
+                this.chargeCastCam(pixelX, pixelY);
+                this.isZoomedForSpellCast = true;
+            } 
+            // Check for cast end when camera is zoomed for a spell
+            else if (!flag && this.isZoomedForSpellCast) {
+                console.log(`Ending spell cast, resetting camera`);
+                this.resetCamera();
+                    this.isZoomedForSpellCast = false;
+            }
+        }
+        
         if (player?.isPlayer) {
             events.emit(`playerCastSpell`);
         }
+    }
+
+    // Simplify the chargeCastCam method - no need for revert parameter
+    chargeCastCam(pixelX, pixelY) {
+        if (FREEZE_CAMERA) return;
+        
+        // Target zoom level for charged spells
+        const targetZoom = 1.5;
+        const panDuration = 800;
+        
+        // Move camera to the caster's location and zoom in
+        this.cameras.main.pan(pixelX, pixelY, panDuration, 'Power2');
+        this.cameras.main.zoomTo(targetZoom, panDuration, 'Power2');
+    }
+
+    // Add a helper method to reset the camera
+    resetCamera(scrollX = null, scrollY = null, zoom = null) {
+        if (FREEZE_CAMERA) return;
+        
+        const gameWidth = this.cameras.main.width;
+        const gameHeight = this.cameras.main.height;
+        
+        // Use provided values or center the camera
+        const targetX = scrollX !== null ? gameWidth/2 + scrollX : gameWidth/2;
+        const targetY = scrollY !== null ? gameHeight/2 + scrollY : gameHeight/2;
+        const targetZoom = zoom !== null ? zoom : 1;
+        
+        // Smoothly transition back
+        this.cameras.main.pan(targetX, targetY, 800, 'Power2');
+        this.cameras.main.zoomTo(targetZoom, 800, 'Power2');
     }
 
     processLocalAnimation({fromX, fromY, toX, toY, id, isKill}) {

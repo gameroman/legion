@@ -88,6 +88,7 @@ export let KILLALL_WM = false;
 export let KILLALL_W = false;
 export let FREEZE_CAMERA = false;
 export let VALIDATE_TARGETS = false;
+export const CAST_ZOOM = true;
 
 // Web3
 export let NETWORK = isDev ? 'devnet' : 'mainnet';
