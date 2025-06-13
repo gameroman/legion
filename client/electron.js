@@ -14,8 +14,8 @@ function createWindow() {
     width: 1280,
     height: 720,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
       // Enable proper storage for Firebase Auth
       webSecurity: true,
       allowRunningInsecureContent: false,
