@@ -15,16 +15,16 @@ export const isElectron = (): boolean => {
   const hasProcess = hasWindow && (window as any).process?.type === 'renderer';
   const hasElectronUA = hasWindow && navigator.userAgent.toLowerCase().indexOf(' electron/') > -1;
   
-  console.log('electronUtils: isElectron check:', {
-    hasWindow,
-    hasProcess,
-    hasElectronUA,
-    userAgent: hasWindow ? navigator.userAgent : 'no window',
-    windowProcess: hasWindow ? (window as any).process : 'no window'
-  });
+  // console.log('electronUtils: isElectron check:', {
+  //   hasWindow,
+  //   hasProcess,
+  //   hasElectronUA,
+  //   userAgent: hasWindow ? navigator.userAgent : 'no window',
+  //   windowProcess: hasWindow ? (window as any).process : 'no window'
+  // });
   
   const result = hasWindow && (hasProcess || hasElectronUA);
-  console.log('electronUtils: isElectron result =', result);
+  // console.log('electronUtils: isElectron result =', result);
   
   return result;
 };
@@ -37,14 +37,14 @@ export const getElectronAPI = (): any => {
   const hasWindow = typeof window !== 'undefined';
   const electronAPI = hasWindow && isElectron() ? (window as any).electronAPI : null;
   
-  console.log('electronUtils: getElectronAPI check:', {
-    hasWindow,
-    isElectron: isElectron(),
-    electronAPI,
-    windowHasElectronAPI: hasWindow && !!(window as any).electronAPI,
-    electronAPIKeys: electronAPI ? Object.keys(electronAPI) : 'null',
-    windowElectronKeys: hasWindow ? Object.keys(window).filter(key => key.toLowerCase().includes('electron')) : 'no window'
-  });
+  // console.log('electronUtils: getElectronAPI check:', {
+  //   hasWindow,
+  //   isElectron: isElectron(),
+  //   electronAPI,
+  //   windowHasElectronAPI: hasWindow && !!(window as any).electronAPI,
+  //   electronAPIKeys: electronAPI ? Object.keys(electronAPI) : 'null',
+  //   windowElectronKeys: hasWindow ? Object.keys(window).filter(key => key.toLowerCase().includes('electron')) : 'no window'
+  // });
   
   return electronAPI;
 }; 

@@ -8,11 +8,11 @@
     <script>
       if (navigator.userAgent.toLowerCase().indexOf('electron') > -1) {
         // We're in Electron
-        console.log('We are in Electron');
+        // console.log('We are in Electron');
         document.write('<base href="./" />');
       } else {
         // We're in browser
-        console.log('We are in browser');
+        // console.log('We are in browser');
         document.write('<base href="/" />');
       }
       console.log('HTML inline script executed - JavaScript is working');

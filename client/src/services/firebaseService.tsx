@@ -27,7 +27,7 @@ const configureFirebaseAuth = async () => {
       for (const persistenceType of persistenceTypes) {
         try {
           await firebaseAuth.setPersistence(persistenceType);
-          console.log(`Firebase Auth: Successfully set ${persistenceType} persistence in Electron`);
+          // console.log(`Firebase Auth: Successfully set ${persistenceType} persistence in Electron`);
           break;
         } catch (error) {
           console.warn(`Firebase Auth: ${persistenceType} persistence not supported, trying next option`);
@@ -38,7 +38,7 @@ const configureFirebaseAuth = async () => {
       // For regular web environment, use LOCAL persistence
       try {
         await firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-        console.log('Firebase Auth: Using LOCAL persistence in web environment');
+        // console.log('Firebase Auth: Using LOCAL persistence in web environment');
       } catch (error) {
         console.warn('Firebase Auth: LOCAL persistence not supported in web environment, using default');
       }

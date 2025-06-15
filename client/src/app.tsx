@@ -1,6 +1,7 @@
 import { h, Component } from 'preact';
 import { Route, Router, RouterOnChangeArgs } from 'preact-router';
 import { PlayerContext } from './contexts/PlayerContext';
+import { isElectron, getElectronAPI } from './utils/electronUtils';
 
 import AuthProvider from './providers/AuthProvider';
 import PlayerProvider from './providers/PlayerProvider';
@@ -64,6 +65,46 @@ class App extends Component<{}, AppState> {
     state: AppState = {
         currentUrl: '/',
         currentMainRoute: '/'
+    };
+
+    componentDidMount() {
+        
+        if (isElectron()) {
+            document.addEventListener('keydown', this.handleKeyDown);
+        }
+    }
+
+    componentWillUnmount() {
+        if (isElectron()) {
+            document.removeEventListener('keydown', this.handleKeyDown);
+        }
+    }
+
+    handleKeyDown = async (event: KeyboardEvent) => {
+    //   console.log('App: Key pressed:', {
+    //     key: event.key,
+    //     keyCode: event.keyCode,
+    //     code: event.code,
+    //     target: (event.target as HTMLElement)?.tagName || 'unknown'
+    //   });
+      
+      // Check if ESC key was pressed
+      if (event.key === 'Escape' || event.keyCode === 27) {
+        
+        const electronAPI = getElectronAPI();
+        
+        if (electronAPI && electronAPI.isFullscreen && electronAPI.toggleFullscreen) {
+          try {
+            const isCurrentlyFullscreen = await electronAPI.isFullscreen();
+            
+            if (isCurrentlyFullscreen) {
+              await electronAPI.toggleFullscreen();
+            }
+          } catch (error) {
+            console.error('App: Error handling ESC key:', error);
+          }
+        }
+      }
     };
 
     warmUpMatchmaker = () => {
