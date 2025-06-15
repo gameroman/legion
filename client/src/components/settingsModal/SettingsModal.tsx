@@ -1,5 +1,6 @@
 import { h, Component, createRef } from 'preact';
 import { events } from '../HUD/GameHUD';
+import { isElectron, getElectronAPI } from '../../utils/electronUtils';
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -19,13 +20,24 @@ export class SettingsModal extends Component<SettingsModalProps> {
       sfxMinValue: 0,
       sfxMaxValue: 100,
       selectedKeyboardLayout: 1,
+      isFullscreen: false,
     }
   
     componentDidMount() {
+      console.log('SettingsModal: componentDidMount');
+      console.log('SettingsModal: isElectron =', isElectron());
+      
       this.detectKeyboardLayout();
       this.loadSettings();
       this.updateMusicControlThumb();
       this.updateSFXControlThumb();
+      
+      if (isElectron()) {
+        console.log('SettingsModal: Running in Electron, checking fullscreen status');
+        this.checkFullscreenStatus();
+      } else {
+        console.log('SettingsModal: Not running in Electron');
+      }
     }
   
     detectKeyboardLayout = () => {
@@ -56,6 +68,9 @@ export class SettingsModal extends Component<SettingsModalProps> {
       if (prevState.selectedKeyboardLayout !== this.state.selectedKeyboardLayout) {
         this.saveSettings();
       }
+      if (prevState.isFullscreen !== this.state.isFullscreen) {
+        this.saveSettings();
+      }
     }
   
     loadSettings = () => {
@@ -66,6 +81,7 @@ export class SettingsModal extends Component<SettingsModalProps> {
           musicCurrentValue: settings.musicVolume,
           sfxCurrentValue: settings.sfxVolume,
           selectedKeyboardLayout: settings.keyboardLayout,
+          isFullscreen: settings.isFullscreen || false,
         });
       }
     }
@@ -75,6 +91,7 @@ export class SettingsModal extends Component<SettingsModalProps> {
         musicVolume: this.state.musicCurrentValue,
         sfxVolume: this.state.sfxCurrentValue,
         keyboardLayout: this.state.selectedKeyboardLayout,
+        isFullscreen: this.state.isFullscreen,
       };
       localStorage.setItem('gameSettings', JSON.stringify(settings));
       events.emit('settingsChanged', settings);  // Emit the settingsChanged event
@@ -136,7 +153,49 @@ export class SettingsModal extends Component<SettingsModalProps> {
       document.addEventListener('mouseup', handleSFXMouseUp);
     };
   
+    checkFullscreenStatus = async () => {
+      console.log('SettingsModal: checkFullscreenStatus called');
+      const electronAPI = getElectronAPI();
+      console.log('SettingsModal: electronAPI =', electronAPI);
+      
+      if (electronAPI && electronAPI.isFullscreen) {
+        console.log('SettingsModal: electronAPI.isFullscreen found, calling it');
+        try {
+          const fullscreenStatus = await electronAPI.isFullscreen();
+          console.log('SettingsModal: fullscreen status =', fullscreenStatus);
+          this.setState({ isFullscreen: fullscreenStatus });
+        } catch (error) {
+          console.error('SettingsModal: Error checking fullscreen status:', error);
+        }
+      } else {
+        console.log('SettingsModal: electronAPI.isFullscreen not available');
+      }
+    }
+
+    toggleFullscreen = async () => {
+      console.log('SettingsModal: toggleFullscreen called');
+      const electronAPI = getElectronAPI();
+      console.log('SettingsModal: electronAPI =', electronAPI);
+      
+      if (electronAPI && electronAPI.toggleFullscreen) {
+        console.log('SettingsModal: electronAPI.toggleFullscreen found, calling it');
+        try {
+          const newFullscreenState = await electronAPI.toggleFullscreen();
+          console.log('SettingsModal: new fullscreen state =', newFullscreenState);
+          this.setState({ isFullscreen: newFullscreenState });
+          this.saveSettings();
+        } catch (error) {
+          console.error('SettingsModal: Error toggling fullscreen:', error);
+        }
+      } else {
+        console.log('SettingsModal: electronAPI.toggleFullscreen not available');
+      }
+    }
+  
     render() {
+      const showElectronSettings = isElectron();
+      console.log('SettingsModal: render - showElectronSettings =', showElectronSettings);
+      
       return (
         <div className="setting_menu flex flex_col gap_4">
           <div className="setting_dialog">
@@ -147,6 +206,25 @@ export class SettingsModal extends Component<SettingsModalProps> {
               <div className={this.state.selectedKeyboardLayout === 0 ? "setting_menu_btn setting_menu_btn_active" : "setting_menu_btn setting_menu_btn_inactive"} onClick={() => this.setState({ selectedKeyboardLayout: 0 })}>Azerty</div>
               <div className={this.state.selectedKeyboardLayout === 1 ? "setting_menu_btn setting_menu_btn_active" : "setting_menu_btn setting_menu_btn_inactive"} onClick={() => this.setState({ selectedKeyboardLayout: 1 })}>Qwerty</div>
             </div>
+            
+            {showElectronSettings && (
+              <div className="setting_dialog_fullscreen_container">
+                <div className="setting_dialog_fullscreen_label">Display mode:</div>
+                <div className="setting_dialog_fullscreen_checkbox_container flex items_center gap_2">
+                  <input 
+                    type="checkbox" 
+                    id="fullscreen-toggle"
+                    className="setting_dialog_fullscreen_checkbox"
+                    checked={this.state.isFullscreen}
+                    onChange={this.toggleFullscreen}
+                  />
+                  <label htmlFor="fullscreen-toggle" className="setting_dialog_fullscreen_text">
+                    Fullscreen mode
+                  </label>
+                </div>
+              </div>
+            )}
+            
             <div className="setting_dialog_control_bar_container">
               <div className="setting_dialog_control_name">Music volume: </div>
               <div className="setting_dialog_contol_lable_start">{this.state.musicMinValue}</div>

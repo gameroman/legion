@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const isDev = process.env.NODE_ENV !== 'production' && !app.isPackaged;
 
@@ -11,6 +11,40 @@ app.commandLine.appendSwitch('enable-local-storage');
 
 // Add http server for production builds
 let server = null;
+let mainWindow = null; // Keep reference to main window
+
+// Register IPC handlers once, outside of createWindow
+ipcMain.handle('is-fullscreen', () => {
+  console.log('Electron: is-fullscreen IPC called');
+  if (!mainWindow) {
+    console.log('Electron: No main window available');
+    return false;
+  }
+  const isFullscreen = mainWindow.isFullScreen();
+  console.log('Electron: current fullscreen state =', isFullscreen);
+  return isFullscreen;
+});
+
+ipcMain.handle('toggle-fullscreen', () => {
+  console.log('Electron: toggle-fullscreen IPC called');
+  if (!mainWindow) {
+    console.log('Electron: No main window available');
+    return false;
+  }
+  const isCurrentlyFullscreen = mainWindow.isFullScreen();
+  console.log('Electron: current fullscreen state =', isCurrentlyFullscreen);
+  const newState = !isCurrentlyFullscreen;
+  console.log('Electron: setting fullscreen to =', newState);
+  mainWindow.setFullScreen(newState);
+  console.log('Electron: fullscreen toggled, returning =', newState);
+  return newState;
+});
+
+// Add a test IPC handler to verify communication
+ipcMain.handle('test-connection', () => {
+  console.log('Electron: test-connection IPC called');
+  return 'connection-working';
+});
 
 function startProductionServer() {
   const express = require('express');
@@ -46,12 +80,30 @@ function startProductionServer() {
 }
 
 function createWindow() {
-  const mainWindow = new BrowserWindow({
+  console.log('Electron: Creating window');
+  
+  const preloadPath = path.join(__dirname, 'preload.js');
+  console.log('Electron: Preload script path:', preloadPath);
+  
+  // Check if preload file exists
+  const fs = require('fs');
+  try {
+    if (fs.existsSync(preloadPath)) {
+      console.log('Electron: Preload script exists');
+    } else {
+      console.error('Electron: Preload script does NOT exist at:', preloadPath);
+    }
+  } catch (error) {
+    console.error('Electron: Error checking preload script:', error);
+  }
+  
+  mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      preload: preloadPath,
       // Enable proper storage for Firebase Auth
       webSecurity: true,
       allowRunningInsecureContent: false,
@@ -127,6 +179,11 @@ function createWindow() {
   // Log when DOM is ready
   mainWindow.webContents.on('dom-ready', () => {
     console.log('DOM is ready');
+  });
+
+  // Clear mainWindow reference when window is closed
+  mainWindow.on('closed', () => {
+    mainWindow = null;
   });
 }
 
