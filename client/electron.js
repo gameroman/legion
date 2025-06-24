@@ -82,12 +82,21 @@ function startProductionServer() {
 function createWindow() {
   console.log('Electron: Creating window');
   
-  // Simplified preload path - it should always be in dist after webpack build
+  // Fixed preload path for proper resolution in packaged apps
   let preloadPath;
   if (app.isPackaged) {
-    preloadPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'dist', 'preload.js');
+    // For packaged apps, preload.js is copied directly to the app directory
+    preloadPath = path.join(__dirname, 'preload.js');
   } else {
-    preloadPath = path.join(__dirname, 'dist', 'preload.js');
+    // For development, check if it exists in dist first, then fallback to root
+    const distPreloadPath = path.join(__dirname, 'dist', 'preload.js');
+    const rootPreloadPath = path.join(__dirname, 'preload.js');
+    try {
+      require('fs').accessSync(distPreloadPath);
+      preloadPath = distPreloadPath;
+    } catch (e) {
+      preloadPath = rootPreloadPath;
+    }
   }
   
   console.log('Electron: Preload script path:', preloadPath);
@@ -95,6 +104,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
+    show: false, // Defer showing the window to prevent a visual flash
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -115,6 +125,10 @@ function createWindow() {
     // Remove menu bar in production
     autoHideMenuBar: !isDev
   });
+
+  // Maximize the window before showing it
+  mainWindow.maximize();
+  mainWindow.show();
 
   // Load the app
   if (isDev) {

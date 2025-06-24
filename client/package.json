@@ -8,7 +8,10 @@
     "build": "NODE_ENV=production webpack --mode production",
     "test": "jest",
     "electron:dev": "concurrently \"npm run start\" \"electron electron.js\"",
-    "electron:build": "BUILD_TARGET=electron npm run build && electron-builder",
+    "electron:build": "BUILD_TARGET=electron npm run build && electron-builder --mac --win",
+    "electron:build:mac": "BUILD_TARGET=electron npm run build && electron-builder --mac",
+    "electron:build:win": "BUILD_TARGET=electron npm run build && electron-builder --win",
+    "electron:build:linux": "BUILD_TARGET=electron npm run build && electron-builder --linux",
     "electron:test": "BUILD_TARGET=electron npm run build && electron-builder --dir"
   },
   "keywords": [],
@@ -107,15 +110,32 @@
     ],
     "mac": {
       "category": "public.app-category.games",
-      "icon": "public/icon.png"
+      "icon": "public/logo.png"
     },
     "win": {
-      "target": "nsis",
-      "icon": "public/icon.png"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/logo.png",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     },
     "linux": {
       "target": "AppImage",
-      "icon": "public/icon.png"
+      "icon": "public/logo.png"
     }
   }
 }

@@ -18,6 +18,7 @@
 .logoContainer {
   width: 78px;
   position: relative;
+  left: 10px;
 }
 
 .gameLogo {

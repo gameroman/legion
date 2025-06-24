@@ -2,7 +2,7 @@
 
 import './navbar.style.css';
 import './SettingsModalWrapper.css';
-import { h, Component } from 'preact';
+import { h, Fragment, Component } from 'preact';
 import { Link, useRouter } from 'preact-router';
 import firebase from 'firebase/compat/app'
 import { firebaseAuth } from '../../services/firebaseService';
@@ -14,6 +14,7 @@ import { SettingsModal } from '../settingsModal/SettingsModal';
 import { PlayerContext } from '../../contexts/PlayerContext';
 import { LockedFeatures } from "@legion/shared/enums";
 import AuthContext from '../../contexts/AuthContext';
+import { isElectron } from '../../utils/electronUtils';
 
 import legionLogo from '@assets/logo.png';
 import playIcon from '@assets/play_btn_idle.png';
@@ -306,12 +307,16 @@ class Navbar extends Component<Props, State> {
                                                 <div onClick={() => window.open('https://guide.play-legion.io', '_blank')}>
                                                     <img src={helpIcon} alt="How to play" /> How to play
                                                 </div>
-                                                <div onClick={() => window.open(X_LINK, '_blank')}>
-                                                    <img src={xIcon} alt="X.com" /> X.com
-                                                </div>
-                                                <div onClick={() => window.open(DISCORD_LINK, '_blank')}>
-                                                    <img src={discordIcon} alt="Discord" /> Discord
-                                                </div>
+                                                {!isElectron() && (
+                                                    <>
+                                                        <div onClick={() => window.open(X_LINK, '_blank')}>
+                                                            <img src={xIcon} alt="X.com" /> X.com
+                                                        </div>
+                                                        <div onClick={() => window.open(DISCORD_LINK, '_blank')}>
+                                                            <img src={discordIcon} alt="Discord" /> Discord
+                                                        </div>
+                                                    </>
+                                                )}
                                                 <div onClick={this.copyIDtoClipboard}>
                                                     <img src={copyIcon} alt="Copy" /> Player ID
                                                 </div>

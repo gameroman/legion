@@ -9,6 +9,7 @@ import cdIcon from '@assets/inventory/cd_icon.png';
 import shareIcon from '@assets/rank/share_icon.png';
 import infoIcon from '@assets/inventory/info_btn.png';
 import {rankIcons} from '../RankPage';
+import { isElectron } from '../../utils/electronUtils';
 
 const leagues = ['bronze', 'silver', 'gold', 'zenith', 'apex', 'alltime']; 
 
@@ -156,10 +157,12 @@ class SeasonCard extends Component<SeasonCardProps> {
                             {this.state.time !== -1 && <div><img src={cdIcon} alt="timer" className="season-timer-icon" /></div>}
                         </div>
                     </div>
-                    <div className="season-share-button" onClick={() => this.shareOnTwitter(this.props.playerRanking.rank, this.props.currTab)}>
-                        <img src={shareIcon} alt="" />
-                        <span>SHARE</span>
-                    </div>
+                    {!isElectron() && (
+                        <div className="season-share-button" onClick={() => this.shareOnTwitter(this.props.playerRanking.rank, this.props.currTab)}>
+                            <img src={shareIcon} alt="" />
+                            <span>SHARE</span>
+                        </div>
+                    )}
                 </div>
             </div>
         );
