@@ -23,6 +23,7 @@ export class PvPGame extends Game {
                 newPlayer.setTeam(team);
                 newPlayer.setUpCharacter(character);
                 team.addMember(newPlayer);
+                this.occupyCell(position.x, position.y, newPlayer);
             });
         }));
     }

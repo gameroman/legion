@@ -133,6 +133,7 @@ export abstract class Game
         console.log(`[Game:start]`);
         try {
             await this.getRemoteConfig();
+            this.generateHoles();
             await this.populateTeams();
             this.populateGrid();
             this.startGame();
@@ -168,25 +169,51 @@ export abstract class Game
     }
 
     getPosition(index, flip) {
-        const positions = [
-            {x: 5, y: 6},
-            {x: 5, y: 3},
-            {x: 4, y: 9},
-            {x: 3, y: 6},
-            {x: 3, y: 3},
-            {x: 2, y: 9},
-        ]
-        const position = positions[index];
-        if (flip) {
-            position.x = GRID_WIDTH - position.x - 1 - (position.y % 2 === 0 ? 1 : 0);
+        // const positions = [
+        //     {x: 5, y: 6},
+        //     {x: 5, y: 3},
+        //     {x: 4, y: 9},
+        //     {x: 3, y: 6},
+        //     {x: 3, y: 3},
+        //     {x: 2, y: 9},
+        // ]
+        // Define the x-range for each team's side.
+        const halfWidth = Math.floor(GRID_WIDTH / 2);
+        const xRange = flip
+            ? Array.from({ length: GRID_WIDTH - halfWidth }, (_, i) => i + halfWidth)
+            : Array.from({ length: halfWidth }, (_, i) => i);
+    
+        // Find all available positions on that side.
+        const availablePositions: { x: number; y: number }[] = [];
+        for (const x of xRange) {
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                if (this.isFree(x, y) && !isSkip(x, y)) {
+                    availablePositions.push({ x, y });
+                }
+            }
         }
+    
+        // If there are no available positions, log an error and return a fallback.
+        if (availablePositions.length === 0) {
+            console.error(`[Game:getPosition] No available position found for index ${index} and flip ${flip}`);
+            const x = xRange[Math.floor(Math.random() * xRange.length)];
+            const y = Math.floor(Math.random() * GRID_HEIGHT);
+            return { x, y };
+        }
+    
+        // Return a random position from the available ones.
+        const randomIndex = Math.floor(Math.random() * availablePositions.length);
+        const position = availablePositions[randomIndex];
+        console.log(`[Game:getPosition] Position: ${position.x},${position.y}`);
+
+
+    
         return position;
     }
 
     isFree(gridX: number, gridY: number) {
         return !this.gridMap.get(`${gridX},${gridY}`) && 
-               !this.hasObstacle(gridX, gridY) && 
-               !this.isHole(gridX, gridY);
+               !this.hasObstacle(gridX, gridY);
     }
 
     hasObstacle(gridX: number, gridY: number) {
@@ -257,9 +284,6 @@ export abstract class Game
         console.log(`[Game:startGame]`)
         this.startTime = Date.now();
         this.gameStarted = true;
-
-        // Generate holes before initializing turn order
-        this.generateHoles();
 
         this.turnSystem = new TurnSystem();
         const allCharacters = this.getTeam(1).concat(this.getTeam(2));

@@ -73,6 +73,7 @@ export class AIGame extends Game {
         newCharacter.setTeam(team);
         newCharacter.setUpCharacter(character, true);
         team.addMember(newCharacter);
+        this.occupyCell(position.x, position.y, newCharacter);
         return newCharacter;
     }
 
@@ -148,6 +149,7 @@ export class AIGame extends Game {
             newCharacter.setTeam(playerTeam!);
             newCharacter.setUpCharacter(character, false);
             characters.push(newCharacter);
+            this.occupyCell(position.x, position.y, newCharacter);
         });
         characters = this.modifyTeamForTutorial(characters);
         characters.forEach(character => {
