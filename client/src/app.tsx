@@ -8,7 +8,7 @@ import PlayerProvider from './providers/PlayerProvider';
 import WalletContextProvider from './providers/WalletContextProvider';
 import HomePage from './routes/HomePage';
 import GamePage from './routes/GamePage';
-import LandingPage from './routes/LandingPage';
+import Root from './routes/Root';
 import withAuth from './components/withAuth';
 import withNoAuth from './components/withNoAuth';
 
@@ -165,7 +165,7 @@ class App extends Component<{}, AppState> {
                         {({ refreshAllData, updateActiveCharacter }) => (
                             <WalletContextProvider>
                                 <Router onChange={(e: RouterOnChangeArgs) => this.handleRoute(e, refreshAllData, updateActiveCharacter)}>
-                                    <Route path="/" component={withNoAuth(LandingPage)} />
+                                    <Route path="/" component={withNoAuth(Root)} />
                                     <Route path="/game/:id" component={AuthenticatedGamePage} />
                                     <Route path="/replay/:id" component={AuthenticatedGamePage} />
                                     <Route path="/play" component={AuthenticatedHomePage} />
