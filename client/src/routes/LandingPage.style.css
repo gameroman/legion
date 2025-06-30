@@ -693,3 +693,28 @@ time {
   padding: 2rem;
   color: #666;
 }
+
+.steam-wishlist-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #1a9fff; /* A steam-like blue */
+  color: white;
+  font-weight: bold;
+}
+
+.steam-wishlist-button .steam-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.header-wishlist-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.header-wishlist-btn .steam-icon {
+  width: 20px;
+  height: 20px;
+}

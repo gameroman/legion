@@ -1,7 +1,7 @@
 import { h, Component, Fragment } from 'preact';
 import { route } from 'preact-router';
 import AuthContext from '../contexts/AuthContext';
-import logoBig from '@assets/logobig.png';
+import logoBig from '@assets/logo.png';
 import axios from 'axios';
 import './LandingPage.style.css';
 import Modal from '../components/modal/Modal';
@@ -10,6 +10,7 @@ import warriorImg from '@assets/warrior.png';
 import blackMageImg from '@assets/blackmage.png';
 import whiteMageImg from '@assets/whitemage.png';
 import Spinner from '../components/spinner/Spinner';
+import steamIcon from '@assets/steam.png';
 
 interface LandingPageProps {
   utm_source?: string;
@@ -35,6 +36,10 @@ interface LandingPageState {
 
 class LandingPage extends Component<LandingPageProps, LandingPageState> {
   static contextType = AuthContext;
+
+  private featureFlagShowNews = false;
+  private pointToSteam = true;
+  private steamWishlistUrl = 'https://store.steampowered.com/app/3729580/Legion/';
 
   state: LandingPageState = {
     showLoginOptions: false,
@@ -68,14 +73,16 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
       }
     }
     
-    const visitorId = generateVisitorId();
-    // Get referrer information
-    const referrer = document.referrer || null;
-    // Check if user is on mobile
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-    // Pass all information to the API
-    this.fetchNews(undefined, visitorId, referrer, isMobile);
+    if (this.featureFlagShowNews) {
+      const visitorId = generateVisitorId();
+      // Get referrer information
+      const referrer = document.referrer || null;
+      // Check if user is on mobile
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+      // Pass all information to the API
+      this.fetchNews(undefined, visitorId, referrer, isMobile);
+    }
   }
 
   fetchNews = async (retries = 3, visitorId?: string, referrer?: string, isMobile?: boolean): Promise<void> => {
@@ -128,13 +135,23 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
     this.setState({ showLegalModal: false, modalContent: null });
   };
 
+  renderWishlistButton = (extraClass: string = ''): h.JSX.Element => (
+    <button 
+      className={`cta-button steam-wishlist-button ${extraClass}`} 
+      onClick={() => window.open(this.steamWishlistUrl, '_blank')}
+    >
+      <img src={steamIcon} alt="Steam Icon" className="steam-icon" />
+      Wishlist on Steam
+    </button>
+  );
+
   renderHeroSection = (): h.JSX.Element => (
     <section className="hero-section">
       <h1 className="visually-hidden">Legion - Free to Play Tactical MultiplayerPvP Game</h1>
       <div className="video-container" aria-label="Game trailer video">
         <iframe 
           className="trailer-video"
-          src="https://www.youtube.com/embed/VM6cGO-e2hY?si=NWHUWMMpdEFMaaki" 
+          src="https://www.youtube.com/embed/GR9Xt4wbcqk?si=nbv1bvCG9rM4i69c" 
           title="Legion - Free to Play Tactical Multiplayer PvP Game" 
           frameBorder="0" 
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -145,7 +162,9 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
         <h2>Classic RPG combat reimagined for competitive PvP</h2>
         <h3>Turn-based - PvP - Free to play</h3>
         <p>Assemble a team of heroes and compete against other players to be the strongest of the arena!</p>
-        <button className="cta-button" onClick={() => route(this.playRoute)} aria-label="Start playing Legion">Play Now</button>
+        {this.pointToSteam ? 
+          this.renderWishlistButton() : 
+          <button className="cta-button" onClick={() => route(this.playRoute)} aria-label="Start playing Legion">Play Now</button>}
       </div>
     </section>
   );
@@ -238,7 +257,7 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
           <p>Practice, Casual, Ranked or challenge a friend</p>
         </div>
       </div>
-      <button className="cta-button" onClick={() => route(this.playRoute)}>Play Now</button>
+      {this.pointToSteam ? this.renderWishlistButton() : <button className="cta-button" onClick={() => route(this.playRoute)}>Play Now</button>}
     </section>
   );
 
@@ -262,7 +281,7 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
           <p>Support specialists who turn the tide of battle with powerful healing, buffs and debuffs</p>
         </div>
       </div>
-      <button className="cta-button" onClick={() => route(this.playRoute)}>Play Now</button>
+      {this.pointToSteam ? this.renderWishlistButton() : <button className="cta-button" onClick={() => route(this.playRoute)}>Play Now</button>}
     </section>
   );
 
@@ -270,8 +289,14 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
     <header className="main-header">
       <img src={logoBig} alt="Logo" className="header-logo" />
       <div className="header-buttons">
-        <button className="login-button" onClick={this.showLoginOptions}>Log in</button>
-        <button className="cta-button" onClick={() => route(this.playRoute)}>Play Now</button>
+        {this.pointToSteam ? (
+          this.renderWishlistButton('header-wishlist-btn')
+        ) : (
+          <>
+            <button className="login-button" onClick={this.showLoginOptions}>Log in</button>
+            <button className="cta-button" onClick={() => route(this.playRoute)}>Play Now</button>
+          </>
+        )}
       </div>
     </header>
   );
@@ -302,7 +327,7 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
           ) : (
             <>
               {this.renderHeroSection()}
-              {this.renderNewsSection()}
+              {this.featureFlagShowNews && this.renderNewsSection()}
               {this.renderFeaturesSection()}
               {this.renderClassesSection()}
             </>
