@@ -11,7 +11,7 @@ import { PlayerContextData, DailyLootAllDBData, DBPlayerData,
 import { NewCharacter } from "@legion/shared/NewCharacter";
 import { getChestContent } from "@legion/shared/chests";
 import {
-  STARTING_CONSUMABLES, STARTING_GOLD, BASE_INVENTORY_SIZE, STARTING_GOLD_ADMIN,
+  STARTING_CONSUMABLES, STARTING_GOLD, STARTING_ELO, BASE_INVENTORY_SIZE, STARTING_GOLD_ADMIN,
   STARTING_SPELLS_ADMIN, STARTING_EQUIPMENT_ADMIN, IMMEDIATE_LOOT, RPC, MIN_WITHDRAW,
   MAX_NICKNAME_LENGTH,
   NB_START_CHARACTERS,
@@ -136,7 +136,7 @@ export const createPlayer = functions.runWith({
       spells: isAdmin ? STARTING_SPELLS_ADMIN : [],
     },
     characters: [],
-    elo: 100,
+    elo: STARTING_ELO,
     league: startLeague,
     xp: 0,
     lvl: 1,
@@ -272,7 +272,7 @@ export const getPlayerData = onRequest({
         response.send({
           uid,
           gold: playerData.gold || 0,
-          elo: playerData.elo || 100,
+          elo: playerData.elo || STARTING_ELO,
           lvl: playerData.lvl || 1,
           name: playerData.name || '',
           teamName: "teamName",
