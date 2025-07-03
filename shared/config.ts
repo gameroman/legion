@@ -24,6 +24,7 @@ export const PARALYZED_DELAY = 1.5;
 export const FIRST_TURN_DELAY = 2.5;
 export const BASE_INVENTORY_SIZE = 20;
 export const BASE_CARRYING_CAPACITY = 3;
+export const STARTING_ELO = 100;
 export const STARTING_GOLD = 50;
 export const STARTING_CONSUMABLES = [];
 export const STARTING_WHITE_MAGE_SPELLS = [9];
