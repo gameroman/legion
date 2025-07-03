@@ -11,11 +11,16 @@ import { PlayerContextData, DailyLootAllDBData, DBPlayerData,
 import { NewCharacter } from "@legion/shared/NewCharacter";
 import { getChestContent } from "@legion/shared/chests";
 import {
-  STARTING_CONSUMABLES, STARTING_GOLD, STARTING_ELO, BASE_INVENTORY_SIZE, STARTING_GOLD_ADMIN,
-  STARTING_SPELLS_ADMIN, STARTING_EQUIPMENT_ADMIN, IMMEDIATE_LOOT, RPC, MIN_WITHDRAW,
+  STARTING_GOLD, STARTING_GOLD_ADMIN,
+  STARTING_ELO,
+  STARTING_CONSUMABLES, STARTING_SPELLS_ADMIN, STARTING_EQUIPMENT_ADMIN,
+  IMMEDIATE_LOOT,
+  NB_START_CHARACTERS, INVENTORY_SIZE_PER_CHARACTER,
+  BASE_INVENTORY_SIZE,
+  INVENTORY_SLOT_PRICE, MAX_PURCHASABLE_SLOTS,
+  RPC, MIN_WITHDRAW,
   MAX_NICKNAME_LENGTH,
-  NB_START_CHARACTERS,
-  MAX_AVATAR_ID
+  MAX_AVATAR_ID,
 } from "@legion/shared/config";
 import { logPlayerAction, updateDAU } from "./dashboardAPI";
 import { getEmptyLeagueStats } from "./leaderboardsAPI";
@@ -28,6 +33,63 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 import { createGameDocument } from "./gameAPI";
 import { transformDailyLoot } from "@legion/shared/utils";
 import { addItemsToInventory, checkFeatureUnlock, getUnlockRewards } from "./inventoryUtils";
+
+export const buyInventorySlots = onRequest({
+  memory: '512MiB'
+}, (request, response) => {
+  const db = admin.firestore();
+
+  corsMiddleware(request, response, async () => {
+    try {
+      const uid = await getUID(request);
+      const slotsToBuy = parseInt(request.body.slots, 10);
+
+      if (isNaN(slotsToBuy) || slotsToBuy <= 0) {
+        response.status(400).send("Invalid number of slots");
+        return;
+      }
+
+      const playerRef = db.collection("players").doc(uid);
+      const playerDoc = await playerRef.get();
+
+      if (!playerDoc.exists) {
+        throw new Error("Invalid player ID");
+      }
+
+      const playerData = playerDoc.data() as DBPlayerData;
+      if (!playerData) {
+        throw new Error("playerData is null");
+      }
+
+      const purchasedSlots = playerData.purchasedInventorySlots || 0;
+      if (purchasedSlots + slotsToBuy > MAX_PURCHASABLE_SLOTS) {
+        response.status(400).send("Cannot purchase more slots than the maximum allowed");
+        return;
+      }
+
+      const totalCost = slotsToBuy * INVENTORY_SLOT_PRICE;
+      if (playerData.gold < totalCost) {
+        response.status(400).send("Not enough gold");
+        return;
+      }
+
+      await playerRef.update({
+        gold: admin.firestore.FieldValue.increment(-totalCost),
+        purchasedInventorySlots: admin.firestore.FieldValue.increment(slotsToBuy)
+      });
+
+      response.send({
+        success: true,
+        newGold: playerData.gold - totalCost,
+        newSlots: purchasedSlots + slotsToBuy
+      });
+
+    } catch (error) {
+      console.error("buyInventorySlots error:", error);
+      response.status(500).send("Error");
+    }
+  });
+});
 
 const chestsDelays = {
   [ChestColor.BRONZE]: 6 * 60 * 60,
@@ -264,6 +326,8 @@ export const getPlayerData = onRequest({
           equipment: Array.isArray(inventory.equipment) ? inventory.equipment.sort(numericalSort) : [],
         };
 
+        const inventorySize = (playerData.characters?.length || 0) * INVENTORY_SIZE_PER_CHARACTER + (playerData.purchasedInventorySlots || 0);
+
         const AIwinRatio = 
           playerData.AIstats && playerData.AIstats.nbGames > 0 ?
             (playerData.AIstats.wins - 1) / (playerData.AIstats.nbGames + 2) :
@@ -283,7 +347,7 @@ export const getPlayerData = onRequest({
           allTimeRank: playerData.allTimeStats?.rank || 0,
           dailyloot: playerData.dailyloot,
           inventory: sortedInventory,
-          carrying_capacity: playerData.carrying_capacity || BASE_INVENTORY_SIZE,
+          carrying_capacity: inventorySize,
           isLoaded: false,
           tokens: playerData.tokens || { [Token.SOL]: 0 },
           AIwinRatio,

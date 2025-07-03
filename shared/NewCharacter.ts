@@ -7,7 +7,7 @@ import { selectStatToLevelUp, increaseStat, getSPIncrement } from "./levelling";
 import { getPrice } from "./economy";
 import { getStarterConsumables, MAGE_SPECIFIC_ITEMS } from "./Items";
 
-import { LOTSA_MP, BASE_CARRYING_CAPACITY, STARTING_WHITE_MAGE_SPELLS, STARTING_BLACK_MAGE_SPELLS } from "@legion/shared/config";
+import { LOTSA_MP, BASE_CHARACTER_CARRYING_CAPACITY, STARTING_WHITE_MAGE_SPELLS, STARTING_BLACK_MAGE_SPELLS } from "@legion/shared/config";
 import { getSpellById, getSpellsUpToLevel } from "./Spells";
 
 enum Gender {
@@ -48,7 +48,7 @@ export class NewCharacter {
     this.name = this.getName();
     this.xp = 0;
     this.level = level;
-    this.carrying_capacity = BASE_CARRYING_CAPACITY;
+    this.carrying_capacity = BASE_CHARACTER_CARRYING_CAPACITY;
     this.carrying_capacity_bonus = 0;
     this.skill_slots = this.getSkillSlots();
     this.inventory = [];
