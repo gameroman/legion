@@ -15,34 +15,25 @@ let mainWindow = null; // Keep reference to main window
 
 // Register IPC handlers once, outside of createWindow
 ipcMain.handle('is-fullscreen', () => {
-  console.log('Electron: is-fullscreen IPC called');
   if (!mainWindow) {
-    console.log('Electron: No main window available');
     return false;
   }
   const isFullscreen = mainWindow.isFullScreen();
-  console.log('Electron: current fullscreen state =', isFullscreen);
   return isFullscreen;
 });
 
 ipcMain.handle('toggle-fullscreen', () => {
-  console.log('Electron: toggle-fullscreen IPC called');
   if (!mainWindow) {
-    console.log('Electron: No main window available');
     return false;
   }
   const isCurrentlyFullscreen = mainWindow.isFullScreen();
-  console.log('Electron: current fullscreen state =', isCurrentlyFullscreen);
   const newState = !isCurrentlyFullscreen;
-  console.log('Electron: setting fullscreen to =', newState);
   mainWindow.setFullScreen(newState);
-  console.log('Electron: fullscreen toggled, returning =', newState);
   return newState;
 });
 
 // Add a test IPC handler to verify communication
 ipcMain.handle('test-connection', () => {
-  console.log('Electron: test-connection IPC called');
   return 'connection-working';
 });
 
