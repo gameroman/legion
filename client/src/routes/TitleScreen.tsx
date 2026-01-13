@@ -59,7 +59,7 @@ class TitleScreen extends Component<{}, { showLoginOptions: boolean }> {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center', marginTop: '2rem' }}>
               <button className="login-button" onClick={this.showLoginOptions}>Log in</button>
-              <button className="cta-button" onClick={() => route(this.playRoute)}>Play Now</button>
+              <button className="cta-button-title-screen" onClick={() => route(this.playRoute)}>Play Now</button>
             </div>
           )}
         </div>

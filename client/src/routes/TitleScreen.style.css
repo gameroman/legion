@@ -109,7 +109,7 @@
   text-shadow: none;
 }
 
-.cta-button {
+.cta-button-title-screen {
   display: inline-block;
   min-width: 200px;
   max-width: 300px;
@@ -128,7 +128,7 @@
   line-height: 1.2;
 }
 
-.cta-button:hover {
+.cta-button-title-screen:hover {
   transform: translateY(-2px);
   background-color: #ffaa00;
 }

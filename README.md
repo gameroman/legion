@@ -98,10 +98,49 @@ For both apps, make sure to:
 
 **Production App Links:**
 - Depots: https://partner.steamgames.com/apps/depots/3729580
+- Builds: https://partner.steamgames.com/apps/builds/3729580
 - Store Package: https://partner.steamgames.com/store/packagelanding/1312865  
 - Launch Options: https://partner.steamgames.com/apps/config/3729580
 - Packages: https://partner.steamgames.com/pub/packageadmin/325618
 
 **Playtest App Links:**
-- Management: https://partner.steamgames.com/apps/associated/3729580
+- Depots: https://partner.steamgames.com/apps/depots/3870830
+- Builds: https://partner.steamgames.com/apps/builds/3870830
+- Store Package: https://partner.steamgames.com/store/packagelanding/1312865  
 - Launch Options: https://partner.steamgames.com/apps/config/3870830
+- All Packages: https://partner.steamgames.com/pub/packageadmin/325618
+- Manage Playtest: https://partner.steamgames.com/apps/playtest/3870830
+
+### Steps
+
+- Make a change
+- `npm run electron:build`
+- `bash deploy_steam.sh playtest`
+- On the Build page, set new build as default; no need to hit "Publish"
+- `bash deploy_steam.sh production`
+
+### Checklist
+
+Please ensure that you have:
+- at least one depot set to [All Languages]
+- that you have uploaded the build to that depot
+- that you have added the depot containing your app's files to both the Developer Comp and Free packages AND to the red ones as well
+- that you have set that build live on the "default" branch
+- and that you have correctly configured your launch options
+
+### Troubleshooting
+
+A download size of 0 Mb is probably a sign that the build is not being uploaded to the depot.
+
+If error about "Platform Support Matches", go to Steamworks admin (https://partner.steamgames.com/apps/view/3996730) and tick the right boxes in "Supported Operating Systems".
+
+Try manual upload at: https://partner.steamgames.com/apps/depotuploads/3870830
+
+
+Successfully added child app to publisher 325618
+Added app payment reporting to publisher 325618
+Created package "Legion Demo Developer Comp" with ID 1402723
+Created package "Legion Demo for Beta Testing" with ID 1402724
+Created package "Legion Demo" with ID 1402725
+Successfully added autogrant package 1402723 to publisher 325618
+Created store item '967207'

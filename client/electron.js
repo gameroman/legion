@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const isDev = process.env.NODE_ENV !== 'production' && !app.isPackaged;
+const ALLOW_CONSOLE = true;
 
 // Enable proper storage for Firebase Auth
 app.commandLine.appendSwitch('enable-features', 'ElectronCookies');
@@ -100,7 +101,7 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       preload: preloadPath,
-      devTools: !app.isPackaged,
+      devTools: ALLOW_CONSOLE,
       // Enable proper storage for Firebase Auth
       webSecurity: true,
       allowRunningInsecureContent: false,
@@ -180,6 +181,17 @@ function createWindow() {
   // Log when DOM is ready
   mainWindow.webContents.on('dom-ready', () => {
     console.log('DOM is ready');
+  });
+
+  // Add keyboard shortcut for dev tools
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (ALLOW_CONSOLE && input.type === 'keyDown') {
+      // Cmd+Shift+I on macOS, Ctrl+Shift+I on Windows/Linux
+      if ((input.meta && process.platform === 'darwin' || input.control && process.platform !== 'darwin') && 
+          input.shift && input.key.toLowerCase() === 'i') {
+        mainWindow.webContents.toggleDevTools();
+      }
+    }
   });
 
   // Clear mainWindow reference when window is closed

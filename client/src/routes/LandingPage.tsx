@@ -11,6 +11,7 @@ import blackMageImg from '@assets/blackmage.png';
 import whiteMageImg from '@assets/whitemage.png';
 import Spinner from '../components/spinner/Spinner';
 import steamIcon from '@assets/steam.png';
+import { POINT_TO_STEAM } from '@legion/shared/config';
 
 interface LandingPageProps {
   utm_source?: string;
@@ -38,7 +39,7 @@ class LandingPage extends Component<LandingPageProps, LandingPageState> {
   static contextType = AuthContext;
 
   private featureFlagShowNews = false;
-  private pointToSteam = true;
+  private pointToSteam = POINT_TO_STEAM;
   private steamWishlistUrl = 'https://store.steampowered.com/app/3729580/Legion/';
 
   state: LandingPageState = {

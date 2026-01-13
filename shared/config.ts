@@ -2,6 +2,8 @@ import { LockedFeatures, RewardType } from "./enums";
 
 const isDev = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'docker';
 
+export const POINT_TO_STEAM = true;
+
 // Profile
 export const MAX_NICKNAME_LENGTH = 18;
 export const MAX_AVATAR_ID = 31;

@@ -22,9 +22,15 @@ case $BUILD_TYPE in
         DEPOT_ID_WIN="3870832"
         BUILD_DESC="Playtest"
         ;;
+    "demo")
+        APP_ID="3996730"
+        DEPOT_ID_MAC="3996731"
+        DEPOT_ID_WIN="3996732"
+        BUILD_DESC="Demo"
+        ;;
     *)
         echo "Error: Invalid build type '$BUILD_TYPE'"
-        echo "Usage: $0 [production|playtest]"
+        echo "Usage: $0 [production|playtest|demo]"
         exit 1
         ;;
 esac

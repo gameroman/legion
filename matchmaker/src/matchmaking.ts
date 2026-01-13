@@ -15,7 +15,7 @@ import {eloRangeIncreaseInterval, eloRangeStart, eloRangeStep, goldRewardInterva
 import { PlayMode, League } from '@legion/shared/enums';
 import { sendMessageToAdmin } from '@legion/shared/utils';
 
-const discordEnabled = (process.env.DISCORD_TOKEN !== undefined);
+const discordEnabled = false; //(process.env.DISCORD_TOKEN !== undefined);
 const discordClient = new Client({intents: [GatewayIntentBits.Guilds]});
 if (discordEnabled) {
     discordClient.login(process.env.DISCORD_TOKEN);
