@@ -6,6 +6,9 @@
     "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "start": "node dist/src/server.js",
     "dev": "nodemon",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org dynetis-games --project legion-server ./dist && sentry-cli sourcemaps upload --org dynetis-games --project legion-server ./dist"
   },
   "author": "",
@@ -27,7 +30,10 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.17",
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
     "nodemon": "^2.0.22",
+    "ts-jest": "^29.1.2",
     "tsc-alias": "1.8.10",
     "tsconfig-paths": "^4.2.0"
   }
