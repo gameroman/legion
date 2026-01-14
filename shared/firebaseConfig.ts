@@ -1,6 +1,6 @@
 const config = {
     projectId: "legion-32c6d",
-    apiKey: "AIzaSyCRlDX1DYaQpHcs0fZm05pmabuGVWeL8Es",
+    apiKey: "AIzaSyCRlDX1DYaQpHcs0fZm05pmabuGVWeL8Es", // Not sensitive, meant to be public, more of an identifier than a secret
     authDomain: "legion-32c6d.firebaseapp.com",
     storageBucket: "legion-32c6d.appspot.com",
     messagingSenderId: "470800826393",
