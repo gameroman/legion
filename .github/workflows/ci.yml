@@ -1,0 +1,135 @@
+name: CI - Tests and Checks
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  # Run tests for server
+  test-server:
+    name: Test Server
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install server dependencies
+        run: |
+          cd server
+          npm ci
+
+      - name: Run server tests
+        run: |
+          cd server
+          npm test
+
+      - name: Upload server coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./server/coverage/lcov.info
+          flags: server
+          name: server-coverage
+        continue-on-error: true
+
+  # Lint and build client
+  build-client:
+    name: Build Client
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install client dependencies
+        run: |
+          cd client
+          npm ci
+
+      - name: Build client
+        run: |
+          cd client
+          npm run build
+        env:
+          NODE_ENV: production
+
+  # Build and lint API
+  build-api:
+    name: Build API
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: api/functions/package-lock.json
+
+      - name: Install API dependencies
+        run: |
+          cd api/functions
+          npm ci
+
+      - name: Lint API
+        run: |
+          cd api/functions
+          npm run lint
+        continue-on-error: true
+
+      - name: Build API
+        run: |
+          cd api/functions
+          npm run build
+        env:
+          DEPLOY: true
+
+  # Build matchmaker
+  build-matchmaker:
+    name: Build Matchmaker
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: matchmaker/package-lock.json
+
+      - name: Install matchmaker dependencies
+        run: |
+          cd matchmaker
+          npm ci
+
+      - name: Build matchmaker
+        run: |
+          cd matchmaker
+          npm run build

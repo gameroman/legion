@@ -1,0 +1,62 @@
+name: Deploy API to Firebase Functions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'api/**'
+      - 'shared/**'
+      - 'firebase.json'
+      - '.github/workflows/deploy-api.yml'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  deploy:
+    name: Deploy API
+    runs-on: ubuntu-latest
+    
+    # Only run on main branch pushes (skip PRs)
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: api/functions/package-lock.json
+
+      - name: Install API dependencies
+        run: |
+          cd api/functions
+          npm ci
+
+      - name: Lint API
+        run: |
+          cd api/functions
+          npm run lint
+        continue-on-error: true
+
+      - name: Build API
+        run: |
+          cd api/functions
+          npm run build
+        env:
+          DEPLOY: true
+
+      - name: Deploy to Firebase Functions
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only functions
+        env:
+          DEPLOY: true
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Deployment summary
+        run: |
+          echo "🚀 API deployed successfully to Firebase Functions!"
+          echo "Functions URL: https://us-central1-legion-32c6d.cloudfunctions.net"

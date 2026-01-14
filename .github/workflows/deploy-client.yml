@@ -1,0 +1,56 @@
+name: Deploy Client to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'client/**'
+      - 'shared/**'
+      - 'firebase.json'
+      - '.github/workflows/deploy-client.yml'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  deploy:
+    name: Deploy Client
+    runs-on: ubuntu-latest
+    
+    # Only run on main branch pushes (skip PRs)
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install client dependencies
+        run: |
+          cd client
+          npm ci
+
+      - name: Build client
+        run: |
+          cd client
+          npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: legion-32c6d
+
+      - name: Deployment summary
+        run: |
+          echo "🚀 Client deployed successfully to Firebase Hosting!"
+          echo "Live URL: https://legion-32c6d.web.app"

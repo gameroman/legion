@@ -20,3 +20,5 @@ legion_steam_build_*.vdf
 coverage
 **/coverage
 *.lcov
+
+.github/SETUP.md

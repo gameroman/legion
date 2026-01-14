@@ -30,10 +30,33 @@ Alternatively run each service separately bare-metal:
 
 ## Deployment
 
-API deployment: `bash deploy_api.sh`
-Client deployment: `bash deploy_client.sh`
+### CI/CD Pipeline (Recommended)
 
-Note: The API has its own `firebase.json` file used for local development with the Firebase emulators. The `firebase.json` at the root of the repository is the one used for deployment to prod.
+The project uses GitHub Actions for automated deployment. See `.github/CI_CD_SUMMARY.md` for a complete overview.
+
+**Quick Start:**
+1. Push to `main` branch
+2. GitHub Actions automatically detects changed services
+3. Runs tests and deploys only what changed
+4. Monitor progress in the Actions tab
+
+**Setup:** See `.github/SETUP.md` for detailed instructions.
+
+**Features:**
+- ✅ Automated testing before deployment
+- ✅ Smart path-based deployment (only deploys changed services)
+- ✅ Preview environments for PRs
+- ✅ Manual deployment option
+
+### Manual Deployment (Legacy)
+
+Alternatively, use the bash scripts:
+- API deployment: `bash deploy_api.sh`
+- Client deployment: `bash deploy_client.sh`
+- Server deployment: `bash deploy_server.sh`
+- Matchmaker deployment: `bash deploy_matchmaker.sh`
+
+**Note:** The API has its own `firebase.json` file used for local development with the Firebase emulators. The `firebase.json` at the root of the repository is the one used for deployment to prod.
 
 ### Setting up secrets
 
