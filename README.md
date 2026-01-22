@@ -123,7 +123,7 @@ The project features a comprehensive automated deployment pipeline:
 - Node.js 20+
 - Docker & Docker Compose (for containerized development)
 - Firebase CLI (for emulator and deployment)
-- npm or yarn
+- Bun
 
 ### Local Development with Docker (Recommended)
 
@@ -140,7 +140,7 @@ This starts all services with hot-reloading enabled:
 - **Matchmaker**: http://localhost:3000
 - **Dashboard**: http://localhost:8050
 
-**Note:** You may need to run `npm install` in `client`, `server`, and `matchmaker` directories for IDE IntelliSense to work properly.
+**Note:** You may need to run `bun install` in `client`, `server`, and `matchmaker` directories for IDE IntelliSense to work properly.
 
 ### Bare-Metal Development
 
@@ -148,29 +148,29 @@ Run each service independently:
 
 ```bash
 # Terminal 1 - API & Firebase Emulators
-cd api/functions && npm run emulators:start
+cd api/functions && bun run emulators:start
 
 # Terminal 2 - Client
-cd client && npm run start
+cd client && bun run start
 
 # Terminal 3 - Game Server
-cd server && npm run start
+cd server && bun run start
 
 # Terminal 4 - Matchmaker
-cd matchmaker && npm run start
+cd matchmaker && bun run start
 ```
 
 ### Running Tests
 
 ```bash
 # Server tests with coverage
-cd server && npm test
+cd server && bun run test
 
 # Watch mode for development
-cd server && npm run test:watch
+cd server && bun run test:watch
 
 # Coverage report
-cd server && npm run test:coverage
+cd server && bun run test:coverage
 ```
 
 ## Deployment
@@ -250,13 +250,13 @@ The client can be packaged as an Electron desktop application for cross-platform
 cd client
 
 # Development mode
-npm run electron:dev
+bun run electron:dev
 
 # Production builds
-npm run electron:build          # macOS + Windows
-npm run electron:build:mac      # macOS only
-npm run electron:build:win      # Windows only
-npm run electron:build:linux    # Linux only
+bun run electron:build          # macOS + Windows
+bun run electron:build:mac      # macOS only
+bun run electron:build:win      # Windows only
+bun run electron:build:linux    # Linux only
 ```
 
 ### Steam Deployment

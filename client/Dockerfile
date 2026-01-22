@@ -1,13 +1,21 @@
-FROM node:20
+FROM oven/bun:1.3.6
 
 WORKDIR /usr/src/app
 
-COPY client/*.json ./
-COPY client/*.js ./
+COPY client/package.json ./
+COPY client/bun.lock ./
+
+RUN bun ci
+
+COPY client/electron.js ./
+COPY client/preload.js ./
+
 COPY client/*.env ./
+
 COPY client/.babelrc ./
 
-RUN npm install
+WORKDIR /usr/src/app
 
 EXPOSE 8080
-CMD ["npm", "run", "start"]
+
+CMD ["bun", "run", "start"]

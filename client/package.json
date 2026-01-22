@@ -1,8 +1,6 @@
 {
   "name": "client",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.tsx",
+  "private": true,
   "scripts": {
     "start": "webpack serve --open",
     "build": "NODE_ENV=production webpack --mode production",
