@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.6
+FROM oven/bun:1.3.6 AS builder
 
 WORKDIR /usr/src/app
 
@@ -9,7 +9,9 @@ RUN bun ci
 
 COPY api/functions/ ./
 
-COPY .firebaserc ./
+
+# Install Node, required for firebase emulators
+FROM node:20-slim
 
 # Install Java, required for firebase emulators
 RUN apt-get update && \
@@ -18,6 +20,13 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN bun add -g firebase-tools
+WORKDIR /usr/src/app
 
-CMD ["bun", "run", "docker:start"]
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app ./
+
+COPY .firebaserc ./
+
+RUN npm install -g firebase-tools
+
+CMD ["npm", "run", "docker:start"]
