@@ -1,24 +1,16 @@
-
-
-FROM node:20
-
-# Install Java
-RUN apt-get update && \
-    apt-get install -y openjdk-17-jdk && \
-    apt-get clean;
+FROM oven/bun:1.3.6
 
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
-COPY api/functions/package*.json ./
+COPY api/functions/package.json ./
+COPY api/functions/bun.lock ./
 
-# Install dependencies
-RUN npm install
+RUN bun ci
 
-RUN npm install -g firebase-tools
+COPY api/functions/ ./
 
-COPY api/functions/ .
-COPY .firebaserc .
+COPY .firebaserc ./
 
-CMD ["npm", "run", "docker:start"]
-# CMD ["tail", "-f", "/dev/null"]
+RUN bun add -g firebase-tools
+
+CMD ["bun", "run", "docker:start"]
