@@ -5,9 +5,8 @@ WORKDIR /usr/src/app
 COPY server/package.json ./
 COPY server/bun.lock ./
 
-# Copy all config files (tsconfig, etc.)
-COPY server/*.json ./
-COPY server/*.js ./
+# Copy config files (tsconfig, etc.)
+COPY server/tsconfig*.json ./
 COPY server/*.env ./
 
 RUN bun install

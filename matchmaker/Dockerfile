@@ -5,9 +5,8 @@ WORKDIR /usr/src/app
 COPY matchmaker/package.json ./
 COPY matchmaker/bun.lock ./
 
-# Copy all config files (nodemon, tsconfig, etc.)
-COPY matchmaker/*.json ./
-COPY matchmaker/*.js ./
+# Copy config files (tsconfig, etc.)
+COPY matchmaker/tsconfig*.json ./
 COPY matchmaker/*.env ./
 
 RUN bun install
