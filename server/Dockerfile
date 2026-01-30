@@ -5,13 +5,15 @@ WORKDIR /usr/src/app
 COPY server/package.json ./
 COPY server/bun.lock ./
 
-COPY server/nodemon.json ./
-COPY server/nodemon.js ./
-
+# Copy all config files (tsconfig, etc.)
+COPY server/*.json ./
+COPY server/*.js ./
 COPY server/*.env ./
 
 RUN bun install
 
 EXPOSE 3123
 
-CMD ["bun", "run", "dev"]
+# Use Bun's built-in watch mode instead of nodemon for better compatibility
+# Use tsconfig.docker.json for path aliases
+CMD ["bun", "--watch", "--tsconfig-override", "tsconfig.docker.json", "src/server.ts"]

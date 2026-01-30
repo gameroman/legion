@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
-import * as admin from 'firebase-admin';
+import { initializeApp } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import axios from 'axios';
 import {
@@ -22,7 +23,7 @@ if (discordEnabled) {
 }
 
 if (process.env.NODE_ENV === 'development') {
-    admin.initializeApp(firebaseConfig);
+    initializeApp(firebaseConfig);
 } 
 
 interface QueuingPlayer {
@@ -393,7 +394,7 @@ async function logQueuingActivity(playerId: string, actionType: string, details:
 
 async function getUID(IDToken) {
     if (process.env.NODE_ENV === 'development') {
-        return (await admin.auth().verifyIdToken(IDToken)).uid;
+        return (await getAuth().verifyIdToken(IDToken)).uid;
     } else {
         return await validateFirebaseIdToken(IDToken, firebaseConfig.projectId);
     }

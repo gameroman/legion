@@ -8,14 +8,11 @@ COPY client/bun.lock ./
 # Use --ignore-scripts to skip native compilation of optional packages (bufferutil, utf-8-validate)
 RUN bun install --ignore-scripts
 
-COPY client/electron.js ./
-COPY client/preload.js ./
-
+# Copy all config files (webpack, tsconfig, etc.)
+COPY client/*.json ./
+COPY client/*.js ./
 COPY client/*.env ./
-
 COPY client/.babelrc ./
-
-WORKDIR /usr/src/app
 
 EXPOSE 8080
 

@@ -5,13 +5,14 @@ WORKDIR /usr/src/app
 COPY matchmaker/package.json ./
 COPY matchmaker/bun.lock ./
 
-COPY server/nodemon.json ./
-COPY server/nodemon.js ./
+# Copy all config files (nodemon, tsconfig, etc.)
+COPY matchmaker/*.json ./
+COPY matchmaker/*.js ./
+COPY matchmaker/*.env ./
 
-COPY server/*.env ./
+RUN bun install
 
-RUN bun ci
+EXPOSE 3000
 
-COPY shared/ ./
-
-CMD ["bun", "run", "dev"]
+# Use Bun's built-in watch mode instead of nodemon for better compatibility
+CMD ["bun", "--watch", "--tsconfig-override", "tsconfig.docker.json", "src/matchmaker.ts"]

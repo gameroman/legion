@@ -1,4 +1,6 @@
-const nodemon = require('nodemon');
+const nodemonModule = require('nodemon');
+// Handle both Node.js (nodemon is the function) and Bun (nodemon is on .default)
+const nodemon = typeof nodemonModule === 'function' ? nodemonModule : nodemonModule.default || nodemonModule;
 
 console.log(`Starting nodemon, Docker mode is ${process.env.IS_DOCKER ? 'enabled' : 'disabled'}`);
 const tsConfigFile = process.env.IS_DOCKER ? 'tsconfig.docker.json' : 'tsconfig.json';

@@ -4,9 +4,10 @@ import express from 'express';
 import { Socket, Server } from 'socket.io';
 import { createServer } from 'http';
 import dotenv from 'dotenv';
-import * as admin from "firebase-admin";
-import cors from 'cors';
+import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
+import cors from 'cors';
 
 import { apiFetch } from './API';
 import { Game } from './Game';
@@ -22,7 +23,7 @@ dotenv.config();
 
 if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
     // We're running locally with emulators
-    admin.initializeApp({
+    initializeApp({
         projectId: firebaseConfig.projectId,
     });
     
@@ -37,7 +38,7 @@ if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
     process.env["FIRESTORE_EMULATOR_HOST"] = "api:8090"; 
 } else {
     // We're running in production
-    admin.initializeApp(firebaseConfig);
+    initializeApp(firebaseConfig);
 }
 
 const PORT = process.env.PORT || 3123;
@@ -83,7 +84,7 @@ const gamesMap = new Map<string, Game>();
 
 async function getPlayerData(uid: string, retries = 10, delay = 500): Promise<PlayerDataForGame> {
   return withRetry(async () => {
-    const db = admin.firestore();
+    const db = getFirestore();
     const playerDoc = await db.collection('players').doc(uid).get();
     
     if (!playerDoc.exists) {
@@ -130,7 +131,7 @@ async function getPlayerData(uid: string, retries = 10, delay = 500): Promise<Pl
 
 async function getGameData(gameId: string, retries = 10, delay = 500) {
   return withRetry(async () => {
-    const db = admin.firestore();
+    const db = getFirestore();
     const querySnapshot = await db.collection("games")
       .where("gameId", "==", gameId.toString())
       .get();
@@ -150,7 +151,7 @@ io.on('connection', async (socket: any) => {
         throw new Error('No token provided');
       }
       socket.firebaseToken = socket.handshake.auth.token.toString();
-      const decodedToken = await admin.auth().verifyIdToken(socket.firebaseToken);
+      const decodedToken = await getAuth().verifyIdToken(socket.firebaseToken);
       socket.uid = decodedToken.uid;
       
       let gameId = socket.handshake.auth.gameId;
