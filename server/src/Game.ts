@@ -1,5 +1,7 @@
 import { Socket, Server } from 'socket.io';
-import * as admin from 'firebase-admin';
+import { getFirestore, DocumentReference } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
+import { getRemoteConfig } from 'firebase-admin/remote-config';
 
 import { ServerPlayer } from './ServerPlayer';
 import { Team } from './Team';
@@ -151,7 +153,7 @@ export abstract class Game
 
     protected async getRemoteConfigFromRemoteConfig(retries = 10, delay = 500) {
         return withRetry(async () => {
-            const remoteConfig = admin.remoteConfig();
+            const remoteConfig = getRemoteConfig();
             const template = await remoteConfig.getTemplate();
 
             // Extract parameter values from the template
@@ -1548,8 +1550,8 @@ export abstract class Game
 
     protected async getRosterData(token: string, retries = 10, delay = 500): Promise<{characters: CharacterData[]}> {
         return withRetry(async () => {
-            const db = admin.firestore();
-            const decodedToken = await admin.auth().verifyIdToken(token);
+            const db = getFirestore();
+            const decodedToken = await getAuth().verifyIdToken(token);
             const uid = decodedToken.uid;
             
             const docSnap = await db.collection("players").doc(uid).get();
@@ -1557,7 +1559,7 @@ export abstract class Game
                 throw new Error('Player not found');
             }
 
-            const characters = docSnap.data()?.characters as admin.firestore.DocumentReference[];
+            const characters = docSnap.data()?.characters as DocumentReference[];
             
             // Batch get operation with field mask for optimization
             const characterDocs = await db.getAll(...characters, {
